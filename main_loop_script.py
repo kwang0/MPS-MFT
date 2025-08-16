@@ -405,7 +405,7 @@ def calculate_pair_binding_energy(L, U):
 
 
 def main():
-    if len(sys.argv) != 6:
+    if len(sys.argv) != 7:
         print("Usage: python main_loop_script.py <L> <U> <t_p> <chi_max> <E_p>")
         sys.exit(1)
 
@@ -415,6 +415,8 @@ def main():
     # 3: t_p
     # 4: chi_max
     # 5: E_p
+    # 6: mu_init
+
     global L, U, t, z_c, chi_max, chi_list, t_p, mu_init, n_target, r_range, E_p
 
     L = int(sys.argv[1])
@@ -430,14 +432,14 @@ def main():
         E_p = np.abs(calculate_pair_binding_energy(L, U, chi_max, chi_list))
         print(f"Calculated E_p = {E_p}")
     
+    mu_init = float(sys.argv[6])
 
-    print(f"Running with t_p={t_p}, U={U}, L={L}, chi_max={chi_max}, E_p={E_p}")
+    print(f"Running with t_p={t_p}, U={U}, L={L}, chi_max={chi_max}, E_p={E_p}, mu_init={mu_init}")
 
     
     t = 1.0
-    mu_init = -5.4
     n_target = 0.5
-    r_range = 1
+    r_range = 4
     z_c = 4
 
     
