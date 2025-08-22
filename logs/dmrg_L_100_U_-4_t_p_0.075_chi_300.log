@@ -1,0 +1,110 @@
+Using provided E_p = 1.476
+Running with t_p=0.075, U=-4.0, L=100, chi_max=300, E_p=1.476, mu_init=-2.645
+Not same mu searching again
+n_target < n_1 and n_target < n_0 triggered
+n_0:0.6022776436127849; n_1:0.5672528673702493; mu_1:-2.645
+n_target < n_1 and n_target < n_0 triggered
+n_0:0.5672528673702493; n_1:0.532233421945322; mu_1:-2.695
+n_target < n_1 and n_target < n_0 triggered
+n_0:0.532233421945322; n_1:0.49738963324310903; mu_1:-2.7449999999999997
+Trying secant step...
+Trying secant step...
+FOUND MU (secant); mu_new:-2.7412390883715987, n_new:0.5000000041851761
+Target density achieved with mu: -2.7412390883715987, density: 0.5000000041851761
+CHECKING IF INPUT {A, B} AGREES WITH OUTPUT {A, B}_measured
+CHECK NOT VALID FOR {A, B} AGREEMENT
+Not same mu searching again
+n_target > n_1 and n_target > n_0 triggered
+n_0:0.44666061147880043; n_1:0.5126242088576817; mu_1:-2.641239088371599
+Trying secant step...
+Trying secant step...
+Trying secant step...
+FOUND MU (secant); mu_new:-2.651521954349555, n_new:0.5000000178690159
+Target density achieved with mu: -2.651521954349555, density: 0.5000000178690159
+CHECKING IF INPUT {A, B} AGREES WITH OUTPUT {A, B}_measured
+CHECK NOT VALID FOR {A, B} AGREEMENT
+Not same mu searching again
+n_target < n_1 and n_target < n_0 triggered
+n_0:0.5596565825435257; n_1:0.5019225361938294; mu_1:-2.651521954349555
+n_target < n_1 and n_target < n_0 triggered
+n_0:0.5019225361938294; n_1:0.43344093600007616; mu_1:-2.701521954349555
+Trying secant step...
+Trying secant step...
+Trying secant step...
+FOUND MU (secant); mu_new:-2.6530624617215737, n_new:0.4999999964791039
+Target density achieved with mu: -2.6530624617215737, density: 0.4999999964791039
+CHECKING IF INPUT {A, B} AGREES WITH OUTPUT {A, B}_measured
+CHECK NOT VALID FOR {A, B} AGREEMENT
+Not same mu searching again
+n_target < n_1 and n_target < n_0 triggered
+n_0:0.5582257505723216; n_1:0.5002691631906082; mu_1:-2.6530624617215737
+n_target < n_1 and n_target < n_0 triggered
+n_0:0.5002691631906082; n_1:0.4314053870478288; mu_1:-2.7030624617215735
+Trying secant step...
+Trying secant step...
+FOUND MU (secant); mu_new:-2.6532758878337246, n_new:0.500002283645391
+Target density achieved with mu: -2.6532758878337246, density: 0.500002283645391
+CHECKING IF INPUT {A, B} AGREES WITH OUTPUT {A, B}_measured
+CHECK NOT VALID FOR {A, B} AGREEMENT
+Not same mu searching again
+n_target < n_1 and n_target < n_0 triggered
+n_0:0.558048952882795; n_1:0.500064551007967; mu_1:-2.6532758878337246
+n_target < n_1 and n_target < n_0 triggered
+n_0:0.500064551007967; n_1:0.43115137793096187; mu_1:-2.7032758878337244
+Trying secant step...
+Trying secant step...
+FOUND MU (secant); mu_new:-2.6533270574440238, n_new:0.5000005530119097
+Target density achieved with mu: -2.6533270574440238, density: 0.5000005530119097
+CHECKING IF INPUT {A, B} AGREES WITH OUTPUT {A, B}_measured
+CHECK NOT VALID FOR {A, B} AGREEMENT
+Not same mu searching again
+n_target < n_1 and n_target < n_0 triggered
+n_0:0.5580075760655315; n_1:0.5000166965064893; mu_1:-2.6533270574440238
+n_target < n_1 and n_target < n_0 triggered
+n_0:0.5000166965064893; n_1:0.4310918761703411; mu_1:-2.7033270574440236
+Trying secant step...
+FOUND MU (secant); mu_new:-2.6533391695586492, n_new:0.5000015472494048
+Target density achieved with mu: -2.6533391695586492, density: 0.5000015472494048
+CHECKING IF INPUT {A, B} AGREES WITH OUTPUT {A, B}_measured
+CHECK NOT VALID FOR {A, B} AGREEMENT
+Not same mu searching again
+n_target < n_1 and n_target < n_0 triggered
+n_0:0.5579982505540682; n_1:0.500005921059493; mu_1:-2.6533391695586492
+n_target < n_1 and n_target < n_0 triggered
+n_0:0.500005921059493; n_1:0.43107843716661726; mu_1:-2.703339169558649
+Trying secant step...
+FOUND MU (secant); mu_new:-2.653343464695479, n_new:0.5000005488597603
+Target density achieved with mu: -2.653343464695479, density: 0.5000005488597603
+CHECKING IF INPUT {A, B} AGREES WITH OUTPUT {A, B}_measured
+CHECK NOT VALID FOR {A, B} AGREEMENT
+Same mu:-2.653343464695479 and continuing
+Target density achieved with mu: -2.653343464695479, density: 0.5000017583941156
+CHECKING IF INPUT {A, B} AGREES WITH OUTPUT {A, B}_measured
+CHECK NOT VALID FOR {A, B} AGREEMENT
+Same mu:-2.653343464695479 and continuing
+Target density achieved with mu: -2.653343464695479, density: 0.5000020993304596
+CHECKING IF INPUT {A, B} AGREES WITH OUTPUT {A, B}_measured
+CHECK NOT VALID FOR {A, B} AGREEMENT
+Same mu:-2.653343464695479 and continuing
+Target density achieved with mu: -2.653343464695479, density: 0.5000021959699812
+CHECKING IF INPUT {A, B} AGREES WITH OUTPUT {A, B}_measured
+CHECK NOT VALID FOR {A, B} AGREEMENT
+Same mu:-2.653343464695479 and continuing
+Target density achieved with mu: -2.653343464695479, density: 0.500002223576608
+CHECKING IF INPUT {A, B} AGREES WITH OUTPUT {A, B}_measured
+CHECK NOT VALID FOR {A, B} AGREEMENT
+Same mu:-2.653343464695479 and continuing
+Target density achieved with mu: -2.653343464695479, density: 0.5000022315001514
+CHECKING IF INPUT {A, B} AGREES WITH OUTPUT {A, B}_measured
+CHECK NOT VALID FOR {A, B} AGREEMENT
+Same mu:-2.653343464695479 and continuing
+Target density achieved with mu: -2.653343464695479, density: 0.5000022337818074
+CHECKING IF INPUT {A, B} AGREES WITH OUTPUT {A, B}_measured
+CHECK NOT VALID FOR {A, B} AGREEMENT
+Same mu:-2.653343464695479 and continuing
+Target density achieved with mu: -2.653343464695479, density: 0.5000022344405012
+CHECKING IF INPUT {A, B} AGREES WITH OUTPUT {A, B}_measured
+CHECK VALID FOR {A, B} AGREEMENT
+Converged alpha and beta. mu: -2.653343464695479, density: 0.5000022344405012
+EXITING LOOP
+Calculation finished. Saving results to results_U_-4.0_t_p0.075.pkl
