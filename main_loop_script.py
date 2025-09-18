@@ -1,10 +1,10 @@
 import tenpy
 import numpy as np
-import matplotlib.pyplot as plt
-import scipy as sp
 import random
 import pickle
 import sys
+import os
+import time
 #Used FermiHubbardChain from TeNPy to construct the required Hamiltonian (MFT for 3D lattice of 1D Hubbard chains with interchain hopping)
 from tenpy.models.hubbard import FermiHubbardChain
 from tenpy.networks.mps import MPS
@@ -169,38 +169,41 @@ def find_mu_for_target_density(model_params, alpha, beta, mu_init, n_target, tol
     #returns mu, density, E, psi
     mu_0 = mu_init
     n_0, E, psi = solve_Ham(mu_0, model_params, alpha, beta)
+    if time.time() - start_time > 23*3600: #23 hours
+            print("Time limit exceeded, exiting loop", flush=True)
+            return mu_0, n_0, E, psi
     if (np.abs(n_0-n_target)/n_target <= tol):
-        print('Same mu:{} and continuing'.format(mu_0))
+        print('Same mu:{} and continuing'.format(mu_0), flush=True)
         return mu_0, n_0, E, psi
-    print('Not same mu searching again')
+    print('Not same mu searching again', flush=True)
     mu_1 = mu_0 + delta_mu
     n_1, E, psi = solve_Ham(mu_1, model_params, alpha, beta)
     for iteration in range(max_iter):
         if abs(n_1 - n_target)/n_target <= tol:
-            print('FOUND MU; mu:{} and n_1:{}'.format(mu_1, n_1))
+            print('FOUND MU; mu:{} and n_1:{}'.format(mu_1, n_1), flush=True)
             return mu_1, n_1, E, psi
         if (n_target >= n_1 and n_target >= n_0):
             mu_0, n_0 = mu_1, n_1
             mu_1 = mu_0 + delta_mu
             n_1, E, psi = solve_Ham(mu_1, model_params, alpha, beta)
-            print('n_target > n_1 and n_target > n_0 triggered')
+            print('n_target > n_1 and n_target > n_0 triggered', flush=True)
         elif (n_target <= n_1 and n_target <= n_0):               
             mu_0, n_0 = mu_1, n_1
             mu_1 = mu_0 - delta_mu
             n_1, E, psi = solve_Ham(mu_1, model_params, alpha, beta)
-            print('n_target < n_1 and n_target < n_0 triggered')
+            print('n_target < n_1 and n_target < n_0 triggered', flush=True)
         else:
             for j in range(max_iter):
                 #Secant Method Step
                 if abs(n_1 - n_0) > 1e-12:
-                    print('Trying secant step...')
+                    print('Trying secant step...', flush=True)
 
                     mu_new = mu_1 - (n_1 - n_target) * (mu_1 - mu_0) / (n_1 - n_0)
 
                     n_new, E, psi = solve_Ham(mu_new, model_params, alpha, beta)
 
                     if abs(n_new - n_target) / n_target <= tol:
-                        print('FOUND MU (secant); mu_new:{}, n_new:{}'.format(mu_new, n_new))
+                        print('FOUND MU (secant); mu_new:{}, n_new:{}'.format(mu_new, n_new), flush=True)
                         return mu_new, n_new, E, psi
                     
                     mu_0, n_0 = mu_1, n_1
@@ -208,12 +211,12 @@ def find_mu_for_target_density(model_params, alpha, beta, mu_init, n_target, tol
                 
                 #Backup Bisection Method Step
                 else:
-                    print('Secant unstable, falling back to bisection...')
+                    print('Secant unstable, falling back to bisection...', flush=True)
                     mu_mid = (mu_0 + mu_1) / 2
                     n_mid, E, psi = solve_Ham(mu_mid, model_params, alpha, beta)
 
                     if abs(n_mid - n_target) / n_target <= tol:
-                        print('FOUND MU (bisection); mu_mid:{}, n_mid:{}'.format(mu_mid, n_mid))
+                        print('FOUND MU (bisection); mu_mid:{}, n_mid:{}'.format(mu_mid, n_mid), flush=True)
                         return mu_mid, n_mid, E, psi
                     
                     if n_1 > n_0:  
@@ -227,10 +230,10 @@ def find_mu_for_target_density(model_params, alpha, beta, mu_init, n_target, tol
                         else:
                             mu_0, n_0 = mu_mid, n_mid
             
-            raise ValueError("Target density not achieved within the maximum number of iterations in the refinement loop")
-        print('n_0:{}; n_1:{}; mu_1:{}'.format(n_0, n_1, mu_1))
-    print('mu_0:{}, mu_1:{}, n_0:{}; n_1:{}, n_target:{}'.format(mu_0, mu_1, n_0, n_1, n_target))
-    raise ValueError("Target density not achieved within the maximum number of iterations")
+            raise ValueError("Target density not achieved within the maximum number of iterations in the refinement loop", flush=True)
+        print('n_0:{}; n_1:{}; mu_1:{}'.format(n_0, n_1, mu_1), flush=True)
+    print('mu_0:{}, mu_1:{}, n_0:{}; n_1:{}, n_target:{}'.format(mu_0, mu_1, n_0, n_1, n_target), flush=True)
+    raise ValueError("Target density not achieved within the maximum number of iterations", flush=True)
 
 def calculate_alpha_beta_measured(psi, model_params, r_range, E_p): 
     psi_alpha = psi.copy()
@@ -272,33 +275,37 @@ def main_loop(model_params, n_target, E_p, max_iter=150):
     for iteration in range(max_iter):
         #Check if density is correct and then adjusts mu otherwise
         mu, n_measured, E, psi = find_mu_for_target_density(model_params, alpha, beta, mu, n_target)
+        if time.time() - start_time > 23*3600: #23 hours
+            print("Time limit exceeded, exiting loop", flush=True)
+            return alpha, beta, mu, n_measured, psi, E
         if abs(n_measured - n_target) < 1e-2:
-            print(f"Target density achieved with mu: {mu}, density: {n_measured}")
+            print(f"Target density achieved with mu: {mu}, density: {n_measured}", flush=True)
             model_params['mu'] = mu
             model_params['iter'] += 1
         #Checks alpha and beta convergence
         alpha_measured, beta_measured = calculate_alpha_beta_measured(psi, model_params, r_range, E_p)
-        print('CHECKING IF INPUT {A, B} AGREES WITH OUTPUT {A, B}_measured')
+        print('CHECKING IF INPUT {A, B} AGREES WITH OUTPUT {A, B}_measured', flush=True)
         if close(alpha, alpha_measured, beta, beta_measured, r_range):
-            print("CHECK VALID FOR {A, B} AGREEMENT")
-            print(f"Converged alpha and beta. mu: {mu}, density: {n_measured}")
-            print('EXITING LOOP')
+            print("CHECK VALID FOR {A, B} AGREEMENT", flush=True)
+            print(f"Converged alpha and beta. mu: {mu}, density: {n_measured}", flush=True)
+            print('EXITING LOOP', flush=True)
             return alpha, beta, mu, n_measured, psi, E
-        print('CHECK NOT VALID FOR {A, B} AGREEMENT')
+        print('CHECK NOT VALID FOR {A, B} AGREEMENT', flush=True)
         # Update alpha and beta based on measured values if not converged
         alpha = alpha_measured
         beta = beta_measured
         model_params['alpha'] = alpha
         model_params['beta'] = beta
-    print("Failed to converge alpha and beta within the maximum number of iterations")
+    print("Failed to converge alpha and beta within the maximum number of iterations", flush=True)
     return alpha, beta, mu, n_measured, psi, E
 
 
 #Function to run the main loop
-def run_loop(L, t, U, t_p, mu_init, n_target, r_range, E_p):
+def run_loop(L, t, U, t_p, mu_init, n_target, r_range, E_p, alpha=None, beta=None):
     #Initial alpha, beta values
-    alpha = np.eye(L, L)*0.5
-    beta = np.zeros((2, L, L))
+    if alpha is None and beta is None:
+        alpha = np.eye(L, L)*0.5
+        beta = np.zeros((2, L, L))
     
     model_params = {
                 'L': L,
@@ -322,11 +329,14 @@ def run_loop(L, t, U, t_p, mu_init, n_target, r_range, E_p):
     model_params['mu'] = mu
     model_params['alpha'] = alpha
     model_params['beta'] = beta
+    if time.time() - start_time > 23*3600: #23 hours
+            print("Time limit exceeded, exiting loop", flush=True)
+            return {'U': U, 't_p': t_p, 'alpha': alpha, 'beta': beta, 'mu': mu, 'psi': None, 'order_param': 0, 'gap': 0, 'E': E, 'completed': False} #Don't need psi and will derive it by doing DMRG again next run
     M = H_MF(model_params)
     
     _, gap, _ = run_excited_DMRG(M)
     order_param = np.abs(order_parameter(psi, 0))
-    temp_dict = {'U': U, 't_p': t_p, 'alpha': alpha, 'beta': beta, 'mu': mu, 'psi': psi, 'order_param': order_param, 'gap': gap, 'E': E}
+    temp_dict = {'U': U, 't_p': t_p, 'alpha': alpha, 'beta': beta, 'mu': mu, 'psi': psi, 'order_param': order_param, 'gap': gap, 'E': E, 'completed': True}
     return temp_dict
 
 #Run_DMRG given a specific product state
@@ -403,10 +413,9 @@ def calculate_pair_binding_energy(L, U):
     pairing_energy = 2 * E_N_plus_1_half - E_N_0 - E_N_plus_2 
     return pairing_energy
 
-
 def main():
     if len(sys.argv) != 7:
-        print("Usage: python main_loop_script.py <L> <U> <t_p> <chi_max> <E_p>")
+        print("Usage: python main_loop_script.py <L> <U> <t_p> <chi_max> <E_p> <mu_init>", flush=True)
         sys.exit(1)
 
     # Arguments
@@ -416,38 +425,53 @@ def main():
     # 4: chi_max
     # 5: E_p
     # 6: mu_init
+    
 
-    global L, U, t, z_c, chi_max, chi_list, t_p, mu_init, n_target, r_range, E_p
+    global L, U, t, z_c, chi_max, chi_list, t_p, mu_init, n_target, r_range, E_p, start_time
 
+    start_time = time.time()
     L = int(sys.argv[1])
     U = float(sys.argv[2])
     t_p = float(sys.argv[3])
     chi_max = int(sys.argv[4])
     chi_list = {0: 20, 10: 50, 30: 100, 40: chi_max}
-    if sys.argv[5] is not (None or 0):
+
+    outfile_name = f"results_U_{U}_t_p{t_p}.pkl"
+
+    if sys.argv[5] not in ("0", "None"):
         E_p = float(sys.argv[5])
-        print(f"Using provided E_p = {E_p}")
+        print(f"Using provided E_p = {E_p}", flush=True)
     else:
-        print("Calculating pair binding energy E_p...")
-        E_p = np.abs(calculate_pair_binding_energy(L, U, chi_max, chi_list))
-        print(f"Calculated E_p = {E_p}")
-    
-    mu_init = float(sys.argv[6])
-
-    print(f"Running with t_p={t_p}, U={U}, L={L}, chi_max={chi_max}, E_p={E_p}, mu_init={mu_init}")
-
+        print("Calculating pair binding energy E_p...", flush=True)
+        E_p = np.abs(calculate_pair_binding_energy(L, U))
+        print(f"Calculated E_p = {E_p}", flush=True)
     
     t = 1.0
     n_target = 0.5
     r_range = 4
     z_c = 4
+    mu_init = float(sys.argv[6]) #mu_inits: -10: 
 
-    
+    #Check if file already exists and resume run if it does
+    if os.path.exists(outfile_name):
+        print(f"Resuming from checkpoint {outfile_name}", flush=True)
+        with open(outfile_name, "rb") as f:
+            data = pickle.load(f)
+        alpha = data['alpha']
+        beta = data['beta']
+        mu_init = data['mu']
+        print(f"Resuming with mu_init={mu_init}", flush=True)
+    else:
+        print("Starting fresh run", flush=True)
+        alpha = None
+        beta = None
+        
+    print(f"Running with t_p={t_p}, U={U}, L={L}, chi_max={chi_max}, E_p={E_p}, mu_init={mu_init}", flush=True)
 
-    result_dict = run_loop(L, t, U, t_p, mu_init, n_target, r_range, E_p)
 
-    outfile_name = f"results_U_{U}_t_p{t_p}.pkl"
-    print(f"Calculation finished. Saving results to {outfile_name}")
+    result_dict = run_loop(L, t, U, t_p, mu_init, n_target, r_range, E_p, alpha, beta)
+
+    print(f"Saving results to {outfile_name}")
     with open(outfile_name, 'wb') as f:
         pickle.dump(result_dict, f)
 

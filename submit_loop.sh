@@ -18,7 +18,30 @@
 
 module load python
 conda activate tenpy-env
+export PYTHONUNBUFFERED=1
 
-python main_loop_script.py $1 $2 $3 $4 $5 $6 > logs/dmrg_L_${1}_U_${2}_t_p_${3}_chi_${4}.log
+outfile_name="results_U_${2}_t_p${3}.pkl"
 
-exit 0
+srun -u python main_loop_script.py $1 $2 $3 $4 $5 $6 \
+  | tee -a logs/dmrg_L_${1}_U_${2}_t_p_${3}_chi_${4}.log
+
+completed=$(python - <<END
+import pickle, sys
+try:
+    with open("$outfile_name", "rb") as f:
+        data = pickle.load(f)
+    sys.exit(0 if data.get("completed", False) else 1)
+except:
+    sys.exit(1)
+END
+)
+
+if [ $? -ne 0 ]; then
+    echo "Not completed, resubmitting..."
+    sbatch --dependency=afterany:$SLURM_JOB_ID submit_loop.sh "$@"
+else
+    echo "Run completed successfully!"
+fi
+
+    
+#Monitor job with: tail -f logs/dmrg_L_*_${1}_U_${2}_t_p_${3}_chi_${4}.log
