@@ -48,6 +48,7 @@ class H_MF_Helper(CouplingMPOModel):
             for k in range(i+1, i+1+r_range): # Using open boundary conditions
                 if k<L and alpha[i, k] != 0:
                     self.add_coupling_term(-1*alpha[i, k], i, k, 'Cu', 'Cd', plus_hc=True)
+                    self.add_coupling_term(1*alpha[k, i], i, k, 'Cd', 'Cu', plus_hc=True)
             self.add_onsite_term(-1*alpha[i, i], i, 'Cu Cd', plus_hc=True)
         for i in range(L):
             for r in range(1, r_range+1):
@@ -265,7 +266,7 @@ def order_parameter(psi, r):
 
 
 #Main loop
-def main_loop(model_params, n_target, E_p, max_iter=150):
+def main_loop(model_params, n_target, E_p, alpha_list, beta_list, max_iter=150):
     alpha = model_params['alpha'] 
     beta = model_params['beta']
     mu = model_params['mu']
@@ -277,19 +278,21 @@ def main_loop(model_params, n_target, E_p, max_iter=150):
         mu, n_measured, E, psi = find_mu_for_target_density(model_params, alpha, beta, mu, n_target)
         if time.time() - start_time > 23*3600: #23 hours
             print("Time limit exceeded, exiting loop", flush=True)
-            return alpha, beta, mu, n_measured, psi, E
+            return alpha, beta, mu, n_measured, psi, E, alpha_list, beta_list, False
         if abs(n_measured - n_target) < 1e-2:
             print(f"Target density achieved with mu: {mu}, density: {n_measured}", flush=True)
             model_params['mu'] = mu
             model_params['iter'] += 1
         #Checks alpha and beta convergence
         alpha_measured, beta_measured = calculate_alpha_beta_measured(psi, model_params, r_range, E_p)
+        alpha_list.append(alpha_measured)
+        beta_list.append(beta_measured)
         print('CHECKING IF INPUT {A, B} AGREES WITH OUTPUT {A, B}_measured', flush=True)
         if close(alpha, alpha_measured, beta, beta_measured, r_range):
             print("CHECK VALID FOR {A, B} AGREEMENT", flush=True)
             print(f"Converged alpha and beta. mu: {mu}, density: {n_measured}", flush=True)
             print('EXITING LOOP', flush=True)
-            return alpha, beta, mu, n_measured, psi, E
+            return alpha, beta, mu, n_measured, psi, E, alpha_list, beta_list, True
         print('CHECK NOT VALID FOR {A, B} AGREEMENT', flush=True)
         # Update alpha and beta based on measured values if not converged
         alpha = alpha_measured
@@ -297,16 +300,18 @@ def main_loop(model_params, n_target, E_p, max_iter=150):
         model_params['alpha'] = alpha
         model_params['beta'] = beta
     print("Failed to converge alpha and beta within the maximum number of iterations", flush=True)
-    return alpha, beta, mu, n_measured, psi, E
+    return alpha, beta, mu, n_measured, psi, E, alpha_list, beta_list, False
 
 
 #Function to run the main loop
-def run_loop(L, t, U, t_p, mu_init, n_target, r_range, E_p, alpha=None, beta=None):
+def run_loop(L, t, U, t_p, mu_init, n_target, r_range, E_p, alpha=None, beta=None, alpha_list=None, beta_list=None):
     #Initial alpha, beta values
     if alpha is None and beta is None:
         alpha = np.eye(L, L)*0.5
         beta = np.zeros((2, L, L))
-    
+    if alpha_list is None and beta_list is None:
+        alpha_list = []
+        beta_list = []
     model_params = {
                 'L': L,
                 'bc_MPS': 'finite',  # Boundary condition (infinite lattice)
@@ -325,23 +330,23 @@ def run_loop(L, t, U, t_p, mu_init, n_target, r_range, E_p, alpha=None, beta=Non
     }
     
     #Go through loop:
-    alpha, beta, mu, n_measured, psi, E = main_loop(model_params, n_target, E_p)
+    alpha, beta, mu, n_measured, psi, E, alpha_list, beta_list, converged = main_loop(model_params, n_target, E_p, alpha_list, beta_list)
     model_params['mu'] = mu
     model_params['alpha'] = alpha
     model_params['beta'] = beta
     if time.time() - start_time > 23*3600: #23 hours
             print("Time limit exceeded, exiting loop", flush=True)
-            return {'U': U, 't_p': t_p, 'alpha': alpha, 'beta': beta, 'mu': mu, 'psi': None, 'order_param': 0, 'gap': 0, 'E': E, 'completed': False} #Don't need psi and will derive it by doing DMRG again next run
+            return {'U': U, 't_p': t_p, 'alpha': alpha, 'beta': beta, 'mu': mu, 'psi': None, 'order_param': 0, 'gap': 0, 'E': E, 'alpha_list': alpha_list, 'beta_list': beta_list, 'completed': False} #Don't need psi and will derive it by doing DMRG again next run
     M = H_MF(model_params)
     
     _, gap, _ = run_excited_DMRG(M)
     order_param = np.abs(order_parameter(psi, 0))
-    temp_dict = {'U': U, 't_p': t_p, 'alpha': alpha, 'beta': beta, 'mu': mu, 'psi': psi, 'order_param': order_param, 'gap': gap, 'E': E, 'completed': True}
+    temp_dict = {'U': U, 't_p': t_p, 'alpha': alpha, 'beta': beta, 'mu': mu, 'psi': psi, 'order_param': order_param, 'gap': gap, 'E': E, 'alpha_list': alpha_list, 'beta_list': beta_list, 'completed': converged}
     return temp_dict
 
 #Run_DMRG given a specific product state
 def run_DMRG_prod(model_params, prod_state):
-    """Function to run DMRG for given model M, particle number N, and spin S."""
+    #Function to run DMRG for given model M, particle number N, and spin S.
     M = FermiHubbardChain(model_params)
     # DMRG Parameters
     dmrg_params = {
@@ -427,7 +432,7 @@ def main():
     # 6: mu_init
     
 
-    global L, U, t, z_c, chi_max, chi_list, t_p, mu_init, n_target, r_range, E_p, start_time
+    global L, U, t, z_c, chi_max, chi_list, t_p, mu_init, n_target, r_range, E_p, start_time, alpha_list, beta_list
 
     start_time = time.time()
     L = int(sys.argv[1])
@@ -435,8 +440,8 @@ def main():
     t_p = float(sys.argv[3])
     chi_max = int(sys.argv[4])
     chi_list = {0: 20, 10: 50, 30: 100, 40: chi_max}
-
-    outfile_name = f"results_U_{U}_t_p{t_p}.pkl"
+    
+    outfile_name = f"results_U_{U}_t_p_{t_p}.pkl"
 
     if sys.argv[5] not in ("0", "None"):
         E_p = float(sys.argv[5])
@@ -460,16 +465,24 @@ def main():
         alpha = data['alpha']
         beta = data['beta']
         mu_init = data['mu']
+        if (data['alpha_list'] is not None) and (data['beta_list'] is not None):
+            alpha_list = data['alpha_list']
+            beta_list = data['beta_list']
+        else:
+            alpha_list = []
+            beta_list = []
         print(f"Resuming with mu_init={mu_init}", flush=True)
     else:
         print("Starting fresh run", flush=True)
         alpha = None
         beta = None
+        alpha_list = []
+        beta_list = []
         
     print(f"Running with t_p={t_p}, U={U}, L={L}, chi_max={chi_max}, E_p={E_p}, mu_init={mu_init}", flush=True)
 
 
-    result_dict = run_loop(L, t, U, t_p, mu_init, n_target, r_range, E_p, alpha, beta)
+    result_dict = run_loop(L, t, U, t_p, mu_init, n_target, r_range, E_p, alpha, beta, alpha_list, beta_list)
 
     print(f"Saving results to {outfile_name}")
     with open(outfile_name, 'wb') as f:
