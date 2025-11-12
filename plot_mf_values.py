@@ -4,7 +4,7 @@ import matplotlib.widgets as widgets
 import tenpy
 import pickle
 
-outputfile_name = f"results_U_-4.0_t_p_0.025.pkl"
+outputfile_name = f"data/results_U_-4.0_t_p_0.075.pkl"
 
 with open(outputfile_name, "rb") as f:
     data = pickle.load(f)
@@ -16,7 +16,8 @@ beta_list = data['beta_list']
 beta_list = np.stack(beta_list, axis=0)
 beta_list0 = beta_list[:,0,:,:]
 beta_list1 = beta_list[:,1,:,:]
-alist = alpha_list
+# alist = alpha_list
+alist = beta_list0
 
 eps = 1e-12
 threshold = 1e-4

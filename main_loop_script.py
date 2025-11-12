@@ -48,7 +48,7 @@ class H_MF_Helper(CouplingMPOModel):
             for k in range(i+1, i+1+r_range): # Using open boundary conditions
                 if k<L and alpha[i, k] != 0:
                     self.add_coupling_term(-1*alpha[i, k], i, k, 'Cu', 'Cd', plus_hc=True)
-                    self.add_coupling_term(1*alpha[k, i], i, k, 'Cd', 'Cu', plus_hc=True)
+                    self.add_coupling_term(alpha[k, i], i, k, 'Cd', 'Cu', plus_hc=True)
             self.add_onsite_term(-1*alpha[i, i], i, 'Cu Cd', plus_hc=True)
         for i in range(L):
             for r in range(1, r_range+1):
