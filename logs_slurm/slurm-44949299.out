@@ -1,0 +1,352 @@
+outfile_name: results_U_-4.0_t_p_0.05.pkl
+Using provided E_p = 1.476
+Starting fresh run
+Running with t_p=0.05, U=-4.0, L=100, chi_max=300, E_p=1.476, mu_init=-2.645
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+Not same mu searching again
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+n_target < n_1 and n_target < n_0 triggered
+n_0:0.6022776436127849; n_1:0.5672528673702493; mu_1:-2.645
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+n_target < n_1 and n_target < n_0 triggered
+n_0:0.5672528673702493; n_1:0.532233421945322; mu_1:-2.695
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+n_target < n_1 and n_target < n_0 triggered
+n_0:0.532233421945322; n_1:0.49738963324310903; mu_1:-2.7449999999999997
+Trying secant step...
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+Trying secant step...
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+FOUND MU (secant); mu_new:-2.7412390883715987, n_new:0.5000000041851761
+Target density achieved with mu: -2.7412390883715987, density: 0.5000000041851761
+CHECKING IF INPUT {A, B} AGREES WITH OUTPUT {A, B}_measured
+CHECK NOT VALID FOR {A, B} AGREEMENT
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+Not same mu searching again
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+n_target > n_1 and n_target > n_0 triggered
+n_0:0.44881932548165016; n_1:0.5143735257619085; mu_1:-2.641239088371599
+Trying secant step...
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+Trying secant step...
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+Trying secant step...
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+FOUND MU (secant); mu_new:-2.6529926942074327, n_new:0.5000000249918218
+Target density achieved with mu: -2.6529926942074327, density: 0.5000000249918218
+CHECKING IF INPUT {A, B} AGREES WITH OUTPUT {A, B}_measured
+CHECK NOT VALID FOR {A, B} AGREEMENT
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+Not same mu searching again
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+n_target < n_1 and n_target < n_0 triggered
+n_0:0.5587139004562589; n_1:0.5009563477458546; mu_1:-2.6529926942074327
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+n_target < n_1 and n_target < n_0 triggered
+n_0:0.5009563477458546; n_1:0.4325724883295711; mu_1:-2.7029926942074325
+Trying secant step...
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+Trying secant step...
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+Trying secant step...
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+FOUND MU (secant); mu_new:-2.6537809953942757, n_new:0.49999999901156
+Target density achieved with mu: -2.6537809953942757, density: 0.49999999901156
+CHECKING IF INPUT {A, B} AGREES WITH OUTPUT {A, B}_measured
+CHECK NOT VALID FOR {A, B} AGREEMENT
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+Not same mu searching again
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+n_target < n_1 and n_target < n_0 triggered
+n_0:0.5581149088635439; n_1:0.5001048926742611; mu_1:-2.6537809953942757
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+n_target < n_1 and n_target < n_0 triggered
+n_0:0.5001048926742611; n_1:0.4315586680735414; mu_1:-2.7037809953942755
+Trying secant step...
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+Trying secant step...
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+FOUND MU (secant); mu_new:-2.653869085859808, n_new:0.5000024057297616
+Target density achieved with mu: -2.653869085859808, density: 0.5000024057297616
+CHECKING IF INPUT {A, B} AGREES WITH OUTPUT {A, B}_measured
+CHECK NOT VALID FOR {A, B} AGREEMENT
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+Not same mu searching again
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+n_target < n_1 and n_target < n_0 triggered
+n_0:0.5581055088952759; n_1:0.500027831230804; mu_1:-2.653869085859808
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+n_target < n_1 and n_target < n_0 triggered
+n_0:0.500027831230804; n_1:0.4314817721379584; mu_1:-2.703869085859808
+Trying secant step...
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+FOUND MU (secant); mu_new:-2.6538893869764384, n_new:0.5000046959070639
+Target density achieved with mu: -2.6538893869764384, density: 0.5000046959070639
+CHECKING IF INPUT {A, B} AGREES WITH OUTPUT {A, B}_measured
+CHECK NOT VALID FOR {A, B} AGREEMENT
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+Not same mu searching again
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+n_target < n_1 and n_target < n_0 triggered
+n_0:0.5581136148322422; n_1:0.5000125961653101; mu_1:-2.6538893869764384
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+n_target < n_1 and n_target < n_0 triggered
+n_0:0.5000125961653101; n_1:0.4314707442854594; mu_1:-2.703889386976438
+Trying secant step...
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+FOUND MU (secant); mu_new:-2.653898575643628, n_new:0.5000022089378691
+Target density achieved with mu: -2.653898575643628, density: 0.5000022089378691
+CHECKING IF INPUT {A, B} AGREES WITH OUTPUT {A, B}_measured
+CHECK NOT VALID FOR {A, B} AGREEMENT
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+Same mu:-2.653898575643628 and continuing
+Target density achieved with mu: -2.653898575643628, density: 0.5000048921641266
+CHECKING IF INPUT {A, B} AGREES WITH OUTPUT {A, B}_measured
+CHECK NOT VALID FOR {A, B} AGREEMENT
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+Not same mu searching again
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+n_target < n_1 and n_target < n_0 triggered
+n_0:0.5581182332240325; n_1:0.5000058291677886; mu_1:-2.653898575643628
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+n_target < n_1 and n_target < n_0 triggered
+n_0:0.5000058291677886; n_1:0.43146621860209095; mu_1:-2.703898575643628
+Trying secant step...
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+FOUND MU (secant); mu_new:-2.653902828051645, n_new:0.50000104144268
+Target density achieved with mu: -2.653902828051645, density: 0.50000104144268
+CHECKING IF INPUT {A, B} AGREES WITH OUTPUT {A, B}_measured
+CHECK NOT VALID FOR {A, B} AGREEMENT
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+Same mu:-2.653902828051645 and continuing
+Target density achieved with mu: -2.653902828051645, density: 0.5000013703005668
+CHECKING IF INPUT {A, B} AGREES WITH OUTPUT {A, B}_measured
+CHECK NOT VALID FOR {A, B} AGREEMENT
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+Same mu:-2.653902828051645 and continuing
+Target density achieved with mu: -2.653902828051645, density: 0.5000014881445355
+CHECKING IF INPUT {A, B} AGREES WITH OUTPUT {A, B}_measured
+CHECK NOT VALID FOR {A, B} AGREEMENT
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+Same mu:-2.653902828051645 and continuing
+Target density achieved with mu: -2.653902828051645, density: 0.5000015298434358
+CHECKING IF INPUT {A, B} AGREES WITH OUTPUT {A, B}_measured
+CHECK NOT VALID FOR {A, B} AGREEMENT
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+Same mu:-2.653902828051645 and continuing
+Target density achieved with mu: -2.653902828051645, density: 0.5000015446417896
+CHECKING IF INPUT {A, B} AGREES WITH OUTPUT {A, B}_measured
+CHECK NOT VALID FOR {A, B} AGREEMENT
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+Same mu:-2.653902828051645 and continuing
+Target density achieved with mu: -2.653902828051645, density: 0.5000015498968939
+CHECKING IF INPUT {A, B} AGREES WITH OUTPUT {A, B}_measured
+CHECK VALID FOR {A, B} AGREEMENT
+Converged alpha and beta. mu: -2.653902828051645, density: 0.5000015498968939
+EXITING LOOP
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config DMRG:
+['orthogonal_to', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config DMRG:
+['orthogonal_to', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+Saving results to results_U_-4.0_t_p_0.05.pkl
+Run completed successfully!

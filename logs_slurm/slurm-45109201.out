@@ -1,3 +1,5 @@
+outfile_name: results_U_-4.0_t_p_0.025.h5
+[ Info:  started timer at: 2025-11-11T12:48:53.173
 Resuming from checkpoint results_U_-4.0_t_p_0.025.h5
 Resuming with mu_init=-2.653158053346751
 Running with t_p=0.025 U=-4.0 L=100 chi_max=300 E_p=1.476 mu_init=-2.653158053346751
@@ -1435,3 +1437,8 @@ After sweep 11 energy=-6.015551593884407  maxlinkdim=203 maxerr=1.00E-10 time=11
 After sweep 12 energy=-6.017306483099253  maxlinkdim=203 maxerr=1.00E-10 time=11.800
 After sweep 13 energy=-6.019365302739691  maxlinkdim=235 maxerr=1.00E-10 time=13.088
 After sweep 14 energy=-6.020923576596921  maxlinkdim=266 maxerr=1.00E-10 time=15.805
+slurmstepd: error: *** STEP 45109201.0 ON nid004529 CANCELLED AT 2025-11-12T04:21:50 ***
+slurmstepd: error: *** JOB 45109201 ON nid004529 CANCELLED AT 2025-11-12T04:21:50 ***
+
+[640748] signal 15: Terminated
+in expression starting at /global/u2/k/kwang98/MPS-MFT/main_loop_script_cpu.jl:553

@@ -1,0 +1,11 @@
+outfile_name: results_U_-4.0_t_p_0.075.h5
+[ Info:  started timer at: 2025-11-11T12:44:52.239
+Starting fresh run
+Running with t_p=0.075 U=-4.0 L=100 chi_max=300 E_p=1.476 mu_init=-2.65
+After sweep 1 energy=-5.4808507  maxlinkdim=16 maxerr=2.78E-07 time=44.172
+After sweep 2 energy=-6.816496  maxlinkdim=256 maxerr=6.32E-07 time=34.741
+After sweep 3 energy=-7.068562  maxlinkdim=284 maxerr=3.42E-07 time=37.984
+After sweep 4 energy=-7.2079177  maxlinkdim=292 maxerr=5.71E-07 time=39.816
+After sweep 5 energy=-7.2899513  maxlinkdim=300 maxerr=6.39E-07 time=41.635
+slurmstepd: error: *** STEP 45109213.0 ON nid008377 CANCELLED AT 2025-11-11T20:50:04 ***
+slurmstepd: error: *** JOB 45109213 ON nid008377 CANCELLED AT 2025-11-11T20:50:04 ***

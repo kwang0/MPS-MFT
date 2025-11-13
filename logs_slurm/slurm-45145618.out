@@ -1,0 +1,55 @@
+outfile_name: results_U_-4.0_t_p_0.1.h5
+[ Info:  started timer at: 2025-11-11T23:47:21.310
+Resuming from checkpoint results_U_-4.0_t_p_0.1.h5
+Resuming with mu_init=-2.6397583491712884
+Running with t_p=0.1 U=-4.0 L=100 chi_max=300 E_p=1.476 mu_init=-2.6397583491712884
+After sweep 1 energy=-4.871402983794812  maxlinkdim=16 maxerr=9.89E-11 time=29.631
+After sweep 2 energy=-5.8330229890694785  maxlinkdim=79 maxerr=1.00E-10 time=3.954
+After sweep 3 energy=-6.026782229457694  maxlinkdim=103 maxerr=1.00E-10 time=6.827
+After sweep 4 energy=-6.146694165696642  maxlinkdim=120 maxerr=9.99E-11 time=7.210
+After sweep 5 energy=-6.233717425058656  maxlinkdim=124 maxerr=9.99E-11 time=7.659
+After sweep 6 energy=-6.298482980445718  maxlinkdim=147 maxerr=9.99E-11 time=8.034
+After sweep 7 energy=-6.343543989723014  maxlinkdim=115 maxerr=9.98E-11 time=8.301
+After sweep 8 energy=-6.3760121339860145  maxlinkdim=103 maxerr=9.99E-11 time=8.146
+After sweep 9 energy=-6.405311903009237  maxlinkdim=129 maxerr=1.00E-10 time=8.959
+After sweep 10 energy=-6.425086293365245  maxlinkdim=148 maxerr=9.99E-11 time=10.489
+After sweep 11 energy=-6.432330881372831  maxlinkdim=157 maxerr=1.00E-10 time=10.289
+After sweep 12 energy=-6.436519626805146  maxlinkdim=156 maxerr=9.99E-11 time=10.133
+After sweep 13 energy=-6.438702951877469  maxlinkdim=177 maxerr=9.99E-11 time=10.535
+After sweep 14 energy=-6.44023683295512  maxlinkdim=153 maxerr=1.00E-10 time=10.669
+After sweep 15 energy=-6.440844790692632  maxlinkdim=188 maxerr=1.00E-10 time=11.612
+After sweep 16 energy=-6.441165630163189  maxlinkdim=148 maxerr=9.98E-11 time=12.020
+After sweep 17 energy=-6.441322011742789  maxlinkdim=155 maxerr=1.00E-10 time=12.695
+After sweep 18 energy=-6.441360223727807  maxlinkdim=159 maxerr=1.00E-10 time=13.351
+After sweep 19 energy=-6.441369214764377  maxlinkdim=135 maxerr=1.00E-10 time=14.204
+After sweep 20 energy=-6.441369882646117  maxlinkdim=127 maxerr=1.00E-10 time=14.442
+After sweep 21 energy=-6.441369900978735  maxlinkdim=122 maxerr=1.00E-10 time=14.175
+After sweep 22 energy=-6.441369901098955  maxlinkdim=122 maxerr=9.98E-11 time=13.987
+After sweep 23 energy=-6.44136990120937  maxlinkdim=122 maxerr=9.98E-11 time=13.907
+After sweep 24 energy=-6.441369901181007  maxlinkdim=122 maxerr=9.98E-11 time=13.750
+After sweep 25 energy=-6.441369901184489  maxlinkdim=122 maxerr=9.98E-11 time=13.770
+After sweep 26 energy=-6.441369901185116  maxlinkdim=122 maxerr=9.98E-11 time=13.884
+After sweep 27 energy=-6.44136990118548  maxlinkdim=122 maxerr=9.98E-11 time=13.817
+After sweep 28 energy=-6.441369901185704  maxlinkdim=122 maxerr=9.98E-11 time=13.755
+After sweep 29 energy=-6.441369901185983  maxlinkdim=122 maxerr=9.98E-11 time=13.751
+After sweep 30 energy=-6.441369901186224  maxlinkdim=122 maxerr=9.98E-11 time=13.816
+Same mu: -2.6397583491712884 and continuing
+Target density achieved with mu=-2.6397583491712884, n=0.5000031763934528
+Checking {alpha,beta} vs measured
+Converged {alpha,beta}. mu=-2.6397583491712884, n=0.5000031763934528
+Exiting loop
+ERROR: LoadError: BoundsError: attempt to access Tuple{Matrix{Float64}, Array{Float64, 3}, Float64, Float64, MPS, Float64, Vector{Index{Vector{Pair{QN, Int64}}}}, MPO} at index [9]
+Stacktrace:
+ [1] indexed_iterate
+   @ ./tuple.jl:159 [inlined]
+ [2] run_loop(L::Int64, t::Float64, U::Float64, t_p::Float64, mu_init::Float64, n_target::Float64, r_range::Int64, z_c::Int64, E_p::Float64, chi_max::Int64; nsweeps::Int64, cutoff::Float64)
+   @ Main /global/u2/k/kwang98/MPS-MFT/main_loop_script.jl:417
+ [3] run_loop(L::Int64, t::Float64, U::Float64, t_p::Float64, mu_init::Float64, n_target::Float64, r_range::Int64, z_c::Int64, E_p::Float64, chi_max::Int64)
+   @ Main /global/u2/k/kwang98/MPS-MFT/main_loop_script.jl:377
+ [4] top-level scope
+   @ /global/u2/k/kwang98/MPS-MFT/main_loop_script.jl:554
+in expression starting at /global/u2/k/kwang98/MPS-MFT/main_loop_script.jl:554
+srun: error: nid008532: task 0: Exited with exit code 1
+srun: Terminating StepId=45145618.0
+Not completed, resubmitting...
+Submitted batch job 45145928

@@ -1,0 +1,55 @@
+outfile_name: results_U_-4.0_t_p_0.15.h5
+[ Info:  started timer at: 2025-11-11T22:57:11.327
+Resuming from checkpoint results_U_-4.0_t_p_0.15.h5
+Resuming with mu_init=-2.621379635090634
+Running with t_p=0.15 U=-4.0 L=100 chi_max=300 E_p=1.476 mu_init=-2.621379635090634
+After sweep 1 energy=-5.617425580622152  maxlinkdim=16 maxerr=8.89E-11 time=29.539
+After sweep 2 energy=-6.829087152457682  maxlinkdim=74 maxerr=1.00E-10 time=3.892
+After sweep 3 energy=-7.142391499193887  maxlinkdim=101 maxerr=9.98E-11 time=6.749
+After sweep 4 energy=-7.316263591508367  maxlinkdim=91 maxerr=9.98E-11 time=6.916
+After sweep 5 energy=-7.425202584224595  maxlinkdim=135 maxerr=1.00E-10 time=7.129
+After sweep 6 energy=-7.488773010656204  maxlinkdim=148 maxerr=9.99E-11 time=6.998
+After sweep 7 energy=-7.531232462803325  maxlinkdim=134 maxerr=1.00E-10 time=7.410
+After sweep 8 energy=-7.5578934463399605  maxlinkdim=139 maxerr=1.00E-10 time=8.161
+After sweep 9 energy=-7.569309163223214  maxlinkdim=127 maxerr=9.99E-11 time=8.001
+After sweep 10 energy=-7.575198501448249  maxlinkdim=128 maxerr=9.99E-11 time=7.808
+After sweep 11 energy=-7.57845824019678  maxlinkdim=131 maxerr=1.00E-10 time=8.156
+After sweep 12 energy=-7.580111717677423  maxlinkdim=129 maxerr=9.99E-11 time=8.155
+After sweep 13 energy=-7.580875902334103  maxlinkdim=134 maxerr=1.00E-10 time=8.784
+After sweep 14 energy=-7.58099915004701  maxlinkdim=105 maxerr=9.98E-11 time=9.060
+After sweep 15 energy=-7.581016649377251  maxlinkdim=129 maxerr=9.98E-11 time=9.057
+After sweep 16 energy=-7.58101873525669  maxlinkdim=106 maxerr=9.99E-11 time=9.199
+After sweep 17 energy=-7.581018762270274  maxlinkdim=87 maxerr=1.00E-10 time=8.872
+After sweep 18 energy=-7.581018761384261  maxlinkdim=87 maxerr=9.80E-11 time=8.877
+After sweep 19 energy=-7.581018761445025  maxlinkdim=87 maxerr=9.76E-11 time=8.734
+After sweep 20 energy=-7.5810187614641205  maxlinkdim=87 maxerr=9.76E-11 time=8.983
+After sweep 21 energy=-7.581018761479077  maxlinkdim=87 maxerr=9.76E-11 time=8.868
+After sweep 22 energy=-7.581018761493809  maxlinkdim=87 maxerr=9.76E-11 time=8.876
+After sweep 23 energy=-7.581018761508531  maxlinkdim=87 maxerr=9.76E-11 time=8.764
+After sweep 24 energy=-7.581018761523268  maxlinkdim=87 maxerr=9.76E-11 time=8.882
+After sweep 25 energy=-7.581018761538097  maxlinkdim=87 maxerr=9.76E-11 time=8.747
+After sweep 26 energy=-7.581018761553418  maxlinkdim=87 maxerr=9.76E-11 time=8.783
+After sweep 27 energy=-7.581018761570025  maxlinkdim=87 maxerr=9.75E-11 time=8.766
+After sweep 28 energy=-7.58101876158913  maxlinkdim=87 maxerr=9.75E-11 time=8.936
+After sweep 29 energy=-7.581018761609941  maxlinkdim=87 maxerr=9.75E-11 time=8.724
+After sweep 30 energy=-7.581018761629348  maxlinkdim=87 maxerr=9.75E-11 time=8.756
+Same mu: -2.621379635090634 and continuing
+Target density achieved with mu=-2.621379635090634, n=0.5000013377808258
+Checking {alpha,beta} vs measured
+Converged {alpha,beta}. mu=-2.621379635090634, n=0.5000013377808258
+Exiting loop
+ERROR: LoadError: BoundsError: attempt to access Tuple{Matrix{Float64}, Array{Float64, 3}, Float64, Float64, MPS, Float64, Vector{Index{Vector{Pair{QN, Int64}}}}, MPO} at index [9]
+Stacktrace:
+ [1] indexed_iterate
+   @ ./tuple.jl:159 [inlined]
+ [2] run_loop(L::Int64, t::Float64, U::Float64, t_p::Float64, mu_init::Float64, n_target::Float64, r_range::Int64, z_c::Int64, E_p::Float64, chi_max::Int64; nsweeps::Int64, cutoff::Float64)
+   @ Main /global/u2/k/kwang98/MPS-MFT/main_loop_script.jl:417
+ [3] run_loop(L::Int64, t::Float64, U::Float64, t_p::Float64, mu_init::Float64, n_target::Float64, r_range::Int64, z_c::Int64, E_p::Float64, chi_max::Int64)
+   @ Main /global/u2/k/kwang98/MPS-MFT/main_loop_script.jl:377
+ [4] top-level scope
+   @ /global/u2/k/kwang98/MPS-MFT/main_loop_script.jl:554
+in expression starting at /global/u2/k/kwang98/MPS-MFT/main_loop_script.jl:554
+srun: error: nid008313: task 0: Exited with exit code 1
+srun: Terminating StepId=45143615.0
+Not completed, resubmitting...
+Submitted batch job 45143805

@@ -1,3 +1,5 @@
+outfile_name: results_U_-4.0_t_p_0.05.h5
+[ Info:  started timer at: 2025-11-11T20:57:38.493
 Starting fresh run
 Running with t_p=0.05 U=-4.0 L=100 chi_max=300 E_p=1.476 mu_init=-2.65
 After sweep 1 energy=-5.05746673463769  maxlinkdim=16 maxerr=9.66E-11 time=30.152
@@ -903,3 +905,18 @@ Target density achieved with mu=-2.650825862862687, n=0.5000021502854742
 Checking {alpha,beta} vs measured
 Converged {alpha,beta}. mu=-2.650825862862687, n=0.5000021502854742
 Exiting loop
+ERROR: LoadError: BoundsError: attempt to access Tuple{Matrix{Float64}, Array{Float64, 3}, Float64, Float64, MPS, Float64, Vector{Index{Vector{Pair{QN, Int64}}}}, MPO} at index [9]
+Stacktrace:
+ [1] indexed_iterate
+   @ ./tuple.jl:159 [inlined]
+ [2] run_loop(L::Int64, t::Float64, U::Float64, t_p::Float64, mu_init::Float64, n_target::Float64, r_range::Int64, z_c::Int64, E_p::Float64, chi_max::Int64; nsweeps::Int64, cutoff::Float64)
+   @ Main /global/u2/k/kwang98/MPS-MFT/main_loop_script.jl:417
+ [3] run_loop(L::Int64, t::Float64, U::Float64, t_p::Float64, mu_init::Float64, n_target::Float64, r_range::Int64, z_c::Int64, E_p::Float64, chi_max::Int64)
+   @ Main /global/u2/k/kwang98/MPS-MFT/main_loop_script.jl:377
+ [4] top-level scope
+   @ /global/u2/k/kwang98/MPS-MFT/main_loop_script.jl:554
+in expression starting at /global/u2/k/kwang98/MPS-MFT/main_loop_script.jl:554
+srun: error: nid008280: task 0: Exited with exit code 1
+srun: Terminating StepId=45136282.0
+Not completed, resubmitting...
+Submitted batch job 45146790

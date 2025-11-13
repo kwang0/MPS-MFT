@@ -1,15 +1,15 @@
 using ITensors
 using ITensorMPS
+using CUDA
 using HDF5
 using LinearAlgebra
 using Printf
 using Serialization
 using TickTock
 
-# Build Electron site indices with Sz conservation and parity (no particle number conservation)
-# Matches the TeNPy choice cons_Sz = "Sz", cons_N = None
+# Build Electron site indices with no conservation for GPU runs
 function make_sites(L::Int)
-    return siteinds("Electron", L; conserve_sz=true, conserve_nfparity=true)
+    return siteinds("Electron", L; conserve_sz=false, conserve_nfparity=false)
 end
 
 # Optionally build Electron sites that DO conserve particle number (used for E_p calculation)
@@ -197,14 +197,14 @@ function build_MPO_MF(; L::Int, t::Float64, U::Float64, mu::Float64, V::Float64,
         end
     end
 
-    H = MPO(os, s)
+    H = cu(MPO(os, s))
     return s, H
 end
 
 # DMRG ground state with product-state initialization
 function run_dmrg_ground(s, H; nsweeps=10, maxdim=200, cutoff=1e-10)
     L = length(s)
-    psi0 = productMPS(s, half_filling_product_state(L))
+    psi0 = cu(productMPS(s, half_filling_product_state(L)))
 
     E0, psi0 = dmrg(H, psi0; nsweeps=nsweeps, maxdim=maxdim, cutoff=cutoff)
     return E0, psi0
@@ -213,7 +213,7 @@ end
 # First excited state energy via DMRG orthogonalization to ground state
 function run_dmrg_excited(s, H, psi0; nsweeps=10, maxdim=200, cutoff=1e-10)
     L = length(s)
-    psi1 = productMPS(s, half_filling_product_state(L))
+    psi1 = cu(productMPS(s, half_filling_product_state(L)))
 
     _, psi1 = dmrg(H, [psi0], psi1; nsweeps=nsweeps, maxdim=maxdim, cutoff=cutoff)
     E1 = inner(psi1', H, psi1)
@@ -459,7 +459,7 @@ function run_loop(L::Int, t::Float64, U::Float64, t_p::Float64, mu_init::Float64
     
     tick()
 
-    outfile = "results_U_$(U)_t_p_$(t_p).h5"
+    outfile = "results_U_$(U)_t_p_$(t_p)_gpu.h5"
     if (isfile(outfile))
         println("Resuming from checkpoint $outfile")
         F = h5open(outfile,"r")
@@ -530,7 +530,7 @@ end
 # -----------------------------
 
 if length(ARGS) != 6
-    println("Usage: julia main_loop_script.jl <L> <U> <t_p> <chi_max> <E_p> <mu_init>")
+    println("Usage: julia main_loop_script_gpu.jl <L> <U> <t_p> <chi_max> <E_p> <mu_init>")
     return
 end
 
@@ -547,6 +547,6 @@ r_range = 4
 z_c = 4
 
 ITensors.Strided.set_num_threads(1)
-BLAS.set_num_threads(256)
+BLAS.set_num_threads(1)
 
 result = run_loop(L, t, U, t_p, mu_init, n_target, r_range, z_c, E_p, chi_max)

@@ -1,0 +1,58 @@
+outfile_name: results_U_-4.0_t_p_0.2.h5
+[ Info:  started timer at: 2025-11-11T20:29:40.204
+Starting fresh run
+Running with t_p=0.2 U=-4.0 L=100 chi_max=300 E_p=1.476 mu_init=-2.65
+After sweep 1 energy=-17.422967765744303  maxlinkdim=16 maxerr=9.94E-16 time=30.122
+After sweep 2 energy=-18.45378074829268  maxlinkdim=64 maxerr=9.98E-11 time=2.480
+After sweep 3 energy=-18.498013755406532  maxlinkdim=74 maxerr=1.00E-10 time=3.379
+After sweep 4 energy=-18.508740476068347  maxlinkdim=75 maxerr=9.99E-11 time=2.984
+After sweep 5 energy=-18.511648414436866  maxlinkdim=64 maxerr=1.00E-10 time=2.789
+After sweep 6 energy=-18.51228062052544  maxlinkdim=61 maxerr=1.00E-10 time=2.937
+After sweep 7 energy=-18.51236324068093  maxlinkdim=58 maxerr=9.96E-11 time=2.599
+After sweep 8 energy=-18.512369006505068  maxlinkdim=52 maxerr=9.99E-11 time=2.590
+After sweep 9 energy=-18.5123690358567  maxlinkdim=40 maxerr=9.97E-11 time=2.526
+After sweep 10 energy=-18.512369035913636  maxlinkdim=40 maxerr=9.74E-11 time=2.530
+After sweep 11 energy=-18.51236903591375  maxlinkdim=40 maxerr=9.74E-11 time=2.529
+After sweep 12 energy=-18.512369035913828  maxlinkdim=40 maxerr=9.74E-11 time=2.537
+After sweep 13 energy=-18.512369035913878  maxlinkdim=40 maxerr=9.74E-11 time=2.542
+After sweep 14 energy=-18.512369035913792  maxlinkdim=40 maxerr=9.74E-11 time=2.552
+After sweep 15 energy=-18.512369035913892  maxlinkdim=40 maxerr=9.74E-11 time=2.768
+After sweep 16 energy=-18.512369035913835  maxlinkdim=40 maxerr=9.74E-11 time=2.502
+After sweep 17 energy=-18.512369035913864  maxlinkdim=40 maxerr=9.74E-11 time=2.489
+After sweep 18 energy=-18.512369035913828  maxlinkdim=40 maxerr=9.74E-11 time=2.499
+After sweep 19 energy=-18.51236903591375  maxlinkdim=40 maxerr=9.74E-11 time=2.517
+After sweep 20 energy=-18.512369035913828  maxlinkdim=40 maxerr=9.74E-11 time=2.515
+After sweep 21 energy=-18.512369035913803  maxlinkdim=40 maxerr=9.74E-11 time=2.529
+After sweep 22 energy=-18.51236903591375  maxlinkdim=40 maxerr=9.74E-11 time=2.531
+After sweep 23 energy=-18.51236903591383  maxlinkdim=40 maxerr=9.74E-11 time=2.556
+After sweep 24 energy=-18.512369035913842  maxlinkdim=40 maxerr=9.74E-11 time=2.557
+After sweep 25 energy=-18.512369035913835  maxlinkdim=40 maxerr=9.74E-11 time=2.772
+After sweep 26 energy=-18.512369035913892  maxlinkdim=40 maxerr=9.74E-11 time=2.559
+After sweep 27 energy=-18.512369035913807  maxlinkdim=40 maxerr=9.74E-11 time=2.489
+After sweep 28 energy=-18.512369035913828  maxlinkdim=40 maxerr=9.74E-11 time=2.529
+After sweep 29 energy=-18.512369035913835  maxlinkdim=40 maxerr=9.74E-11 time=2.524
+After sweep 30 energy=-18.512369035913864  maxlinkdim=40 maxerr=9.74E-11 time=2.526
+ERROR: LoadError: UndefVarError: `psi` not defined in `Main`
+Stacktrace:
+ [1] #run_dmrg_ground#2
+   @ /global/u2/k/kwang98/MPS-MFT/main_loop_script.jl:130 [inlined]
+ [2] solve_Ham(mu::Float64, model_params::Dict{Symbol, Any}, alpha::Matrix{Float64}, beta::Array{Float64, 3}; nsweeps::Int64, maxdim::Int64, cutoff::Float64)
+   @ Main /global/u2/k/kwang98/MPS-MFT/main_loop_script.jl:153
+ [3] solve_Ham
+   @ /global/u2/k/kwang98/MPS-MFT/main_loop_script.jl:144 [inlined]
+ [4] find_mu_for_target_density(model_params::Dict{Symbol, Any}, alpha::Matrix{Float64}, beta::Array{Float64, 3}, mu_init::Float64, n_target::Float64; tol::Float64, delta_mu::Float64, max_iter::Int64, dmrg_kw::@NamedTuple{nsweeps::Int64, maxdim::Int64, cutoff::Float64})
+   @ Main /global/u2/k/kwang98/MPS-MFT/main_loop_script.jl:188
+ [5] main_loop(model_params::Dict{Symbol, Any}; n_target::Float64, E_p::Float64, z_c::Int64, alpha_list::Vector{Any}, beta_list::Vector{Any}, max_iter::Int64, nsweeps::Int64, maxdim::Int64, cutoff::Float64)
+   @ Main /global/u2/k/kwang98/MPS-MFT/main_loop_script.jl:334
+ [6] run_loop(L::Int64, t::Float64, U::Float64, t_p::Float64, mu_init::Float64, n_target::Float64, r_range::Int64, z_c::Int64, E_p::Float64, chi_max::Int64; nsweeps::Int64, cutoff::Float64)
+   @ Main /global/u2/k/kwang98/MPS-MFT/main_loop_script.jl:417
+ [7] run_loop(L::Int64, t::Float64, U::Float64, t_p::Float64, mu_init::Float64, n_target::Float64, r_range::Int64, z_c::Int64, E_p::Float64, chi_max::Int64)
+   @ Main /global/u2/k/kwang98/MPS-MFT/main_loop_script.jl:377
+ [8] top-level scope
+   @ /global/u2/k/kwang98/MPS-MFT/main_loop_script.jl:554
+in expression starting at /global/u2/k/kwang98/MPS-MFT/main_loop_script.jl:554
+srun: error: nid008293: task 0: Exited with exit code 1
+srun: Terminating StepId=45135827.0
+Check failed: [Errno 2] Unable to synchronously open file (unable to open file: name = 'results_U_-4.0_t_p_0.2.h5', errno = 2, error message = 'No such file or directory', flags = 0, o_flags = 0)
+Not completed, resubmitting...
+Submitted batch job 45135859

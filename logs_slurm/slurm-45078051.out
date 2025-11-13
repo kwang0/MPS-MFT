@@ -1,0 +1,25 @@
+outfile_name: results_U_-4.0_t_p_0.05.h5
+[ Info:  started timer at: 2025-11-10T20:06:38.896
+Resuming from checkpoint results_U_-4.0_t_p_0.05.h5
+ERROR: LoadError: KeyError: key "alpha_list" not found
+Stacktrace:
+ [1] getindex(parent::HDF5.File, path::String; pv::@Kwargs{})
+   @ HDF5 ~/.julia/packages/HDF5/Z859u/src/highlevel.jl:75
+ [2] getindex
+   @ ~/.julia/packages/HDF5/Z859u/src/highlevel.jl:74 [inlined]
+ [3] read(parent::HDF5.File, name::String; pv::@Kwargs{})
+   @ HDF5 ~/.julia/packages/HDF5/Z859u/src/readwrite.jl:23
+ [4] read
+   @ ~/.julia/packages/HDF5/Z859u/src/readwrite.jl:22 [inlined]
+ [5] run_loop(L::Int64, t::Float64, U::Float64, t_p::Float64, mu_init::Float64, n_target::Float64, r_range::Int64, z_c::Int64, E_p::Float64, chi_max::Int64; nsweeps::Int64, cutoff::Float64)
+   @ Main /global/u2/k/kwang98/MPS-MFT/main_loop_script_cpu.jl:375
+ [6] run_loop(L::Int64, t::Float64, U::Float64, t_p::Float64, mu_init::Float64, n_target::Float64, r_range::Int64, z_c::Int64, E_p::Float64, chi_max::Int64)
+   @ Main /global/u2/k/kwang98/MPS-MFT/main_loop_script_cpu.jl:364
+ [7] top-level scope
+   @ /global/u2/k/kwang98/MPS-MFT/main_loop_script_cpu.jl:540
+in expression starting at /global/u2/k/kwang98/MPS-MFT/main_loop_script_cpu.jl:540
+srun: error: nid005753: task 0: Exited with exit code 1
+srun: Terminating StepId=45078051.0
+Check failed: name 'outfile_name' is not defined
+Not completed, resubmitting...
+Submitted batch job 45079563

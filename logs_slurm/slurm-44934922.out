@@ -1,0 +1,90 @@
+outfile_name: results_U_-4.0_t_p_0.05.pkl
+Using provided E_p = 1.476
+Starting fresh run
+Running with t_p=0.05, U=-4.0, L=100, chi_max=300, E_p=1.476, mu_init=-2.645
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+Not same mu searching again
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+n_target < n_1 and n_target < n_0 triggered
+n_0:0.6022776436127849; n_1:0.5672528673702493; mu_1:-2.645
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+n_target < n_1 and n_target < n_0 triggered
+n_0:0.5672528673702493; n_1:0.532233421945322; mu_1:-2.695
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+n_target < n_1 and n_target < n_0 triggered
+n_0:0.532233421945322; n_1:0.49738963324310903; mu_1:-2.7449999999999997
+Trying secant step...
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+Trying secant step...
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused option ['verbose'] for config TwoSiteDMRGEngine
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+FOUND MU (secant); mu_new:-2.7412390883715987, n_new:0.5000000041851761
+Target density achieved with mu: -2.7412390883715987, density: 0.5000000041851761
+CHECKING IF INPUT {A, B} AGREES WITH OUTPUT {A, B}_measured
+CHECK NOT VALID FOR {A, B} AGREEMENT
+Traceback (most recent call last):
+  File "/global/u2/k/kwang98/MPS-MFT/main_loop_script.py", line 493, in <module>
+    main()
+  File "/global/u2/k/kwang98/MPS-MFT/main_loop_script.py", line 485, in main
+    result_dict = run_loop(L, t, U, t_p, mu_init, n_target, r_range, E_p, alpha, beta, alpha_list, beta_list)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/global/u2/k/kwang98/MPS-MFT/main_loop_script.py", line 333, in run_loop
+    alpha, beta, mu, n_measured, psi, E, alpha_list, beta_list, converged = main_loop(model_params, n_target, E_p, alpha_list, beta_list)
+                                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/global/u2/k/kwang98/MPS-MFT/main_loop_script.py", line 278, in main_loop
+    mu, n_measured, E, psi = find_mu_for_target_density(model_params, alpha, beta, mu, n_target)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/global/u2/k/kwang98/MPS-MFT/main_loop_script.py", line 172, in find_mu_for_target_density
+    n_0, E, psi = solve_Ham(mu_0, model_params, alpha, beta)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/global/u2/k/kwang98/MPS-MFT/main_loop_script.py", line 151, in solve_Ham
+    M = H_MF(model_params)
+        ^^^^^^^^^^^^^^^^^^
+  File "/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/models/model.py", line 1836, in __init__
+    self.init_terms(model_params)
+  File "/global/u2/k/kwang98/MPS-MFT/main_loop_script.py", line 51, in init_terms
+    self.add_coupling_term(-1*alpha[k, i], k, i, 'Cu', 'Cd', plus_hc=True)
+  File "/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/models/model.py", line 1749, in add_term_function
+    res = f(self, *args, **kwargs)
+          ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/models/model.py", line 1253, in add_coupling_term
+    ct.add_coupling_term(strength, i, j, op_i, op_j, op_string)
+  File "/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/networks/terms.py", line 541, in add_coupling_term
+    raise ValueError("need i < j")
+ValueError: need i < j
+/global/homes/k/kwang98/.conda/envs/tenpy-env/lib/python3.11/site-packages/tenpy/tools/params.py:232: UserWarning: unused options for config H_MF:
+['conserve', 'iter', 'sort_mpo_legs', 't_p', 'verbose']
+  warnings.warn(msg.format(keys=sorted(unused), name=self.name))
+srun: error: nid006537: task 0: Exited with exit code 1
+srun: Terminating StepId=44934922.0
+Check failed: [Errno 2] No such file or directory: 'results_U_-4.0_t_p_0.05.pkl'
+Not completed, resubmitting...
+Submitted batch job 44935842
