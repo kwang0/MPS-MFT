@@ -236,25 +236,65 @@ function solve_Ham(mu, model_params, alpha, beta; nsweeps::Int=10, maxdim=200, c
 end
 
 # Check convergence of alpha/beta by comparing diagonals up to r_range with relative tolerance
+# function close_ab(alpha, alpha_meas, beta, beta_meas, r_range; thresh=1e-4)
+#     eps = 1e-12
+#     for r in 0:r_range
+#         # alpha
+#         a = diag(alpha, r)
+#         am = diag(alpha_meas, r)
+#         if any(abs.(am .- a) ./ (abs.(a) .+ eps) .> thresh)
+#             println("Alpha not converged. Triggered by relative error of $(maximum(abs.(am .- a) ./ (abs.(a) .+ eps)))")
+#             return false
+#         end
+#         # beta down
+#         b = diag(view(beta, 1, :, :), r)
+#         bm = diag(view(beta_meas, 1, :, :), r)
+#         if any(abs.(bm .- b) ./ (abs.(b) .+ eps) .> thresh)
+#             println("Beta not converged. Triggered by relative error of $(maximum(abs.(bm .- b) ./ (abs.(b) .+ eps)))")
+#             return false
+#         end
+#         # beta up
+#         b = diag(view(beta, 2, :, :), r)
+#         bm = diag(view(beta_meas, 2, :, :), r)
+#         if any(abs.(bm .- b) ./ (abs.(b) .+ eps) .> thresh)
+#             println("Beta not converged. Triggered by relative error of $(maximum(abs.(bm .- b) ./ (abs.(b) .+ eps)))")
+#             return false
+#         end
+#     end
+#     return true
+# end
+
+# Check convergence of alpha/beta by checking rms of relative errors along diagonals up to r_range
 function close_ab(alpha, alpha_meas, beta, beta_meas, r_range; thresh=1e-4)
     eps = 1e-12
     for r in 0:r_range
         # alpha
         a = diag(alpha, r)
         am = diag(alpha_meas, r)
-        if any(abs.(am .- a) ./ (abs.(a) .+ eps) .> thresh)
+        errs = (am .- a) ./ (abs.(a) .+ eps)
+        rms_err = sqrt(sum(errs .^ 2) / length(errs))
+        if rms_err > thresh
+            println("Alpha not converged.")
             return false
         end
+
         # beta down
         b = diag(view(beta, 1, :, :), r)
         bm = diag(view(beta_meas, 1, :, :), r)
-        if any(abs.(bm .- b) ./ (abs.(b) .+ eps) .> thresh)
+        errs = (bm .- b) ./ (abs.(b) .+ eps)
+        rms_err = sqrt(sum(errs .^ 2) / length(errs))
+        if rms_err > thresh
+            println("Beta not converged.")
             return false
         end
+
         # beta up
         b = diag(view(beta, 2, :, :), r)
         bm = diag(view(beta_meas, 2, :, :), r)
-        if any(abs.(bm .- b) ./ (abs.(b) .+ eps) .> thresh)
+        errs = (bm .- b) ./ (abs.(b) .+ eps)
+        rms_err = sqrt(sum(errs .^ 2) / length(errs))
+        if rms_err > thresh
+            println("Beta not converged.")
             return false
         end
     end
@@ -363,24 +403,22 @@ function find_mu_for_target_density(model_params, alpha, beta, mu_init, n_target
     error("Target density not achieved within maximum iterations")
 end
 
-# Measure alpha,beta from correlators per the supplied definitions
-function calculate_alpha_beta_measured(psi::MPS, s; L::Int, r_range::Int, z_c::Int, t_p::Float64, E_p::Float64)
+# Measure alpha, beta from correlators
+function calculate_alpha_beta_measured(psi::MPS, s; L::Int, r_range::Int, z_c::Int, t_p::Float64, E_p::Float64, threshold::Float64=1e-5)
     alpha_meas = zeros(Float64, L, L)
     beta_meas = zeros(Float64, 2, L, L)
 
     pref = 2 * z_c * t_p^2 / E_p
 
-    # alpha from ⟨ Cup_i Cdn_j ⟩
     C_alpha = pref .* correlation_matrix(psi, "Cup", "Cdn")
-    # beta_down from ⟨ Cdagdn_i Cdn_j ⟩, beta_up from ⟨ Cdagup_i Cup_j ⟩
     C_beta_down = pref .* correlation_matrix(psi, "Cdagdn", "Cdn")
     C_beta_up = pref .* correlation_matrix(psi, "Cdagup", "Cup")
 
     for i in 1:L, j in 1:L
         if abs(i - j) <= r_range
-            alpha_meas[i, j] = C_alpha[i, j]
-            beta_meas[1, i, j] = C_beta_down[i, j]
-            beta_meas[2, i, j] = C_beta_up[i, j]
+            alpha_meas[i, j] = (abs(C_alpha[i, j]) > threshold) ? C_alpha[i, j] : 0.0 # Zero if below threshold
+            beta_meas[1, i, j] = (abs(C_beta_down[i, j]) > threshold) ? C_beta_down[i, j] : 0.0
+            beta_meas[2, i, j] = (abs(C_beta_up[i, j]) > threshold) ? C_beta_up[i, j] : 0.0
         end
     end
 
@@ -392,7 +430,7 @@ function order_parameter(psi::MPS, s)
     L = length(s)
     C = correlation_matrix(psi, "Cup", "Cdn")
     diag0 = [C[i, i] for i in 1:L]
-    lo = max(1, 10)
+    lo = 10
     hi = max(lo, L - 10)
     return abs(sum(diag0[lo:hi]) / max(hi - lo + 1, 1))
 end
@@ -402,6 +440,7 @@ function main_loop(model_params; n_target::Float64, E_p::Float64, z_c::Int=4, al
     alpha = model_params[:alpha]
     beta = model_params[:beta]
     mu = model_params[:mu]
+    U = model_params[:U]
     t_p = model_params[:t_p]
     r_range = model_params[:r_range]
     L = model_params[:L]

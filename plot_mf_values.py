@@ -1,21 +1,33 @@
+import h5py
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.widgets as widgets
 import tenpy
 import pickle
 
-outputfile_name = f"data/results_U_-4.0_t_p_0.075.pkl"
+# outputfile_name = f"data/results_U_-4.0_t_p_0.075.pkl"
 
-with open(outputfile_name, "rb") as f:
-    data = pickle.load(f)
+# with open(outputfile_name, "rb") as f:
+#     data = pickle.load(f)
 
-alpha_list = data['alpha_list']
-alpha_list = np.stack(alpha_list, axis=0)
+# alpha_list = data['alpha_list']
+# alpha_list = np.stack(alpha_list, axis=0)
 
-beta_list = data['beta_list']
-beta_list = np.stack(beta_list, axis=0)
-beta_list0 = beta_list[:,0,:,:]
-beta_list1 = beta_list[:,1,:,:]
+# beta_list = data['beta_list']
+# beta_list = np.stack(beta_list, axis=0)
+# beta_list0 = beta_list[:,0,:,:]
+# beta_list1 = beta_list[:,1,:,:]
+# # alist = alpha_list
+# alist = beta_list0
+
+outputfile_name = f"results_U_-4.0_t_p_0.025_gpu.h5"
+
+with h5py.File(outputfile_name, "r") as f:
+    alpha_list = f['alpha_list'][:]
+    beta_list = f['beta_list'][:]
+
+beta_list0 = beta_list[:,:,:,0]
+beta_list1 = beta_list[:,:,:,1]
 # alist = alpha_list
 alist = beta_list0
 
@@ -23,7 +35,7 @@ eps = 1e-12
 threshold = 1e-4
 
 idx0 = 1
-num_times = beta_list.shape[0]
+num_times = alist.shape[0]
 
 fig, ax = plt.subplots()
 img = ax.imshow(np.abs(alist[idx0,:,:] - alist[idx0-1,:,:])/np.abs(alist[idx0-1,:,:] + eps) > threshold)

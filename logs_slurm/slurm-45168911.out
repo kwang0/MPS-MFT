@@ -1,3 +1,5 @@
+outfile_name: results_U_-4.0_t_p_0.1.h5
+[ Info:  started timer at: 2025-11-13T09:46:08.275
 Starting fresh run
 Running with t_p=0.1 U=-4.0 L=100 chi_max=300 E_p=1.476 mu_init=-2.65
 After sweep 1 energy=-6.695593692986006  maxlinkdim=16 maxerr=8.75E-11 time=29.772
@@ -898,3 +900,4 @@ After sweep 28 energy=-6.326232921458062  maxlinkdim=224 maxerr=1.00E-10 time=50
 After sweep 29 energy=-6.326235830417496  maxlinkdim=228 maxerr=1.00E-10 time=56.464
 After sweep 30 energy=-6.326237626812284  maxlinkdim=287 maxerr=1.00E-10 time=59.938
 Calculation finished. Saving results to results_U_-4.0_t_p_0.1.h5
+Run completed successfully!
