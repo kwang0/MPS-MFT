@@ -18,6 +18,7 @@
 
 export SLURM_CPU_BIND="cores"
 
+module load julia
 module load python
 conda activate tenpy-env
 

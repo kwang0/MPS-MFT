@@ -18,6 +18,7 @@
 export OMP_NUM_THREADS=256
 export MKL_NUM_THREADS=256
 
+module load julia
 module load python
 conda activate tenpy-env
 

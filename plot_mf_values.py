@@ -20,7 +20,7 @@ import pickle
 # # alist = alpha_list
 # alist = beta_list0
 
-outputfile_name = f"results_U_-4.0_t_p_0.025_gpu.h5"
+outputfile_name = f"data/results_U_-4.0_t_p_0.025_gpu.h5"
 
 with h5py.File(outputfile_name, "r") as f:
     alpha_list = f['alpha_list'][:]
