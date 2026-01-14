@@ -1,0 +1,21 @@
+L=64, U=8.0, t0=1.0, density=0.9375
+============================================================
+Pair binding energy for Hubbard ladder
+L = 64 rungs, 128 sites
+U = 8.0, t = 1.0, t0 = 1.0, density = 0.9375
+N_base = 120
+============================================================
+
+[2/3] Computing E(N-1=119)
+  Initial state: 119 particles (60 up, 59 dn)
+After sweep 1 energy=-50.952712342534106  maxlinkdim=20 maxerr=5.00E-04 time=37.034
+After sweep 2 energy=-60.801347236318456  maxlinkdim=50 maxerr=4.87E-05 time=11.828
+After sweep 3 energy=-63.10327789752244  maxlinkdim=100 maxerr=4.20E-06 time=21.175
+After sweep 4 energy=-64.14032240440261  maxlinkdim=200 maxerr=3.57E-07 time=41.725
+After sweep 5 energy=-64.7725356562382  maxlinkdim=1000 maxerr=1.17E-10 time=88.935
+After sweep 6 energy=-65.40899563317517  maxlinkdim=1000 maxerr=5.27E-10 time=235.047
+After sweep 7 energy=-65.9186713769343  maxlinkdim=1000 maxerr=2.33E-09 time=408.841
+After sweep 8 energy=-66.32219664946454  maxlinkdim=1000 maxerr=5.82E-09 time=388.058
+After sweep 9 energy=-66.66456833683296  maxlinkdim=1000 maxerr=7.99E-09 time=787.847
+slurmstepd: error: *** STEP 47461481.0 ON nid005604 CANCELLED AT 2026-01-06T22:23:33 ***
+slurmstepd: error: *** JOB 47461481 ON nid005604 CANCELLED AT 2026-01-06T22:23:33 ***

@@ -7,6 +7,25 @@ using Printf
 # Basic ladder construction (mirror main_loop_script_ladder.jl)
 # -----------------------------------------------------------------------------
 
+mutable struct DemoObserver <: AbstractObserver
+   energy_tol::Float64
+   last_energy::Float64
+
+   DemoObserver(energy_tol=0.0) = new(energy_tol,1000.0)
+end
+
+function ITensorMPS.checkdone!(o::DemoObserver;kwargs...)
+  sw = kwargs[:sweep]
+  energy = kwargs[:energy]
+  if abs(energy-o.last_energy)/abs(energy) < o.energy_tol
+    println("Stopping DMRG after sweep $sw")
+    return true
+  end
+  # Otherwise, update last_energy and keep going
+  o.last_energy = energy
+  return false
+end
+
 function make_sites_conserveN(L::Int)
     return siteinds("Electron", L; conserve_sz=true, conserve_nf=true)
 end
@@ -15,7 +34,7 @@ function rung_leg_to_site(rung::Int, leg::Int)
     return 2 * (rung - 1) + leg + 1
 end
 
-function build_hubbard_ladder(; L::Int, t::Float64=1.0, U::Float64=0.0, mu::Float64=0.0, t0::Float64=0.0)
+function build_hubbard_ladder(; L::Int, t::Float64=1.0, U::Float64=0.0, V::Float64=0.0, mu::Float64=0.0, t0::Float64=0.0)
     sites = make_sites_conserveN(2 * L)
     os = OpSum()
 
@@ -32,17 +51,24 @@ function build_hubbard_ladder(; L::Int, t::Float64=1.0, U::Float64=0.0, mu::Floa
             add!(os, -t, "Cdagup", n, "Cup", s)
             add!(os, -t, "Cdagdn", s, "Cdn", n)
             add!(os, -t, "Cdagdn", n, "Cdn", s)
+            if V != 0.0
+                add!(os, V, "Ntot", s, "Ntot", n)
+            end
         end
     end
 
-    if t0 != 0
-        for rung in 1:L
-            s0 = rung_leg_to_site(rung, 0)
-            s1 = rung_leg_to_site(rung, 1)
+
+    for rung in 1:L
+        s0 = rung_leg_to_site(rung, 0)
+        s1 = rung_leg_to_site(rung, 1)
+        if t0 != 0.0
             add!(os, -t0, "Cdagup", s0, "Cup", s1)
             add!(os, -t0, "Cdagup", s1, "Cup", s0)
             add!(os, -t0, "Cdagdn", s0, "Cdn", s1)
             add!(os, -t0, "Cdagdn", s1, "Cdn", s0)
+        end
+        if V != 0.0
+            add!(os, V, "Ntot", s0, "Ntot", s1)
         end
     end
 
@@ -127,18 +153,18 @@ function make_sweeps(maxsweeps::Int, maxdim::Int; cutoff::Float64)
     return sweeps
 end
 
-function run_dmrg_energy(L::Int, N_particles::Int; t::Float64=1.0, U::Float64=0.0, t0::Float64=0.0,
-                         mu::Float64=0.0, maxdim::Int=1000, maxsweeps::Int=60, cutoff::Float64=1e-10)
+function run_dmrg_energy(L::Int, N_particles::Int; t::Float64=1.0, U::Float64=0.0, V::Float64=0.0, t0::Float64=0.0,
+                         mu::Float64=0.0, maxdim::Int=1000, maxsweeps::Int=60, cutoff::Float64=1e-10, E_tol::Float64=1e-6)
     N_particles < 0 && error("Cannot target negative particle number: $N_particles")
     states = ladder_initial_state(L, N_particles)
     total, n_up, n_dn = count_particles(states)
     total == N_particles || error("Initial state mismatch: expected $N_particles, got $total")
     println("  Initial state: $total particles ($n_up up, $n_dn dn)")
 
-    sites, H = build_hubbard_ladder(L=L, t=t, U=U, mu=mu, t0=t0)
+    sites, H = build_hubbard_ladder(L=L, t=t, U=U, V=V, mu=mu, t0=t0)
     psi0 = productMPS(sites, states)
     sweeps = make_sweeps(maxsweeps, maxdim; cutoff=cutoff)
-    energy, _ = dmrg(H, psi0, sweeps; outputlevel=1)
+    energy, _ = dmrg(H, psi0, sweeps; observer = DemoObserver(E_tol), outputlevel=1)
     return energy
 end
 
@@ -146,45 +172,39 @@ end
 # Pair binding computation
 # -----------------------------------------------------------------------------
 
-function calculate_pair_binding_energy(L::Int, U::Float64, density::Float64; t::Float64=1.0,
-                                       t0::Float64=1.0, maxdim::Int=1000, maxsweeps::Int=100, offset::Int=0)
+function calculate_pair_binding_energy(L::Int, U::Float64, V::Float64, density::Float64; t::Float64=1.0,
+                                       t0::Float64=1.0, maxdim::Int=1500, maxsweeps::Int=200)
     total_sites = 2 * L
     N_base = round(Int, density * total_sites)
     println("="^60)
     println("Pair binding energy for Hubbard ladder")
     println("L = $L rungs, $(total_sites) sites")
-    println("U = $U, t = $t, t0 = $t0, density = $density")
+    println("U = $U, V = $V, t = $t, t0 = $t0, density = $density")
     println("N_base = $N_base")
     println("="^60)
 
-    if offset == 2
-        println("\n[1/3] Computing E(N-2=$(N_base-2))")
-        ENm2 = run_dmrg_energy(L, N_base - 2; t=t, U=U, t0=t0, maxdim=maxdim, maxsweeps=maxsweeps)
-        println("  E(N-2) = $ENm2")
-        return
-    elseif offset == 1
-        println("\n[2/3] Computing E(N-1=$(N_base-1))")
-        ENm1 = run_dmrg_energy(L, N_base - 1; t=t, U=U, t0=t0, maxdim=maxdim, maxsweeps=maxsweeps)
-        println("  E(N-1) = $ENm1")
-        return
-    elseif offset == 0
-        println("\n[3/3] Computing E(N=$N_base)")
-        EN = run_dmrg_energy(L, N_base; t=t, U=U, t0=t0, maxdim=maxdim, maxsweeps=maxsweeps)
-        println("  E(N) = $EN")
-        return
-    else
-        return
-    end
+    println("\n[1/3] Computing E(N-2=$(N_base-2))")
+    ENm2 = run_dmrg_energy(L, N_base - 2; t=t, U=U, V=V, t0=t0, maxdim=maxdim, maxsweeps=maxsweeps)
+    println("  E(N-2) = $ENm2")
 
-    # E_p = ENm2 + EN - 2 * ENm1
-    # println("\n" * "="^60)
-    # println("RESULTS:")
-    # println("  E($(N_base-2)) = $ENm2")
-    # println("  E($(N_base-1)) = $ENm1")
-    # println("  E($N_base)     = $EN")
-    # @printf("  E_p = %.8f  (%s hole pairing)\n", E_p, E_p < 0 ? "attractive" : "repulsive")
-    # println("="^60)
-    # return E_p
+    println("\n[2/3] Computing E(N-1=$(N_base-1))")
+    ENm1 = run_dmrg_energy(L, N_base - 1; t=t, U=U, V=V, t0=t0, maxdim=maxdim, maxsweeps=maxsweeps)
+    println("  E(N-1) = $ENm1")
+
+    println("\n[3/3] Computing E(N=$N_base)")
+    EN = run_dmrg_energy(L, N_base; t=t, U=U, V=V, t0=t0, maxdim=maxdim, maxsweeps=maxsweeps)
+    println("  E(N) = $EN")
+
+
+    E_p = ENm2 + EN - 2 * ENm1
+    println("\n" * "="^60)
+    println("RESULTS:")
+    println("  E($(N_base-2)) = $ENm2")
+    println("  E($(N_base-1)) = $ENm1")
+    println("  E($N_base) = $EN")
+    @printf("  E_p = %.8f  (%s hole pairing)\n", E_p, E_p < 0 ? "attractive" : "repulsive")
+    println("="^60)
+    return E_p
 end
 
 # -----------------------------------------------------------------------------
@@ -192,31 +212,32 @@ end
 # -----------------------------------------------------------------------------
 
 function main()
-    # if length(ARGS) != 4
-    #     println("Usage: julia calculate_E_p_ladder.jl <L> <U> <t0> <density>")
-    #     println("  L: number of rungs (total sites = 2L)")
-    #     println("  U: onsite interaction strength")
-    #     println("  t0: rung hopping")
-    #     println("  density: particle density (0-2)")
-    #     exit(1)
-    # end
+    if length(ARGS) != 5
+        println("Usage: julia calculate_E_p_ladder.jl <L> <U> <V> <t0> <density>")
+        println("  L: number of rungs (total sites = 2L)")
+        println("  U: onsite interaction strength")
+        println("  V: nearest-neighbor interaction strength")
+        println("  t0: rung hopping")
+        println("  density: particle density (0-2)")
+        exit(1)
+    end
 
     L = parse(Int, ARGS[1])
     U = parse(Float64, ARGS[2])
-    t0 = parse(Float64, ARGS[3])
-    density = parse(Float64, ARGS[4])
-    offset = parse(Int, ARGS[5])  # 0: N, 1: N-1, 2: N-2
+    V = parse(Float64, ARGS[3])
+    t0 = parse(Float64, ARGS[4])
+    density = parse(Float64, ARGS[5])
 
-    # println("Calculating pair binding energy for ladder")
-    println("L=$L, U=$U, t0=$t0, density=$density")
+    println("Calculating pair binding energy for ladder")
+    println("L=$L, U=$U, V=$V, t0=$t0, density=$density")
     flush(stdout)
 
     BLAS.set_num_threads(1)
     ITensors.Strided.disable_threads()
     ITensors.enable_threaded_blocksparse()
 
-    E_p = calculate_pair_binding_energy(L, U, density; t=1.0, t0=t0, offset=offset)
-    # println("RESULT: E_p = $E_p")
+    E_p = calculate_pair_binding_energy(L, U, V, density; t=1.0, t0=t0)
+    println("RESULT: E_p = $E_p")
 end
 
 main()

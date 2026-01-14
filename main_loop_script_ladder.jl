@@ -422,6 +422,8 @@ function find_mu_for_target_density(model_params, alpha, beta, mu_init, n_target
         mu0, n0 = mu_new, n_new
     end
 
+    factor = 1.0
+    multiplier = 3.0
     for it in 1:max_iter
         if TIME_LIMIT_EXCEEDED[] || peektimer() > TIME_LIMIT_SECONDS
             println("Time limit exceeded, exiting loop")
@@ -437,18 +439,21 @@ function find_mu_for_target_density(model_params, alpha, beta, mu_init, n_target
         if (n_target >= n1 && n_target >= n0)
             println("n_target > n1 and n_target > n0 triggered")
             mu0, n0 = mu1, n1
-            mu_new = mu0 + delta_mu
+            mu_new = mu0 + factor * delta_mu
             n_new, E_new, psi_new, s_new, H_new = solve_Ham(mu_new, model_params, alpha, beta, model_params[:density]; dmrg_kw...)
             mu1, n1 = mu_new, n_new
+            factor *= multiplier # increase step size exponentially until range found
         elseif (n_target <= n1 && n_target <= n0)
             println("n_target < n1 and n_target < n0 triggered")
             mu1, n1 = mu0, n0
-            mu_new = mu0 - delta_mu
+            mu_new = mu0 - factor * delta_mu
             n_new, E_new, psi_new, s_new, H_new = solve_Ham(mu_new, model_params, alpha, beta, model_params[:density]; dmrg_kw...)
             mu0, n0 = mu_new, n_new
+            factor *= multiplier # increase step size exponentially until range found
         else
             # refinement loop
             println("\nRange found between mu0: $mu0 (n0: $n0) and mu1: $mu1 (n1: $n1); refining...")
+            factor = 1.0  # reset factor
             for j in 1:max_iter
                 if TIME_LIMIT_EXCEEDED[] || peektimer() > TIME_LIMIT_SECONDS
                     println("Time limit exceeded, exiting loop")

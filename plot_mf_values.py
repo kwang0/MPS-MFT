@@ -20,25 +20,28 @@ import pickle
 # # alist = alpha_list
 # alist = beta_list0
 
-outputfile_name = f"data/results_U_-4.0_t_p_0.025_gpu.h5"
+outputfile_name = f"data/results_L_64_U_-4.0_t0_0.2_t_p_0.2_chi_1000_gpu.h5"
 
 with h5py.File(outputfile_name, "r") as f:
     alpha_list = f['alpha_list'][:]
     beta_list = f['beta_list'][:]
 
-beta_list0 = beta_list[:,:,:,0]
-beta_list1 = beta_list[:,:,:,1]
-# alist = alpha_list
-alist = beta_list0
+alpha_list = np.transpose(alpha_list) # Match ordering in julia
+beta_list = np.transpose(beta_list)
+
+alpha_list = alpha_list[:,:,0,0,:]
+beta_list0 = beta_list[0,:,:,0,0,:]
+beta_list1 = beta_list[1,:,:,0,0,:]
+alist = alpha_list
 
 eps = 1e-12
 threshold = 1e-4
 
 idx0 = 1
-num_times = alist.shape[0]
+num_times = alist.shape[-1]
 
 fig, ax = plt.subplots()
-img = ax.imshow(np.abs(alist[idx0,:,:] - alist[idx0-1,:,:])/np.abs(alist[idx0-1,:,:] + eps) > threshold)
+img = ax.imshow(np.abs(alist[:,:,idx0] - alist[:,:,idx0-1])/np.abs(alist[:,:,idx0-1] + eps) > threshold)
 ax_slider = fig.add_axes([0.25, 0.05, 0.50, 0.03])
 slider = widgets.Slider(
     ax_slider,            # the axes to draw the slider in
@@ -51,7 +54,7 @@ slider = widgets.Slider(
 
 def update(val):
     i = int(round(val))
-    img.set_data(np.abs(alist[i,:,:] - alist[i-1,:,:])/np.abs(alist[i-1,:,:] + eps) > threshold)        # update image data
+    img.set_data(np.abs(alist[:,:,i] - alist[:,:,i-1])/np.abs(alist[:,:,i-1] + eps) > threshold)        # update image data
     ax.set_title(f"Slice {i} of {num_times}")     # update title (optional)
     fig.canvas.draw_idle()             # redraw
 

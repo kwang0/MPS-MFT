@@ -1,0 +1,8 @@
+Usage: julia calculate_E_p_ladder.jl <L> <U> <t0> <density>
+  L: number of rungs (total sites = 2L)
+  U: onsite interaction strength
+  t0: rung hopping
+  density: particle density (0-2)
+srun: error: nid004626: task 0: Exited with exit code 1
+srun: Terminating StepId=47455240.0
+E_p calculation completed

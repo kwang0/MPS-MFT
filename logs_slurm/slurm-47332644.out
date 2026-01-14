@@ -1,0 +1,33 @@
+outfile_name: results_U_-4.0_t0_0.1_t_p_0.1.h5
+[ Info:  started timer at: 2026-01-03T10:40:05.934
+Starting fresh run
+Running with t0=0.1 t_p=0.1 U=-4.0 L=32 chi_max=1000 E_p=1.476 mu_init=-2.64
+After sweep 1 energy=9.67790464551655  maxlinkdim=10 maxerr=1.13E-02 time=33.932
+After sweep 2 energy=0.8621680851636663  maxlinkdim=20 maxerr=1.54E-03 time=2.241
+After sweep 3 energy=-0.5098511110259647  maxlinkdim=100 maxerr=3.57E-05 time=7.525
+After sweep 4 energy=-0.783752169430642  maxlinkdim=999 maxerr=1.11E-10 time=885.026
+After sweep 5 energy=-2.2611380157200176  maxlinkdim=1000 maxerr=5.87E-09 time=1767.293
+After sweep 6 energy=-2.466090770458588  maxlinkdim=1000 maxerr=6.79E-09 time=1978.734
+After sweep 7 energy=-2.9546782963296296  maxlinkdim=1000 maxerr=1.37E-08 time=2061.321
+After sweep 8 energy=-3.986912484234982  maxlinkdim=1000 maxerr=1.39E-08 time=1937.192
+After sweep 9 energy=-4.270688727113702  maxlinkdim=1000 maxerr=2.90E-09 time=1467.955
+After sweep 10 energy=-4.38464602454227  maxlinkdim=1000 maxerr=1.98E-09 time=1430.515
+After sweep 11 energy=-4.412746199858126  maxlinkdim=1000 maxerr=1.09E-09 time=1901.274
+After sweep 12 energy=-4.422889730422807  maxlinkdim=1000 maxerr=7.64E-10 time=2387.887
+After sweep 13 energy=-4.427339495093691  maxlinkdim=1000 maxerr=9.84E-10 time=1967.090
+After sweep 14 energy=-4.429082752669321  maxlinkdim=1000 maxerr=1.66E-09 time=1510.813
+After sweep 15 energy=-4.429741174103318  maxlinkdim=1000 maxerr=2.39E-09 time=1665.236
+After sweep 16 energy=-4.429926652932039  maxlinkdim=1000 maxerr=3.86E-09 time=1807.470
+After sweep 17 energy=-4.429969812100481  maxlinkdim=1000 maxerr=3.50E-09 time=1623.119
+After sweep 18 energy=-4.429981284799205  maxlinkdim=1000 maxerr=9.94E-09 time=1658.127
+After sweep 19 energy=-4.429982037180655  maxlinkdim=1000 maxerr=3.87E-09 time=2209.585
+After sweep 20 energy=-4.4299820640301215  maxlinkdim=1000 maxerr=3.01E-09 time=1861.241
+After sweep 21 energy=-4.4299820689589255  maxlinkdim=1000 maxerr=3.00E-09 time=2429.733
+After sweep 22 energy=-4.429982070740062  maxlinkdim=1000 maxerr=3.02E-09 time=2062.662
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
+slurmstepd: error: *** STEP 47332644.0 ON nid004404 CANCELLED AT 2026-01-04T04:41:09 ***
+slurmstepd: error: *** JOB 47332644 ON nid004404 CANCELLED AT 2026-01-04T04:41:09 ***
+
+[564893] signal 15: Terminated
+in expression starting at /global/cfs/cdirs/m4863/MPS-MFT/main_loop_script_ladder.jl:859
+pthread_cond_wait at /lib64/libpthread.so.0 (unknown line)

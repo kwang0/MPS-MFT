@@ -1,0 +1,94 @@
+Calculating pair binding energy for ladder
+L=64, U=8.0, V=0.0, t0=1.3, density=0.9375
+============================================================
+Pair binding energy for Hubbard ladder
+L = 64 rungs, 128 sites
+U = 8.0, V = 0.0, t = 1.0, t0 = 1.3, density = 0.9375
+N_base = 120
+============================================================
+
+[1/3] Computing E(N-2=118)
+  Initial state: 118 particles (59 up, 59 dn)
+ERROR: LoadError: TaskFailedException
+
+    nested task error: BoundsError: attempt to access 32-element Vector{Vector{Tuple{Block{2}, Block{2}, Block{2}}}} at index [33]
+    Stacktrace:
+     [1] throw_boundserror(A::Vector{Vector{Tuple{Block{2}, Block{2}, Block{2}}}}, I::Tuple{Int64})
+       @ Base ./essentials.jl:15
+     [2] getindex
+       @ ./essentials.jl:919 [inlined]
+     [3] (::NDTensors.var"#contract_blocks!##6#contract_blocks!##7"{Vector{Vector{Tuple{Block{2}, Block{2}, Block{2}}}}, Tuple{Int64, Int64}, Tuple{Int64, Int64}, Tuple{Int64, Int64}, Val{2}, Dictionaries.Indices{Block{2}}, Vector{Block{2}}})()
+       @ NDTensors ~/.julia/packages/NDTensors/Q9Zpu/src/blocksparse/contract_threads.jl:38
+Stacktrace:
+  [1] sync_end(c::Channel{Any})
+    @ Base ./task.jl:601
+  [2] macro expansion
+    @ ./task.jl:634 [inlined]
+  [3] contract_blocks!(alg::NDTensors.BackendSelection.Algorithm{:threaded_threads, @NamedTuple{}}, contraction_plans::Vector{Vector{Tuple{Block{2}, Block{2}, Block{2}}}}, boffs1::Dictionaries.Dictionary{Block{2}, Int64}, boffs2::Dictionaries.Dictionary{Block{2}, Int64}, labels1_to_labels2::Tuple{Int64, Int64}, labels1_to_labelsR::Tuple{Int64, Int64}, labels2_to_labelsR::Tuple{Int64, Int64}, ValNR::Val{2})
+    @ NDTensors ~/.julia/packages/NDTensors/Q9Zpu/src/blocksparse/contract_threads.jl:34
+  [4] contract_blockoffsets(alg::NDTensors.BackendSelection.Algorithm{:threaded_threads, @NamedTuple{}}, boffs1::Dictionaries.Dictionary{Block{2}, Int64}, inds1::Tuple{Index{Vector{Pair{QN, Int64}}}, Index{Vector{Pair{QN, Int64}}}}, labels1::Tuple{Int64, Int64}, boffs2::Dictionaries.Dictionary{Block{2}, Int64}, inds2::Tuple{Index{Vector{Pair{QN, Int64}}}, Index{Vector{Pair{QN, Int64}}}}, labels2::Tuple{Int64, Int64}, indsR::Tuple{Index{Vector{Pair{QN, Int64}}}, Index{Vector{Pair{QN, Int64}}}}, labelsR::Tuple{Int64, Int64})
+    @ NDTensors ~/.julia/packages/NDTensors/Q9Zpu/src/blocksparse/contract_generic.jl:43
+  [5] contract_blockoffsets
+    @ ~/.julia/packages/NDTensors/Q9Zpu/src/blocksparse/contract.jl:52 [inlined]
+  [6] contraction_output(tensor1::NDTensors.BlockSparseTensor{Float64, 2, Tuple{Index{Vector{Pair{QN, Int64}}}, Index{Vector{Pair{QN, Int64}}}}, NDTensors.BlockSparse{Float64, Vector{Float64}, 2}}, labelstensor1::Tuple{Int64, Int64}, tensor2::NDTensors.BlockSparseTensor{Float64, 2, Tuple{Index{Vector{Pair{QN, Int64}}}, Index{Vector{Pair{QN, Int64}}}}, NDTensors.BlockSparse{Float64, Vector{Float64}, 2}}, labelstensor2::Tuple{Int64, Int64}, labelsR::Tuple{Int64, Int64})
+    @ NDTensors ~/.julia/packages/NDTensors/Q9Zpu/src/blocksparse/contract.jl:29
+  [7] contract(tensor1::NDTensors.BlockSparseTensor{Float64, 2, Tuple{Index{Vector{Pair{QN, Int64}}}, Index{Vector{Pair{QN, Int64}}}}, NDTensors.BlockSparse{Float64, Vector{Float64}, 2}}, labelstensor1::Tuple{Int64, Int64}, tensor2::NDTensors.BlockSparseTensor{Float64, 2, Tuple{Index{Vector{Pair{QN, Int64}}}, Index{Vector{Pair{QN, Int64}}}}, NDTensors.BlockSparse{Float64, Vector{Float64}, 2}}, labelstensor2::Tuple{Int64, Int64}, labelsR::Tuple{Int64, Int64})
+    @ NDTensors ~/.julia/packages/NDTensors/Q9Zpu/src/blocksparse/contract.jl:10
+  [8] _contract(A::NDTensors.BlockSparseTensor{Float64, 2, Tuple{Index{Vector{Pair{QN, Int64}}}, Index{Vector{Pair{QN, Int64}}}}, NDTensors.BlockSparse{Float64, Vector{Float64}, 2}}, B::NDTensors.BlockSparseTensor{Float64, 2, Tuple{Index{Vector{Pair{QN, Int64}}}, Index{Vector{Pair{QN, Int64}}}}, NDTensors.BlockSparse{Float64, Vector{Float64}, 2}})
+    @ ITensors ~/.julia/packages/ITensors/AbUYR/src/tensor_operations/tensor_algebra.jl:3
+  [9] _contract(A::ITensor, B::ITensor)
+    @ ITensors ~/.julia/packages/ITensors/AbUYR/src/tensor_operations/tensor_algebra.jl:9
+ [10] contract(A::ITensor, B::ITensor)
+    @ ITensors ~/.julia/packages/ITensors/AbUYR/src/tensor_operations/tensor_algebra.jl:74
+ [11] *
+    @ ~/.julia/packages/ITensors/AbUYR/src/tensor_operations/tensor_algebra.jl:61 [inlined]
+ [12] product(A::ITensor, B::ITensor; apply_dag::Bool)
+    @ ITensors ~/.julia/packages/ITensors/AbUYR/src/tensor_operations/tensor_algebra.jl:605
+ [13] product(A::ITensor, B::ITensor)
+    @ ITensors ~/.julia/packages/ITensors/AbUYR/src/tensor_operations/tensor_algebra.jl:580
+ [14] op(name::String, s::Index{Vector{Pair{QN, Int64}}}; adjoint::Bool, kwargs::@Kwargs{})
+    @ ITensors.SiteTypes ~/.julia/packages/ITensors/AbUYR/src/lib/SiteTypes/src/sitetype.jl:288
+ [15] op
+    @ ~/.julia/packages/ITensors/AbUYR/src/lib/SiteTypes/src/sitetype.jl:236 [inlined]
+ [16] op(s::Index{Vector{Pair{QN, Int64}}}, opname::String)
+    @ ITensors.SiteTypes ~/.julia/packages/ITensors/AbUYR/src/lib/SiteTypes/src/sitetype.jl:449
+ [17] (::ITensors.ITensorMPS.var"#calcQN#643"{Vector{Index{Vector{Pair{QN, Int64}}}}, Dict{Pair{String, Int64}, ITensor}})(term::Vector{Op})
+    @ ITensors.ITensorMPS ~/.julia/packages/ITensors/AbUYR/src/lib/ITensorMPS/src/opsum_to_mpo/opsum_to_mpo_qn.jl:27
+ [18] qn_svdMPO(ValType::Type{Float64}, os::Sum{Scaled{ComplexF64, Prod{Op}}}, sites::Vector{Index{Vector{Pair{QN, Int64}}}}; mindim::Int64, maxdim::Int64, cutoff::Float64)
+    @ ITensors.ITensorMPS ~/.julia/packages/ITensors/AbUYR/src/lib/ITensorMPS/src/opsum_to_mpo/opsum_to_mpo_qn.jl:52
+ [19] qn_svdMPO
+    @ ~/.julia/packages/ITensors/AbUYR/src/lib/ITensorMPS/src/opsum_to_mpo/opsum_to_mpo_qn.jl:5 [inlined]
+ [20] #qn_svdMPO#657
+    @ ~/.julia/packages/ITensors/AbUYR/src/lib/ITensorMPS/src/opsum_to_mpo/opsum_to_mpo_qn.jl:260 [inlined]
+ [21] qn_svdMPO
+    @ ~/.julia/packages/ITensors/AbUYR/src/lib/ITensorMPS/src/opsum_to_mpo/opsum_to_mpo_qn.jl:257 [inlined]
+ [22] MPO(os::Sum{Scaled{ComplexF64, Prod{Op}}}, sites::Vector{Index{Vector{Pair{QN, Int64}}}}; splitblocks::Bool, kwargs::@Kwargs{})
+    @ ITensors.ITensorMPS ~/.julia/packages/ITensors/AbUYR/src/lib/ITensorMPS/src/opsum_to_mpo/opsum_to_mpo_generic.jl:297
+ [23] MPO(os::Sum{Scaled{ComplexF64, Prod{Op}}}, sites::Vector{Index{Vector{Pair{QN, Int64}}}})
+    @ ITensors.ITensorMPS ~/.julia/packages/ITensors/AbUYR/src/lib/ITensorMPS/src/opsum_to_mpo/opsum_to_mpo_generic.jl:289
+ [24] build_hubbard_ladder(; L::Int64, t::Float64, U::Float64, V::Float64, mu::Float64, t0::Float64)
+    @ Main /global/cfs/cdirs/m4863/MPS-MFT/calculate_E_p_ladder.jl:56
+ [25] build_hubbard_ladder
+    @ /global/cfs/cdirs/m4863/MPS-MFT/calculate_E_p_ladder.jl:18 [inlined]
+ [26] run_dmrg_energy(L::Int64, N_particles::Int64; t::Float64, U::Float64, V::Float64, t0::Float64, mu::Float64, maxdim::Int64, maxsweeps::Int64, cutoff::Float64)
+    @ Main /global/cfs/cdirs/m4863/MPS-MFT/calculate_E_p_ladder.jl:145
+ [27] run_dmrg_energy
+    @ /global/cfs/cdirs/m4863/MPS-MFT/calculate_E_p_ladder.jl:137 [inlined]
+ [28] calculate_pair_binding_energy(L::Int64, U::Float64, V::Float64, density::Float64; t::Float64, t0::Float64, maxdim::Int64, maxsweeps::Int64)
+    @ Main /global/cfs/cdirs/m4863/MPS-MFT/calculate_E_p_ladder.jl:168
+ [29] calculate_pair_binding_energy
+    @ /global/cfs/cdirs/m4863/MPS-MFT/calculate_E_p_ladder.jl:156 [inlined]
+ [30] main()
+    @ Main /global/cfs/cdirs/m4863/MPS-MFT/calculate_E_p_ladder.jl:220
+ [31] top-level scope
+    @ /global/cfs/cdirs/m4863/MPS-MFT/calculate_E_p_ladder.jl:224
+ [32] include(mod::Module, _path::String)
+    @ Base ./Base.jl:306
+ [33] exec_options(opts::Base.JLOptions)
+    @ Base ./client.jl:317
+ [34] _start()
+    @ Base ./client.jl:550
+in expression starting at /global/cfs/cdirs/m4863/MPS-MFT/calculate_E_p_ladder.jl:224
+srun: error: nid006884: task 0: Exited with exit code 1
+srun: Terminating StepId=47552297.0
+E_p calculation completed

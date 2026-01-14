@@ -1,0 +1,34 @@
+L=64, U=-4.0, t0=0.0, density=0.5
+============================================================
+Pair binding energy for Hubbard ladder
+L = 64 rungs, 128 sites
+U = -4.0, t = 1.0, t0 = 0.0, density = 0.5
+N_base = 64
+============================================================
+
+[2/3] Computing E(N-1=63)
+  Initial state: 63 particles (32 up, 31 dn)
+After sweep 1 energy=-58.74023881621575  maxlinkdim=20 maxerr=1.31E-05 time=34.341
+After sweep 2 energy=-120.51116772352202  maxlinkdim=50 maxerr=1.16E-05 time=7.050
+After sweep 3 energy=-127.87686225994082  maxlinkdim=100 maxerr=1.51E-06 time=11.016
+After sweep 4 energy=-146.8839790055734  maxlinkdim=200 maxerr=4.39E-07 time=21.278
+After sweep 5 energy=-159.24280221919892  maxlinkdim=1000 maxerr=8.16E-09 time=221.421
+After sweep 6 energy=-163.26608291722587  maxlinkdim=1000 maxerr=1.48E-07 time=813.088
+After sweep 7 energy=-164.67546628060524  maxlinkdim=1000 maxerr=5.35E-07 time=605.451
+After sweep 8 energy=-165.4274791151524  maxlinkdim=1000 maxerr=4.20E-06 time=589.946
+After sweep 9 energy=-166.01637490554097  maxlinkdim=1000 maxerr=7.18E-06 time=560.511
+After sweep 10 energy=-166.56335001741076  maxlinkdim=1000 maxerr=4.55E-06 time=605.627
+After sweep 11 energy=-167.05467674047603  maxlinkdim=1000 maxerr=1.76E-05 time=712.259
+After sweep 12 energy=-167.5231818611212  maxlinkdim=1000 maxerr=1.02E-05 time=549.345
+After sweep 13 energy=-167.92053728534228  maxlinkdim=1000 maxerr=2.12E-05 time=615.119
+After sweep 14 energy=-168.28042164762073  maxlinkdim=1000 maxerr=1.69E-05 time=558.713
+After sweep 15 energy=-168.6394364954671  maxlinkdim=1000 maxerr=2.19E-05 time=557.001
+After sweep 16 energy=-168.97807906237173  maxlinkdim=1000 maxerr=7.51E-06 time=595.129
+After sweep 17 energy=-169.30150720455066  maxlinkdim=1000 maxerr=5.45E-06 time=547.223
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
+slurmstepd: error: *** STEP 47461473.0 ON nid005148 CANCELLED AT 2026-01-06T22:23:33 ***
+
+[1440194] signal 15: Terminated
+in expression starting at /global/cfs/cdirs/m4863/MPS-MFT/calculate_E_p_ladder.jl:217
+pthread_cond_wait at /lib64/libpthread.so.0 (unknown line)
+slurmstepd: error: *** JOB 47461473 ON nid005148 CANCELLED AT 2026-01-06T22:23:33 ***

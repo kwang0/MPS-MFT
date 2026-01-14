@@ -1,0 +1,22 @@
+ERROR: LoadError: ArgumentError: invalid base 10 digit '.' in "8.0"
+Stacktrace:
+ [1] tryparse_internal(::Type{Int64}, s::String, startpos::Int64, endpos::Int64, base_::Int64, raise::Bool)
+   @ Base ./parse.jl:143
+ [2] #parse#472
+   @ ./parse.jl:254 [inlined]
+ [3] parse
+   @ ./parse.jl:253 [inlined]
+ [4] main()
+   @ Main /global/cfs/cdirs/m4863/MPS-MFT/calculate_E_p_ladder.jl:215
+ [5] top-level scope
+   @ /global/cfs/cdirs/m4863/MPS-MFT/calculate_E_p_ladder.jl:231
+ [6] include(mod::Module, _path::String)
+   @ Base ./Base.jl:306
+ [7] exec_options(opts::Base.JLOptions)
+   @ Base ./client.jl:317
+ [8] _start()
+   @ Base ./client.jl:550
+in expression starting at /global/cfs/cdirs/m4863/MPS-MFT/calculate_E_p_ladder.jl:231
+srun: error: nid006534: task 0: Exited with exit code 1
+srun: Terminating StepId=47503857.0
+E_p calculation completed

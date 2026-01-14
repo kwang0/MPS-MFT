@@ -24,7 +24,7 @@ mkdir -p logs_julia
 
 # Note: calculate_E_p_ladder.jl doesn't create an h5 file, just computes E_p
 srun -u julia -t 32 calculate_E_p_ladder.jl $1 $2 $3 $4 $5 \
-  | tee -a logs_julia/E_p_ladder_L_${1}_U_${2}_t0_${3}_density_${4}_offset_${5}.log
+  | tee -a logs_julia/E_p_ladder_L_${1}_U_${2}_V_${3}_t0_${4}_density_${5}_chi_1500.log
 
 # No completion check needed - script prints result and exits
 echo "E_p calculation completed"
