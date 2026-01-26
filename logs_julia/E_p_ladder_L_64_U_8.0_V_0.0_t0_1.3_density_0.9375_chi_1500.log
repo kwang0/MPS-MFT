@@ -279,3 +279,17 @@ After sweep 77 energy=-79.82106201957546  maxlinkdim=1500 maxerr=3.82E-07 time=3
 After sweep 78 energy=-79.82173497389114  maxlinkdim=1500 maxerr=3.73E-07 time=308.885
 After sweep 79 energy=-79.822181850855  maxlinkdim=1500 maxerr=4.50E-07 time=309.364
 After sweep 80 energy=-79.82248725247283  maxlinkdim=1500 maxerr=3.39E-07 time=306.528
+After sweep 81 energy=-79.82267703728355  maxlinkdim=1500 maxerr=3.55E-07 time=308.681
+After sweep 82 energy=-79.82278105059244  maxlinkdim=1500 maxerr=2.79E-07 time=306.769
+After sweep 83 energy=-79.82283944297322  maxlinkdim=1500 maxerr=2.64E-07 time=304.588
+Stopping DMRG after sweep 83
+  E(N) = -79.82283944297322
+
+============================================================
+RESULTS:
+  E(118) = -83.1679351241886
+  E(119) = -81.40153391873491
+  E(120)     = -79.82283944297322
+  E_p = -0.18770673  (attractive hole pairing)
+============================================================
+RESULT: E_p = -0.1877067296919961

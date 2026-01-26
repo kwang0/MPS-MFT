@@ -744,7 +744,7 @@ end
 
 # Convenience: run the full loop and then compute gap and order parameter
 function run_loop(L::Int, t::Float64, U::Float64, t0::Float64, t_p::Float64, mu_init::Float64, n_target::Float64,
-    r_range::Int, z_c::Int, E_p::Real, chi_max::Int=200; nsweeps=30, cutoff=1e-10)
+    r_range::Int, z_c::Int, E_p::Real, chi_max::Int=200; nsweeps=50, cutoff=1e-10)
     
     tick()
 

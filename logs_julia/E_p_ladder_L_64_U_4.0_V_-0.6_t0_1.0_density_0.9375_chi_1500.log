@@ -1,0 +1,139 @@
+Calculating pair binding energy for ladder
+L=64, U=4.0, V=-0.6, t0=1.0, density=0.9375
+============================================================
+Pair binding energy for Hubbard ladder
+L = 64 rungs, 128 sites
+U = 4.0, V = -0.6, t = 1.0, t0 = 1.0, density = 0.9375
+N_base = 120
+============================================================
+
+[1/3] Computing E(N-2=118)
+  Initial state: 118 particles (59 up, 59 dn)
+After sweep 1 energy=-183.26506188986946  maxlinkdim=20 maxerr=8.43E-04 time=49.284
+After sweep 2 energy=-188.90674155723403  maxlinkdim=50 maxerr=4.04E-04 time=36.567
+After sweep 3 energy=-190.7080556601319  maxlinkdim=100 maxerr=2.85E-04 time=51.754
+After sweep 4 energy=-191.61681309472445  maxlinkdim=200 maxerr=1.09E-04 time=75.953
+After sweep 5 energy=-192.1089206336676  maxlinkdim=1500 maxerr=3.41E-08 time=181.196
+After sweep 6 energy=-192.36381107253268  maxlinkdim=1500 maxerr=2.64E-08 time=350.686
+After sweep 7 energy=-192.5832682966681  maxlinkdim=1500 maxerr=1.21E-07 time=338.525
+After sweep 8 energy=-192.7779865749583  maxlinkdim=1500 maxerr=1.36E-07 time=334.574
+After sweep 9 energy=-192.91719404625903  maxlinkdim=1500 maxerr=1.53E-07 time=339.742
+After sweep 10 energy=-193.06416397438116  maxlinkdim=1500 maxerr=6.15E-07 time=350.021
+After sweep 11 energy=-193.2069673524691  maxlinkdim=1500 maxerr=7.66E-06 time=362.139
+After sweep 12 energy=-193.29903113192006  maxlinkdim=1500 maxerr=7.59E-07 time=356.026
+After sweep 13 energy=-193.37901244716588  maxlinkdim=1500 maxerr=2.33E-06 time=356.076
+After sweep 14 energy=-193.4469462971101  maxlinkdim=1500 maxerr=2.47E-06 time=354.189
+After sweep 15 energy=-193.5095641248198  maxlinkdim=1500 maxerr=1.80E-06 time=359.050
+After sweep 16 energy=-193.56453201148636  maxlinkdim=1500 maxerr=3.11E-06 time=358.101
+After sweep 17 energy=-193.6123460393011  maxlinkdim=1500 maxerr=2.67E-06 time=346.893
+After sweep 18 energy=-193.66633816322602  maxlinkdim=1500 maxerr=9.14E-06 time=343.011
+After sweep 19 energy=-193.71730903054683  maxlinkdim=1500 maxerr=3.00E-06 time=348.124
+After sweep 20 energy=-193.7583994378087  maxlinkdim=1500 maxerr=3.12E-06 time=343.820
+After sweep 21 energy=-193.79492362011064  maxlinkdim=1500 maxerr=4.87E-06 time=339.208
+After sweep 22 energy=-193.8277657573444  maxlinkdim=1500 maxerr=7.09E-06 time=340.083
+After sweep 23 energy=-193.8569086663227  maxlinkdim=1500 maxerr=8.55E-06 time=353.443
+After sweep 24 energy=-193.88034669855446  maxlinkdim=1500 maxerr=2.19E-05 time=353.152
+After sweep 25 energy=-193.9038330322105  maxlinkdim=1500 maxerr=4.12E-05 time=352.865
+After sweep 26 energy=-193.92889298767565  maxlinkdim=1500 maxerr=1.41E-05 time=352.630
+After sweep 27 energy=-193.94587598843182  maxlinkdim=1500 maxerr=2.57E-05 time=352.401
+After sweep 28 energy=-193.95894032981346  maxlinkdim=1500 maxerr=1.69E-05 time=350.330
+After sweep 29 energy=-193.97019149813667  maxlinkdim=1500 maxerr=1.23E-05 time=352.089
+After sweep 30 energy=-193.97802741136218  maxlinkdim=1500 maxerr=1.11E-05 time=348.763
+After sweep 31 energy=-193.9830370985779  maxlinkdim=1500 maxerr=1.28E-05 time=349.775
+After sweep 32 energy=-193.98675899368715  maxlinkdim=1500 maxerr=1.19E-05 time=349.221
+After sweep 33 energy=-193.9886148698628  maxlinkdim=1500 maxerr=1.19E-05 time=349.371
+After sweep 34 energy=-193.98928135128483  maxlinkdim=1500 maxerr=1.05E-05 time=361.186
+After sweep 35 energy=-193.98951105482985  maxlinkdim=1500 maxerr=1.02E-05 time=363.765
+After sweep 36 energy=-193.98959363890484  maxlinkdim=1500 maxerr=1.02E-05 time=354.284
+Stopping DMRG after sweep 36
+  E(N-2) = -193.98959363890484
+
+[2/3] Computing E(N-1=119)
+  Initial state: 119 particles (60 up, 59 dn)
+After sweep 1 energy=-184.97483808551968  maxlinkdim=20 maxerr=8.43E-04 time=12.174
+After sweep 2 energy=-190.16939789165264  maxlinkdim=50 maxerr=4.83E-04 time=30.456
+After sweep 3 energy=-191.63026652676686  maxlinkdim=100 maxerr=3.17E-04 time=45.248
+After sweep 4 energy=-192.42867541945944  maxlinkdim=200 maxerr=1.16E-04 time=71.558
+After sweep 5 energy=-192.92031834357203  maxlinkdim=1500 maxerr=2.42E-07 time=173.845
+After sweep 6 energy=-193.1121471535146  maxlinkdim=1500 maxerr=5.19E-08 time=360.412
+After sweep 7 energy=-193.24751339734578  maxlinkdim=1500 maxerr=4.72E-08 time=358.530
+After sweep 8 energy=-193.4006225923753  maxlinkdim=1500 maxerr=1.99E-07 time=355.628
+After sweep 9 energy=-193.56514388116724  maxlinkdim=1500 maxerr=8.81E-07 time=358.827
+After sweep 10 energy=-193.67183321751497  maxlinkdim=1500 maxerr=7.46E-07 time=359.160
+After sweep 11 energy=-193.75810282142353  maxlinkdim=1500 maxerr=1.52E-06 time=355.270
+After sweep 12 energy=-193.83128687202117  maxlinkdim=1500 maxerr=1.11E-05 time=333.946
+After sweep 13 energy=-193.89532233044727  maxlinkdim=1500 maxerr=3.80E-06 time=337.417
+After sweep 14 energy=-193.9488184524895  maxlinkdim=1500 maxerr=1.40E-06 time=337.163
+After sweep 15 energy=-194.00059085689875  maxlinkdim=1500 maxerr=1.98E-06 time=343.761
+After sweep 16 energy=-194.05212563117155  maxlinkdim=1500 maxerr=3.80E-06 time=344.067
+After sweep 17 energy=-194.0887363844965  maxlinkdim=1500 maxerr=5.73E-06 time=342.467
+After sweep 18 energy=-194.11961982435352  maxlinkdim=1500 maxerr=4.22E-06 time=342.097
+After sweep 19 energy=-194.14911575816157  maxlinkdim=1500 maxerr=4.83E-06 time=343.398
+After sweep 20 energy=-194.1732287243911  maxlinkdim=1500 maxerr=4.26E-06 time=343.201
+After sweep 21 energy=-194.19563930485737  maxlinkdim=1500 maxerr=7.51E-06 time=346.179
+After sweep 22 energy=-194.2162080960228  maxlinkdim=1500 maxerr=3.48E-06 time=347.145
+After sweep 23 energy=-194.2351070038513  maxlinkdim=1500 maxerr=1.01E-05 time=343.116
+After sweep 24 energy=-194.25069659821295  maxlinkdim=1500 maxerr=4.48E-06 time=338.131
+After sweep 25 energy=-194.2643260857231  maxlinkdim=1500 maxerr=4.38E-06 time=345.190
+After sweep 26 energy=-194.2766891108437  maxlinkdim=1500 maxerr=3.90E-06 time=345.648
+After sweep 27 energy=-194.28884062213564  maxlinkdim=1500 maxerr=1.14E-05 time=346.368
+After sweep 28 energy=-194.30029898203856  maxlinkdim=1500 maxerr=8.27E-06 time=350.480
+After sweep 29 energy=-194.3139502199311  maxlinkdim=1500 maxerr=1.23E-05 time=346.408
+After sweep 30 energy=-194.3240046784096  maxlinkdim=1500 maxerr=1.93E-05 time=347.076
+After sweep 31 energy=-194.3289374458351  maxlinkdim=1500 maxerr=1.91E-05 time=347.717
+After sweep 32 energy=-194.3315049740116  maxlinkdim=1500 maxerr=1.65E-05 time=346.438
+After sweep 33 energy=-194.3326640522785  maxlinkdim=1500 maxerr=1.62E-05 time=346.862
+After sweep 34 energy=-194.33317215258694  maxlinkdim=1500 maxerr=1.59E-05 time=346.633
+After sweep 35 energy=-194.3333986754622  maxlinkdim=1500 maxerr=1.59E-05 time=343.020
+After sweep 36 energy=-194.33349980943362  maxlinkdim=1500 maxerr=1.59E-05 time=348.784
+Stopping DMRG after sweep 36
+  E(N-1) = -194.33349980943362
+
+[3/3] Computing E(N=120)
+  Initial state: 120 particles (60 up, 60 dn)
+After sweep 1 energy=-186.2439837093599  maxlinkdim=20 maxerr=8.55E-04 time=11.577
+After sweep 2 energy=-191.20339921145973  maxlinkdim=50 maxerr=3.68E-04 time=29.695
+After sweep 3 energy=-192.521193319881  maxlinkdim=100 maxerr=3.27E-04 time=44.196
+After sweep 4 energy=-193.26697589081667  maxlinkdim=200 maxerr=1.18E-04 time=64.271
+After sweep 5 energy=-193.73649991472985  maxlinkdim=1500 maxerr=5.29E-07 time=167.652
+After sweep 6 energy=-193.92054450620986  maxlinkdim=1500 maxerr=4.42E-08 time=344.632
+After sweep 7 energy=-194.04650945398498  maxlinkdim=1500 maxerr=5.69E-08 time=348.258
+After sweep 8 energy=-194.15172100135635  maxlinkdim=1500 maxerr=1.32E-07 time=348.907
+After sweep 9 energy=-194.24429418984857  maxlinkdim=1500 maxerr=2.66E-06 time=344.555
+After sweep 10 energy=-194.32363760747728  maxlinkdim=1500 maxerr=7.88E-07 time=341.817
+After sweep 11 energy=-194.3940407246735  maxlinkdim=1500 maxerr=8.37E-06 time=337.990
+After sweep 12 energy=-194.44796833227647  maxlinkdim=1500 maxerr=2.79E-06 time=345.141
+After sweep 13 energy=-194.49583596102082  maxlinkdim=1500 maxerr=1.35E-05 time=342.280
+After sweep 14 energy=-194.53429307786473  maxlinkdim=1500 maxerr=4.14E-06 time=340.683
+After sweep 15 energy=-194.56957874916714  maxlinkdim=1500 maxerr=3.90E-06 time=341.526
+After sweep 16 energy=-194.60218863761216  maxlinkdim=1500 maxerr=1.23E-05 time=341.910
+After sweep 17 energy=-194.6332634138902  maxlinkdim=1500 maxerr=1.62E-05 time=345.169
+After sweep 18 energy=-194.65865496703785  maxlinkdim=1500 maxerr=1.23E-05 time=340.049
+After sweep 19 energy=-194.68135828240162  maxlinkdim=1500 maxerr=3.30E-06 time=333.813
+After sweep 20 energy=-194.70340468043474  maxlinkdim=1500 maxerr=1.27E-05 time=333.460
+After sweep 21 energy=-194.7228707368717  maxlinkdim=1500 maxerr=1.00E-05 time=335.590
+After sweep 22 energy=-194.74033054643365  maxlinkdim=1500 maxerr=1.02E-05 time=340.066
+After sweep 23 energy=-194.75598725122146  maxlinkdim=1500 maxerr=1.52E-05 time=345.188
+After sweep 24 energy=-194.76837909563417  maxlinkdim=1500 maxerr=7.34E-06 time=343.131
+After sweep 25 energy=-194.77935270424376  maxlinkdim=1500 maxerr=7.72E-06 time=340.794
+After sweep 26 energy=-194.78911404724394  maxlinkdim=1500 maxerr=9.32E-06 time=340.505
+After sweep 27 energy=-194.7977681545279  maxlinkdim=1500 maxerr=5.39E-06 time=350.011
+After sweep 28 energy=-194.8052821416327  maxlinkdim=1500 maxerr=6.21E-06 time=352.224
+After sweep 29 energy=-194.81145250770868  maxlinkdim=1500 maxerr=7.56E-06 time=353.304
+After sweep 30 energy=-194.81703206530895  maxlinkdim=1500 maxerr=8.67E-06 time=348.088
+After sweep 31 energy=-194.82011292232426  maxlinkdim=1500 maxerr=9.22E-06 time=349.792
+After sweep 32 energy=-194.82142030900354  maxlinkdim=1500 maxerr=8.40E-06 time=349.181
+After sweep 33 energy=-194.8219614776843  maxlinkdim=1500 maxerr=7.97E-06 time=347.434
+After sweep 34 energy=-194.82217493366178  maxlinkdim=1500 maxerr=7.84E-06 time=350.127
+After sweep 35 energy=-194.82225953673662  maxlinkdim=1500 maxerr=7.84E-06 time=346.591
+Stopping DMRG after sweep 35
+  E(N) = -194.82225953673662
+
+============================================================
+RESULTS:
+  E(118) = -193.98959363890484
+  E(119) = -194.33349980943362
+  E(120)     = -194.82225953673662
+  E_p = -0.14485356  (attractive hole pairing)
+============================================================
+RESULT: E_p = -0.1448535567741942

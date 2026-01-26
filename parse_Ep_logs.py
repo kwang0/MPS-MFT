@@ -42,9 +42,9 @@ def parse_filename(filename):
     }
 
 def extract_Ep_and_convergence(filepath):
-    """Extract E_p value and relative energy convergence from log file.
+    """Extract E_p, E(N), and relative energy convergence from log file.
     
-    Returns (E_p, rel_diff) where rel_diff is |E_final - E_penultimate| / |E_final| for E(N) calculation.
+    Returns (E_p, E_N, rel_diff) where rel_diff is |E_final - E_penultimate| / |E_final| for E(N) calculation.
     """
     try:
         with open(filepath, 'r') as f:
@@ -59,6 +59,12 @@ def extract_Ep_and_convergence(filepath):
             match = re.search(r'E_p\s*=\s*([-\d.eE+]+)\s*\(', content)
             if match:
                 E_p = float(match.group(1))
+        
+        # Extract E(N)
+        E_N = None
+        match = re.search(r'E\(N\)\s*=\s*([-\d.eE+]+)', content)
+        if match:
+            E_N = float(match.group(1))
         
         # Extract relative energy difference from E(N) calculation (section [3/3])
         rel_diff = None
@@ -79,10 +85,10 @@ def extract_Ep_and_convergence(filepath):
                 E_final = float(E_final)
                 rel_diff = abs(E_final - E_penultimate) / abs(E_final)
         
-        return E_p, rel_diff
+        return E_p, E_N, rel_diff
     except Exception as e:
         print(f"Error reading {filepath}: {e}", file=sys.stderr)
-        return None, None
+        return None, None, None
 
 def main():
     if len(sys.argv) < 2:
@@ -102,7 +108,7 @@ def main():
         if params is None:
             continue
         
-        E_p, rel_diff = extract_Ep_and_convergence(filepath)
+        E_p, E_N, rel_diff = extract_Ep_and_convergence(filepath)
         if E_p is None:
             print(f"  Warning: Could not extract E_p from {filepath.name}", file=sys.stderr)
             continue
@@ -113,6 +119,7 @@ def main():
             continue
         
         params['E_p'] = E_p
+        params['E_N'] = E_N
         params['rel_diff'] = rel_diff
         results.append(params)
     
@@ -122,19 +129,20 @@ def main():
     
     results.sort(key=lambda x: (x['L'], x['U'], x['V'], x['t0'], x['density'], x['chi']))
     
-    columns = ['L', 'U', 'V', 't0', 'density', 'chi', 'E_p', 'rel_diff']
+    columns = ['L', 'U', 'V', 't0', 'density', 'chi', 'E_N', 'E_p', 'rel_diff']
     
     # Print table
-    print("\n" + "=" * 116)
+    print("\n" + "=" * 130)
     print("RESULTS TABLE")
-    print("=" * 116)
+    print("=" * 130)
     header = "  ".join(f"{col:>12}" for col in columns)
     print(header)
     print("-" * len(header))
     
     for r in results:
         rel_diff_str = f"{r['rel_diff']:.2e}" if r['rel_diff'] is not None else "N/A"
-        row = f"{r['L']:>12}  {r['U']:>12.4f}  {r['V']:>12.4f}  {r['t0']:>12.4f}  {r['density']:>12.6f}  {r['chi']:>12}  {r['E_p']:>12.8f}  {rel_diff_str:>12}"
+        E_N_str = f"{r['E_N']:.8f}" if r['E_N'] is not None else "N/A"
+        row = f"{r['L']:>12}  {r['U']:>12.4f}  {r['V']:>12.4f}  {r['t0']:>12.4f}  {r['density']:>12.6f}  {r['chi']:>12}  {E_N_str:>12}  {r['E_p']:>12.8f}  {rel_diff_str:>12}"
         print(row)
     
     print(f"\nTotal: {len(results)} files processed")
