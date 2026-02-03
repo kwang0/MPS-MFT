@@ -400,7 +400,7 @@ end
 
 # Find mu to hit target density using secant with bisection fallback
 function find_mu_for_target_density(model_params, alpha, beta, mu_init, n_target;
-    tol=1e-5, delta_mu=0.01, max_iter=100, dmrg_kw)
+    tol=1e-3, delta_mu=0.01, max_iter=100, dmrg_kw)
     mu0 = mu_init
     n0, E0, psi0, s0, H0 = solve_Ham(mu0, model_params, alpha, beta, model_params[:density]; dmrg_kw...)
     
@@ -700,7 +700,7 @@ function main_loop(model_params; n_target::Float64, E_p::Float64, z_c::Int=4, al
     s = nothing
 
     for it in 1:max_iter
-        mu, n_meas, E, psi, s, H = find_mu_for_target_density(model_params, alpha, beta, mu, n_target; tol=1e-5,
+        mu, n_meas, E, psi, s, H = find_mu_for_target_density(model_params, alpha, beta, mu, n_target;
             dmrg_kw=(nsweeps=nsweeps, maxdim=maxdim, cutoff=cutoff))
         if TIME_LIMIT_EXCEEDED[] || peektimer() > TIME_LIMIT_SECONDS
             return alpha, beta, alpha_list, beta_list, mu, psi, E, s, H
@@ -744,7 +744,7 @@ end
 
 # Convenience: run the full loop and then compute gap and order parameter
 function run_loop(L::Int, t::Float64, U::Float64, t0::Float64, t_p::Float64, mu_init::Float64, n_target::Float64,
-    r_range::Int, z_c::Int, E_p::Real, chi_max::Int=200; nsweeps=50, cutoff=1e-10)
+    r_range::Int, z_c::Int, E_p::Real, chi_max::Int=200; nsweeps=30, cutoff=1e-10)
     
     tick()
 

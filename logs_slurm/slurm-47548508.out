@@ -576,3 +576,6 @@ After sweep 18 energy=-229.13162  maxlinkdim=1000 maxerr=2.45E-07 time=203.217
 After sweep 19 energy=-229.30197  maxlinkdim=1000 maxerr=1.71E-06 time=209.068
 After sweep 20 energy=-229.44724  maxlinkdim=1000 maxerr=1.06E-07 time=211.034
 After sweep 21 energy=-229.54729  maxlinkdim=1000 maxerr=6.15E-08 time=215.384
+After sweep 22 energy=-229.62555  maxlinkdim=1000 maxerr=8.04E-08 time=206.474
+slurmstepd: error: *** STEP 47548508.0 ON nid008405 CANCELLED AT 2026-01-12T14:07:27 ***
+slurmstepd: error: *** JOB 47548508 ON nid008405 CANCELLED AT 2026-01-12T14:07:27 ***

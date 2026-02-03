@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -A m4863_g
 #SBATCH -C gpu&hbm80g
-#SBATCH -q regular
+#SBATCH -q shared
 #SBATCH -n 1
 #SBATCH -t 24:00:00
 #SBATCH -c 32

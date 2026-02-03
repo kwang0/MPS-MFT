@@ -1,0 +1,47 @@
+outfile_name: results_L_64_U_8.0_t0_1.0_t_p_0.05_chi_1000_gpu.h5
+[ Info:  started timer at: 2026-01-29T08:06:20.239
+Resuming from checkpoint results_L_64_U_8.0_t0_1.0_t_p_0.05_chi_1000_gpu.h5
+Resuming with mu_init=1.7503370481294738
+Running with t0=1.0 t_p=0.05 U=8.0 L=64 chi_max=1000 E_p=0.134 mu_init=1.7503370481294738
+ERROR: LoadError: UndefVarError: `set_eltype` not defined in `ITensors`
+Suggestion: check for spelling errors or missing imports.
+Stacktrace:
+  [1] getproperty
+    @ ./Base_compiler.jl:47 [inlined]
+  [2] macro expansion
+    @ ~/.julia/packages/ITensorMPS/CrVGU/src/dmrg.jl:258 [inlined]
+  [3] macro expansion
+    @ ./timing.jl:461 [inlined]
+  [4] dmrg(PH::ProjMPO, psi0::MPS, sweeps::Sweeps; which_decomp::Nothing, svd_alg::Nothing, observer::TimerObserver, outputlevel::Int64, write_when_maxdim_exceeds::Nothing, write_path::String, eigsolve_tol::Float64, eigsolve_krylovdim::Int64, eigsolve_maxiter::Int64, eigsolve_verbosity::Int64, eigsolve_which_eigenvalue::Symbol, ishermitian::Bool)
+    @ ITensorMPS ~/.julia/packages/ITensorMPS/CrVGU/src/dmrg.jl:206
+  [5] dmrg
+    @ ~/.julia/packages/ITensorMPS/CrVGU/src/dmrg.jl:158 [inlined]
+  [6] #dmrg#606
+    @ ~/.julia/packages/ITensorMPS/CrVGU/src/dmrg.jl:28 [inlined]
+  [7] dmrg
+    @ ~/.julia/packages/ITensorMPS/CrVGU/src/dmrg.jl:21 [inlined]
+  [8] #run_dmrg_ground#6
+    @ /global/cfs/cdirs/m4863/MPS-MFT/main_loop_script_ladder_gpu.jl:299 [inlined]
+  [9] solve_Ham(mu::Float64, model_params::Dict{Symbol, Any}, alpha::Array{Float64, 4}, beta::Array{Float64, 5}, density::Float64; nsweeps::Int64, maxdim::Int64, cutoff::Float64)
+    @ Main /global/cfs/cdirs/m4863/MPS-MFT/main_loop_script_ladder_gpu.jl:330
+ [10] find_mu_for_target_density(model_params::Dict{Symbol, Any}, alpha::Array{Float64, 4}, beta::Array{Float64, 5}, mu_init::Float64, n_target::Float64; tol::Float64, delta_mu::Float64, max_iter::Int64, dmrg_kw::@NamedTuple{nsweeps::Int64, maxdim::Int64, cutoff::Float64})
+    @ Main /global/cfs/cdirs/m4863/MPS-MFT/main_loop_script_ladder_gpu.jl:405
+ [11] main_loop(model_params::Dict{Symbol, Any}; n_target::Float64, E_p::Float64, z_c::Int64, alpha_list::Array{Float64, 5}, beta_list::Array{Float64, 6}, max_iter::Int64, nsweeps::Int64, maxdim::Int64, cutoff::Float64)
+    @ Main /global/cfs/cdirs/m4863/MPS-MFT/main_loop_script_ladder_gpu.jl:703
+ [12] run_loop(L::Int64, t::Float64, U::Float64, t0::Float64, t_p::Float64, mu_init::Float64, n_target::Float64, r_range::Int64, z_c::Int64, E_p::Float64, chi_max::Int64; nsweeps::Int64, cutoff::Float64)
+    @ Main /global/cfs/cdirs/m4863/MPS-MFT/main_loop_script_ladder_gpu.jl:794
+ [13] run_loop(L::Int64, t::Float64, U::Float64, t0::Float64, t_p::Float64, mu_init::Float64, n_target::Float64, r_range::Int64, z_c::Int64, E_p::Float64, chi_max::Int64)
+    @ Main /global/cfs/cdirs/m4863/MPS-MFT/main_loop_script_ladder_gpu.jl:746
+ [14] top-level scope
+    @ /global/cfs/cdirs/m4863/MPS-MFT/main_loop_script_ladder_gpu.jl:869
+ [15] include(mod::Module, _path::String)
+    @ Base ./Base.jl:306
+ [16] exec_options(opts::Base.JLOptions)
+    @ Base ./client.jl:317
+ [17] _start()
+    @ Base ./client.jl:550
+in expression starting at /global/cfs/cdirs/m4863/MPS-MFT/main_loop_script_ladder_gpu.jl:869
+srun: error: nid008344: task 0: Exited with exit code 1
+srun: Terminating StepId=48188472.0
+Not completed, resubmitting...
+Submitted batch job 48267452

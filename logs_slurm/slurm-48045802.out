@@ -1,0 +1,177 @@
+outfile_name: results_L_64_U_8.0_t0_1.0_t_p_0.05_chi_1000_gpu.h5
+Precompiling packages...
+Info Given StridedViewsCUDAExt was explicitly requested, output will be shown live [0K
+[0KERROR: LoadError: ArgumentError: Package StridedViewsCUDAExt does not have StridedView in its dependencies:
+[0K- You may have a partially installed environment. Try `Pkg.instantiate()`
+[0K  to ensure all packages in the environment are installed.
+[0K- Or, if you have StridedViewsCUDAExt checked out for development and have
+[0K  added StridedView as a dependency but haven't updated your primary
+[0K  environment's manifest file, try `Pkg.resolve()`.
+[0K- Otherwise you may need to report an issue with StridedViewsCUDAExt
+[0KStacktrace:
+[0K  [1] macro expansion
+[0K    @ ./loading.jl:2378 [inlined]
+[0K  [2] macro expansion
+[0K    @ ./lock.jl:376 [inlined]
+[0K  [3] __require(into::Module, mod::Symbol)
+[0K    @ Base ./loading.jl:2358
+[0K  [4] require(into::Module, mod::Symbol)
+[0K    @ Base ./loading.jl:2334
+[0K  [5] top-level scope
+[0K    @ ~/.julia/packages/StridedViews/NeyFD/ext/StridedViewsCUDAExt.jl:4
+[0K  [6] include(mod::Module, _path::String)
+[0K    @ Base ./Base.jl:306
+[0K  [7] include_package_for_output(pkg::Base.PkgId, input::String, depot_path::Vector{String}, dl_load_path::Vector{String}, load_path::Vector{String}, concrete_deps::Vector{Pair{Base.PkgId, UInt128}}, source::Nothing)
+[0K    @ Base ./loading.jl:2996
+[0K  [8] top-level scope
+[0K    @ stdin:5
+[0K  [9] eval(m::Module, e::Any)
+[0K    @ Core ./boot.jl:489
+[0K [10] include_string(mapexpr::typeof(identity), mod::Module, code::String, filename::String)
+[0K    @ Base ./loading.jl:2842
+[0K [11] include_string
+[0K    @ ./loading.jl:2852 [inlined]
+[0K [12] exec_options(opts::Base.JLOptions)
+[0K    @ Base ./client.jl:315
+[0K [13] _start()
+[0K    @ Base ./client.jl:550
+[0Kin expression starting at /global/homes/m/mathi/.julia/packages/StridedViews/NeyFD/ext/StridedViewsCUDAExt.jl:1
+[0Kin expression starting at stdin:5
+              ✗ StridedViews → StridedViewsCUDAExt
+  0 dependencies successfully precompiled in 7 seconds. 108 already precompiled.
+ERROR: LoadError: ArgumentError: Package StridedViewsCUDAExt does not have StridedView in its dependencies:
+- You may have a partially installed environment. Try `Pkg.instantiate()`
+  to ensure all packages in the environment are installed.
+- Or, if you have StridedViewsCUDAExt checked out for development and have
+  added StridedView as a dependency but haven't updated your primary
+  environment's manifest file, try `Pkg.resolve()`.
+- Otherwise you may need to report an issue with StridedViewsCUDAExt
+Stacktrace:
+  [1] macro expansion
+    @ ./loading.jl:2378 [inlined]
+  [2] macro expansion
+    @ ./lock.jl:376 [inlined]
+  [3] __require(into::Module, mod::Symbol)
+    @ Base ./loading.jl:2358
+  [4] require(into::Module, mod::Symbol)
+    @ Base ./loading.jl:2334
+  [5] top-level scope
+    @ ~/.julia/packages/StridedViews/NeyFD/ext/StridedViewsCUDAExt.jl:4
+  [6] include(mod::Module, _path::String)
+    @ Base ./Base.jl:306
+  [7] include_package_for_output(pkg::Base.PkgId, input::String, depot_path::Vector{String}, dl_load_path::Vector{String}, load_path::Vector{String}, concrete_deps::Vector{Pair{Base.PkgId, UInt128}}, source::String)
+    @ Base ./loading.jl:2996
+  [8] top-level scope
+    @ stdin:5
+  [9] eval(m::Module, e::Any)
+    @ Core ./boot.jl:489
+ [10] include_string(mapexpr::typeof(identity), mod::Module, code::String, filename::String)
+    @ Base ./loading.jl:2842
+ [11] include_string
+    @ ./loading.jl:2852 [inlined]
+ [12] exec_options(opts::Base.JLOptions)
+    @ Base ./client.jl:315
+ [13] _start()
+    @ Base ./client.jl:550
+in expression starting at /global/homes/m/mathi/.julia/packages/StridedViews/NeyFD/ext/StridedViewsCUDAExt.jl:1
+in expression starting at stdin:5
+┌ Error: Error during loading of extension StridedViewsCUDAExt of StridedViews, use `Base.retry_load_extensions()` to retry.
+│   exception =
+│    1-element ExceptionStack:
+│    Failed to precompile StridedViewsCUDAExt [6eaa3634-1823-5a95-8160-0f368f727af8] to "/global/homes/m/mathi/.julia/compiled/v1.12/StridedViewsCUDAExt/jl_TjC2pj".
+│    Stacktrace:
+│      [1] error(s::String)
+│        @ Base ./error.jl:44
+│      [2] compilecache(pkg::Base.PkgId, path::String, internal_stderr::IO, internal_stdout::IO, keep_loaded_modules::Bool; flags::Cmd, cacheflags::Base.CacheFlags, reasons::Dict{String, Int64}, loadable_exts::Vector{Base.PkgId})
+│        @ Base ./loading.jl:3283
+│      [3] (::Base.var"#__require_prelocked##0#__require_prelocked##1"{Base.PkgId, String, Dict{String, Int64}})()
+│        @ Base ./loading.jl:2651
+│      [4] mkpidlock(f::Base.var"#__require_prelocked##0#__require_prelocked##1"{Base.PkgId, String, Dict{String, Int64}}, at::String, pid::Int32; kwopts::@Kwargs{stale_age::Int64, wait::Bool})
+│        @ FileWatching.Pidfile /global/common/software/nersc9/julia/1.12.1/share/julia/stdlib/v1.12/FileWatching/src/pidfile.jl:93
+│      [5] #mkpidlock#7
+│        @ /global/common/software/nersc9/julia/1.12.1/share/julia/stdlib/v1.12/FileWatching/src/pidfile.jl:88 [inlined]
+│      [6] trymkpidlock(::Function, ::Vararg{Any}; kwargs::@Kwargs{stale_age::Int64})
+│        @ FileWatching.Pidfile /global/common/software/nersc9/julia/1.12.1/share/julia/stdlib/v1.12/FileWatching/src/pidfile.jl:114
+│      [7] #invokelatest_gr#232
+│        @ ./reflection.jl:1282 [inlined]
+│      [8] invokelatest_gr
+│        @ ./reflection.jl:1274 [inlined]
+│      [9] maybe_cachefile_lock(f::Base.var"#__require_prelocked##0#__require_prelocked##1"{Base.PkgId, String, Dict{String, Int64}}, pkg::Base.PkgId, srcpath::String; stale_age::Int64)
+│        @ Base ./loading.jl:3854
+│     [10] maybe_cachefile_lock(f::Function, pkg::Base.PkgId, srcpath::String)
+│        @ Base ./loading.jl:3851
+│     [11] __require_prelocked(pkg::Base.PkgId, env::Nothing)
+│        @ Base ./loading.jl:2637
+│     [12] _require_prelocked(uuidkey::Base.PkgId, env::Nothing)
+│        @ Base ./loading.jl:2465
+│     [13] _require_prelocked(uuidkey::Base.PkgId)
+│        @ Base ./loading.jl:2459
+│     [14] run_extension_callbacks(extid::Base.ExtensionId)
+│        @ Base ./loading.jl:1579
+│     [15] run_extension_callbacks(pkgid::Base.PkgId)
+│        @ Base ./loading.jl:1616
+│     [16] run_package_callbacks(modkey::Base.PkgId)
+│        @ Base ./loading.jl:1432
+│     [17] _require_prelocked(uuidkey::Base.PkgId, env::String)
+│        @ Base ./loading.jl:2473
+│     [18] macro expansion
+│        @ ./loading.jl:2393 [inlined]
+│     [19] macro expansion
+│        @ ./lock.jl:376 [inlined]
+│     [20] __require(into::Module, mod::Symbol)
+│        @ Base ./loading.jl:2358
+│     [21] require(into::Module, mod::Symbol)
+│        @ Base ./loading.jl:2334
+│     [22] include(mod::Module, _path::String)
+│        @ Base ./Base.jl:306
+│     [23] exec_options(opts::Base.JLOptions)
+│        @ Base ./client.jl:317
+│     [24] _start()
+│        @ Base ./client.jl:550
+└ @ Base loading.jl:1589
+[ Info:  started timer at: 2026-01-25T08:39:12.120
+Resuming from checkpoint results_L_64_U_8.0_t0_1.0_t_p_0.05_chi_1000_gpu.h5
+Resuming with mu_init=1.7503370481294738
+Running with t0=1.0 t_p=0.05 U=8.0 L=64 chi_max=1000 E_p=0.134 mu_init=1.7503370481294738
+ERROR: LoadError: UndefVarError: `set_eltype` not defined in `ITensors`
+Suggestion: check for spelling errors or missing imports.
+Stacktrace:
+  [1] getproperty
+    @ ./Base_compiler.jl:47 [inlined]
+  [2] macro expansion
+    @ ~/.julia/packages/ITensorMPS/CrVGU/src/dmrg.jl:258 [inlined]
+  [3] macro expansion
+    @ ./timing.jl:461 [inlined]
+  [4] dmrg(PH::ProjMPO, psi0::MPS, sweeps::Sweeps; which_decomp::Nothing, svd_alg::Nothing, observer::TimerObserver, outputlevel::Int64, write_when_maxdim_exceeds::Nothing, write_path::String, eigsolve_tol::Float64, eigsolve_krylovdim::Int64, eigsolve_maxiter::Int64, eigsolve_verbosity::Int64, eigsolve_which_eigenvalue::Symbol, ishermitian::Bool)
+    @ ITensorMPS ~/.julia/packages/ITensorMPS/CrVGU/src/dmrg.jl:206
+  [5] dmrg
+    @ ~/.julia/packages/ITensorMPS/CrVGU/src/dmrg.jl:158 [inlined]
+  [6] #dmrg#606
+    @ ~/.julia/packages/ITensorMPS/CrVGU/src/dmrg.jl:28 [inlined]
+  [7] dmrg
+    @ ~/.julia/packages/ITensorMPS/CrVGU/src/dmrg.jl:21 [inlined]
+  [8] #run_dmrg_ground#6
+    @ /global/cfs/cdirs/m4863/MPS-MFT/main_loop_script_ladder_gpu.jl:299 [inlined]
+  [9] solve_Ham(mu::Float64, model_params::Dict{Symbol, Any}, alpha::Array{Float64, 4}, beta::Array{Float64, 5}, density::Float64; nsweeps::Int64, maxdim::Int64, cutoff::Float64)
+    @ Main /global/cfs/cdirs/m4863/MPS-MFT/main_loop_script_ladder_gpu.jl:330
+ [10] find_mu_for_target_density(model_params::Dict{Symbol, Any}, alpha::Array{Float64, 4}, beta::Array{Float64, 5}, mu_init::Float64, n_target::Float64; tol::Float64, delta_mu::Float64, max_iter::Int64, dmrg_kw::@NamedTuple{nsweeps::Int64, maxdim::Int64, cutoff::Float64})
+    @ Main /global/cfs/cdirs/m4863/MPS-MFT/main_loop_script_ladder_gpu.jl:405
+ [11] main_loop(model_params::Dict{Symbol, Any}; n_target::Float64, E_p::Float64, z_c::Int64, alpha_list::Array{Float64, 5}, beta_list::Array{Float64, 6}, max_iter::Int64, nsweeps::Int64, maxdim::Int64, cutoff::Float64)
+    @ Main /global/cfs/cdirs/m4863/MPS-MFT/main_loop_script_ladder_gpu.jl:703
+ [12] run_loop(L::Int64, t::Float64, U::Float64, t0::Float64, t_p::Float64, mu_init::Float64, n_target::Float64, r_range::Int64, z_c::Int64, E_p::Float64, chi_max::Int64; nsweeps::Int64, cutoff::Float64)
+    @ Main /global/cfs/cdirs/m4863/MPS-MFT/main_loop_script_ladder_gpu.jl:794
+ [13] run_loop(L::Int64, t::Float64, U::Float64, t0::Float64, t_p::Float64, mu_init::Float64, n_target::Float64, r_range::Int64, z_c::Int64, E_p::Float64, chi_max::Int64)
+    @ Main /global/cfs/cdirs/m4863/MPS-MFT/main_loop_script_ladder_gpu.jl:746
+ [14] top-level scope
+    @ /global/cfs/cdirs/m4863/MPS-MFT/main_loop_script_ladder_gpu.jl:869
+ [15] include(mod::Module, _path::String)
+    @ Base ./Base.jl:306
+ [16] exec_options(opts::Base.JLOptions)
+    @ Base ./client.jl:317
+ [17] _start()
+    @ Base ./client.jl:550
+in expression starting at /global/cfs/cdirs/m4863/MPS-MFT/main_loop_script_ladder_gpu.jl:869
+srun: error: nid008613: task 0: Exited with exit code 1
+srun: Terminating StepId=48045802.0
+Not completed, resubmitting...
+Submitted batch job 48095176

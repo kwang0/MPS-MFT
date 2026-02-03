@@ -1,0 +1,217 @@
+outfile_name: results_L_64_U_8.0_t0_1.0_t_p_0.05_chi_1000_gpu.h5
+[ Info:  started timer at: 2026-01-30T01:22:59.655
+Resuming from checkpoint results_L_64_U_8.0_t0_1.0_t_p_0.05_chi_1000_gpu.h5
+Resuming with mu_init=1.7503370481294738
+Running with t0=1.0 t_p=0.05 U=8.0 L=64 chi_max=1000 E_p=0.134 mu_init=1.7503370481294738
+After sweep 1 energy=-245.53912  maxlinkdim=10 maxerr=4.70E-03 time=29.761
+After sweep 2 energy=-254.21213  maxlinkdim=20 maxerr=2.06E-03 time=1.643
+After sweep 3 energy=-257.90802  maxlinkdim=100 maxerr=7.61E-06 time=3.182
+After sweep 4 energy=-258.27438  maxlinkdim=1000 maxerr=3.45E-10 time=64.386
+After sweep 5 energy=-258.7581  maxlinkdim=1000 maxerr=4.73E-08 time=154.534
+After sweep 6 energy=-259.12262  maxlinkdim=1000 maxerr=2.60E-08 time=101.316
+After sweep 7 energy=-259.33673  maxlinkdim=1000 maxerr=1.55E-07 time=85.976
+After sweep 8 energy=-259.57455  maxlinkdim=1000 maxerr=7.17E-08 time=94.464
+After sweep 9 energy=-259.80167  maxlinkdim=1000 maxerr=6.49E-08 time=118.753
+After sweep 10 energy=-260.0037  maxlinkdim=1000 maxerr=1.04E-07 time=128.537
+After sweep 11 energy=-260.1555  maxlinkdim=1000 maxerr=2.68E-08 time=127.050
+After sweep 12 energy=-260.31363  maxlinkdim=1000 maxerr=1.44E-07 time=143.719
+After sweep 13 energy=-260.49277  maxlinkdim=1000 maxerr=3.41E-07 time=158.976
+After sweep 14 energy=-260.65405  maxlinkdim=1000 maxerr=2.65E-07 time=176.238
+After sweep 15 energy=-260.8182  maxlinkdim=1000 maxerr=3.31E-07 time=181.363
+After sweep 16 energy=-260.99686  maxlinkdim=1000 maxerr=5.68E-07 time=191.852
+After sweep 17 energy=-261.1226  maxlinkdim=1000 maxerr=1.35E-06 time=190.742
+After sweep 18 energy=-261.21725  maxlinkdim=1000 maxerr=1.10E-06 time=193.886
+After sweep 19 energy=-261.3482  maxlinkdim=1000 maxerr=8.13E-07 time=204.587
+After sweep 20 energy=-261.4672  maxlinkdim=1000 maxerr=1.70E-06 time=208.404
+After sweep 21 energy=-261.57126  maxlinkdim=1000 maxerr=3.21E-07 time=208.204
+After sweep 22 energy=-261.6491  maxlinkdim=1000 maxerr=2.75E-07 time=209.668
+After sweep 23 energy=-261.7041  maxlinkdim=1000 maxerr=2.64E-06 time=214.802
+After sweep 24 energy=-261.7591  maxlinkdim=1000 maxerr=2.53E-06 time=221.484
+After sweep 25 energy=-261.80804  maxlinkdim=1000 maxerr=2.39E-06 time=225.384
+After sweep 26 energy=-261.85013  maxlinkdim=1000 maxerr=1.51E-06 time=231.612
+After sweep 27 energy=-261.87866  maxlinkdim=1000 maxerr=6.10E-07 time=253.189
+After sweep 28 energy=-261.90878  maxlinkdim=1000 maxerr=6.00E-07 time=253.666
+After sweep 29 energy=-261.92703  maxlinkdim=1000 maxerr=7.24E-07 time=250.834
+After sweep 30 energy=-261.94144  maxlinkdim=1000 maxerr=9.13E-07 time=252.197
+Not same mu, searching again
+After sweep 1 energy=-244.65549  maxlinkdim=10 maxerr=6.08E-03 time=1.422
+After sweep 2 energy=-252.80447  maxlinkdim=20 maxerr=2.02E-03 time=1.590
+After sweep 3 energy=-256.51996  maxlinkdim=100 maxerr=8.43E-06 time=2.671
+After sweep 4 energy=-256.92493  maxlinkdim=1000 maxerr=3.30E-10 time=65.712
+After sweep 5 energy=-257.44162  maxlinkdim=1000 maxerr=8.69E-09 time=150.224
+After sweep 6 energy=-257.75854  maxlinkdim=1000 maxerr=9.57E-09 time=100.364
+After sweep 7 energy=-257.97958  maxlinkdim=928 maxerr=5.40E-08 time=80.539
+After sweep 8 energy=-258.22635  maxlinkdim=1000 maxerr=3.68E-08 time=94.001
+After sweep 9 energy=-258.4741  maxlinkdim=1000 maxerr=8.57E-08 time=128.611
+After sweep 10 energy=-258.6812  maxlinkdim=1000 maxerr=2.32E-08 time=136.880
+After sweep 11 energy=-258.86887  maxlinkdim=1000 maxerr=1.70E-08 time=141.774
+After sweep 12 energy=-259.04694  maxlinkdim=1000 maxerr=2.78E-08 time=142.413
+After sweep 13 energy=-259.24338  maxlinkdim=1000 maxerr=6.63E-07 time=152.193
+After sweep 14 energy=-259.45288  maxlinkdim=1000 maxerr=3.54E-07 time=165.043
+After sweep 15 energy=-259.63092  maxlinkdim=1000 maxerr=3.81E-07 time=165.955
+After sweep 16 energy=-259.80554  maxlinkdim=1000 maxerr=1.58E-06 time=184.713
+After sweep 17 energy=-259.9681  maxlinkdim=1000 maxerr=5.81E-07 time=194.899
+After sweep 18 energy=-260.07352  maxlinkdim=1000 maxerr=4.89E-07 time=186.036
+After sweep 19 energy=-260.18268  maxlinkdim=1000 maxerr=1.23E-06 time=201.264
+After sweep 20 energy=-260.28284  maxlinkdim=1000 maxerr=1.79E-06 time=208.637
+After sweep 21 energy=-260.401  maxlinkdim=1000 maxerr=1.21E-06 time=217.411
+After sweep 22 energy=-260.4719  maxlinkdim=1000 maxerr=1.73E-06 time=217.824
+After sweep 23 energy=-260.52084  maxlinkdim=1000 maxerr=3.03E-06 time=220.214
+After sweep 24 energy=-260.56012  maxlinkdim=1000 maxerr=3.38E-06 time=223.696
+After sweep 25 energy=-260.6041  maxlinkdim=1000 maxerr=2.80E-06 time=228.569
+After sweep 26 energy=-260.64044  maxlinkdim=1000 maxerr=2.02E-06 time=236.784
+After sweep 27 energy=-260.6787  maxlinkdim=1000 maxerr=2.11E-06 time=238.625
+After sweep 28 energy=-260.7099  maxlinkdim=1000 maxerr=1.08E-06 time=248.686
+After sweep 29 energy=-260.73233  maxlinkdim=1000 maxerr=1.66E-06 time=247.886
+After sweep 30 energy=-260.74603  maxlinkdim=1000 maxerr=1.28E-06 time=249.767
+n0: 0.94523865; n1: 0.95254636; mu0: 1.7403370481294738; mu1: 1.7503370481294738
+n_target < n1 and n_target < n0 triggered
+After sweep 1 energy=-242.97693  maxlinkdim=10 maxerr=5.54E-03 time=1.399
+After sweep 2 energy=-251.53282  maxlinkdim=20 maxerr=2.01E-03 time=1.574
+After sweep 3 energy=-255.50664  maxlinkdim=100 maxerr=1.31E-05 time=2.737
+After sweep 4 energy=-255.91472  maxlinkdim=1000 maxerr=4.63E-10 time=70.418
+After sweep 5 energy=-256.41986  maxlinkdim=1000 maxerr=9.60E-09 time=151.843
+After sweep 6 energy=-256.80774  maxlinkdim=894 maxerr=8.74E-08 time=100.868
+After sweep 7 energy=-257.05334  maxlinkdim=1000 maxerr=8.78E-10 time=81.120
+After sweep 8 energy=-257.2718  maxlinkdim=1000 maxerr=6.68E-08 time=95.268
+After sweep 9 energy=-257.52203  maxlinkdim=1000 maxerr=2.28E-08 time=125.168
+After sweep 10 energy=-257.7684  maxlinkdim=1000 maxerr=5.66E-08 time=149.760
+After sweep 11 energy=-257.94952  maxlinkdim=1000 maxerr=2.58E-09 time=141.987
+After sweep 12 energy=-258.15536  maxlinkdim=1000 maxerr=2.38E-07 time=157.549
+After sweep 13 energy=-258.37686  maxlinkdim=1000 maxerr=6.55E-08 time=179.369
+After sweep 14 energy=-258.6203  maxlinkdim=1000 maxerr=1.87E-06 time=197.195
+After sweep 15 energy=-258.84454  maxlinkdim=1000 maxerr=7.80E-07 time=201.991
+After sweep 16 energy=-258.97156  maxlinkdim=1000 maxerr=1.62E-07 time=209.644
+After sweep 17 energy=-259.05902  maxlinkdim=1000 maxerr=5.80E-07 time=199.702
+After sweep 18 energy=-259.1895  maxlinkdim=1000 maxerr=4.29E-07 time=211.852
+After sweep 19 energy=-259.28043  maxlinkdim=1000 maxerr=4.51E-07 time=224.242
+After sweep 20 energy=-259.3455  maxlinkdim=1000 maxerr=6.80E-07 time=220.449
+After sweep 21 energy=-259.39267  maxlinkdim=1000 maxerr=2.11E-06 time=221.585
+After sweep 22 energy=-259.44635  maxlinkdim=1000 maxerr=2.22E-06 time=231.485
+After sweep 23 energy=-259.48456  maxlinkdim=1000 maxerr=7.41E-07 time=234.490
+After sweep 24 energy=-259.51334  maxlinkdim=1000 maxerr=3.33E-06 time=239.200
+After sweep 25 energy=-259.54892  maxlinkdim=1000 maxerr=4.25E-06 time=244.634
+After sweep 26 energy=-259.5725  maxlinkdim=1000 maxerr=7.52E-07 time=245.494
+After sweep 27 energy=-259.5954  maxlinkdim=1000 maxerr=1.02E-06 time=249.150
+After sweep 28 energy=-259.61673  maxlinkdim=1000 maxerr=1.48E-06 time=254.881
+After sweep 29 energy=-259.63037  maxlinkdim=1000 maxerr=1.22E-06 time=256.291
+After sweep 30 energy=-259.64313  maxlinkdim=1000 maxerr=9.94E-07 time=256.874
+n0: 0.93775564; n1: 0.94523865; mu0: 1.7303370481294738; mu1: 1.7403370481294738
+FOUND MU; mu: 1.7303370481294738  n: 0.93775564
+Target density achieved with mu=1.7303370481294738, n=0.93775564
+Checking {alpha,beta} vs measured
+Alpha not converged.
+NOT CONVERGED; updating alpha, beta and continuing...
+After sweep 1 energy=-243.31422  maxlinkdim=10 maxerr=6.00E-03 time=1.396
+After sweep 2 energy=-251.39934  maxlinkdim=20 maxerr=2.17E-03 time=1.570
+After sweep 3 energy=-255.34021  maxlinkdim=100 maxerr=1.57E-05 time=2.680
+After sweep 4 energy=-255.75371  maxlinkdim=1000 maxerr=3.96E-10 time=68.241
+After sweep 5 energy=-256.25504  maxlinkdim=1000 maxerr=3.82E-08 time=154.938
+After sweep 6 energy=-256.64932  maxlinkdim=1000 maxerr=8.02E-08 time=116.911
+After sweep 7 energy=-256.95157  maxlinkdim=1000 maxerr=1.74E-08 time=121.311
+After sweep 8 energy=-257.16388  maxlinkdim=1000 maxerr=5.74E-08 time=123.272
+After sweep 9 energy=-257.37463  maxlinkdim=1000 maxerr=3.86E-07 time=137.756
+After sweep 10 energy=-257.58466  maxlinkdim=1000 maxerr=2.60E-07 time=153.087
+After sweep 11 energy=-257.79718  maxlinkdim=1000 maxerr=2.05E-06 time=162.574
+After sweep 12 energy=-257.94357  maxlinkdim=1000 maxerr=9.28E-08 time=159.233
+After sweep 13 energy=-258.05588  maxlinkdim=1000 maxerr=2.38E-08 time=167.162
+After sweep 14 energy=-258.16928  maxlinkdim=1000 maxerr=6.05E-07 time=173.605
+After sweep 15 energy=-258.29706  maxlinkdim=1000 maxerr=2.33E-06 time=175.010
+After sweep 16 energy=-258.4403  maxlinkdim=1000 maxerr=1.48E-06 time=183.058
+After sweep 17 energy=-258.58713  maxlinkdim=1000 maxerr=2.10E-06 time=195.539
+After sweep 18 energy=-258.7121  maxlinkdim=1000 maxerr=1.41E-06 time=193.048
+After sweep 19 energy=-258.8337  maxlinkdim=1000 maxerr=2.19E-06 time=204.749
+After sweep 20 energy=-258.94138  maxlinkdim=1000 maxerr=2.01E-06 time=203.982
+After sweep 21 energy=-259.0467  maxlinkdim=1000 maxerr=2.16E-06 time=212.094
+After sweep 22 energy=-259.13568  maxlinkdim=1000 maxerr=1.43E-06 time=208.399
+After sweep 23 energy=-259.21985  maxlinkdim=1000 maxerr=1.76E-06 time=212.917
+After sweep 24 energy=-259.29944  maxlinkdim=1000 maxerr=9.47E-06 time=221.431
+After sweep 25 energy=-259.3776  maxlinkdim=1000 maxerr=3.45E-06 time=230.364
+After sweep 26 energy=-259.43723  maxlinkdim=1000 maxerr=2.61E-06 time=227.947
+After sweep 27 energy=-259.48032  maxlinkdim=1000 maxerr=3.52E-06 time=224.606
+After sweep 28 energy=-259.52005  maxlinkdim=1000 maxerr=3.22E-06 time=231.620
+After sweep 29 energy=-259.55405  maxlinkdim=1000 maxerr=1.90E-06 time=235.575
+After sweep 30 energy=-259.58505  maxlinkdim=1000 maxerr=2.68E-06 time=239.691
+Not same mu, searching again
+After sweep 1 energy=-241.67107  maxlinkdim=10 maxerr=4.83E-03 time=1.293
+
+[1115211] signal 11 (2): Segmentation fault
+in expression starting at /global/cfs/cdirs/m4863/MPS-MFT/main_loop_script_ladder_gpu.jl:869
+unknown function (ip: 0x7f841b56f373) at /global/homes/k/kwang98/.julia/artifacts/7e64c64a00967ce6115cb8ee560507413f9fce96/lib/libcuda.so
+unknown function (ip: 0x7f841b616c09) at /global/homes/k/kwang98/.julia/artifacts/7e64c64a00967ce6115cb8ee560507413f9fce96/lib/libcuda.so
+unknown function (ip: 0x7f841c2fdaa3) at /global/homes/k/kwang98/.julia/artifacts/7e64c64a00967ce6115cb8ee560507413f9fce96/lib/libcuda.so
+unknown function (ip: 0x7f841b51c12b) at /global/homes/k/kwang98/.julia/artifacts/7e64c64a00967ce6115cb8ee560507413f9fce96/lib/libcuda.so
+unknown function (ip: 0x7f841b51c919) at /global/homes/k/kwang98/.julia/artifacts/7e64c64a00967ce6115cb8ee560507413f9fce96/lib/libcuda.so
+unknown function (ip: 0x7f841b51d2d3) at /global/homes/k/kwang98/.julia/artifacts/7e64c64a00967ce6115cb8ee560507413f9fce96/lib/libcuda.so
+unknown function (ip: 0x7f841b6cee59) at /global/homes/k/kwang98/.julia/artifacts/7e64c64a00967ce6115cb8ee560507413f9fce96/lib/libcuda.so
+cuMemcpyDtoHAsync_v2 at /global/homes/k/kwang98/.julia/artifacts/7e64c64a00967ce6115cb8ee560507413f9fce96/lib/libcuda.so (unknown line)
+macro expansion at /global/homes/k/kwang98/.julia/packages/CUDA/wPaDI/lib/cudadrv/libcuda.jl:510 [inlined]
+#cuMemcpyDtoHAsync_v2##0 at /global/homes/k/kwang98/.julia/packages/GPUToolbox/JLBB1/src/ccalls.jl:34 [inlined]
+check at /global/homes/k/kwang98/.julia/packages/CUDA/wPaDI/lib/cudadrv/libcuda.jl:35 [inlined]
+cuMemcpyDtoHAsync_v2 at /global/homes/k/kwang98/.julia/packages/GPUToolbox/JLBB1/src/ccalls.jl:33 [inlined]
+#unsafe_copyto!#497 at /global/homes/k/kwang98/.julia/packages/CUDA/wPaDI/lib/cudadrv/memory.jl:414 [inlined]
+unsafe_copyto! at /global/homes/k/kwang98/.julia/packages/CUDA/wPaDI/lib/cudadrv/memory.jl:411
+getindex at /global/homes/k/kwang98/.julia/packages/CUDA/wPaDI/src/refpointer.jl:84 [inlined]
+nrm2 at /global/homes/k/kwang98/.julia/packages/CUDA/wPaDI/lib/cublas/wrappers.jl:247
+nrm2 at /global/homes/k/kwang98/.julia/packages/CUDA/wPaDI/lib/cublas/wrappers.jl:252 [inlined]
+norm at /global/homes/k/kwang98/.julia/packages/CUDA/wPaDI/lib/cublas/linalg.jl:214 [inlined]
+norm at /global/homes/k/kwang98/.julia/packages/CUDA/wPaDI/lib/cublas/linalg.jl:213 [inlined]
+norm at /global/homes/k/kwang98/.julia/packages/NDTensors/wnM2t/src/tensorstorage/tensorstorage.jl:86 [inlined]
+norm at /global/homes/k/kwang98/.julia/packages/NDTensors/wnM2t/src/tensor/tensor.jl:239
+unknown function (ip: 0x7f83a1765c34) at (unknown file)
+norm at /global/homes/k/kwang98/.julia/packages/ITensors/SOADD/src/itensor.jl:1750
+#initialize#21 at /global/homes/k/kwang98/.julia/packages/KrylovKit/ZcdRg/src/factorizations/lanczos.jl:181
+initialize at /global/homes/k/kwang98/.julia/packages/KrylovKit/ZcdRg/src/factorizations/lanczos.jl:178 [inlined]
+#eigsolve#54 at /global/homes/k/kwang98/.julia/packages/KrylovKit/ZcdRg/src/eigsolve/lanczos.jl:20
+eigsolve at /global/homes/k/kwang98/.julia/packages/KrylovKit/ZcdRg/src/eigsolve/lanczos.jl:1 [inlined]
+#eigsolve#51 at /global/homes/k/kwang98/.julia/packages/KrylovKit/ZcdRg/src/eigsolve/eigsolve.jl:235 [inlined]
+eigsolve at /global/homes/k/kwang98/.julia/packages/KrylovKit/ZcdRg/src/eigsolve/eigsolve.jl:209 [inlined]
+macro expansion at /global/homes/k/kwang98/.julia/packages/ITensorMPS/kjso2/src/dmrg.jl:239 [inlined]
+macro expansion at ./timing.jl:461 [inlined]
+#dmrg#609 at /global/homes/k/kwang98/.julia/packages/ITensorMPS/kjso2/src/dmrg.jl:206
+dmrg at /global/homes/k/kwang98/.julia/packages/ITensorMPS/kjso2/src/dmrg.jl:158 [inlined]
+#dmrg#606 at /global/homes/k/kwang98/.julia/packages/ITensorMPS/kjso2/src/dmrg.jl:28 [inlined]
+dmrg at /global/homes/k/kwang98/.julia/packages/ITensorMPS/kjso2/src/dmrg.jl:21 [inlined]
+#run_dmrg_ground#6 at /global/cfs/cdirs/m4863/MPS-MFT/main_loop_script_ladder_gpu.jl:299 [inlined]
+run_dmrg_ground at /global/cfs/cdirs/m4863/MPS-MFT/main_loop_script_ladder_gpu.jl:289
+unknown function (ip: 0x7f83b0f161b5) at (unknown file)
+#solve_Ham#8 at /global/cfs/cdirs/m4863/MPS-MFT/main_loop_script_ladder_gpu.jl:330
+solve_Ham at /global/cfs/cdirs/m4863/MPS-MFT/main_loop_script_ladder_gpu.jl:320
+unknown function (ip: 0x7f83b1344ae3) at (unknown file)
+#find_mu_for_target_density#22 at /global/cfs/cdirs/m4863/MPS-MFT/main_loop_script_ladder_gpu.jl:421
+find_mu_for_target_density at /global/cfs/cdirs/m4863/MPS-MFT/main_loop_script_ladder_gpu.jl:402
+unknown function (ip: 0x7f83b1344a53) at (unknown file)
+#main_loop#27 at /global/cfs/cdirs/m4863/MPS-MFT/main_loop_script_ladder_gpu.jl:703
+main_loop at /global/cfs/cdirs/m4863/MPS-MFT/main_loop_script_ladder_gpu.jl:689
+unknown function (ip: 0x7f83b1340511) at (unknown file)
+#run_loop#28 at /global/cfs/cdirs/m4863/MPS-MFT/main_loop_script_ladder_gpu.jl:794
+run_loop at /global/cfs/cdirs/m4863/MPS-MFT/main_loop_script_ladder_gpu.jl:746
+unknown function (ip: 0x7f83b13095ef) at (unknown file)
+jl_apply at /cache/build/tester-amdci4-14/julialang/julia-release-1-dot-12/src/julia.h:2391 [inlined]
+do_call at /cache/build/tester-amdci4-14/julialang/julia-release-1-dot-12/src/interpreter.c:123
+eval_value at /cache/build/tester-amdci4-14/julialang/julia-release-1-dot-12/src/interpreter.c:243
+eval_stmt_value at /cache/build/tester-amdci4-14/julialang/julia-release-1-dot-12/src/interpreter.c:194 [inlined]
+eval_body at /cache/build/tester-amdci4-14/julialang/julia-release-1-dot-12/src/interpreter.c:707
+jl_interpret_toplevel_thunk at /cache/build/tester-amdci4-14/julialang/julia-release-1-dot-12/src/interpreter.c:898
+jl_toplevel_eval_flex at /cache/build/tester-amdci4-14/julialang/julia-release-1-dot-12/src/toplevel.c:1035
+jl_toplevel_eval_flex at /cache/build/tester-amdci4-14/julialang/julia-release-1-dot-12/src/toplevel.c:975
+ijl_toplevel_eval at /cache/build/tester-amdci4-14/julialang/julia-release-1-dot-12/src/toplevel.c:1047
+ijl_toplevel_eval_in at /cache/build/tester-amdci4-14/julialang/julia-release-1-dot-12/src/toplevel.c:1092
+eval at ./boot.jl:489
+include_string at ./loading.jl:2842
+_include at ./loading.jl:2902
+include at ./Base.jl:306
+exec_options at ./client.jl:317
+_start at ./client.jl:550
+jfptr__start_31204.1 at /global/common/software/nersc9/julia/1.12.1/lib/julia/sys.so (unknown line)
+jl_apply at /cache/build/tester-amdci4-14/julialang/julia-release-1-dot-12/src/julia.h:2391 [inlined]
+true_main at /cache/build/tester-amdci4-14/julialang/julia-release-1-dot-12/src/jlapi.c:971
+jl_repl_entrypoint at /cache/build/tester-amdci4-14/julialang/julia-release-1-dot-12/src/jlapi.c:1139
+main at /cache/build/tester-amdci4-14/julialang/julia-release-1-dot-12/cli/loader_exe.c:58
+__libc_start_main at /lib64/libc.so.6 (unknown line)
+unknown function (ip: 0x4010b8) at /workspace/srcdir/glibc-2.17/csu/../sysdeps/x86_64/start.S
+Allocations: 734939061 (Pool: 734936816; Big: 2245); GC: 107770
+srun: error: nid008324: task 0: Segmentation fault
+srun: Terminating StepId=48283670.0
+Not completed, resubmitting...
+Submitted batch job 48305993

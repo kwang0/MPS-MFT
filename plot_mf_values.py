@@ -32,7 +32,7 @@ beta_list = np.transpose(beta_list)
 alpha_list = alpha_list[:,:,0,0,:]
 beta_list0 = beta_list[0,:,:,0,0,:]
 beta_list1 = beta_list[1,:,:,0,0,:]
-alist = alpha_list
+alist = beta_list0
 
 eps = 1e-12
 threshold = 1e-4
