@@ -252,8 +252,8 @@ function build_MPO_MF(; L::Int, t::Float64, U::Float64, mu::Float64, V::Float64,
                 if a != 0
                     site_i = rung_leg_to_site(i, j)
                     site_ip = rung_leg_to_site(i_p, j_p)
-                    add!(os, -a, "Cup", site_i, "Cdn", site_ip)
-                    add!(os, -a, "Cdagdn", site_ip, "Cdagup", site_i)  # h.c.
+                    add!(os, -a, "Cup", site_ip, "Cdn", site_i)
+                    add!(os, -a, "Cdagdn", site_i, "Cdagup", site_ip)  # h.c.
                 end
             end
         end
@@ -266,16 +266,18 @@ function build_MPO_MF(; L::Int, t::Float64, U::Float64, mu::Float64, V::Float64,
                 site_i = rung_leg_to_site(i, j)
                 site_ip = rung_leg_to_site(i_p, j_p)
                 
-                bdn = beta[1, i, i_p, j+1, j_p+1]  # Julia 1-indexed
-                if bdn != 0
-                    add!(os, bdn, "Cdagdn", site_i, "Cdn", site_ip)
-                    add!(os, bdn, "Cdagdn", site_ip, "Cdn", site_i)
-                end
-                
-                bup = beta[2, i, i_p, j+1, j_p+1]
-                if bup != 0
-                    add!(os, bup, "Cdagup", site_i, "Cup", site_ip)
-                    add!(os, bup, "Cdagup", site_ip, "Cup", site_i)
+                if site_i != site_ip # No onsite terms for now (don't consider CDW)
+                    bdn = beta[1, i, i_p, j+1, j_p+1]  # Julia 1-indexed
+                    if bdn != 0
+                        add!(os, bdn, "Cdagdn", site_i, "Cdn", site_ip)
+                        # add!(os, bdn, "Cdagdn", site_ip, "Cdn", site_i) # Double counted
+                    end
+                    
+                    bup = beta[2, i, i_p, j+1, j_p+1]
+                    if bup != 0
+                        add!(os, bup, "Cdagup", site_i, "Cup", site_ip)
+                        # add!(os, bup, "Cdagup", site_ip, "Cup", site_i)
+                    end
                 end
             end
         end
