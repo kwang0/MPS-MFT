@@ -295,14 +295,15 @@ function run_dmrg_ground(s, H, density::Float64; psi_init=nothing, nsweeps=10, m
     end
 
     sweeps = Sweeps(nsweeps)
-    maxdim!(sweeps, min(10, maxdim), min(20, maxdim), 100, maxdim)
-    cutoff!(sweeps, cutoff)
     if psi_init !== nothing
-        # If starting from previous state, shouldn't need noise
+        # Starting from previous state: use full maxdim from sweep 1 and no noise
+        maxdim!(sweeps, maxdim)
         noise!(sweeps, 0.0)
     else
+        maxdim!(sweeps, min(10, maxdim), min(20, maxdim), 100, maxdim)
         noise!(sweeps, 1e-5, 1e-6, 1e-7, 1e-8, 0.0)
     end
+    cutoff!(sweeps, cutoff)
 
     obs = TimerObserver()
     E0, psi0 = dmrg(H, psi0, sweeps; observer=obs)
@@ -704,7 +705,7 @@ function cdw_order_parameter(psi::MPS, s; L_rungs::Int, q::Float64=Float64(π))
 end
 
 # Main SCF loop: adjust mu for target density, then update alpha/beta until self-consistent; creates site indices once and reuses it and old MPS for DMRG across SCF iterations
-function main_loop(model_params; n_target::Float64, E_p::Float64, z_c::Int=4, alpha_list, beta_list, max_iter::Int=150, nsweeps=10, maxdim=200, cutoff=1e-10)
+function main_loop(model_params; n_target::Float64, E_p::Float64, z_c::Int=4, alpha_list, beta_list, psi_init=nothing, max_iter::Int=150, nsweeps=10, maxdim=200, cutoff=1e-10)
     alpha = model_params[:alpha]
     beta = model_params[:beta]
     mu = model_params[:mu]
@@ -714,10 +715,14 @@ function main_loop(model_params; n_target::Float64, E_p::Float64, z_c::Int=4, al
     L = model_params[:L]
     outfile = model_params[:outfile]
     E = 0.0
-    psi = nothing
+    psi = psi_init
 
-    # Create site indices here and reuse throughout
-    s = make_sites(2 * L)
+    # Reuse site indices from psi_init if available, otherwise create fresh
+    if psi_init !== nothing
+        s = siteinds(psi_init)
+    else
+        s = make_sites(2 * L)
+    end
 
     for it in 1:max_iter
         # Warm-start from previous psi (nothing on first iteration = cold start)
@@ -753,6 +758,7 @@ function main_loop(model_params; n_target::Float64, E_p::Float64, z_c::Int=4, al
         F["beta"] = beta
         F["mu"] = mu
         F["E"] = E
+        F["psi"] = ITensors.cpu(psi)
         F["alpha_list"] = alpha_list
         F["beta_list"] = beta_list
         F["completed"] = false
@@ -778,8 +784,9 @@ function run_loop(L::Int, t::Float64, U::Float64, t0::Float64, t_p::Float64, mu_
         alpha_list = read(F, "alpha_list")
         beta_list = read(F, "beta_list")
         mu_init = read(F, "mu")
+        psi_resume = haskey(F, "psi") ? cu(read(F, "psi", MPS)) : nothing
         close(F)
-        println("Resuming with mu_init=$(mu_init)")
+        println("Resuming with mu_init=$(mu_init), psi_resume=$(psi_resume !== nothing ? "loaded" : "not found")")
     else
         println("Starting fresh run")
         pref = 2 * t_p^2 / E_p  # Note: no z_c factor for ladders (see Appendix E)
@@ -793,6 +800,7 @@ function run_loop(L::Int, t::Float64, U::Float64, t0::Float64, t_p::Float64, mu_
         beta = zeros(Float64, 2, L, L, 2, 2)
         alpha_list = Vector{Any}()
         beta_list = Vector{Any}()
+        psi_resume = nothing
     end
 
     println("Running with t0=$(t0) t_p=$(t_p) U=$U L=$L chi_max=$(chi_max) E_p=$(E_p) mu_init=$(mu_init)")
@@ -812,7 +820,7 @@ function run_loop(L::Int, t::Float64, U::Float64, t0::Float64, t_p::Float64, mu_
         :outfile => outfile,
     )
 
-    alpha, beta, alpha_list, beta_list, mu, psi, E, s, H = main_loop(model_params; n_target=n_target, E_p=E_p, z_c=z_c, alpha_list=alpha_list, beta_list=beta_list, nsweeps=nsweeps, maxdim=chi_max, cutoff=cutoff)
+    alpha, beta, alpha_list, beta_list, mu, psi, E, s, H = main_loop(model_params; n_target=n_target, E_p=E_p, z_c=z_c, alpha_list=alpha_list, beta_list=beta_list, psi_init=psi_resume, nsweeps=nsweeps, maxdim=chi_max, cutoff=cutoff)
 
     if H === nothing
         println("Main loop returned nothing for H (convergence failure). Exiting.")
