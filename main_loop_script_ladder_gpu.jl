@@ -12,15 +12,24 @@ using Random
 const TIME_LIMIT_EXCEEDED = Ref(false)
 const TIME_LIMIT_SECONDS = 47.5 * 60 * 60  # 47.5 hours
 
-# Observer that checks timer after each sweep
+# Observer that checks energy convergence and timer after each sweep
 mutable struct TimerObserver <: AbstractObserver
+    energy_tol::Float64
+    last_energy::Float64
+    TimerObserver(energy_tol=0.0) = new(energy_tol, 1000.0)
 end
 
 function ITensorMPS.checkdone!(o::TimerObserver; kwargs...)
+    energy = kwargs[:energy]
+    if o.energy_tol > 0.0 && abs(energy - o.last_energy) / abs(energy) < o.energy_tol
+        println("Energy converged after sweep $(kwargs[:sweep]), stopping DMRG early")
+        return true
+    end
+    o.last_energy = energy
     if peektimer() > TIME_LIMIT_SECONDS
         println("Time limit approaching, stopping DMRG early...")
         TIME_LIMIT_EXCEEDED[] = true
-        return true  # Signal DMRG to stop
+        return true
     end
     return false
 end
@@ -286,7 +295,7 @@ function build_MPO_MF(s; L::Int, t::Float64, U::Float64, mu::Float64, V::Float64
 end
 
 # DMRG ground state with optional previous state initialization; fallback is product state
-function run_dmrg_ground(s, H, density::Float64; psi_init=nothing, nsweeps=10, maxdim=200, cutoff=1e-10)
+function run_dmrg_ground(s, H, density::Float64; psi_init=nothing, nsweeps=10, maxdim=200, cutoff=1e-10, energy_tol=0.0)
     L_sites = length(s)  # Total MPS sites (2L for ladder)
     if psi_init !== nothing
         psi0 = psi_init
@@ -305,7 +314,7 @@ function run_dmrg_ground(s, H, density::Float64; psi_init=nothing, nsweeps=10, m
     end
     cutoff!(sweeps, cutoff)
 
-    obs = TimerObserver()
+    obs = TimerObserver(energy_tol)
     E0, psi0 = dmrg(H, psi0, sweeps; observer=obs)
     return E0, psi0
 end
@@ -327,7 +336,7 @@ function run_dmrg_excited(s, H, psi0, density::Float64; nsweeps=10, maxdim=200, 
 end
 
 # Solve one Hamiltonian instance and return (density, energy, psi)
-function solve_Ham(s, mu, model_params, alpha, beta, density; psi_init=nothing, nsweeps::Int=10, maxdim=200, cutoff=1e-10)
+function solve_Ham(s, mu, model_params, alpha, beta, density; psi_init=nothing, nsweeps::Int=10, maxdim=200, cutoff=1e-10, energy_tol=0.0)
     L = model_params[:L]
     t = model_params[:t]
     U = model_params[:U]
@@ -337,7 +346,7 @@ function solve_Ham(s, mu, model_params, alpha, beta, density; psi_init=nothing, 
     φ = get(model_params, :phi_ext, nothing)
 
     H = build_MPO_MF(s; L=L, t=t, U=U, mu=mu, V=V, r_range=r_range, alpha=alpha, beta=beta, t0=t0, phi_ext=φ)
-    E, psi = run_dmrg_ground(s, H, density; psi_init=psi_init, nsweeps=nsweeps, maxdim=maxdim, cutoff=cutoff)
+    E, psi = run_dmrg_ground(s, H, density; psi_init=psi_init, nsweeps=nsweeps, maxdim=maxdim, cutoff=cutoff, energy_tol=energy_tol)
     n = average_density(psi)
     return n, E, psi, H
 end
@@ -705,7 +714,7 @@ function cdw_order_parameter(psi::MPS, s; L_rungs::Int, q::Float64=Float64(π))
 end
 
 # Main SCF loop: adjust mu for target density, then update alpha/beta until self-consistent; creates site indices once and reuses it and old MPS for DMRG across SCF iterations
-function main_loop(model_params; n_target::Float64, E_p::Float64, z_c::Int=4, alpha_list, beta_list, psi_init=nothing, max_iter::Int=150, nsweeps=10, maxdim=200, cutoff=1e-10)
+function main_loop(model_params; n_target::Float64, E_p::Float64, z_c::Int=4, alpha_list, beta_list, psi_init=nothing, max_iter::Int=150, nsweeps=10, maxdim=200, cutoff=1e-10, energy_tol=1e-6)
     alpha = model_params[:alpha]
     beta = model_params[:beta]
     mu = model_params[:mu]
@@ -727,7 +736,7 @@ function main_loop(model_params; n_target::Float64, E_p::Float64, z_c::Int=4, al
     for it in 1:max_iter
         # Warm-start from previous psi (nothing on first iteration = cold start)
         mu, n_meas, E, psi, H = find_mu_for_target_density(s, model_params, alpha, beta, mu, n_target;
-            psi_init=psi, dmrg_kw=(nsweeps=nsweeps, maxdim=maxdim, cutoff=cutoff))
+            psi_init=psi, dmrg_kw=(nsweeps=nsweeps, maxdim=maxdim, cutoff=cutoff, energy_tol=energy_tol))
         if TIME_LIMIT_EXCEEDED[] || peektimer() > TIME_LIMIT_SECONDS
             return alpha, beta, alpha_list, beta_list, mu, psi, E, s, H
         end
@@ -770,8 +779,9 @@ function main_loop(model_params; n_target::Float64, E_p::Float64, z_c::Int=4, al
 end
 
 # Convenience: run the full loop and then compute gap and order parameter
+# inherit_from: path to another run's HDF5 file to inherit alpha/beta/mu from
 function run_loop(L::Int, t::Float64, U::Float64, t0::Float64, t_p::Float64, mu_init::Float64, n_target::Float64,
-    r_range::Int, z_c::Int, E_p::Real, chi_max::Int=200; nsweeps=30, cutoff=1e-10)
+    r_range::Int, z_c::Int, E_p::Real, chi_max::Int=200; nsweeps=30, cutoff=1e-10, energy_tol=1e-6, inherit_from::Union{Nothing,String}=nothing)
     
     tick()
 
@@ -787,6 +797,16 @@ function run_loop(L::Int, t::Float64, U::Float64, t0::Float64, t_p::Float64, mu_
         psi_resume = haskey(F, "psi") ? cu(read(F, "psi", MPS)) : nothing
         close(F)
         println("Resuming with mu_init=$(mu_init), psi_resume=$(psi_resume !== nothing ? "loaded" : "not found")")
+    elseif inherit_from !== nothing && isfile(inherit_from)
+        println("Inheriting alpha/beta/mu from $inherit_from")
+        F = h5open(inherit_from, "r")
+        alpha = read(F, "alpha")
+        beta = read(F, "beta")
+        mu_init = read(F, "mu")
+        close(F)
+        alpha_list = Vector{Any}()
+        beta_list = Vector{Any}()
+        psi_resume = nothing  # Can't reuse psi (different chi)
     else
         println("Starting fresh run")
         pref = 2 * t_p^2 / E_p  # Note: no z_c factor for ladders (see Appendix E)
@@ -820,7 +840,7 @@ function run_loop(L::Int, t::Float64, U::Float64, t0::Float64, t_p::Float64, mu_
         :outfile => outfile,
     )
 
-    alpha, beta, alpha_list, beta_list, mu, psi, E, s, H = main_loop(model_params; n_target=n_target, E_p=E_p, z_c=z_c, alpha_list=alpha_list, beta_list=beta_list, psi_init=psi_resume, nsweeps=nsweeps, maxdim=chi_max, cutoff=cutoff)
+    alpha, beta, alpha_list, beta_list, mu, psi, E, s, H = main_loop(model_params; n_target=n_target, E_p=E_p, z_c=z_c, alpha_list=alpha_list, beta_list=beta_list, psi_init=psi_resume, nsweeps=nsweeps, maxdim=chi_max, cutoff=cutoff, energy_tol=energy_tol)
 
     if H === nothing
         println("Main loop returned nothing for H (convergence failure). Exiting.")
@@ -865,8 +885,8 @@ end
 # CLI entry point
 # -----------------------------
 
-if length(ARGS) != 8
-    println("Usage: julia main_loop_script_ladder_gpu.jl <L> <U> <t0> <t_p> <chi_max> <E_p> <mu_init> <density>")
+if length(ARGS) < 8 || length(ARGS) > 10
+    println("Usage: julia main_loop_script_ladder_gpu.jl <L> <U> <t0> <t_p> <chi_max> <E_p> <mu_init> <density> [energy_tol] [inherit_from]")
     println("  L: number of rungs (total sites = 2L)")
     println("  U: onsite interaction (repulsive, U > 0 for ladders)")
     println("  t0: rung hopping strength")
@@ -875,6 +895,8 @@ if length(ARGS) != 8
     println("  E_p: pair binding energy")
     println("  mu_init: initial chemical potential")
     println("  density: target particle density (e.g. 0.9375)")
+    println("  energy_tol: (optional) relative energy tolerance for early DMRG exit (default 1e-6)")
+    println("  inherit_from: (optional) path to HDF5 file to inherit alpha/beta/mu from it")
     return
 end
 
@@ -886,6 +908,8 @@ chi_max = parse(Int, ARGS[5])
 E_p = parse(Float64, ARGS[6])
 mu_init = parse(Float64, ARGS[7])
 density = parse(Float64, ARGS[8])
+energy_tol = length(ARGS) >= 9 ? parse(Float64, ARGS[9]) : 1e-6
+inherit_from = length(ARGS) >= 10 ? ARGS[10] : nothing
 
 t = 1.0
 n_target = density
@@ -895,4 +919,4 @@ z_c = 4  # Still used in calculate_alpha_beta_measured
 ITensors.Strided.set_num_threads(1)
 BLAS.set_num_threads(1)
 
-result = run_loop(L, t, U, t0, t_p, mu_init, n_target, r_range, z_c, E_p, chi_max)
+result = run_loop(L, t, U, t0, t_p, mu_init, n_target, r_range, z_c, E_p, chi_max; energy_tol=energy_tol, inherit_from=inherit_from)
