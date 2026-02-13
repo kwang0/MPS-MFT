@@ -33,7 +33,7 @@ echo "outfile_name: $outfile_name"
 
 mkdir -p logs_julia
 
-srun -u julia main_loop_script_ladder_gpu.jl $1 $2 $3 $4 $5 $6 $7 $8 \
+srun -u julia main_loop_script_ladder_gpu.jl "$@" \
   | tee -a logs_julia/dmrg_ladder_L_${1}_U_${2}_t0_${3}_t_p_${4}_chi_${5}_gpu.log
 
 python <<END
