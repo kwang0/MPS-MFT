@@ -714,7 +714,7 @@ function cdw_order_parameter(psi::MPS, s; L_rungs::Int, q::Float64=Float64(π))
 end
 
 # Main SCF loop: adjust mu for target density, then update alpha/beta until self-consistent; creates site indices once and reuses it and old MPS for DMRG across SCF iterations
-function main_loop(model_params; n_target::Float64, E_p::Float64, z_c::Int=4, alpha_list, beta_list, psi_init=nothing, max_iter::Int=150, nsweeps=10, maxdim=200, cutoff=1e-10, energy_tol=1e-6)
+function main_loop(model_params; n_target::Float64, E_p::Float64, z_c::Int=4, alpha_list, beta_list, psi_init=nothing, max_iter::Int=150, nsweeps=10, maxdim=200, cutoff=1e-10, energy_tol=1e-6, damp=0.5)
     alpha = model_params[:alpha]
     beta = model_params[:beta]
     mu = model_params[:mu]
@@ -753,8 +753,8 @@ function main_loop(model_params; n_target::Float64, E_p::Float64, z_c::Int=4, al
         end
 
         println("NOT CONVERGED; updating alpha, beta and continuing...")
-        alpha = alpha_meas
-        beta = beta_meas
+        alpha = damp * alpha_meas + (1 - damp) * alpha
+        beta  = damp * beta_meas  + (1 - damp) * beta
         model_params[:alpha] = alpha
         model_params[:beta] = beta
         model_params[:mu] = mu
