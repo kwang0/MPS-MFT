@@ -810,14 +810,19 @@ function run_loop(L::Int, t::Float64, U::Float64, t0::Float64, t_p::Float64, mu_
     else
         println("Starting fresh run")
         pref = 2 * t_p^2 / E_p  # Note: no z_c factor for ladders (see Appendix E)
-        # Initialize alpha[L, L, 2, 2] with diagonal onsite pairing
-        alpha = zeros(Float64, L, L, 2, 2)
-        for i in 1:L
-            alpha[i, i, 1, 1] = pref  # Onsite pairing leg 0
-            alpha[i, i, 2, 2] = pref  # Onsite pairing leg 1
+        eps  = 1e-3 * pref  # try 1e-4–1e-2 times pref
+
+        beta  = zeros(Float64, 2, L, L, 2, 2) # Initialize beta[2, L, L, 2, 2] to zeros
+        alpha = zeros(Float64, L, L, 2, 2) # Initialize alpha[L, L, 2, 2] with small random values up to r_range
+        for r in 0:r_range
+            for j in 1:2, jp in 1:2
+                val = eps * randn()
+                for i in 1:(L-r)
+                    alpha[i, i+r, j, jp] = val
+                    alpha[i+r, i, jp, j] = val  # symmetrize
+                end
+            end
         end
-        # Initialize beta[2, L, L, 2, 2] to zeros
-        beta = zeros(Float64, 2, L, L, 2, 2)
         alpha_list = Vector{Any}()
         beta_list = Vector{Any}()
         psi_resume = nothing
