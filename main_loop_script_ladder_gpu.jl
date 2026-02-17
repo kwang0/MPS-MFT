@@ -742,7 +742,7 @@ function main_loop(model_params; n_target::Float64, E_p::Float64, z_c::Int=4, al
         end
         println("Target density achieved with mu=$mu, n=$n_meas")
 
-        alpha_meas, beta_meas = calculate_alpha_beta_measured(psi, s; L=L, r_range=r_range, z_c=z_c, t_p=t_p, E_p=E_p)
+        alpha_meas, beta_meas = calculate_alpha_beta_measured(psi, s; L=L, r_range=r_range, z_c=z_c, t_p=t_p, E_p=E_p, threshold=1e-3)
         alpha_list == [] ? alpha_list = alpha_meas : alpha_list = cat(alpha_list, alpha_meas, dims=length(size(alpha_meas))+1)
         beta_list == [] ? beta_list = beta_meas : beta_list = cat(beta_list, beta_meas, dims=length(size(beta_meas))+1)
 
