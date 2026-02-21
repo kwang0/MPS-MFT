@@ -305,9 +305,9 @@ function run_dmrg_ground(s, H, density::Float64; psi_init=nothing, nsweeps=10, m
 
     sweeps = Sweeps(nsweeps)
     if psi_init !== nothing
-        # Starting from previous state: use full maxdim from sweep 1 and no noise
+        # Starting from previous state: use full maxdim from sweep 1
         maxdim!(sweeps, maxdim)
-        noise!(sweeps, 0.0)
+        noise!(sweeps, 1e-6, 1e-7, 1e-8, 0.0)
     else
         maxdim!(sweeps, min(10, maxdim), min(20, maxdim), 100, maxdim)
         noise!(sweeps, 1e-5, 1e-6, 1e-7, 1e-8, 0.0)
