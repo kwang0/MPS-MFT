@@ -500,7 +500,7 @@ function find_mu_for_target_density(s, model_params, alpha, beta, mu_init, n_tar
                 end
                 
                 # Check if mu interval is too small to refine further
-                if abs(mu1 - mu0) < 1e-10
+                if abs(mu1 - mu0) < 1e-6
                     println("Mu interval too small ($(abs(mu1 - mu0))), returning best result...")
                     # Return the endpoint closer to target
                     if abs(n0 - n_target) < abs(n1 - n_target)
@@ -512,7 +512,7 @@ function find_mu_for_target_density(s, model_params, alpha, beta, mu_init, n_tar
                     end
                 end
                 
-                if abs(n1 - n0) > 1e-12
+                if abs(n1 - n0) > 1e-6
                     println("Trying secant step...")
 
                     # Update mu that is farther from target
@@ -542,7 +542,7 @@ function find_mu_for_target_density(s, model_params, alpha, beta, mu_init, n_tar
                     println("Secant unstable (n0 ≈ n1), falling back to bisection...")
                     
                     # If densities are identical and interval is tiny, we've converged numerically
-                    if abs(mu1 - mu0) < 1e-8
+                    if abs(mu1 - mu0) < 1e-6
                         println("Densities identical and mu interval small, returning closest to target...")
                         if abs(n0 - n_target) < abs(n1 - n_target)
                             return mu0, n0, E_new, psi_new, H_new
