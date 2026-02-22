@@ -184,13 +184,18 @@ end
 #  - t0: rung hopping
 #  - optional phi_ext (Peierls flux per hop)
 function build_MPO_MF(s; L::Int, t::Float64, U::Float64, mu::Float64, V::Float64,
-    r_range::Int, alpha::Array{Float64,4}, beta::Array{Float64,5}, t0::Float64,
+    r_range::Int, alpha::Array{Float64,4}, beta::Array{Float64,5}, mu_cdw::Array{Float64,2}, t0::Float64,
     phi_ext::Union{Nothing,Float64}=nothing)
     os = OpSum()
 
-    # Onsite terms: -mu*Ntot + U*Nup*Ndn
+    # Onsite terms: -mu*Ntot + U*Nup*Ndn + mu_cdw(site,spin)*Nspin
+    # mu_cdw indexing: [1, site] = down spin, [2, site] = up spin
     for i in 1:(2*L)
         add!(os, -mu, "Ntot", i)
+        m_dn = mu_cdw[1, i]
+        m_up = mu_cdw[2, i]
+        m_dn != 0 && add!(os, m_dn, "Ndn", i)
+        m_up != 0 && add!(os, m_up, "Nup", i)
         add!(os, U, "Nupdn", i)
     end
 
@@ -237,8 +242,9 @@ function build_MPO_MF(s; L::Int, t::Float64, U::Float64, mu::Float64, V::Float64
         end
     end
 
-    # Optional nearest-neighbor density-density V N_i N_{i+1} along legs
+    # Optional nearest-neighbor density-density V terms on both legs and rungs
     if V != 0
+        # Leg bonds
         for i_rung in 1:(L-1)
             for j_leg in 0:1
                 site = rung_leg_to_site(i_rung, j_leg)
@@ -248,6 +254,15 @@ function build_MPO_MF(s; L::Int, t::Float64, U::Float64, mu::Float64, V::Float64
                 add!(os, V, "Ndn", site, "Nup", next_site)
                 add!(os, V, "Ndn", site, "Ndn", next_site)
             end
+        end
+        # Rung bonds
+        for i_rung in 1:L
+            site0 = rung_leg_to_site(i_rung, 0)
+            site1 = rung_leg_to_site(i_rung, 1)
+            add!(os, V, "Nup", site0, "Nup", site1)
+            add!(os, V, "Nup", site0, "Ndn", site1)
+            add!(os, V, "Ndn", site0, "Nup", site1)
+            add!(os, V, "Ndn", site0, "Ndn", site1)
         end
     end
 
@@ -273,7 +288,7 @@ function build_MPO_MF(s; L::Int, t::Float64, U::Float64, mu::Float64, V::Float64
                 site_i = rung_leg_to_site(i, j)
                 site_ip = rung_leg_to_site(i_p, j_p)
                 
-                if site_i != site_ip # No onsite terms for now (don't consider CDW)
+                if site_i != site_ip # No onsite terms for now (don't consider CDW); for CDW I think eq.7 handles the onsite case anyways, so didn't change this
                     bdn = beta[1, i, i_p, j+1, j_p+1]  # Julia 1-indexed
                     if bdn != 0
                         add!(os, bdn, "Cdagdn", site_i, "Cdn", site_ip)
@@ -344,8 +359,9 @@ function solve_Ham(s, mu, model_params, alpha, beta, density; psi_init=nothing, 
     r_range = model_params[:r_range]
     t0 = model_params[:t0]
     φ = get(model_params, :phi_ext, nothing)
+    mu_cdw = get(model_params, :mu_cdw, zeros(Float64, 2, 2 * L))
 
-    H = build_MPO_MF(s; L=L, t=t, U=U, mu=mu, V=V, r_range=r_range, alpha=alpha, beta=beta, t0=t0, phi_ext=φ)
+    H = build_MPO_MF(s; L=L, t=t, U=U, mu=mu, V=V, r_range=r_range, alpha=alpha, beta=beta, mu_cdw=mu_cdw, t0=t0, phi_ext=φ)
     E, psi = run_dmrg_ground(s, H, density; psi_init=psi_init, nsweeps=nsweeps, maxdim=maxdim, cutoff=cutoff, energy_tol=energy_tol)
     n = average_density(psi)
     return n, E, psi, H
@@ -381,7 +397,7 @@ end
 # end
 
 # Check convergence of alpha/beta by checking rms of relative errors along diagonals up to r_range
-function close_ab(alpha, alpha_meas, beta, beta_meas, r_range; thresh=1e-4)
+function close_ab(alpha, alpha_meas, beta, beta_meas, r_range; mu_cdw=nothing, mu_cdw_meas=nothing, thresh=1e-4)
     eps = 1e-12
     for j in 1:2, j_p in 1:2
         for r in 0:r_range
@@ -414,6 +430,16 @@ function close_ab(alpha, alpha_meas, beta, beta_meas, r_range; thresh=1e-4)
             end
         end
     end
+
+    if mu_cdw !== nothing && mu_cdw_meas !== nothing
+        errs = (mu_cdw_meas .- mu_cdw) ./ (abs.(mu_cdw) .+ eps)
+        rms_err = sqrt(sum(errs .^ 2) / length(errs))
+        if rms_err > thresh
+            println("mu_cdw not converged.")
+            return false
+        end
+    end
+
     return true
 end
 
@@ -653,6 +679,25 @@ function calculate_alpha_beta_measured(psi::MPS, s; L::Int, r_range::Int, z_c::I
     return alpha_meas, beta_meas
 end
 
+# Measure site and spin-resolved CDW mu field
+# Using Eq. 7, pref_mu is half the pair prefactor (I didn't check the MFT reduction to verify this)
+function calculate_mu_cdw_measured(psi::MPS; t_p::Float64, E_p::Float64, threshold::Float64=1e-5)
+    n_up = expect(psi, "Nup")
+    n_dn = expect(psi, "Ndn")
+    n_sites = length(n_up)
+    mu_cdw_meas = zeros(Float64, 2, n_sites)
+
+    pref_pair = 2*t_p^2 / E_p
+    pref = 0.5 *pref_pair
+    for i in 1:n_sites
+        val_dn = pref * (2*n_dn[i] - 1)
+        val_up = pref * (2*n_up[i] - 1)
+        mu_cdw_meas[1, i] = (abs(val_dn) > threshold) ? val_dn : 0.0
+        mu_cdw_meas[2, i] = (abs(val_up) > threshold) ? val_up : 0.0
+    end
+    return mu_cdw_meas
+end
+
 # Order parameter: average of diagonal r=0 of ⟨ Cup_i Cdn_{i+r} ⟩, excluding 10-site edges
 function order_parameter(psi::MPS, s)
     L = length(s)
@@ -717,8 +762,10 @@ end
 function main_loop(model_params; n_target::Float64, E_p::Float64, z_c::Int=4, alpha_list, beta_list, psi_init=nothing, max_iter::Int=150, nsweeps=10, maxdim=200, cutoff=1e-10, energy_tol=1e-6, damp=0.5)
     alpha = model_params[:alpha]
     beta = model_params[:beta]
+    mu_cdw = model_params[:mu_cdw]
     mu = model_params[:mu]
     U = model_params[:U]
+    V = model_params[:V]
     t_p = model_params[:t_p]
     r_range = model_params[:r_range]
     L = model_params[:L]
@@ -733,38 +780,67 @@ function main_loop(model_params; n_target::Float64, E_p::Float64, z_c::Int=4, al
         s = make_sites(2 * L)
     end
 
+    # Track fields from past iterations to detect period-n SCF convergence
+    recent_checks = 4  # 0 means check all past steps-back; set >0 to check only that many most recent steps-back (set as 4 for now)
+    alpha_hist = Vector{Array{Float64,4}}()
+    beta_hist = Vector{Array{Float64,5}}()
+    mu_cdw_hist = Vector{Array{Float64,2}}()
+
     for it in 1:max_iter
         # Warm-start from previous psi (nothing on first iteration = cold start)
         mu, n_meas, E, psi, H = find_mu_for_target_density(s, model_params, alpha, beta, mu, n_target;
             psi_init=psi, dmrg_kw=(nsweeps=nsweeps, maxdim=maxdim, cutoff=cutoff, energy_tol=energy_tol))
         if TIME_LIMIT_EXCEEDED[] || peektimer() > TIME_LIMIT_SECONDS
-            return alpha, beta, alpha_list, beta_list, mu, psi, E, s, H
+            return alpha, beta, mu_cdw, alpha_list, beta_list, mu, psi, E, s, H
         end
         println("Target density achieved with mu=$mu, n=$n_meas")
 
         alpha_meas, beta_meas = calculate_alpha_beta_measured(psi, s; L=L, r_range=r_range, z_c=z_c, t_p=t_p, E_p=E_p, threshold=1e-3)
+        mu_cdw_meas = calculate_mu_cdw_measured(psi; t_p=t_p, E_p=E_p, threshold=1e-3)
         alpha_list == [] ? alpha_list = alpha_meas : alpha_list = cat(alpha_list, alpha_meas, dims=length(size(alpha_meas))+1)
         beta_list == [] ? beta_list = beta_meas : beta_list = cat(beta_list, beta_meas, dims=length(size(beta_meas))+1)
 
-        println("Checking {alpha,beta} vs measured")
-        if close_ab(alpha, alpha_meas, beta, beta_meas, r_range; thresh=1e-3)
-            println("Converged {alpha,beta}. mu=$mu, n=$n_meas\nExiting loop")
-            return alpha, beta, alpha_list, beta_list, mu, psi, E, s, H
+        println("Checking {alpha,beta,mu_cdw} vs measured")
+        if close_ab(alpha, alpha_meas, beta, beta_meas, r_range; mu_cdw=mu_cdw, mu_cdw_meas=mu_cdw_meas, thresh=1e-3)
+            println("Converged {alpha,beta,mu_cdw}. mu=$mu, n=$n_meas\nExiting loop")
+            return alpha, beta, mu_cdw, alpha_list, beta_list, mu, psi, E, s, H
         end
 
-        println("NOT CONVERGED; updating alpha, beta and continuing...")
+        if !isempty(alpha_hist)
+            start_idx = (recent_checks <= 0) ? 1 : max(1, length(alpha_hist) - recent_checks + 1)
+            for idx in start_idx:length(alpha_hist)
+                n_steps_back = length(alpha_hist) - idx + 1
+                n_steps_back == 1 && continue
+                if close_ab(alpha_hist[idx], alpha, beta_hist[idx], beta, r_range; mu_cdw=mu_cdw_hist[idx], mu_cdw_meas=mu_cdw, thresh=1e-3)
+                    println("Converged {alpha,beta,mu_cdw}. n_steps_back=$(n_steps_back), mu=$mu, n=$n_meas\nExiting loop")
+                    return alpha, beta, mu_cdw, alpha_list, beta_list, mu, psi, E, s, H
+                end
+            end
+        end
+
+        println("NOT CONVERGED; updating alpha, beta, mu_cdw and continuing...")
+
+        # Save current fields for n-step-back detection in later iterations.
+        push!(alpha_hist, copy(alpha))
+        push!(beta_hist, copy(beta))
+        push!(mu_cdw_hist, copy(mu_cdw))
+
         alpha = damp * alpha_meas + (1 - damp) * alpha
         beta  = damp * beta_meas  + (1 - damp) * beta
+        mu_cdw = damp * mu_cdw_meas + (1 - damp) * mu_cdw
         model_params[:alpha] = alpha
         model_params[:beta] = beta
+        model_params[:mu_cdw] = mu_cdw
         model_params[:mu] = mu
 
         # Writing to data file
         F = h5open(outfile, "w")
         F["U"] = U
+        F["V"] = V
         F["t_p"] = t_p
         F["alpha"] = alpha
         F["beta"] = beta
+        F["mu_cdw"] = mu_cdw
         F["mu"] = mu
         F["E"] = E
         F["psi"] = ITensors.cpu(psi)
@@ -775,22 +851,23 @@ function main_loop(model_params; n_target::Float64, E_p::Float64, z_c::Int=4, al
     end
 
     @warn "Failed to converge alpha and beta within the maximum number of iterations"
-    return alpha, beta, alpha_list, beta_list, mu, psi, E, s, nothing
+    return alpha, beta, mu_cdw, alpha_list, beta_list, mu, psi, E, s, nothing
 end
 
 # Convenience: run the full loop and then compute gap and order parameter
 # inherit_from: path to another run's HDF5 file to inherit alpha/beta/mu from
-function run_loop(L::Int, t::Float64, U::Float64, t0::Float64, t_p::Float64, mu_init::Float64, n_target::Float64,
+function run_loop(L::Int, t::Float64, U::Float64, V::Float64, t0::Float64, t_p::Float64, mu_init::Float64, n_target::Float64,
     r_range::Int, z_c::Int, E_p::Real, chi_max::Int=200; nsweeps=30, cutoff=1e-10, energy_tol=1e-6, inherit_from::Union{Nothing,String}=nothing)
     
     tick()
 
-    outfile = "results_L_$(L)_U_$(U)_t0_$(t0)_t_p_$(t_p)_chi_$(chi_max)_gpu.h5"
+    outfile = "results_L_$(L)_U_$(U)_V_$(V)_t0_$(t0)_t_p_$(t_p)_chi_$(chi_max)_gpu.h5"
     if (isfile(outfile))
         println("Resuming from checkpoint $outfile")
         F = h5open(outfile,"r")
         alpha = read(F, "alpha")
         beta = read(F, "beta")
+        mu_cdw = haskey(F, "mu_cdw") ? read(F, "mu_cdw") : zeros(Float64, 2, 2 * L) #Did a check in case we use initial state that doesn't have cdw implementation
         alpha_list = read(F, "alpha_list")
         beta_list = read(F, "beta_list")
         mu_init = read(F, "mu")
@@ -802,6 +879,7 @@ function run_loop(L::Int, t::Float64, U::Float64, t0::Float64, t_p::Float64, mu_
         F = h5open(inherit_from, "r")
         alpha = read(F, "alpha")
         beta = read(F, "beta")
+        mu_cdw = haskey(F, "mu_cdw") ? read(F, "mu_cdw") : zeros(Float64, 2, 2 * L)
         mu_init = read(F, "mu")
         close(F)
         alpha_list = Vector{Any}()
@@ -814,6 +892,7 @@ function run_loop(L::Int, t::Float64, U::Float64, t0::Float64, t_p::Float64, mu_
 
         beta  = zeros(Float64, 2, L, L, 2, 2) # Initialize beta[2, L, L, 2, 2] to zeros
         alpha = zeros(Float64, L, L, 2, 2) # Initialize alpha[L, L, 2, 2] with small random values up to r_range
+        mu_cdw = zeros(Float64, 2, 2 * L)
         for r in 0:r_range
             for j in 1:2, jp in 1:2
                 val = eps * randn()
@@ -828,16 +907,17 @@ function run_loop(L::Int, t::Float64, U::Float64, t0::Float64, t_p::Float64, mu_
         psi_resume = nothing
     end
 
-    println("Running with t0=$(t0) t_p=$(t_p) U=$U L=$L chi_max=$(chi_max) E_p=$(E_p) mu_init=$(mu_init)")
+    println("Running with t0=$(t0) t_p=$(t_p) U=$U V=$V L=$L chi_max=$(chi_max) E_p=$(E_p) mu_init=$(mu_init)")
 
     model_params = Dict{Symbol,Any}(
         :L => L,
         :t => t,
         :U => U,
-        :V => 0.0,
+        :V => V,
         :t0 => t0,
         :t_p => t_p,
         :mu => mu_init,
+        :mu_cdw => mu_cdw,
         :r_range => r_range,
         :alpha => alpha,
         :beta => beta,
@@ -845,7 +925,7 @@ function run_loop(L::Int, t::Float64, U::Float64, t0::Float64, t_p::Float64, mu_
         :outfile => outfile,
     )
 
-    alpha, beta, alpha_list, beta_list, mu, psi, E, s, H = main_loop(model_params; n_target=n_target, E_p=E_p, z_c=z_c, alpha_list=alpha_list, beta_list=beta_list, psi_init=psi_resume, nsweeps=nsweeps, maxdim=chi_max, cutoff=cutoff, energy_tol=energy_tol)
+    alpha, beta, mu_cdw, alpha_list, beta_list, mu, psi, E, s, H = main_loop(model_params; n_target=n_target, E_p=E_p, z_c=z_c, alpha_list=alpha_list, beta_list=beta_list, psi_init=psi_resume, nsweeps=nsweeps, maxdim=chi_max, cutoff=cutoff, energy_tol=energy_tol)
 
     if H === nothing
         println("Main loop returned nothing for H (convergence failure). Exiting.")
@@ -868,10 +948,12 @@ function run_loop(L::Int, t::Float64, U::Float64, t0::Float64, t_p::Float64, mu_
     # Writing to data file
     F = h5open(outfile, "w")
     F["U"] = U
+    F["V"] = V
     F["t0"] = t0
     F["t_p"] = t_p
     F["alpha"] = alpha
     F["beta"] = beta
+    F["mu_cdw"] = mu_cdw
     F["mu"] = mu
     F["psi"] = ITensors.cpu(psi)
     F["order_param"] = order_param
@@ -890,10 +972,11 @@ end
 # CLI entry point
 # -----------------------------
 
-if length(ARGS) < 8 || length(ARGS) > 10
-    println("Usage: julia main_loop_script_ladder_gpu.jl <L> <U> <t0> <t_p> <chi_max> <E_p> <mu_init> <density> [energy_tol] [inherit_from]")
+if length(ARGS) < 9 || length(ARGS) > 11
+    println("Usage: julia main_loop_script_ladder_gpu.jl <L> <U> <V> <t0> <t_p> <chi_max> <E_p> <mu_init> <density> [energy_tol] [inherit_from]")
     println("  L: number of rungs (total sites = 2L)")
     println("  U: onsite interaction (repulsive, U > 0 for ladders)")
+    println("  V: nearest-neighbor interaction strength")
     println("  t0: rung hopping strength")
     println("  t_p: inter-chain hopping")
     println("  chi_max: maximum bond dimension")
@@ -901,20 +984,21 @@ if length(ARGS) < 8 || length(ARGS) > 10
     println("  mu_init: initial chemical potential")
     println("  density: target particle density (e.g. 0.9375)")
     println("  energy_tol: (optional) relative energy tolerance for early DMRG exit (default 1e-6)")
-    println("  inherit_from: (optional) path to HDF5 file to inherit alpha/beta/mu from it")
+    println("  inherit_from: (optional) path to HDF5 file to inherit alpha/beta/mu/mu_cdw from it")
     return
 end
 
 L = parse(Int, ARGS[1])
 U = parse(Float64, ARGS[2])
-t0 = parse(Float64, ARGS[3])
-t_p = parse(Float64, ARGS[4])
-chi_max = parse(Int, ARGS[5])
-E_p = parse(Float64, ARGS[6])
-mu_init = parse(Float64, ARGS[7])
-density = parse(Float64, ARGS[8])
-energy_tol = length(ARGS) >= 9 ? parse(Float64, ARGS[9]) : 1e-6
-inherit_from = length(ARGS) >= 10 ? ARGS[10] : nothing
+V = parse(Float64, ARGS[3])
+t0 = parse(Float64, ARGS[4])
+t_p = parse(Float64, ARGS[5])
+chi_max = parse(Int, ARGS[6])
+E_p = parse(Float64, ARGS[7])
+mu_init = parse(Float64, ARGS[8])
+density = parse(Float64, ARGS[9])
+energy_tol = length(ARGS) >= 10 ? parse(Float64, ARGS[10]) : 1e-6
+inherit_from = length(ARGS) >= 11 ? ARGS[11] : nothing
 
 t = 1.0
 n_target = density
@@ -924,4 +1008,4 @@ z_c = 4  # Still used in calculate_alpha_beta_measured
 ITensors.Strided.set_num_threads(1)
 BLAS.set_num_threads(1)
 
-result = run_loop(L, t, U, t0, t_p, mu_init, n_target, r_range, z_c, E_p, chi_max; energy_tol=energy_tol, inherit_from=inherit_from)
+result = run_loop(L, t, U, V, t0, t_p, mu_init, n_target, r_range, z_c, E_p, chi_max; energy_tol=energy_tol, inherit_from=inherit_from)
