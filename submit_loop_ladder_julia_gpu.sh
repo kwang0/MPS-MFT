@@ -28,14 +28,14 @@ module load libfabric
 module load python
 conda activate tenpy-env
 
-outfile_name="results_L_${1}_U_${2}_V_${3}_t0_${4}_t_p_${5}_chi_${6}_gpu.h5"
+outfile_name="results_L_${1}_U_${2}_V_${3}_t0_${4}_t_p_${5}_chi_${6}_density_${9}_gpu.h5"
 
 echo "outfile_name: $outfile_name"
 
 mkdir -p logs_julia
 
 srun -u julia main_loop_script_ladder_gpu.jl "$@" \
-  | tee -a logs_julia/dmrg_ladder_L_${1}_U_${2}_V_${3}_t0_${4}_t_p_${5}_chi_${6}_gpu.log
+  | tee -a logs_julia/dmrg_ladder_L_${1}_U_${2}_V_${3}_t0_${4}_t_p_${5}_chi_${6}_density_${9}_gpu.log
 
 python <<END
 import h5py, sys

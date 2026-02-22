@@ -861,7 +861,7 @@ function run_loop(L::Int, t::Float64, U::Float64, V::Float64, t0::Float64, t_p::
     
     tick()
 
-    outfile = "results_L_$(L)_U_$(U)_V_$(V)_t0_$(t0)_t_p_$(t_p)_chi_$(chi_max)_gpu.h5"
+    outfile = "results_L_$(L)_U_$(U)_V_$(V)_t0_$(t0)_t_p_$(t_p)_chi_$(chi_max)_density_$(n_target)_gpu.h5"
     if (isfile(outfile))
         println("Resuming from checkpoint $outfile")
         F = h5open(outfile,"r")
@@ -907,7 +907,7 @@ function run_loop(L::Int, t::Float64, U::Float64, V::Float64, t0::Float64, t_p::
         psi_resume = nothing
     end
 
-    println("Running with t0=$(t0) t_p=$(t_p) U=$U V=$V L=$L chi_max=$(chi_max) E_p=$(E_p) mu_init=$(mu_init)")
+    println("Running with t0=$(t0) t_p=$(t_p) U=$U V=$V L=$L chi_max=$(chi_max) E_p=$(E_p) mu_init=$(mu_init) density=$(n_target)")
 
     model_params = Dict{Symbol,Any}(
         :L => L,
