@@ -781,7 +781,7 @@ function main_loop(model_params; n_target::Float64, E_p::Float64, z_c::Int=4, al
     end
 
     # Track fields from past iterations to detect period-n SCF convergence
-    recent_checks = 4  # 0 means check all past steps-back; set >0 to check only that many most recent steps-back (set as 4 for now)
+    recent_checks = 8  # 0 means check all past steps-back; set >0 to check only that many most recent steps-back (set as 8 for now)
     alpha_hist = Vector{Array{Float64,4}}()
     beta_hist = Vector{Array{Float64,5}}()
     mu_cdw_hist = Vector{Array{Float64,2}}()
