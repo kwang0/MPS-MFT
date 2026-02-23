@@ -320,9 +320,9 @@ function run_dmrg_ground(s, H, density::Float64; psi_init=nothing, nsweeps=10, m
 
     sweeps = Sweeps(nsweeps)
     if psi_init !== nothing
-        # Starting from previous state: use full maxdim from sweep 1 and no noise
+        # Starting from previous state: use full maxdim from sweep 1
         maxdim!(sweeps, maxdim)
-        noise!(sweeps, 0.0)
+        noise!(sweeps, 1e-6, 1e-7, 1e-8, 0.0)
     else
         maxdim!(sweeps, min(10, maxdim), min(20, maxdim), 100, maxdim)
         noise!(sweeps, 1e-5, 1e-6, 1e-7, 1e-8, 0.0)
@@ -526,7 +526,7 @@ function find_mu_for_target_density(s, model_params, alpha, beta, mu_init, n_tar
                 end
                 
                 # Check if mu interval is too small to refine further
-                if abs(mu1 - mu0) < 1e-10
+                if abs(mu1 - mu0) < 1e-6
                     println("Mu interval too small ($(abs(mu1 - mu0))), returning best result...")
                     # Return the endpoint closer to target
                     if abs(n0 - n_target) < abs(n1 - n_target)
@@ -538,7 +538,7 @@ function find_mu_for_target_density(s, model_params, alpha, beta, mu_init, n_tar
                     end
                 end
                 
-                if abs(n1 - n0) > 1e-12
+                if abs(n1 - n0) > 1e-6
                     println("Trying secant step...")
 
                     # Update mu that is farther from target
@@ -568,7 +568,7 @@ function find_mu_for_target_density(s, model_params, alpha, beta, mu_init, n_tar
                     println("Secant unstable (n0 ≈ n1), falling back to bisection...")
                     
                     # If densities are identical and interval is tiny, we've converged numerically
-                    if abs(mu1 - mu0) < 1e-8
+                    if abs(mu1 - mu0) < 1e-6
                         println("Densities identical and mu interval small, returning closest to target...")
                         if abs(n0 - n_target) < abs(n1 - n_target)
                             return mu0, n0, E_new, psi_new, H_new
