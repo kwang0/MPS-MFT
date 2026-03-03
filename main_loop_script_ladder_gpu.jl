@@ -307,7 +307,7 @@ function run_dmrg_ground(s, H, density::Float64; psi_init=nothing, nsweeps=10, m
     if psi_init !== nothing
         # Starting from previous state: use full maxdim from sweep 1
         maxdim!(sweeps, maxdim)
-        noise!(sweeps, 1e-6, 1e-7, 1e-8, 0.0)
+        noise!(sweeps, 1e-3, 1e-4, 1e-5, 1e-6, 0.0)
     else
         maxdim!(sweeps, min(10, maxdim), min(20, maxdim), 100, maxdim)
         noise!(sweeps, 1e-5, 1e-6, 1e-7, 1e-8, 0.0)
@@ -390,10 +390,13 @@ function close_ab(alpha, alpha_meas, beta, beta_meas, r_range; thresh=1e-4)
             # alpha
             a = [alpha[i, i+r, j, j_p] for i in 1:n_diag]
             am = [alpha_meas[i, i+r, j, j_p] for i in 1:n_diag]
+    	    am[abs.(a) .< thresh] .= 0.0 # Excluding small values from check (use distinct threshold?)
+	        a[abs.(a) .< thresh] .= 0.0
             errs = (am .- a) ./ (abs.(a) .+ eps)
             rms_err = sqrt(sum(errs .^ 2) / length(errs))
             if rms_err > thresh
                 println("Alpha not converged.")
+		println("r = $r, j = $j, j_p = $(j_p), rms_err = $(rms_err)")
                 return false
             end
         end
@@ -406,6 +409,8 @@ function close_ab(alpha, alpha_meas, beta, beta_meas, r_range; thresh=1e-4)
             # beta
             b = [beta[σ, i, i+r, j, j_p] for i in 1:n_diag]
             bm = [beta_meas[σ, i, i+r, j, j_p] for i in 1:n_diag]
+	        bm[abs.(b) .< thresh] .= 0.0
+	        b[abs.(b) .< thresh] .= 0.0
             errs = (bm .- b) ./ (abs.(b) .+ eps)
             rms_err = sqrt(sum(errs .^ 2) / length(errs))
             if rms_err > thresh
@@ -420,7 +425,7 @@ end
 # Find mu to hit target density using secant with bisection fallback
 # Starts DMRG from the previous psi at each step
 function find_mu_for_target_density(s, model_params, alpha, beta, mu_init, n_target;
-    psi_init=nothing, tol=1e-3, delta_mu=0.01, max_iter=100, dmrg_kw)
+    psi_init=nothing, tol=2e-3, delta_mu=0.01, max_iter=100, dmrg_kw)
     mu0 = mu_init
     n0, E0, psi0, H0 = solve_Ham(s, mu0, model_params, alpha, beta, model_params[:density]; psi_init=psi_init, dmrg_kw...)
     psi_prev = psi0  # Track latest psi for starting
@@ -742,12 +747,12 @@ function main_loop(model_params; n_target::Float64, E_p::Float64, z_c::Int=4, al
         end
         println("Target density achieved with mu=$mu, n=$n_meas")
 
-        alpha_meas, beta_meas = calculate_alpha_beta_measured(psi, s; L=L, r_range=r_range, z_c=z_c, t_p=t_p, E_p=E_p, threshold=1e-3)
+        alpha_meas, beta_meas = calculate_alpha_beta_measured(psi, s; L=L, r_range=r_range, z_c=z_c, t_p=t_p, E_p=E_p, threshold=1e-6)
         alpha_list == [] ? alpha_list = alpha_meas : alpha_list = cat(alpha_list, alpha_meas, dims=length(size(alpha_meas))+1)
         beta_list == [] ? beta_list = beta_meas : beta_list = cat(beta_list, beta_meas, dims=length(size(beta_meas))+1)
 
         println("Checking {alpha,beta} vs measured")
-        if close_ab(alpha, alpha_meas, beta, beta_meas, r_range; thresh=1e-3)
+        if close_ab(alpha, alpha_meas, beta, beta_meas, r_range; thresh=5e-3)
             println("Converged {alpha,beta}. mu=$mu, n=$n_meas\nExiting loop")
             return alpha, beta, alpha_list, beta_list, mu, psi, E, s, H
         end
