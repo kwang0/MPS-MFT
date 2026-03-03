@@ -741,7 +741,7 @@ function main_loop(model_params; n_target::Float64, E_p::Float64, z_c::Int=4, al
     for it in 1:max_iter
         # Warm-start from previous psi (nothing on first iteration = cold start)
         mu, n_meas, E, psi, H = find_mu_for_target_density(s, model_params, alpha, beta, mu, n_target;
-            psi_init=psi, dmrg_kw=(nsweeps=nsweeps, maxdim=maxdim, cutoff=cutoff, energy_tol=energy_tol))
+            psi_init=psi, tol=2e-3, dmrg_kw=(nsweeps=nsweeps, maxdim=maxdim, cutoff=cutoff, energy_tol=energy_tol))
         if TIME_LIMIT_EXCEEDED[] || peektimer() > TIME_LIMIT_SECONDS
             return alpha, beta, alpha_list, beta_list, mu, psi, E, s, H
         end

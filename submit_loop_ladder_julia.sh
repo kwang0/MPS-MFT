@@ -20,17 +20,18 @@
 export OMP_NUM_THREADS=256
 export MKL_NUM_THREADS=256
 
+module load julia
 module load python
 conda activate tenpy-env
 
-outfile_name="results_L_${1}_U_${2}_t0_${3}_t_p_${4}_chi_${5}.h5"
+outfile_name="results_L_${1}_U_${2}_t0_${3}_t_p_${4}_chi_${5}_cpu.h5"
 
 echo "outfile_name: $outfile_name"
 
 mkdir -p logs_julia
 
-srun -u julia main_loop_script_ladder.jl $1 $2 $3 $4 $5 $6 $7 $8 \
-  | tee -a logs_julia/dmrg_ladder_L_${1}_U_${2}_t0_${3}_t_p_${4}_chi_${5}.log
+srun -u julia -t 32 main_loop_script_ladder.jl "$@" \
+  | tee -a logs_julia/dmrg_ladder_L_${1}_U_${2}_t0_${3}_t_p_${4}_chi_${5}_cpu.log
 
 python <<END
 import h5py, sys

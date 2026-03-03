@@ -9,23 +9,31 @@ using Random
 
 # Global flag to signal time limit exceeded
 const TIME_LIMIT_EXCEEDED = Ref(false)
-const TIME_LIMIT_SECONDS = 23.5 * 60 * 60  # 23.5 hours
+const TIME_LIMIT_SECONDS = 23.5 * 60 * 60  # 47.5 hours
 
-# Observer that checks timer after each sweep
+# Observer that checks energy convergence and timer after each sweep
 mutable struct TimerObserver <: AbstractObserver
+    energy_tol::Float64
+    last_energy::Float64
+    TimerObserver(energy_tol=0.0) = new(energy_tol, 1000.0)
 end
 
 function ITensorMPS.checkdone!(o::TimerObserver; kwargs...)
+    energy = kwargs[:energy]
+    if o.energy_tol > 0.0 && abs(energy - o.last_energy) / abs(energy) < o.energy_tol
+        println("Energy converged after sweep $(kwargs[:sweep]), stopping DMRG early")
+        return true
+    end
+    o.last_energy = energy
     if peektimer() > TIME_LIMIT_SECONDS
         println("Time limit approaching, stopping DMRG early...")
         TIME_LIMIT_EXCEEDED[] = true
-        return true  # Signal DMRG to stop
+        return true
     end
     return false
 end
 
-# Build Electron site indices with Sz conservation and parity (no particle number conservation)
-# Matches the TeNPy choice cons_Sz = "Sz", cons_N = None
+# Build Electron site indices
 function make_sites(L::Int)
     return siteinds("Electron", L; conserve_sz=true, conserve_nfparity=true)
 end
@@ -174,11 +182,9 @@ end
 #  - beta[2,L,L,2,2]: spin-resolved hopping between rungs i,i' and legs j,j'
 #  - t0: rung hopping
 #  - optional phi_ext (Peierls flux per hop)
-function build_MPO_MF(; L::Int, t::Float64, U::Float64, mu::Float64, V::Float64,
+function build_MPO_MF(s; L::Int, t::Float64, U::Float64, mu::Float64, V::Float64,
     r_range::Int, alpha::Array{Float64,4}, beta::Array{Float64,5}, t0::Float64,
     phi_ext::Union{Nothing,Float64}=nothing)
-    # L is number of rungs, total sites = 2L
-    s = make_sites(2 * L)
     os = OpSum()
 
     # Onsite terms: -mu*Ntot + U*Nup*Ndn
@@ -284,20 +290,30 @@ function build_MPO_MF(; L::Int, t::Float64, U::Float64, mu::Float64, V::Float64,
     end
 
     H = MPO(os, s)
-    return s, H
+    return H
 end
 
-# DMRG ground state with product-state initialization
-function run_dmrg_ground(s, H, density::Float64; nsweeps=10, maxdim=200, cutoff=1e-10)
+# DMRG ground state with optional previous state initialization; fallback is product state
+function run_dmrg_ground(s, H, density::Float64; psi_init=nothing, nsweeps=10, maxdim=200, cutoff=1e-10, energy_tol=0.0)
     L_sites = length(s)  # Total MPS sites (2L for ladder)
-    psi0 = productMPS(s, density_product_state(L_sites, density))
+    if psi_init !== nothing
+        psi0 = psi_init
+    else
+        psi0 = productMPS(s, density_product_state(L_sites, density))
+    end
 
     sweeps = Sweeps(nsweeps)
-    maxdim!(sweeps, min(10, maxdim), min(20, maxdim), 100, maxdim)
+    if psi_init !== nothing
+        # Starting from previous state: use full maxdim from sweep 1
+        maxdim!(sweeps, maxdim)
+        noise!(sweeps, 1e-3, 1e-4, 1e-5, 1e-6, 0.0)
+    else
+        maxdim!(sweeps, min(10, maxdim), min(20, maxdim), 100, maxdim)
+        noise!(sweeps, 1e-5, 1e-6, 1e-7, 1e-8, 0.0)
+    end
     cutoff!(sweeps, cutoff)
-    noise!(sweeps, 1e-5, 1e-6, 1e-7, 1e-8, 0.0)
 
-    obs = TimerObserver()
+    obs = TimerObserver(energy_tol)
     E0, psi0 = dmrg(H, psi0, sweeps; observer=obs)
     return E0, psi0
 end
@@ -319,7 +335,7 @@ function run_dmrg_excited(s, H, psi0, density::Float64; nsweeps=10, maxdim=200, 
 end
 
 # Solve one Hamiltonian instance and return (density, energy, psi)
-function solve_Ham(mu, model_params, alpha, beta, density; nsweeps::Int=10, maxdim=200, cutoff=1e-10)
+function solve_Ham(s, mu, model_params, alpha, beta, density; psi_init=nothing, nsweeps::Int=10, maxdim=200, cutoff=1e-10, energy_tol=0.0)
     L = model_params[:L]
     t = model_params[:t]
     U = model_params[:U]
@@ -328,10 +344,10 @@ function solve_Ham(mu, model_params, alpha, beta, density; nsweeps::Int=10, maxd
     t0 = model_params[:t0]
     φ = get(model_params, :phi_ext, nothing)
 
-    s, H = build_MPO_MF(L=L, t=t, U=U, mu=mu, V=V, r_range=r_range, alpha=alpha, beta=beta, t0=t0, phi_ext=φ)
-    E, psi = run_dmrg_ground(s, H, density; nsweeps=nsweeps, maxdim=maxdim, cutoff=cutoff)
+    H = build_MPO_MF(s; L=L, t=t, U=U, mu=mu, V=V, r_range=r_range, alpha=alpha, beta=beta, t0=t0, phi_ext=φ)
+    E, psi = run_dmrg_ground(s, H, density; psi_init=psi_init, nsweeps=nsweeps, maxdim=maxdim, cutoff=cutoff, energy_tol=energy_tol)
     n = average_density(psi)
-    return n, E, psi, s, H
+    return n, E, psi, H
 end
 
 # Check convergence of alpha/beta by comparing diagonals up to r_range with relative tolerance
@@ -373,10 +389,13 @@ function close_ab(alpha, alpha_meas, beta, beta_meas, r_range; thresh=1e-4)
             # alpha
             a = [alpha[i, i+r, j, j_p] for i in 1:n_diag]
             am = [alpha_meas[i, i+r, j, j_p] for i in 1:n_diag]
+    	    am[abs.(a) .< thresh] .= 0.0 # Excluding small values from check (use distinct threshold?)
+	        a[abs.(a) .< thresh] .= 0.0
             errs = (am .- a) ./ (abs.(a) .+ eps)
             rms_err = sqrt(sum(errs .^ 2) / length(errs))
             if rms_err > thresh
                 println("Alpha not converged.")
+		println("r = $r, j = $j, j_p = $(j_p), rms_err = $(rms_err)")
                 return false
             end
         end
@@ -389,6 +408,8 @@ function close_ab(alpha, alpha_meas, beta, beta_meas, r_range; thresh=1e-4)
             # beta
             b = [beta[σ, i, i+r, j, j_p] for i in 1:n_diag]
             bm = [beta_meas[σ, i, i+r, j, j_p] for i in 1:n_diag]
+	        bm[abs.(b) .< thresh] .= 0.0
+	        b[abs.(b) .< thresh] .= 0.0
             errs = (bm .- b) ./ (abs.(b) .+ eps)
             rms_err = sqrt(sum(errs .^ 2) / length(errs))
             if rms_err > thresh
@@ -401,26 +422,30 @@ function close_ab(alpha, alpha_meas, beta, beta_meas, r_range; thresh=1e-4)
 end
 
 # Find mu to hit target density using secant with bisection fallback
-function find_mu_for_target_density(model_params, alpha, beta, mu_init, n_target;
-    tol=1e-5, delta_mu=0.01, max_iter=100, dmrg_kw)
+# Starts DMRG from the previous psi at each step
+function find_mu_for_target_density(s, model_params, alpha, beta, mu_init, n_target;
+    psi_init=nothing, tol=1e-4, delta_mu=0.01, max_iter=100, dmrg_kw)
     mu0 = mu_init
-    n0, E0, psi0, s0, H0 = solve_Ham(mu0, model_params, alpha, beta, model_params[:density]; dmrg_kw...)
+    n0, E0, psi0, H0 = solve_Ham(s, mu0, model_params, alpha, beta, model_params[:density]; psi_init=psi_init, dmrg_kw...)
+    psi_prev = psi0  # Track latest psi for starting
     
     if abs(n0 - n_target) / max(n_target, 1e-12) <= tol
         println("Same mu: $mu0 and continuing")
-        return mu0, n0, E0, psi0, s0, H0
+        return mu0, n0, E0, psi0, H0
     end
     println("Not same mu, searching again")
 
     # 0 and 1 are fixed to be left and right. "new" keeps track of latest
     if n0 < n_target
         mu_new = mu0 + delta_mu
-        n_new, E_new, psi_new, s_new, H_new = solve_Ham(mu_new, model_params, alpha, beta, model_params[:density]; dmrg_kw...)
+        n_new, E_new, psi_new, H_new = solve_Ham(s, mu_new, model_params, alpha, beta, model_params[:density]; psi_init=psi_prev, dmrg_kw...)
+        psi_prev = psi_new
         mu1, n1 = mu_new, n_new
     else
         mu1, n1 = mu0, n0
         mu_new = mu0 - delta_mu
-        n_new, E_new, psi_new, s_new, H_new = solve_Ham(mu_new, model_params, alpha, beta, model_params[:density]; dmrg_kw...)
+        n_new, E_new, psi_new, H_new = solve_Ham(s, mu_new, model_params, alpha, beta, model_params[:density]; psi_init=psi_prev, dmrg_kw...)
+        psi_prev = psi_new
         mu0, n0 = mu_new, n_new
     end
 
@@ -429,27 +454,29 @@ function find_mu_for_target_density(model_params, alpha, beta, mu_init, n_target
     for it in 1:max_iter
         if TIME_LIMIT_EXCEEDED[] || peektimer() > TIME_LIMIT_SECONDS
             println("Time limit exceeded, exiting loop")
-            return mu_new, n_new, E_new, psi_new, s_new, H_new
+            return mu_new, n_new, E_new, psi_new, H_new
         end
 
         println("n0: $n0; n1: $n1; mu0: $mu0; mu1: $mu1")
         if abs(n_new - n_target) / max(n_target, 1e-12) <= tol
             println("FOUND MU; mu: $mu_new  n: $n_new")
-            return mu_new, n_new, E_new, psi_new, s_new, H_new
+            return mu_new, n_new, E_new, psi_new, H_new
         end
 
         if (n_target >= n1 && n_target >= n0)
             println("n_target > n1 and n_target > n0 triggered")
             mu0, n0 = mu1, n1
             mu_new = mu0 + factor * delta_mu
-            n_new, E_new, psi_new, s_new, H_new = solve_Ham(mu_new, model_params, alpha, beta, model_params[:density]; dmrg_kw...)
+            n_new, E_new, psi_new, H_new = solve_Ham(s, mu_new, model_params, alpha, beta, model_params[:density]; psi_init=psi_prev, dmrg_kw...)
+            psi_prev = psi_new
             mu1, n1 = mu_new, n_new
             factor *= multiplier # increase step size exponentially until range found
         elseif (n_target <= n1 && n_target <= n0)
             println("n_target < n1 and n_target < n0 triggered")
             mu1, n1 = mu0, n0
             mu_new = mu0 - factor * delta_mu
-            n_new, E_new, psi_new, s_new, H_new = solve_Ham(mu_new, model_params, alpha, beta, model_params[:density]; dmrg_kw...)
+            n_new, E_new, psi_new, H_new = solve_Ham(s, mu_new, model_params, alpha, beta, model_params[:density]; psi_init=psi_prev, dmrg_kw...)
+            psi_prev = psi_new
             mu0, n0 = mu_new, n_new
             factor *= multiplier # increase step size exponentially until range found
         else
@@ -459,48 +486,50 @@ function find_mu_for_target_density(model_params, alpha, beta, mu_init, n_target
             for j in 1:max_iter
                 if TIME_LIMIT_EXCEEDED[] || peektimer() > TIME_LIMIT_SECONDS
                     println("Time limit exceeded, exiting loop")
-                    return mu_new, n_new, E_new, psi_new, s_new, H_new
+                    return mu_new, n_new, E_new, psi_new, H_new
                 end
                 println("n0: $n0; n1: $n1; mu0: $mu0; mu1: $mu1")
                 
                 # Check if either existing endpoint already satisfies the tolerance
                 if abs(n0 - n_target) / max(n_target, 1e-12) <= tol
                     println("FOUND MU (n0 already at target); mu: $mu0  n: $n0")
-                    # Need to solve again to get full return values if not already available
-                    n0, E0, psi0, s0, H0 = solve_Ham(mu0, model_params, alpha, beta, model_params[:density]; dmrg_kw...)
-                    return mu0, n0, E0, psi0, s0, H0
+                    # Re-solve to get consistent psi/H for this mu
+                    n0, E0, psi0, H0 = solve_Ham(s, mu0, model_params, alpha, beta, model_params[:density]; psi_init=psi_prev, dmrg_kw...)
+                    return mu0, n0, E0, psi0, H0
                 end
                 if abs(n1 - n_target) / max(n_target, 1e-12) <= tol
                     println("FOUND MU (n1 already at target); mu: $mu1  n: $n1")
-                    n1, E1, psi1, s1, H1 = solve_Ham(mu1, model_params, alpha, beta, model_params[:density]; dmrg_kw...)
-                    return mu1, n1, E1, psi1, s1, H1
+                    n1, E1, psi1, H1 = solve_Ham(s, mu1, model_params, alpha, beta, model_params[:density]; psi_init=psi_prev, dmrg_kw...)
+                    return mu1, n1, E1, psi1, H1
                 end
                 
                 # Check if mu interval is too small to refine further
-                if abs(mu1 - mu0) < 1e-10
+                if abs(mu1 - mu0) < 1e-6
                     println("Mu interval too small ($(abs(mu1 - mu0))), returning best result...")
                     # Return the endpoint closer to target
                     if abs(n0 - n_target) < abs(n1 - n_target)
-                        n0, E0, psi0, s0, H0 = solve_Ham(mu0, model_params, alpha, beta, model_params[:density]; dmrg_kw...)
-                        return mu0, n0, E0, psi0, s0, H0
+                        n0, E0, psi0, H0 = solve_Ham(s, mu0, model_params, alpha, beta, model_params[:density]; psi_init=psi_prev, dmrg_kw...)
+                        return mu0, n0, E0, psi0, H0
                     else
-                        n1, E1, psi1, s1, H1 = solve_Ham(mu1, model_params, alpha, beta, model_params[:density]; dmrg_kw...)
-                        return mu1, n1, E1, psi1, s1, H1
+                        n1, E1, psi1, H1 = solve_Ham(s, mu1, model_params, alpha, beta, model_params[:density]; psi_init=psi_prev, dmrg_kw...)
+                        return mu1, n1, E1, psi1, H1
                     end
                 end
                 
-                if abs(n1 - n0) > 1e-12
+                if abs(n1 - n0) > 1e-6
                     println("Trying secant step...")
 
                     # Update mu that is farther from target
                     if abs(n1 - n_target) > abs(n0 - n_target)
                         mu1 = mu1 - (n1 - n_target) * (mu1 - mu0) / (n1 - n0)
-                        n1, E1, psi1, s1, H1 = solve_Ham(mu1, model_params, alpha, beta, model_params[:density]; dmrg_kw...)
-                        mu_new, n_new, E_new, psi_new, s_new, H_new = mu1, n1, E1, psi1, s1, H1
+                        n1, E1, psi1, H1 = solve_Ham(s, mu1, model_params, alpha, beta, model_params[:density]; psi_init=psi_prev, dmrg_kw...)
+                        psi_prev = psi1
+                        mu_new, n_new, E_new, psi_new, H_new = mu1, n1, E1, psi1, H1
                     else
                         mu0 = mu0 + (n_target - n0) * (mu1 - mu0) / (n1 - n0)
-                        n0, E0, psi0, s0, H0 = solve_Ham(mu0, model_params, alpha, beta, model_params[:density]; dmrg_kw...)
-                        mu_new, n_new, E_new, psi_new, s_new, H_new = mu0, n0, E0, psi0, s0, H0
+                        n0, E0, psi0, H0 = solve_Ham(s, mu0, model_params, alpha, beta, model_params[:density]; psi_init=psi_prev, dmrg_kw...)
+                        psi_prev = psi0
+                        mu_new, n_new, E_new, psi_new, H_new = mu0, n0, E0, psi0, H0
                     end
 
                     # Ensure mu0 < mu1 for next iteration
@@ -511,26 +540,27 @@ function find_mu_for_target_density(model_params, alpha, beta, mu_init, n_target
 
                     if abs(n_new - n_target) / max(n_target, 1e-12) <= tol
                         println("FOUND MU (secant); mu: $mu_new  n: $n_new")
-                        return mu_new, n_new, E_new, psi_new, s_new, H_new
+                        return mu_new, n_new, E_new, psi_new, H_new
                     end
                 else
                     println("Secant unstable (n0 ≈ n1), falling back to bisection...")
                     
                     # If densities are identical and interval is tiny, we've converged numerically
-                    if abs(mu1 - mu0) < 1e-8
+                    if abs(mu1 - mu0) < 1e-6
                         println("Densities identical and mu interval small, returning closest to target...")
                         if abs(n0 - n_target) < abs(n1 - n_target)
-                            return mu0, n0, E_new, psi_new, s_new, H_new
+                            return mu0, n0, E_new, psi_new, H_new
                         else
-                            return mu1, n1, E_new, psi_new, s_new, H_new
+                            return mu1, n1, E_new, psi_new, H_new
                         end
                     end
                     
                     mu_new = 0.5 * (mu0 + mu1)
-                    n_new, E_new, psi_new, s_new, H_new = solve_Ham(mu_new, model_params, alpha, beta, model_params[:density]; dmrg_kw...)
+                    n_new, E_new, psi_new, H_new = solve_Ham(s, mu_new, model_params, alpha, beta, model_params[:density]; psi_init=psi_prev, dmrg_kw...)
+                    psi_prev = psi_new
                     if abs(n_new - n_target) / max(n_target, 1e-12) <= tol
                         println("FOUND MU (bisection); mu: $mu_new  n: $n_new")
-                        return mu_new, n_new, E_new, psi_new, s_new, H_new
+                        return mu_new, n_new, E_new, psi_new, H_new
                     end
                     if n_target > n_new
                         mu0, n0 = mu_new, n_new
@@ -632,7 +662,7 @@ function order_parameter(psi::MPS, s)
     L = length(s)
     C = correlation_matrix(psi, "Cup", "Cdn")
     diag0 = [C[i, i] for i in 1:L]
-    lo = 10
+    lo = max(1, 10)
     hi = max(lo, L - 10)
     return abs(sum(diag0[lo:hi]) / max(hi - lo + 1, 1))
 end
@@ -687,8 +717,8 @@ function cdw_order_parameter(psi::MPS, s; L_rungs::Int, q::Float64=Float64(π))
     return abs(cdw_amp)
 end
 
-# Main SCF loop: adjust mu for target density, then update alpha/beta until self-consistent
-function main_loop(model_params; n_target::Float64, E_p::Float64, z_c::Int=4, alpha_list, beta_list, max_iter::Int=150, nsweeps=10, maxdim=200, cutoff=1e-10)
+# Main SCF loop: adjust mu for target density, then update alpha/beta until self-consistent; creates site indices once and reuses it and old MPS for DMRG across SCF iterations
+function main_loop(model_params; n_target::Float64, E_p::Float64, z_c::Int=4, alpha_list, beta_list, psi_init=nothing, max_iter::Int=150, nsweeps=10, maxdim=200, cutoff=1e-10, energy_tol=1e-6, damp=0.5)
     alpha = model_params[:alpha]
     beta = model_params[:beta]
     mu = model_params[:mu]
@@ -698,18 +728,25 @@ function main_loop(model_params; n_target::Float64, E_p::Float64, z_c::Int=4, al
     L = model_params[:L]
     outfile = model_params[:outfile]
     E = 0.0
-    psi = nothing
-    s = nothing
+    psi = psi_init
+
+    # Reuse site indices from psi_init if available, otherwise create fresh
+    if psi_init !== nothing
+        s = siteinds(psi_init)
+    else
+        s = make_sites(2 * L)
+    end
 
     for it in 1:max_iter
-        mu, n_meas, E, psi, s, H = find_mu_for_target_density(model_params, alpha, beta, mu, n_target; tol=1e-5,
-            dmrg_kw=(nsweeps=nsweeps, maxdim=maxdim, cutoff=cutoff))
+        # Warm-start from previous psi (nothing on first iteration = cold start)
+        mu, n_meas, E, psi, H = find_mu_for_target_density(s, model_params, alpha, beta, mu, n_target;
+            psi_init=psi, tol=1e-4, dmrg_kw=(nsweeps=nsweeps, maxdim=maxdim, cutoff=cutoff, energy_tol=energy_tol))
         if TIME_LIMIT_EXCEEDED[] || peektimer() > TIME_LIMIT_SECONDS
             return alpha, beta, alpha_list, beta_list, mu, psi, E, s, H
         end
         println("Target density achieved with mu=$mu, n=$n_meas")
 
-        alpha_meas, beta_meas = calculate_alpha_beta_measured(psi, s; L=L, r_range=r_range, z_c=z_c, t_p=t_p, E_p=E_p)
+        alpha_meas, beta_meas = calculate_alpha_beta_measured(psi, s; L=L, r_range=r_range, z_c=z_c, t_p=t_p, E_p=E_p, threshold=1e-6)
         alpha_list == [] ? alpha_list = alpha_meas : alpha_list = cat(alpha_list, alpha_meas, dims=length(size(alpha_meas))+1)
         beta_list == [] ? beta_list = beta_meas : beta_list = cat(beta_list, beta_meas, dims=length(size(beta_meas))+1)
 
@@ -720,8 +757,8 @@ function main_loop(model_params; n_target::Float64, E_p::Float64, z_c::Int=4, al
         end
 
         println("NOT CONVERGED; updating alpha, beta and continuing...")
-        alpha = alpha_meas
-        beta = beta_meas
+        alpha = damp * alpha_meas + (1 - damp) * alpha
+        beta  = damp * beta_meas  + (1 - damp) * beta
         model_params[:alpha] = alpha
         model_params[:beta] = beta
         model_params[:mu] = mu
@@ -734,6 +771,7 @@ function main_loop(model_params; n_target::Float64, E_p::Float64, z_c::Int=4, al
         F["beta"] = beta
         F["mu"] = mu
         F["E"] = E
+        F["psi"] = ITensors.cpu(psi)
         F["alpha_list"] = alpha_list
         F["beta_list"] = beta_list
         F["completed"] = false
@@ -745,12 +783,13 @@ function main_loop(model_params; n_target::Float64, E_p::Float64, z_c::Int=4, al
 end
 
 # Convenience: run the full loop and then compute gap and order parameter
+# inherit_from: path to another run's HDF5 file to inherit alpha/beta/mu from
 function run_loop(L::Int, t::Float64, U::Float64, t0::Float64, t_p::Float64, mu_init::Float64, n_target::Float64,
-    r_range::Int, z_c::Int, E_p::Real, chi_max::Int=200; nsweeps=50, cutoff=1e-10)
+    r_range::Int, z_c::Int, E_p::Real, chi_max::Int=200; nsweeps=30, cutoff=1e-10, energy_tol=1e-6, inherit_from::Union{Nothing,String}=nothing)
     
     tick()
 
-    outfile = "results_L_$(L)_U_$(U)_t0_$(t0)_t_p_$(t_p)_chi_$(chi_max).h5"
+    outfile = "results_L_$(L)_U_$(U)_t0_$(t0)_t_p_$(t_p)_chi_$(chi_max)_cpu.h5"
     if (isfile(outfile))
         println("Resuming from checkpoint $outfile")
         F = h5open(outfile,"r")
@@ -759,21 +798,38 @@ function run_loop(L::Int, t::Float64, U::Float64, t0::Float64, t_p::Float64, mu_
         alpha_list = read(F, "alpha_list")
         beta_list = read(F, "beta_list")
         mu_init = read(F, "mu")
+        psi_resume = haskey(F, "psi") ? read(F, "psi", MPS) : nothing
         close(F)
-        println("Resuming with mu_init=$(mu_init)")
+        println("Resuming with mu_init=$(mu_init), psi_resume=$(psi_resume !== nothing ? "loaded" : "not found")")
+    elseif inherit_from !== nothing && isfile(inherit_from)
+        println("Inheriting alpha/beta/mu from $inherit_from")
+        F = h5open(inherit_from, "r")
+        alpha = read(F, "alpha")
+        beta = read(F, "beta")
+        mu_init = read(F, "mu")
+        close(F)
+        alpha_list = Vector{Any}()
+        beta_list = Vector{Any}()
+        psi_resume = nothing  # Can't reuse psi (different chi)
     else
         println("Starting fresh run")
         pref = 2 * t_p^2 / E_p  # Note: no z_c factor for ladders (see Appendix E)
-        # Initialize alpha[L, L, 2, 2] with diagonal onsite pairing
-        alpha = zeros(Float64, L, L, 2, 2)
-        for i in 1:L
-            alpha[i, i, 1, 1] = pref  # Onsite pairing leg 0
-            alpha[i, i, 2, 2] = pref  # Onsite pairing leg 1
+        eps  = 1e-3 * pref  # try 1e-4–1e-2 times pref
+
+        beta  = zeros(Float64, 2, L, L, 2, 2) # Initialize beta[2, L, L, 2, 2] to zeros
+        alpha = zeros(Float64, L, L, 2, 2) # Initialize alpha[L, L, 2, 2] with small random values up to r_range
+        for r in 0:r_range
+            for j in 1:2, jp in 1:2
+                val = eps * randn()
+                for i in 1:(L-r)
+                    alpha[i, i+r, j, jp] = val
+                    alpha[i+r, i, jp, j] = val  # symmetrize
+                end
+            end
         end
-        # Initialize beta[2, L, L, 2, 2] to zeros
-        beta = zeros(Float64, 2, L, L, 2, 2)
         alpha_list = Vector{Any}()
         beta_list = Vector{Any}()
+        psi_resume = nothing
     end
 
     println("Running with t0=$(t0) t_p=$(t_p) U=$U L=$L chi_max=$(chi_max) E_p=$(E_p) mu_init=$(mu_init)")
@@ -793,7 +849,12 @@ function run_loop(L::Int, t::Float64, U::Float64, t0::Float64, t_p::Float64, mu_
         :outfile => outfile,
     )
 
-    alpha, beta, alpha_list, beta_list, mu, psi, E, s, H = main_loop(model_params; n_target=n_target, E_p=E_p, z_c=z_c, alpha_list=alpha_list, beta_list=beta_list, nsweeps=nsweeps, maxdim=chi_max, cutoff=cutoff)
+    alpha, beta, alpha_list, beta_list, mu, psi, E, s, H = main_loop(model_params; n_target=n_target, E_p=E_p, z_c=z_c, alpha_list=alpha_list, beta_list=beta_list, psi_init=psi_resume, nsweeps=nsweeps, maxdim=chi_max, cutoff=cutoff, energy_tol=energy_tol)
+
+    if H === nothing
+        println("Main loop returned nothing for H (convergence failure). Exiting.")
+        return
+    end
 
     if TIME_LIMIT_EXCEEDED[] || peektimer() > TIME_LIMIT_SECONDS
         return
@@ -833,8 +894,8 @@ end
 # CLI entry point
 # -----------------------------
 
-if length(ARGS) != 8
-    println("Usage: julia main_loop_script_ladder.jl <L> <U> <t0> <t_p> <chi_max> <E_p> <mu_init> <density>")
+if length(ARGS) < 8 || length(ARGS) > 10
+    println("Usage: julia main_loop_script_ladder.jl <L> <U> <t0> <t_p> <chi_max> <E_p> <mu_init> <density> [energy_tol] [inherit_from]")
     println("  L: number of rungs (total sites = 2L)")
     println("  U: onsite interaction (repulsive, U > 0 for ladders)")
     println("  t0: rung hopping strength")
@@ -842,7 +903,9 @@ if length(ARGS) != 8
     println("  chi_max: maximum bond dimension")
     println("  E_p: pair binding energy")
     println("  mu_init: initial chemical potential")
-    println("  density: target particle density (e.g., 0.9375 for PhysRevX paper)")
+    println("  density: target particle density (e.g. 0.9375)")
+    println("  energy_tol: (optional) relative energy tolerance for early DMRG exit (default 1e-6)")
+    println("  inherit_from: (optional) path to HDF5 file to inherit alpha/beta/mu from it")
     return
 end
 
@@ -854,13 +917,16 @@ chi_max = parse(Int, ARGS[5])
 E_p = parse(Float64, ARGS[6])
 mu_init = parse(Float64, ARGS[7])
 density = parse(Float64, ARGS[8])
+energy_tol = length(ARGS) >= 9 ? parse(Float64, ARGS[9]) : 1e-6
+inherit_from = length(ARGS) >= 10 ? ARGS[10] : nothing
 
 t = 1.0
 n_target = density
 r_range = 4
 z_c = 4  # Still used in calculate_alpha_beta_measured
 
-ITensors.Strided.set_num_threads(1)
-BLAS.set_num_threads(256)
+BLAS.set_num_threads(1)
+ITensors.Strided.disable_threads()
+ITensors.enable_threaded_blocksparse()
 
-result = run_loop(L, t, U, t0, t_p, mu_init, n_target, r_range, z_c, E_p, chi_max)
+result = run_loop(L, t, U, t0, t_p, mu_init, n_target, r_range, z_c, E_p, chi_max; energy_tol=energy_tol, inherit_from=inherit_from)

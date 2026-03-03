@@ -659,3 +659,58 @@ After sweep 2 energy=-226.81885  maxlinkdim=1000 maxerr=5.88E-07 time=379.042
 After sweep 3 energy=-226.82495  maxlinkdim=1000 maxerr=1.19E-07 time=379.281
 After sweep 4 energy=-226.82828  maxlinkdim=1000 maxerr=2.94E-08 time=378.373
 After sweep 5 energy=-226.83005  maxlinkdim=1000 maxerr=1.32E-08 time=260.621
+Resuming from checkpoint results_L_64_U_8.0_t0_1.0_t_p_0.2_chi_1000_gpu.h5
+Resuming with mu_init=1.4664526272027394, psi_resume=loaded
+Running with t0=1.0 t_p=0.2 U=8.0 L=64 chi_max=1000 E_p=0.134 mu_init=1.4664526272027394
+After sweep 1 energy=-226.80748  maxlinkdim=1000 maxerr=3.91E-06 time=410.966
+After sweep 2 energy=-226.818  maxlinkdim=1000 maxerr=5.81E-07 time=378.546
+After sweep 3 energy=-226.8242  maxlinkdim=1000 maxerr=1.18E-07 time=377.361
+After sweep 4 energy=-226.82771  maxlinkdim=1000 maxerr=2.93E-08 time=376.895
+After sweep 5 energy=-226.83018  maxlinkdim=1000 maxerr=5.14E-08 time=259.746
+After sweep 6 energy=-226.82881  maxlinkdim=1000 maxerr=3.05E-08 time=259.416
+After sweep 7 energy=-226.82858  maxlinkdim=1000 maxerr=2.14E-08 time=258.883
+After sweep 8 energy=-226.82985  maxlinkdim=1000 maxerr=8.83E-08 time=259.295
+After sweep 9 energy=-226.8295  maxlinkdim=1000 maxerr=1.44E-07 time=259.731
+After sweep 10 energy=-226.83018  maxlinkdim=1000 maxerr=1.02E-07 time=258.872
+After sweep 11 energy=-226.82854  maxlinkdim=1000 maxerr=4.57E-08 time=259.722
+After sweep 12 energy=-226.82986  maxlinkdim=1000 maxerr=8.60E-08 time=259.809
+After sweep 13 energy=-226.83063  maxlinkdim=1000 maxerr=2.29E-09 time=259.177
+After sweep 14 energy=-226.82964  maxlinkdim=1000 maxerr=5.04E-08 time=259.773
+After sweep 15 energy=-226.82967  maxlinkdim=1000 maxerr=8.97E-08 time=259.780
+Energy converged after sweep 15, stopping DMRG early
+Same mu: 1.4664526272027394 and continuing
+Target density achieved with mu=1.4664526272027394, n=0.9371989
+Checking {alpha,beta} vs measured
+Converged {alpha,beta}. mu=1.4664526272027394, n=0.9371989
+Exiting loop
+After sweep 1 energy=-211.35685093395716  maxlinkdim=10 maxerr=2.52E-03 time=29.353
+After sweep 2 energy=-218.46178760219018  maxlinkdim=20 maxerr=1.30E-03 time=2.423
+After sweep 3 energy=-222.07765715476236  maxlinkdim=100 maxerr=1.22E-05 time=3.707
+After sweep 4 energy=-222.72357502702553  maxlinkdim=1000 maxerr=4.44E-10 time=79.325
+After sweep 5 energy=-223.148494901171  maxlinkdim=1000 maxerr=9.66E-10 time=206.947
+After sweep 6 energy=-223.43978344465128  maxlinkdim=1000 maxerr=2.15E-10 time=196.786
+After sweep 7 energy=-223.73057865009847  maxlinkdim=1000 maxerr=1.82E-09 time=202.858
+After sweep 8 energy=-223.96310163827738  maxlinkdim=1000 maxerr=1.47E-07 time=222.326
+After sweep 9 energy=-224.16658336896225  maxlinkdim=1000 maxerr=4.19E-07 time=259.093
+After sweep 10 energy=-224.2306299539326  maxlinkdim=1000 maxerr=5.55E-09 time=281.056
+After sweep 11 energy=-224.26980303326516  maxlinkdim=1000 maxerr=1.44E-09 time=279.289
+After sweep 12 energy=-224.30944785533762  maxlinkdim=1000 maxerr=1.61E-08 time=283.466
+After sweep 13 energy=-224.34172453848458  maxlinkdim=1000 maxerr=6.71E-08 time=304.423
+After sweep 14 energy=-224.3717445959952  maxlinkdim=1000 maxerr=4.85E-08 time=311.490
+After sweep 15 energy=-224.41999708291914  maxlinkdim=1000 maxerr=2.55E-07 time=309.643
+After sweep 16 energy=-224.49333521787617  maxlinkdim=1000 maxerr=7.69E-08 time=321.890
+After sweep 17 energy=-224.60885614838205  maxlinkdim=1000 maxerr=9.25E-09 time=317.737
+After sweep 18 energy=-224.76301967965716  maxlinkdim=1000 maxerr=7.83E-09 time=317.673
+After sweep 19 energy=-224.96628985941007  maxlinkdim=1000 maxerr=9.24E-08 time=320.921
+After sweep 20 energy=-225.07680974115763  maxlinkdim=1000 maxerr=6.87E-09 time=319.001
+After sweep 21 energy=-225.19215600750366  maxlinkdim=1000 maxerr=6.52E-09 time=320.897
+After sweep 22 energy=-225.30423812312196  maxlinkdim=1000 maxerr=1.79E-08 time=320.659
+After sweep 23 energy=-225.38912663293445  maxlinkdim=1000 maxerr=9.50E-09 time=316.953
+After sweep 24 energy=-225.51739978549676  maxlinkdim=1000 maxerr=2.01E-08 time=314.933
+After sweep 25 energy=-225.74237554863362  maxlinkdim=1000 maxerr=1.12E-06 time=314.235
+After sweep 26 energy=-225.82356701859592  maxlinkdim=1000 maxerr=1.48E-07 time=316.375
+After sweep 27 energy=-225.87715822787615  maxlinkdim=1000 maxerr=4.27E-08 time=318.249
+After sweep 28 energy=-225.89968459700447  maxlinkdim=1000 maxerr=2.25E-08 time=320.277
+After sweep 29 energy=-225.90598480227223  maxlinkdim=1000 maxerr=4.06E-08 time=324.708
+After sweep 30 energy=-225.9098233962866  maxlinkdim=1000 maxerr=1.82E-08 time=320.361
+Calculation finished. Saving results to results_L_64_U_8.0_t0_1.0_t_p_0.2_chi_1000_gpu.h5
