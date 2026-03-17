@@ -1,0 +1,10 @@
+outfile_name: results_L_64_U_8.0_t0_1.0_t_p_0.1_chi_1000_cpu.h5
+[ Info:  started timer at: 2026-03-04T07:48:32.899
+Resuming from checkpoint results_L_64_U_8.0_t0_1.0_t_p_0.1_chi_1000_cpu.h5
+Resuming with mu_init=1.6000638489145513, psi_resume=loaded
+Running with t0=1.0 t_p=0.1 U=8.0 L=64 chi_max=1000 E_p=0.134 mu_init=1.6000638489145513
+After sweep 1 energy=-253.85361340755685  maxlinkdim=1000 maxerr=8.06E-05 time=1254.505
+After sweep 2 energy=-253.85537703833512  maxlinkdim=1000 maxerr=1.85E-05 time=1211.438
+After sweep 3 energy=-253.85693829871542  maxlinkdim=1000 maxerr=4.28E-06 time=1203.665
+slurmstepd: error: *** STEP 49644624.0 ON nid005893 CANCELLED AT 2026-03-04T17:01:38 ***
+slurmstepd: error: *** JOB 49644624 ON nid005893 CANCELLED AT 2026-03-04T17:01:38 ***

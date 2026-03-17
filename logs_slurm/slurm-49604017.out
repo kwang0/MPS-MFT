@@ -1,0 +1,53 @@
+outfile_name: results_L_64_U_8.0_t0_1.0_t_p_0.15_chi_1000_gpu.h5
+[ Info:  started timer at: 2026-03-03T09:25:58.019
+Resuming from checkpoint results_L_64_U_8.0_t0_1.0_t_p_0.15_chi_1000_gpu.h5
+Resuming with mu_init=1.5005330342868357, psi_resume=loaded
+Running with t0=1.0 t_p=0.15 U=8.0 L=64 chi_max=1000 E_p=0.134 mu_init=1.5005330342868357
+After sweep 1 energy=-235.99696  maxlinkdim=1000 maxerr=2.03E-05 time=413.141
+After sweep 2 energy=-236.01326  maxlinkdim=1000 maxerr=3.38E-06 time=379.755
+After sweep 3 energy=-236.02478  maxlinkdim=1000 maxerr=6.56E-07 time=378.670
+After sweep 4 energy=-236.02818  maxlinkdim=1000 maxerr=1.75E-07 time=378.949
+After sweep 5 energy=-236.02945  maxlinkdim=1000 maxerr=5.03E-08 time=260.721
+After sweep 6 energy=-236.02846  maxlinkdim=1000 maxerr=7.18E-08 time=260.515
+After sweep 7 energy=-236.02937  maxlinkdim=1000 maxerr=1.27E-07 time=260.408
+After sweep 8 energy=-236.03046  maxlinkdim=1000 maxerr=7.33E-08 time=260.345
+After sweep 9 energy=-236.02953  maxlinkdim=1000 maxerr=3.11E-08 time=260.538
+After sweep 10 energy=-236.02939  maxlinkdim=1000 maxerr=3.15E-08 time=260.630
+Energy converged after sweep 10, stopping DMRG early
+Same mu: 1.5005330342868357 and continuing
+Target density achieved with mu=1.5005330342868357, n=0.9361508
+Checking {alpha,beta} vs measured
+Converged {alpha,beta}. mu=1.5005330342868357, n=0.9361508
+Exiting loop
+After sweep 1 energy=-220.967501413644  maxlinkdim=10 maxerr=2.19E-03 time=30.058
+After sweep 2 energy=-228.3167867756176  maxlinkdim=20 maxerr=1.65E-03 time=2.433
+After sweep 3 energy=-231.77275896746949  maxlinkdim=100 maxerr=1.42E-05 time=3.712
+After sweep 4 energy=-232.36639034429626  maxlinkdim=1000 maxerr=7.93E-10 time=88.769
+After sweep 5 energy=-232.76565737242373  maxlinkdim=1000 maxerr=1.32E-09 time=232.274
+After sweep 6 energy=-232.9726603472045  maxlinkdim=1000 maxerr=8.95E-10 time=243.727
+After sweep 7 energy=-233.11829811898502  maxlinkdim=1000 maxerr=1.35E-09 time=253.131
+After sweep 8 energy=-233.24016795647813  maxlinkdim=1000 maxerr=2.22E-09 time=271.562
+After sweep 9 energy=-233.44790008270164  maxlinkdim=1000 maxerr=9.57E-07 time=293.523
+After sweep 10 energy=-233.64084676057067  maxlinkdim=1000 maxerr=1.07E-07 time=314.056
+After sweep 11 energy=-233.7388279470121  maxlinkdim=1000 maxerr=2.67E-08 time=315.724
+After sweep 12 energy=-233.8242890970498  maxlinkdim=1000 maxerr=7.89E-08 time=318.872
+After sweep 13 energy=-233.9094226985652  maxlinkdim=1000 maxerr=3.72E-08 time=322.592
+After sweep 14 energy=-234.01683431993126  maxlinkdim=1000 maxerr=5.51E-07 time=323.743
+After sweep 15 energy=-234.12374156981727  maxlinkdim=1000 maxerr=2.35E-07 time=323.260
+After sweep 16 energy=-234.2367751913583  maxlinkdim=1000 maxerr=7.32E-08 time=323.120
+After sweep 17 energy=-234.41568998102534  maxlinkdim=1000 maxerr=2.71E-07 time=320.696
+After sweep 18 energy=-234.6010398453419  maxlinkdim=1000 maxerr=3.26E-06 time=325.653
+After sweep 19 energy=-234.78454892466502  maxlinkdim=1000 maxerr=1.29E-05 time=322.994
+After sweep 20 energy=-234.89128453156167  maxlinkdim=1000 maxerr=2.79E-07 time=324.846
+After sweep 21 energy=-235.0089548297474  maxlinkdim=1000 maxerr=1.51E-06 time=319.960
+After sweep 22 energy=-235.1223835007298  maxlinkdim=1000 maxerr=8.48E-07 time=323.023
+After sweep 23 energy=-235.19722469993067  maxlinkdim=1000 maxerr=3.19E-07 time=322.073
+After sweep 24 energy=-235.24770006896375  maxlinkdim=1000 maxerr=9.36E-07 time=321.009
+After sweep 25 energy=-235.2899433737032  maxlinkdim=1000 maxerr=4.56E-07 time=323.853
+After sweep 26 energy=-235.3186250546218  maxlinkdim=1000 maxerr=4.56E-07 time=323.579
+After sweep 27 energy=-235.33564427471052  maxlinkdim=1000 maxerr=2.02E-07 time=322.173
+After sweep 28 energy=-235.34794684348043  maxlinkdim=1000 maxerr=1.18E-06 time=326.186
+After sweep 29 energy=-235.35974072739396  maxlinkdim=1000 maxerr=9.87E-07 time=324.665
+After sweep 30 energy=-235.3684487142534  maxlinkdim=1000 maxerr=1.12E-06 time=322.506
+Calculation finished. Saving results to results_L_64_U_8.0_t0_1.0_t_p_0.15_chi_1000_gpu.h5
+Run completed successfully!

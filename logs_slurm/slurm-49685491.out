@@ -1,0 +1,114 @@
+outfile_name: results_L_64_U_8.0_t0_1.0_t_p_0.1_chi_1000_cpu.h5
+[ Info:  started timer at: 2026-03-05T14:06:29.080
+Resuming from checkpoint results_L_64_U_8.0_t0_1.0_t_p_0.1_chi_1000_cpu.h5
+Resuming with mu_init=1.5964636372915013, psi_resume=loaded
+Running with t0=1.0 t_p=0.1 U=8.0 L=64 chi_max=1000 E_p=0.134 mu_init=1.5964636372915013
+After sweep 1 energy=-253.41944536905203  maxlinkdim=1000 maxerr=7.91E-05 time=1097.002
+After sweep 2 energy=-253.4211314974258  maxlinkdim=1000 maxerr=1.82E-05 time=1043.963
+After sweep 3 energy=-253.42269089529634  maxlinkdim=1000 maxerr=4.24E-06 time=1047.399
+After sweep 4 energy=-253.42352742460943  maxlinkdim=1000 maxerr=1.24E-06 time=1051.078
+After sweep 5 energy=-253.42387551217732  maxlinkdim=1000 maxerr=4.30E-07 time=838.032
+After sweep 6 energy=-253.42388535115376  maxlinkdim=1000 maxerr=4.55E-07 time=832.091
+Energy converged after sweep 6, stopping DMRG early
+Same mu: 1.5964636372915013 and continuing
+Target density achieved with mu=1.5964636372915013, n=0.937576843467892
+Checking {alpha,beta} vs measured
+Alpha not converged.
+r = 1, j = 1, j_p = 1, rms_err = 0.008577363950858874
+NOT CONVERGED; updating alpha, beta and continuing...
+After sweep 1 energy=-253.42019804738544  maxlinkdim=1000 maxerr=7.90E-05 time=1048.362
+After sweep 2 energy=-253.42188312026988  maxlinkdim=1000 maxerr=1.82E-05 time=1048.436
+After sweep 3 energy=-253.42344079147216  maxlinkdim=1000 maxerr=4.24E-06 time=1054.764
+After sweep 4 energy=-253.42427638567915  maxlinkdim=1000 maxerr=1.24E-06 time=1034.628
+After sweep 5 energy=-253.42462393793917  maxlinkdim=1000 maxerr=4.29E-07 time=834.942
+After sweep 6 energy=-253.424633918069  maxlinkdim=1000 maxerr=4.53E-07 time=832.017
+Energy converged after sweep 6, stopping DMRG early
+Same mu: 1.5964636372915013 and continuing
+Target density achieved with mu=1.5964636372915013, n=0.9375796496087827
+Checking {alpha,beta} vs measured
+Alpha not converged.
+r = 1, j = 1, j_p = 1, rms_err = 0.005393175088968873
+NOT CONVERGED; updating alpha, beta and continuing...
+After sweep 1 energy=-253.4206447671578  maxlinkdim=1000 maxerr=7.90E-05 time=1048.699
+After sweep 2 energy=-253.42232887869602  maxlinkdim=1000 maxerr=1.82E-05 time=1043.625
+After sweep 3 energy=-253.4238862005896  maxlinkdim=1000 maxerr=4.24E-06 time=1045.071
+After sweep 4 energy=-253.42472149181353  maxlinkdim=1000 maxerr=1.24E-06 time=1030.928
+After sweep 5 energy=-253.42506876976455  maxlinkdim=1000 maxerr=4.28E-07 time=836.154
+After sweep 6 energy=-253.42507860041732  maxlinkdim=1000 maxerr=4.52E-07 time=832.224
+Energy converged after sweep 6, stopping DMRG early
+Same mu: 1.5964636372915013 and continuing
+Target density achieved with mu=1.5964636372915013, n=0.9375797867024663
+Checking {alpha,beta} vs measured
+Alpha not converged.
+r = 1, j = 1, j_p = 1, rms_err = 0.00341481258309843
+NOT CONVERGED; updating alpha, beta and continuing...
+After sweep 1 energy=-253.4209030598136  maxlinkdim=1000 maxerr=7.89E-05 time=1044.172
+After sweep 2 energy=-253.42258672182226  maxlinkdim=1000 maxerr=1.82E-05 time=1051.286
+After sweep 3 energy=-253.42414345865404  maxlinkdim=1000 maxerr=4.24E-06 time=1047.417
+After sweep 4 energy=-253.42497841720458  maxlinkdim=1000 maxerr=1.24E-06 time=1035.942
+After sweep 5 energy=-253.42532554646402  maxlinkdim=1000 maxerr=4.29E-07 time=830.668
+After sweep 6 energy=-253.4253353830067  maxlinkdim=1000 maxerr=4.52E-07 time=832.464
+Energy converged after sweep 6, stopping DMRG early
+Same mu: 1.5964636372915013 and continuing
+Target density achieved with mu=1.5964636372915013, n=0.9375792530116637
+Checking {alpha,beta} vs measured
+Alpha not converged.
+r = 1, j = 1, j_p = 1, rms_err = 0.0021723233479547565
+NOT CONVERGED; updating alpha, beta and continuing...
+After sweep 1 energy=-253.42105025965324  maxlinkdim=1000 maxerr=7.89E-05 time=1045.221
+After sweep 2 energy=-253.42273402447879  maxlinkdim=1000 maxerr=1.82E-05 time=1041.371
+After sweep 3 energy=-253.424290674689  maxlinkdim=1000 maxerr=4.24E-06 time=1050.513
+After sweep 4 energy=-253.42512540589277  maxlinkdim=1000 maxerr=1.24E-06 time=1035.958
+After sweep 5 energy=-253.42547244173605  maxlinkdim=1000 maxerr=4.29E-07 time=848.823
+After sweep 6 energy=-253.42548228185174  maxlinkdim=1000 maxerr=4.52E-07 time=845.827
+Energy converged after sweep 6, stopping DMRG early
+Same mu: 1.5964636372915013 and continuing
+Target density achieved with mu=1.5964636372915013, n=0.9375783836180829
+Checking {alpha,beta} vs measured
+Alpha not converged.
+r = 1, j = 1, j_p = 1, rms_err = 0.0013864785911865195
+NOT CONVERGED; updating alpha, beta and continuing...
+After sweep 1 energy=-253.42113319727815  maxlinkdim=1000 maxerr=7.89E-05 time=1044.430
+After sweep 2 energy=-253.4228167499248  maxlinkdim=1000 maxerr=1.82E-05 time=1045.681
+After sweep 3 energy=-253.4243732618491  maxlinkdim=1000 maxerr=4.24E-06 time=1042.663
+After sweep 4 energy=-253.4252077536465  maxlinkdim=1000 maxerr=1.24E-06 time=1039.502
+After sweep 5 energy=-253.42555463713128  maxlinkdim=1000 maxerr=4.29E-07 time=832.461
+After sweep 6 energy=-253.42556459818778  maxlinkdim=1000 maxerr=4.52E-07 time=842.942
+Energy converged after sweep 6, stopping DMRG early
+Same mu: 1.5964636372915013 and continuing
+Target density achieved with mu=1.5964636372915013, n=0.9375784920330836
+Checking {alpha,beta} vs measured
+Converged {alpha,beta}. mu=1.5964636372915013, n=0.9375784920330836
+Exiting loop
+After sweep 1 energy=-238.16215165710102  maxlinkdim=10 maxerr=4.75E-03 time=12.256
+After sweep 2 energy=-245.60465947806009  maxlinkdim=20 maxerr=1.79E-03 time=19.361
+After sweep 3 energy=-249.30923299545418  maxlinkdim=100 maxerr=2.19E-05 time=42.176
+After sweep 4 energy=-249.89648331986427  maxlinkdim=1000 maxerr=1.05E-09 time=286.278
+After sweep 5 energy=-250.31648039916234  maxlinkdim=1000 maxerr=1.20E-09 time=641.614
+After sweep 6 energy=-250.5646407936593  maxlinkdim=1000 maxerr=2.28E-09 time=626.886
+After sweep 7 energy=-250.7447032910958  maxlinkdim=1000 maxerr=2.44E-09 time=665.272
+After sweep 8 energy=-250.89258777646526  maxlinkdim=1000 maxerr=3.45E-09 time=688.360
+After sweep 9 energy=-251.0617192965135  maxlinkdim=1000 maxerr=5.48E-08 time=716.914
+After sweep 10 energy=-251.2353059650444  maxlinkdim=1000 maxerr=1.17E-06 time=768.113
+After sweep 11 energy=-251.45783242030615  maxlinkdim=1000 maxerr=3.76E-06 time=808.342
+After sweep 12 energy=-251.59480681964482  maxlinkdim=1000 maxerr=2.33E-06 time=843.780
+After sweep 13 energy=-251.7619817074091  maxlinkdim=1000 maxerr=8.31E-07 time=845.216
+After sweep 14 energy=-251.91175941219257  maxlinkdim=1000 maxerr=2.39E-07 time=868.748
+After sweep 15 energy=-252.07600790265076  maxlinkdim=1000 maxerr=3.83E-07 time=864.950
+After sweep 16 energy=-252.25298322965608  maxlinkdim=1000 maxerr=3.29E-06 time=859.538
+After sweep 17 energy=-252.37727831280517  maxlinkdim=1000 maxerr=3.21E-07 time=869.123
+After sweep 18 energy=-252.4799237187337  maxlinkdim=1000 maxerr=1.09E-06 time=870.259
+After sweep 19 energy=-252.5668866963837  maxlinkdim=1000 maxerr=1.03E-06 time=869.364
+After sweep 20 energy=-252.6470260526059  maxlinkdim=1000 maxerr=5.37E-06 time=859.704
+After sweep 21 energy=-252.7108427632582  maxlinkdim=1000 maxerr=1.84E-06 time=865.606
+After sweep 22 energy=-252.74761585433492  maxlinkdim=1000 maxerr=8.34E-07 time=865.804
+After sweep 23 energy=-252.77656343123792  maxlinkdim=1000 maxerr=7.23E-07 time=860.967
+After sweep 24 energy=-252.80256504392963  maxlinkdim=1000 maxerr=1.37E-06 time=867.961
+After sweep 25 energy=-252.82706797969522  maxlinkdim=1000 maxerr=1.85E-06 time=865.986
+After sweep 26 energy=-252.84805585311415  maxlinkdim=1000 maxerr=9.17E-07 time=867.488
+After sweep 27 energy=-252.8683720256629  maxlinkdim=1000 maxerr=1.38E-06 time=876.667
+After sweep 28 energy=-252.90531950652462  maxlinkdim=1000 maxerr=8.65E-06 time=858.084
+After sweep 29 energy=-252.93620937885692  maxlinkdim=1000 maxerr=6.65E-06 time=875.705
+After sweep 30 energy=-252.95502627578895  maxlinkdim=1000 maxerr=9.33E-06 time=867.593
+Calculation finished. Saving results to results_L_64_U_8.0_t0_1.0_t_p_0.1_chi_1000_cpu.h5
+Run completed successfully!
