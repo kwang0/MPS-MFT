@@ -751,7 +751,7 @@ function main_loop(model_params; n_target::Float64, E_p::Float64, z_c::Int=4, al
         beta_list == [] ? beta_list = beta_meas : beta_list = cat(beta_list, beta_meas, dims=length(size(beta_meas))+1)
 
         println("Checking {alpha,beta} vs measured")
-        if close_ab(alpha, alpha_meas, beta, beta_meas, r_range; thresh=1e-4)
+        if close_ab(alpha, alpha_meas, beta, beta_meas, r_range; thresh=1e-3)
             println("Converged {alpha,beta}. mu=$mu, n=$n_meas\nExiting loop")
             return alpha, beta, alpha_list, beta_list, mu, psi, E, s, H
         end
