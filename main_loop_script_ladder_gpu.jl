@@ -412,7 +412,7 @@ function close_ab(alpha, alpha_meas, beta, beta_meas, r_range; mu_cdw=nothing, m
             rms_err = sqrt(sum(errs .^ 2) / length(errs))
             if rms_err > thresh
                 println("Alpha not converged.")
-		println("r = $r, j = $j, j_p = $(j_p), rms_err = $(rms_err)")
+		        println("r = $r, j = $j, j_p = $(j_p), rms_err = $(rms_err)")
                 return false
             end
         end
@@ -685,21 +685,24 @@ function calculate_alpha_beta_measured(psi::MPS, s; L::Int, r_range::Int, z_c::I
 end
 
 # Measure site and spin-resolved CDW mu field
-# Using Eq. 7, pref_mu is half the pair prefactor (I didn't check the MFT reduction to verify this)
-function calculate_mu_cdw_measured(psi::MPS; t_p::Float64, E_p::Float64, threshold::Float64=1e-5)
+function calculate_mu_cdw_measured(psi::MPS; L::Int, t_p::Float64, E_p::Float64, threshold::Float64=1e-5)
     n_up = expect(psi, "Nup")
     n_dn = expect(psi, "Ndn")
-    n_sites = length(n_up)
-    mu_cdw_meas = zeros(Float64, 2, n_sites)
+    mu_cdw_meas = zeros(Float64, 2, 2*L)
 
-    pref_pair = 2*t_p^2 / E_p
-    pref = 0.5 *pref_pair
-    for i in 1:n_sites
-        val_dn = pref * (2*n_dn[i] - 1)
-        val_up = pref * (2*n_up[i] - 1)
-        mu_cdw_meas[1, i] = (abs(val_dn) > threshold) ? val_dn : 0.0
-        mu_cdw_meas[2, i] = (abs(val_up) > threshold) ? val_up : 0.0
+    pref = t_p^2 / E_p
+    for i_rung in 1:L
+        s0 = rung_leg_to_site(i_rung, 0)
+        s1 = rung_leg_to_site(i_rung, 1)
+
+        mu_cdw_meas[1, s0] = pref * (4 * n_dn[s0] + 2 * n_dn[s1] - 3)
+        mu_cdw_meas[2, s0] = pref * (4 * n_up[s0] + 2 * n_up[s1] - 3)
+        
+        mu_cdw_meas[1, s1] = pref * (4 * n_dn[s1] + 2 * n_dn[s0] - 3)
+        mu_cdw_meas[2, s1] = pref * (4 * n_up[s1] + 2 * n_up[s0] - 3)
     end
+    mu_cdw_meas[abs.(mu_cdw_meas) .< threshold] .= 0.0
+    
     return mu_cdw_meas
 end
 
@@ -801,7 +804,7 @@ function main_loop(model_params; n_target::Float64, E_p::Float64, z_c::Int=4, al
         println("Target density achieved with mu=$mu, n=$n_meas")
 
         alpha_meas, beta_meas = calculate_alpha_beta_measured(psi, s; L=L, r_range=r_range, z_c=z_c, t_p=t_p, E_p=E_p, threshold=1e-6)
-        mu_cdw_meas = calculate_mu_cdw_measured(psi; t_p=t_p, E_p=E_p, threshold=1e-6)
+        mu_cdw_meas = calculate_mu_cdw_measured(psi; L=L, t_p=t_p, E_p=E_p, threshold=1e-6)
         alpha_list == [] ? alpha_list = alpha_meas : alpha_list = cat(alpha_list, alpha_meas, dims=length(size(alpha_meas))+1)
         beta_list == [] ? beta_list = beta_meas : beta_list = cat(beta_list, beta_meas, dims=length(size(beta_meas))+1)
 
