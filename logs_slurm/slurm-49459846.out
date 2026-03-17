@@ -1,0 +1,512 @@
+outfile_name: results_L_64_U_8.0_t0_1.0_t_p_0.2_chi_1000_gpu.h5
+[ Info:  started timer at: 2026-02-28T09:07:18.768
+Inheriting alpha/beta/mu from results_L_64_U_8.0_t0_1.0_t_p_0.1_chi_1000_gpu.h5
+Running with t0=1.0 t_p=0.2 U=8.0 L=64 chi_max=1000 E_p=0.134 mu_init=1.6014193942089805
+After sweep 1 energy=-238.48756  maxlinkdim=10 maxerr=3.63E-03 time=32.819
+After sweep 2 energy=-246.3464  maxlinkdim=20 maxerr=1.98E-03 time=1.695
+After sweep 3 energy=-250.28395  maxlinkdim=100 maxerr=2.67E-05 time=2.792
+After sweep 4 energy=-250.68816  maxlinkdim=1000 maxerr=1.38E-10 time=44.117
+After sweep 5 energy=-250.97462  maxlinkdim=1000 maxerr=5.72E-08 time=70.450
+After sweep 6 energy=-251.20593  maxlinkdim=1000 maxerr=7.84E-08 time=56.244
+After sweep 7 energy=-251.38347  maxlinkdim=1000 maxerr=4.86E-08 time=64.732
+After sweep 8 energy=-251.57101  maxlinkdim=1000 maxerr=1.28E-08 time=84.699
+After sweep 9 energy=-251.71642  maxlinkdim=1000 maxerr=4.29E-06 time=86.722
+After sweep 10 energy=-251.84874  maxlinkdim=1000 maxerr=4.89E-06 time=96.922
+After sweep 11 energy=-251.98044  maxlinkdim=1000 maxerr=9.25E-07 time=110.701
+After sweep 12 energy=-252.1447  maxlinkdim=1000 maxerr=7.25E-07 time=132.173
+After sweep 13 energy=-252.28702  maxlinkdim=1000 maxerr=5.05E-07 time=133.036
+After sweep 14 energy=-252.44221  maxlinkdim=1000 maxerr=1.31E-06 time=126.954
+After sweep 15 energy=-252.58653  maxlinkdim=1000 maxerr=7.40E-07 time=142.440
+After sweep 16 energy=-252.72466  maxlinkdim=1000 maxerr=4.25E-07 time=148.592
+After sweep 17 energy=-252.86943  maxlinkdim=1000 maxerr=2.78E-07 time=156.122
+After sweep 18 energy=-252.99089  maxlinkdim=1000 maxerr=2.37E-07 time=160.317
+After sweep 19 energy=-253.10121  maxlinkdim=1000 maxerr=6.68E-07 time=174.885
+After sweep 20 energy=-253.17726  maxlinkdim=1000 maxerr=4.60E-07 time=168.138
+After sweep 21 energy=-253.23616  maxlinkdim=1000 maxerr=8.25E-07 time=168.488
+After sweep 22 energy=-253.29434  maxlinkdim=1000 maxerr=6.39E-07 time=175.899
+After sweep 23 energy=-253.36887  maxlinkdim=1000 maxerr=1.50E-06 time=177.394
+After sweep 24 energy=-253.44804  maxlinkdim=1000 maxerr=7.20E-07 time=179.183
+After sweep 25 energy=-253.51239  maxlinkdim=1000 maxerr=4.07E-07 time=176.522
+After sweep 26 energy=-253.59203  maxlinkdim=1000 maxerr=1.77E-06 time=183.482
+After sweep 27 energy=-253.66486  maxlinkdim=1000 maxerr=4.71E-06 time=184.526
+After sweep 28 energy=-253.75317  maxlinkdim=1000 maxerr=2.26E-06 time=188.818
+After sweep 29 energy=-253.82413  maxlinkdim=1000 maxerr=9.85E-07 time=188.053
+After sweep 30 energy=-253.87598  maxlinkdim=1000 maxerr=1.66E-06 time=190.268
+Not same mu, searching again
+After sweep 1 energy=-252.6715  maxlinkdim=1000 maxerr=3.07E-05 time=287.086
+After sweep 2 energy=-252.7364  maxlinkdim=1000 maxerr=8.06E-06 time=287.252
+After sweep 3 energy=-252.7763  maxlinkdim=1000 maxerr=2.16E-06 time=287.531
+After sweep 4 energy=-252.78903  maxlinkdim=1000 maxerr=7.44E-07 time=286.506
+After sweep 5 energy=-252.79282  maxlinkdim=1000 maxerr=3.54E-07 time=195.061
+After sweep 6 energy=-252.79362  maxlinkdim=1000 maxerr=3.47E-07 time=195.056
+After sweep 7 energy=-252.79774  maxlinkdim=1000 maxerr=3.42E-07 time=195.142
+After sweep 8 energy=-252.79996  maxlinkdim=1000 maxerr=3.51E-07 time=194.931
+After sweep 9 energy=-252.8024  maxlinkdim=1000 maxerr=3.62E-07 time=194.932
+After sweep 10 energy=-252.80426  maxlinkdim=1000 maxerr=3.80E-07 time=195.064
+After sweep 11 energy=-252.80629  maxlinkdim=1000 maxerr=3.80E-07 time=194.968
+After sweep 12 energy=-252.80676  maxlinkdim=1000 maxerr=3.75E-07 time=195.567
+After sweep 13 energy=-252.80705  maxlinkdim=1000 maxerr=3.71E-07 time=194.923
+After sweep 14 energy=-252.80783  maxlinkdim=1000 maxerr=3.73E-07 time=194.936
+After sweep 15 energy=-252.80869  maxlinkdim=1000 maxerr=3.68E-07 time=194.822
+After sweep 16 energy=-252.80891  maxlinkdim=1000 maxerr=3.86E-07 time=194.950
+Energy converged after sweep 16, stopping DMRG early
+n0: 0.9289076; n1: 0.9409348; mu0: 1.5914193942089805; mu1: 1.6014193942089805
+
+Range found between mu0: 1.5914193942089805 (n0: 0.9289076) and mu1: 1.6014193942089805 (n1: 0.9409348); refining...
+n0: 0.9289076; n1: 0.9409348; mu0: 1.5914193942089805; mu1: 1.6014193942089805
+Trying secant step...
+After sweep 1 energy=-253.61899  maxlinkdim=1000 maxerr=3.24E-05 time=287.710
+After sweep 2 energy=-253.64291  maxlinkdim=1000 maxerr=7.48E-06 time=288.083
+After sweep 3 energy=-253.65868  maxlinkdim=1000 maxerr=1.86E-06 time=286.577
+After sweep 4 energy=-253.6632  maxlinkdim=1000 maxerr=6.47E-07 time=286.420
+After sweep 5 energy=-253.66322  maxlinkdim=1000 maxerr=2.90E-07 time=195.266
+Energy converged after sweep 5, stopping DMRG early
+n0: 0.93433744; n1: 0.9409348; mu0: 1.5985635540242276; mu1: 1.6014193942089805
+Trying secant step...
+After sweep 1 energy=-253.78748  maxlinkdim=1000 maxerr=2.93E-05 time=288.143
+After sweep 2 energy=-253.80687  maxlinkdim=1000 maxerr=7.06E-06 time=287.440
+After sweep 3 energy=-253.82262  maxlinkdim=1000 maxerr=1.78E-06 time=286.523
+After sweep 4 energy=-253.8272  maxlinkdim=1000 maxerr=6.30E-07 time=286.840
+After sweep 5 energy=-253.82664  maxlinkdim=1000 maxerr=2.65E-07 time=194.806
+After sweep 6 energy=-253.82776  maxlinkdim=1000 maxerr=2.68E-07 time=194.786
+After sweep 7 energy=-253.82745  maxlinkdim=1000 maxerr=2.84E-07 time=194.777
+After sweep 8 energy=-253.82703  maxlinkdim=1000 maxerr=2.87E-07 time=194.848
+After sweep 9 energy=-253.82678  maxlinkdim=1000 maxerr=2.87E-07 time=194.875
+Energy converged after sweep 9, stopping DMRG early
+n0: 0.93433744; n1: 0.9354272; mu0: 1.5985635540242276; mu1: 1.599932556367479
+Trying secant step...
+After sweep 1 energy=-254.0993  maxlinkdim=1000 maxerr=2.84E-05 time=287.614
+After sweep 2 energy=-254.11922  maxlinkdim=1000 maxerr=6.75E-06 time=287.471
+After sweep 3 energy=-254.13618  maxlinkdim=1000 maxerr=1.72E-06 time=286.731
+After sweep 4 energy=-254.14095  maxlinkdim=1000 maxerr=5.95E-07 time=287.066
+After sweep 5 energy=-254.14064  maxlinkdim=1000 maxerr=2.65E-07 time=194.920
+After sweep 6 energy=-254.13948  maxlinkdim=1000 maxerr=2.73E-07 time=195.072
+After sweep 7 energy=-254.14148  maxlinkdim=1000 maxerr=2.75E-07 time=194.869
+After sweep 8 energy=-254.13965  maxlinkdim=1000 maxerr=2.84E-07 time=194.887
+After sweep 9 energy=-254.13914  maxlinkdim=1000 maxerr=2.62E-07 time=194.817
+After sweep 10 energy=-254.13918  maxlinkdim=1000 maxerr=2.64E-07 time=194.920
+Energy converged after sweep 10, stopping DMRG early
+FOUND MU (secant); mu: 1.6025365286635418  n: 0.93756986
+Target density achieved with mu=1.6025365286635418, n=0.93756986
+Checking {alpha,beta} vs measured
+Alpha not converged.
+NOT CONVERGED; updating alpha, beta and continuing...
+After sweep 1 energy=-246.36777  maxlinkdim=1000 maxerr=7.14E-06 time=382.660
+After sweep 2 energy=-246.4165  maxlinkdim=1000 maxerr=9.43E-07 time=379.019
+After sweep 3 energy=-246.45236  maxlinkdim=1000 maxerr=9.79E-08 time=378.635
+After sweep 4 energy=-246.45825  maxlinkdim=1000 maxerr=2.61E-08 time=378.269
+After sweep 5 energy=-246.45923  maxlinkdim=1000 maxerr=3.42E-08 time=259.302
+After sweep 6 energy=-246.462  maxlinkdim=1000 maxerr=2.24E-09 time=257.822
+After sweep 7 energy=-246.45988  maxlinkdim=1000 maxerr=3.84E-08 time=259.766
+After sweep 8 energy=-246.45932  maxlinkdim=1000 maxerr=1.38E-07 time=259.618
+After sweep 9 energy=-246.46  maxlinkdim=1000 maxerr=4.32E-08 time=259.708
+After sweep 10 energy=-246.45851  maxlinkdim=1000 maxerr=2.10E-09 time=259.835
+After sweep 11 energy=-246.45955  maxlinkdim=1000 maxerr=8.24E-08 time=259.485
+After sweep 12 energy=-246.45978  maxlinkdim=1000 maxerr=3.24E-08 time=259.024
+Energy converged after sweep 12, stopping DMRG early
+Not same mu, searching again
+After sweep 1 energy=-245.17357  maxlinkdim=1000 maxerr=2.75E-06 time=380.550
+After sweep 2 energy=-245.17908  maxlinkdim=1000 maxerr=4.81E-07 time=378.395
+After sweep 3 energy=-245.18674  maxlinkdim=1000 maxerr=9.20E-08 time=377.973
+After sweep 4 energy=-245.19034  maxlinkdim=1000 maxerr=2.27E-08 time=377.261
+After sweep 5 energy=-245.19011  maxlinkdim=1000 maxerr=2.06E-09 time=260.415
+Energy converged after sweep 5, stopping DMRG early
+n0: 0.9913083; n1: 0.9922195; mu0: 1.5925365286635418; mu1: 1.6025365286635418
+n_target < n1 and n_target < n0 triggered
+After sweep 1 energy=-243.9017  maxlinkdim=1000 maxerr=3.05E-06 time=379.371
+After sweep 2 energy=-243.91083  maxlinkdim=1000 maxerr=5.23E-07 time=378.426
+After sweep 3 energy=-243.91867  maxlinkdim=1000 maxerr=1.02E-07 time=378.401
+After sweep 4 energy=-243.92087  maxlinkdim=1000 maxerr=2.49E-08 time=377.066
+After sweep 5 energy=-243.92366  maxlinkdim=1000 maxerr=2.22E-09 time=260.856
+After sweep 6 energy=-243.92296  maxlinkdim=1000 maxerr=2.94E-08 time=259.476
+After sweep 7 energy=-243.92332  maxlinkdim=1000 maxerr=2.41E-09 time=260.597
+After sweep 8 energy=-243.92226  maxlinkdim=1000 maxerr=3.98E-08 time=260.157
+After sweep 9 energy=-243.9227  maxlinkdim=1000 maxerr=2.63E-09 time=260.151
+After sweep 10 energy=-243.9236  maxlinkdim=1000 maxerr=3.33E-09 time=260.173
+After sweep 11 energy=-243.92331  maxlinkdim=1000 maxerr=9.14E-09 time=260.232
+After sweep 12 energy=-243.92346  maxlinkdim=1000 maxerr=8.37E-08 time=260.040
+Energy converged after sweep 12, stopping DMRG early
+n0: 0.9902304; n1: 0.9913083; mu0: 1.5825365286635418; mu1: 1.5925365286635418
+n_target < n1 and n_target < n0 triggered
+After sweep 1 energy=-240.10696  maxlinkdim=1000 maxerr=4.06E-06 time=380.051
+After sweep 2 energy=-240.11423  maxlinkdim=1000 maxerr=7.28E-07 time=379.678
+After sweep 3 energy=-240.1256  maxlinkdim=1000 maxerr=1.38E-07 time=378.170
+After sweep 4 energy=-240.12744  maxlinkdim=1000 maxerr=3.56E-08 time=378.407
+After sweep 5 energy=-240.1289  maxlinkdim=1000 maxerr=3.75E-09 time=260.348
+After sweep 6 energy=-240.12585  maxlinkdim=1000 maxerr=1.69E-08 time=260.266
+After sweep 7 energy=-240.12834  maxlinkdim=1000 maxerr=1.25E-08 time=260.192
+After sweep 8 energy=-240.1276  maxlinkdim=1000 maxerr=4.05E-09 time=260.335
+After sweep 9 energy=-240.1266  maxlinkdim=1000 maxerr=3.84E-08 time=260.279
+After sweep 10 energy=-240.12718  maxlinkdim=1000 maxerr=5.81E-08 time=260.469
+After sweep 11 energy=-240.12944  maxlinkdim=1000 maxerr=1.20E-08 time=260.311
+After sweep 12 energy=-240.1292  maxlinkdim=1000 maxerr=4.28E-09 time=260.241
+After sweep 13 energy=-240.12772  maxlinkdim=1000 maxerr=1.07E-08 time=260.847
+After sweep 14 energy=-240.12857  maxlinkdim=1000 maxerr=4.10E-09 time=260.619
+After sweep 15 energy=-240.12704  maxlinkdim=1000 maxerr=5.04E-09 time=260.448
+After sweep 16 energy=-240.12643  maxlinkdim=1000 maxerr=2.58E-08 time=260.089
+After sweep 17 energy=-240.12978  maxlinkdim=1000 maxerr=3.87E-09 time=260.047
+After sweep 18 energy=-240.12962  maxlinkdim=1000 maxerr=1.80E-08 time=260.024
+Energy converged after sweep 18, stopping DMRG early
+n0: 0.98561436; n1: 0.9902304; mu0: 1.5525365286635417; mu1: 1.5825365286635418
+n_target < n1 and n_target < n0 triggered
+After sweep 1 energy=-228.88397  maxlinkdim=1000 maxerr=1.09E-05 time=380.377
+After sweep 2 energy=-228.91812  maxlinkdim=1000 maxerr=1.78E-06 time=379.372
+After sweep 3 energy=-228.94646  maxlinkdim=1000 maxerr=4.34E-07 time=378.817
+After sweep 4 energy=-228.95291  maxlinkdim=1000 maxerr=1.34E-07 time=378.971
+After sweep 5 energy=-228.95609  maxlinkdim=1000 maxerr=5.17E-08 time=260.520
+After sweep 6 energy=-228.95528  maxlinkdim=1000 maxerr=5.72E-08 time=260.290
+After sweep 7 energy=-228.95595  maxlinkdim=1000 maxerr=2.61E-08 time=260.329
+After sweep 8 energy=-228.95491  maxlinkdim=1000 maxerr=2.62E-08 time=260.391
+After sweep 9 energy=-228.9539  maxlinkdim=1000 maxerr=4.01E-08 time=261.014
+After sweep 10 energy=-228.9549  maxlinkdim=1000 maxerr=3.79E-08 time=259.841
+After sweep 11 energy=-228.95474  maxlinkdim=1000 maxerr=2.74E-08 time=261.109
+Energy converged after sweep 11, stopping DMRG early
+n0: 0.9455062; n1: 0.98561436; mu0: 1.4625365286635417; mu1: 1.5525365286635417
+n_target < n1 and n_target < n0 triggered
+After sweep 1 energy=-197.68954  maxlinkdim=1000 maxerr=2.97E-05 time=380.201
+After sweep 2 energy=-198.32059  maxlinkdim=1000 maxerr=5.72E-06 time=380.481
+After sweep 3 energy=-198.61617  maxlinkdim=1000 maxerr=1.51E-06 time=380.494
+After sweep 4 energy=-198.72781  maxlinkdim=1000 maxerr=9.56E-07 time=379.138
+After sweep 5 energy=-198.78995  maxlinkdim=1000 maxerr=2.06E-07 time=260.632
+After sweep 6 energy=-198.8203  maxlinkdim=1000 maxerr=2.34E-07 time=252.803
+After sweep 7 energy=-198.83803  maxlinkdim=1000 maxerr=2.68E-07 time=260.496
+After sweep 8 energy=-198.8489  maxlinkdim=1000 maxerr=3.39E-07 time=261.314
+After sweep 9 energy=-198.85396  maxlinkdim=1000 maxerr=3.30E-07 time=260.568
+After sweep 10 energy=-198.85596  maxlinkdim=1000 maxerr=3.40E-07 time=260.732
+After sweep 11 energy=-198.85545  maxlinkdim=1000 maxerr=3.64E-07 time=261.034
+After sweep 12 energy=-198.85542  maxlinkdim=1000 maxerr=3.68E-07 time=261.028
+Energy converged after sweep 12, stopping DMRG early
+n0: 0.8162902; n1: 0.9455062; mu0: 1.1925365286635417; mu1: 1.4625365286635417
+
+Range found between mu0: 1.1925365286635417 (n0: 0.8162902) and mu1: 1.4625365286635417 (n1: 0.9455062); refining...
+n0: 0.8162902; n1: 0.9455062; mu0: 1.1925365286635417; mu1: 1.4625365286635417
+Trying secant step...
+After sweep 1 energy=-226.42256  maxlinkdim=1000 maxerr=8.12E-05 time=380.880
+After sweep 2 energy=-226.64905  maxlinkdim=1000 maxerr=9.04E-06 time=379.846
+After sweep 3 energy=-226.76299  maxlinkdim=1000 maxerr=1.15E-06 time=379.816
+After sweep 4 energy=-226.82489  maxlinkdim=1000 maxerr=6.74E-07 time=379.581
+After sweep 5 energy=-226.87642  maxlinkdim=1000 maxerr=1.27E-07 time=260.187
+After sweep 6 energy=-226.9044  maxlinkdim=1000 maxerr=1.67E-07 time=249.763
+After sweep 7 energy=-226.918  maxlinkdim=1000 maxerr=4.56E-08 time=254.840
+After sweep 8 energy=-226.92746  maxlinkdim=1000 maxerr=8.84E-08 time=255.434
+After sweep 9 energy=-226.93393  maxlinkdim=1000 maxerr=9.53E-08 time=258.248
+After sweep 10 energy=-226.93703  maxlinkdim=1000 maxerr=4.95E-08 time=259.721
+After sweep 11 energy=-226.93953  maxlinkdim=1000 maxerr=4.57E-08 time=260.308
+After sweep 12 energy=-226.94006  maxlinkdim=1000 maxerr=4.36E-08 time=260.510
+After sweep 13 energy=-226.93935  maxlinkdim=1000 maxerr=4.17E-08 time=260.486
+After sweep 14 energy=-226.94109  maxlinkdim=1000 maxerr=5.05E-08 time=260.865
+After sweep 15 energy=-226.94225  maxlinkdim=1000 maxerr=4.31E-08 time=260.400
+After sweep 16 energy=-226.94176  maxlinkdim=1000 maxerr=4.11E-08 time=260.355
+After sweep 17 energy=-226.94078  maxlinkdim=1000 maxerr=4.42E-08 time=260.333
+After sweep 18 energy=-226.94081  maxlinkdim=1000 maxerr=4.85E-08 time=260.449
+Energy converged after sweep 18, stopping DMRG early
+n0: 0.93365026; n1: 0.9455062; mu0: 1.4458073479182532; mu1: 1.4625365286635417
+Trying secant step...
+After sweep 1 energy=-227.55963  maxlinkdim=1000 maxerr=2.66E-05 time=380.227
+After sweep 2 energy=-227.57655  maxlinkdim=1000 maxerr=3.98E-06 time=379.177
+After sweep 3 energy=-227.58823  maxlinkdim=1000 maxerr=7.18E-07 time=379.069
+After sweep 4 energy=-227.59198  maxlinkdim=1000 maxerr=1.95E-07 time=378.914
+After sweep 5 energy=-227.5937  maxlinkdim=1000 maxerr=3.79E-08 time=261.031
+After sweep 6 energy=-227.59192  maxlinkdim=1000 maxerr=1.30E-07 time=260.910
+After sweep 7 energy=-227.59276  maxlinkdim=1000 maxerr=3.49E-08 time=260.823
+After sweep 8 energy=-227.59258  maxlinkdim=1000 maxerr=7.28E-08 time=260.661
+Energy converged after sweep 8, stopping DMRG early
+FOUND MU (secant); mu: 1.4512394746387633  n: 0.93752533
+Target density achieved with mu=1.4512394746387633, n=0.93752533
+Checking {alpha,beta} vs measured
+Alpha not converged.
+NOT CONVERGED; updating alpha, beta and continuing...
+After sweep 1 energy=-224.94301  maxlinkdim=1000 maxerr=1.11E-05 time=381.993
+After sweep 2 energy=-224.96313  maxlinkdim=1000 maxerr=1.31E-06 time=380.137
+After sweep 3 energy=-224.9746  maxlinkdim=1000 maxerr=2.41E-07 time=378.874
+After sweep 4 energy=-224.97769  maxlinkdim=1000 maxerr=6.49E-08 time=378.669
+After sweep 5 energy=-224.97873  maxlinkdim=1000 maxerr=2.12E-08 time=260.669
+After sweep 6 energy=-224.979  maxlinkdim=1000 maxerr=8.89E-08 time=260.458
+After sweep 7 energy=-224.97746  maxlinkdim=1000 maxerr=7.30E-08 time=260.638
+After sweep 8 energy=-224.97682  maxlinkdim=1000 maxerr=2.39E-08 time=260.660
+After sweep 9 energy=-224.97833  maxlinkdim=1000 maxerr=3.20E-08 time=259.789
+After sweep 10 energy=-224.97742  maxlinkdim=1000 maxerr=1.45E-08 time=260.455
+After sweep 11 energy=-224.97743  maxlinkdim=1000 maxerr=8.52E-09 time=260.378
+Energy converged after sweep 11, stopping DMRG early
+Not same mu, searching again
+After sweep 1 energy=-223.73564  maxlinkdim=1000 maxerr=8.10E-06 time=380.465
+After sweep 2 energy=-223.74738  maxlinkdim=1000 maxerr=1.35E-06 time=379.462
+After sweep 3 energy=-223.75308  maxlinkdim=1000 maxerr=2.64E-07 time=379.495
+After sweep 4 energy=-223.75908  maxlinkdim=1000 maxerr=6.81E-08 time=378.025
+After sweep 5 energy=-223.75763  maxlinkdim=1000 maxerr=5.11E-08 time=260.926
+After sweep 6 energy=-223.7585  maxlinkdim=1000 maxerr=8.96E-09 time=260.283
+After sweep 7 energy=-223.75867  maxlinkdim=1000 maxerr=9.38E-09 time=260.321
+Energy converged after sweep 7, stopping DMRG early
+n0: 0.9500302; n1: 0.95452255; mu0: 1.4412394746387633; mu1: 1.4512394746387633
+n_target < n1 and n_target < n0 triggered
+After sweep 1 energy=-222.52023  maxlinkdim=1000 maxerr=9.20E-06 time=380.761
+After sweep 2 energy=-222.53398  maxlinkdim=1000 maxerr=1.46E-06 time=379.267
+After sweep 3 energy=-222.54306  maxlinkdim=1000 maxerr=2.94E-07 time=378.970
+After sweep 4 energy=-222.54564  maxlinkdim=1000 maxerr=7.79E-08 time=378.741
+After sweep 5 energy=-222.54538  maxlinkdim=1000 maxerr=9.90E-09 time=260.418
+After sweep 6 energy=-222.54626  maxlinkdim=1000 maxerr=3.96E-08 time=260.511
+After sweep 7 energy=-222.54465  maxlinkdim=1000 maxerr=1.11E-08 time=260.318
+After sweep 8 energy=-222.5458  maxlinkdim=1000 maxerr=1.77E-07 time=260.559
+After sweep 9 energy=-222.54553  maxlinkdim=1000 maxerr=3.57E-08 time=260.644
+After sweep 10 energy=-222.54527  maxlinkdim=1000 maxerr=1.11E-08 time=260.873
+After sweep 11 energy=-222.54486  maxlinkdim=1000 maxerr=1.08E-08 time=260.807
+After sweep 12 energy=-222.54448  maxlinkdim=1000 maxerr=3.20E-08 time=260.680
+After sweep 13 energy=-222.5452  maxlinkdim=1000 maxerr=1.10E-08 time=260.984
+After sweep 14 energy=-222.54544  maxlinkdim=1000 maxerr=2.65E-08 time=261.274
+After sweep 15 energy=-222.54596  maxlinkdim=1000 maxerr=6.73E-08 time=260.723
+After sweep 16 energy=-222.5449  maxlinkdim=1000 maxerr=1.53E-08 time=260.667
+After sweep 17 energy=-222.54492  maxlinkdim=1000 maxerr=1.63E-08 time=260.735
+Energy converged after sweep 17, stopping DMRG early
+n0: 0.94524467; n1: 0.9500302; mu0: 1.4312394746387633; mu1: 1.4412394746387633
+n_target < n1 and n_target < n0 triggered
+After sweep 1 energy=-218.91415  maxlinkdim=1000 maxerr=1.18E-05 time=380.423
+After sweep 2 energy=-218.93051  maxlinkdim=1000 maxerr=1.97E-06 time=379.717
+After sweep 3 energy=-218.93973  maxlinkdim=1000 maxerr=3.98E-07 time=379.612
+After sweep 4 energy=-218.94247  maxlinkdim=1000 maxerr=1.11E-07 time=379.336
+After sweep 5 energy=-218.944  maxlinkdim=1000 maxerr=1.77E-08 time=260.784
+After sweep 6 energy=-218.94398  maxlinkdim=1000 maxerr=5.31E-08 time=260.203
+Energy converged after sweep 6, stopping DMRG early
+n0: 0.92953205; n1: 0.94524467; mu0: 1.4012394746387633; mu1: 1.4312394746387633
+
+Range found between mu0: 1.4012394746387633 (n0: 0.92953205) and mu1: 1.4312394746387633 (n1: 0.94524467); refining...
+n0: 0.92953205; n1: 0.94524467; mu0: 1.4012394746387633; mu1: 1.4312394746387633
+Trying secant step...
+After sweep 1 energy=-220.73802  maxlinkdim=1000 maxerr=1.19E-05 time=382.197
+After sweep 2 energy=-220.75156  maxlinkdim=1000 maxerr=1.73E-06 time=379.746
+After sweep 3 energy=-220.75879  maxlinkdim=1000 maxerr=3.38E-07 time=379.514
+After sweep 4 energy=-220.76231  maxlinkdim=1000 maxerr=9.08E-08 time=378.998
+After sweep 5 energy=-220.76262  maxlinkdim=1000 maxerr=1.34E-08 time=260.689
+After sweep 6 energy=-220.76326  maxlinkdim=1000 maxerr=1.45E-08 time=260.720
+After sweep 7 energy=-220.76283  maxlinkdim=1000 maxerr=3.50E-08 time=260.685
+After sweep 8 energy=-220.76256  maxlinkdim=1000 maxerr=9.73E-08 time=260.463
+After sweep 9 energy=-220.76299  maxlinkdim=1000 maxerr=7.97E-08 time=260.634
+After sweep 10 energy=-220.76184  maxlinkdim=1000 maxerr=1.47E-08 time=260.416
+After sweep 11 energy=-220.76268  maxlinkdim=1000 maxerr=1.47E-08 time=260.450
+After sweep 12 energy=-220.76332  maxlinkdim=1000 maxerr=1.39E-08 time=260.963
+After sweep 13 energy=-220.76297  maxlinkdim=1000 maxerr=1.39E-08 time=260.467
+After sweep 14 energy=-220.7622  maxlinkdim=1000 maxerr=1.40E-08 time=260.477
+After sweep 15 energy=-220.76385  maxlinkdim=1000 maxerr=5.50E-08 time=260.487
+After sweep 16 energy=-220.7638  maxlinkdim=1000 maxerr=1.69E-07 time=260.464
+Energy converged after sweep 16, stopping DMRG early
+FOUND MU (secant); mu: 1.4164526272027393  n: 0.93771285
+Target density achieved with mu=1.4164526272027393, n=0.93771285
+Checking {alpha,beta} vs measured
+Alpha not converged.
+NOT CONVERGED; updating alpha, beta and continuing...
+After sweep 1 energy=-220.02393  maxlinkdim=1000 maxerr=8.54E-06 time=382.138
+After sweep 2 energy=-220.03893  maxlinkdim=1000 maxerr=1.26E-06 time=379.090
+After sweep 3 energy=-220.04698  maxlinkdim=1000 maxerr=2.52E-07 time=378.571
+After sweep 4 energy=-220.04842  maxlinkdim=1000 maxerr=6.46E-08 time=378.557
+After sweep 5 energy=-220.05031  maxlinkdim=1000 maxerr=1.49E-08 time=260.429
+After sweep 6 energy=-220.05142  maxlinkdim=1000 maxerr=8.65E-09 time=260.619
+After sweep 7 energy=-220.05206  maxlinkdim=1000 maxerr=8.35E-09 time=260.823
+After sweep 8 energy=-220.0501  maxlinkdim=1000 maxerr=8.47E-09 time=260.947
+After sweep 9 energy=-220.05124  maxlinkdim=1000 maxerr=4.74E-08 time=260.063
+After sweep 10 energy=-220.0508  maxlinkdim=1000 maxerr=6.72E-08 time=260.604
+After sweep 11 energy=-220.05022  maxlinkdim=1000 maxerr=6.50E-08 time=260.524
+After sweep 12 energy=-220.05093  maxlinkdim=1000 maxerr=7.73E-08 time=260.460
+After sweep 13 energy=-220.05006  maxlinkdim=1000 maxerr=8.81E-09 time=260.744
+After sweep 14 energy=-220.0515  maxlinkdim=1000 maxerr=4.21E-08 time=260.604
+After sweep 15 energy=-220.05104  maxlinkdim=1000 maxerr=5.09E-08 time=260.841
+After sweep 16 energy=-220.05019  maxlinkdim=1000 maxerr=8.57E-09 time=259.844
+After sweep 17 energy=-220.05074  maxlinkdim=1000 maxerr=3.30E-08 time=260.544
+After sweep 18 energy=-220.05206  maxlinkdim=1000 maxerr=9.54E-09 time=260.795
+After sweep 19 energy=-220.0512  maxlinkdim=1000 maxerr=1.07E-07 time=260.795
+After sweep 20 energy=-220.05074  maxlinkdim=1000 maxerr=2.33E-08 time=260.737
+After sweep 21 energy=-220.0498  maxlinkdim=1000 maxerr=1.60E-08 time=260.722
+After sweep 22 energy=-220.05067  maxlinkdim=1000 maxerr=8.45E-09 time=259.976
+After sweep 23 energy=-220.05074  maxlinkdim=1000 maxerr=3.73E-08 time=260.569
+Energy converged after sweep 23, stopping DMRG early
+Same mu: 1.4164526272027393 and continuing
+Target density achieved with mu=1.4164526272027393, n=0.9372872
+Checking {alpha,beta} vs measured
+Alpha not converged.
+NOT CONVERGED; updating alpha, beta and continuing...
+After sweep 1 energy=-219.96915  maxlinkdim=1000 maxerr=6.90E-06 time=381.917
+After sweep 2 energy=-219.98492  maxlinkdim=1000 maxerr=1.03E-06 time=379.685
+After sweep 3 energy=-219.9888  maxlinkdim=1000 maxerr=2.07E-07 time=378.515
+After sweep 4 energy=-219.99324  maxlinkdim=1000 maxerr=5.22E-08 time=378.403
+After sweep 5 energy=-219.99377  maxlinkdim=1000 maxerr=5.83E-09 time=260.381
+After sweep 6 energy=-219.99469  maxlinkdim=1000 maxerr=5.82E-09 time=260.266
+After sweep 7 energy=-219.99254  maxlinkdim=1000 maxerr=2.93E-08 time=260.458
+After sweep 8 energy=-219.99316  maxlinkdim=1000 maxerr=1.33E-08 time=260.581
+After sweep 9 energy=-219.9936  maxlinkdim=1000 maxerr=1.70E-08 time=260.361
+After sweep 10 energy=-219.99359  maxlinkdim=1000 maxerr=1.62E-08 time=259.723
+Energy converged after sweep 10, stopping DMRG early
+Not same mu, searching again
+After sweep 1 energy=-221.16978  maxlinkdim=1000 maxerr=6.31E-06 time=381.235
+After sweep 2 energy=-221.18079  maxlinkdim=1000 maxerr=9.85E-07 time=379.668
+After sweep 3 energy=-221.18614  maxlinkdim=1000 maxerr=1.96E-07 time=378.165
+After sweep 4 energy=-221.19087  maxlinkdim=1000 maxerr=5.02E-08 time=378.971
+After sweep 5 energy=-221.19081  maxlinkdim=1000 maxerr=1.82E-08 time=260.870
+Energy converged after sweep 5, stopping DMRG early
+n0: 0.933406; n1: 0.93730336; mu0: 1.4164526272027393; mu1: 1.4264526272027394
+FOUND MU; mu: 1.4264526272027394  n: 0.93730336
+Target density achieved with mu=1.4264526272027394, n=0.93730336
+Checking {alpha,beta} vs measured
+Alpha not converged.
+NOT CONVERGED; updating alpha, beta and continuing...
+After sweep 1 energy=-221.30788  maxlinkdim=1000 maxerr=5.78E-06 time=381.730
+After sweep 2 energy=-221.31903  maxlinkdim=1000 maxerr=8.70E-07 time=379.529
+After sweep 3 energy=-221.32574  maxlinkdim=1000 maxerr=1.71E-07 time=378.648
+After sweep 4 energy=-221.32964  maxlinkdim=1000 maxerr=4.20E-08 time=378.612
+After sweep 5 energy=-221.32906  maxlinkdim=1000 maxerr=1.36E-07 time=260.577
+After sweep 6 energy=-221.32993  maxlinkdim=1000 maxerr=1.09E-07 time=260.930
+After sweep 7 energy=-221.32948  maxlinkdim=1000 maxerr=2.67E-08 time=260.865
+After sweep 8 energy=-221.3305  maxlinkdim=1000 maxerr=4.22E-09 time=260.887
+After sweep 9 energy=-221.32878  maxlinkdim=1000 maxerr=7.20E-08 time=260.317
+After sweep 10 energy=-221.33003  maxlinkdim=1000 maxerr=1.47E-07 time=260.820
+After sweep 11 energy=-221.32933  maxlinkdim=1000 maxerr=6.66E-08 time=260.917
+After sweep 12 energy=-221.33038  maxlinkdim=1000 maxerr=7.82E-08 time=260.848
+After sweep 13 energy=-221.32991  maxlinkdim=1000 maxerr=1.97E-08 time=260.453
+After sweep 14 energy=-221.32924  maxlinkdim=1000 maxerr=9.74E-08 time=260.687
+After sweep 15 energy=-221.32959  maxlinkdim=1000 maxerr=7.63E-08 time=260.707
+After sweep 16 energy=-221.32845  maxlinkdim=1000 maxerr=6.83E-09 time=260.941
+After sweep 17 energy=-221.32736  maxlinkdim=1000 maxerr=1.89E-08 time=260.296
+After sweep 18 energy=-221.32843  maxlinkdim=1000 maxerr=6.57E-08 time=260.724
+After sweep 19 energy=-221.32948  maxlinkdim=1000 maxerr=6.26E-09 time=260.754
+After sweep 20 energy=-221.33057  maxlinkdim=1000 maxerr=2.52E-08 time=260.992
+After sweep 21 energy=-221.32915  maxlinkdim=1000 maxerr=8.32E-08 time=260.238
+After sweep 22 energy=-221.33014  maxlinkdim=1000 maxerr=1.17E-08 time=260.453
+After sweep 23 energy=-221.33043  maxlinkdim=1000 maxerr=2.55E-08 time=260.322
+After sweep 24 energy=-221.33025  maxlinkdim=1000 maxerr=2.62E-08 time=260.595
+Energy converged after sweep 24, stopping DMRG early
+Not same mu, searching again
+After sweep 1 energy=-222.50417  maxlinkdim=1000 maxerr=5.53E-06 time=380.078
+After sweep 2 energy=-222.51704  maxlinkdim=1000 maxerr=8.28E-07 time=379.183
+After sweep 3 energy=-222.52275  maxlinkdim=1000 maxerr=1.63E-07 time=379.054
+After sweep 4 energy=-222.52547  maxlinkdim=1000 maxerr=4.17E-08 time=378.445
+After sweep 5 energy=-222.5268  maxlinkdim=1000 maxerr=3.40E-09 time=260.645
+After sweep 6 energy=-222.52592  maxlinkdim=1000 maxerr=3.58E-08 time=261.066
+After sweep 7 energy=-222.52704  maxlinkdim=1000 maxerr=2.74E-08 time=260.673
+After sweep 8 energy=-222.5255  maxlinkdim=1000 maxerr=4.22E-08 time=260.666
+After sweep 9 energy=-222.52791  maxlinkdim=1000 maxerr=3.73E-09 time=260.553
+After sweep 10 energy=-222.52505  maxlinkdim=1000 maxerr=3.08E-08 time=260.562
+After sweep 11 energy=-222.52719  maxlinkdim=1000 maxerr=1.12E-07 time=260.733
+After sweep 12 energy=-222.52618  maxlinkdim=1000 maxerr=6.13E-08 time=261.005
+After sweep 13 energy=-222.52596  maxlinkdim=1000 maxerr=2.28E-07 time=260.869
+After sweep 14 energy=-222.52594  maxlinkdim=1000 maxerr=3.80E-09 time=260.862
+Energy converged after sweep 14, stopping DMRG early
+n0: 0.93366325; n1: 0.9372286; mu0: 1.4264526272027394; mu1: 1.4364526272027394
+FOUND MU; mu: 1.4364526272027394  n: 0.9372286
+Target density achieved with mu=1.4364526272027394, n=0.9372286
+Checking {alpha,beta} vs measured
+Alpha not converged.
+NOT CONVERGED; updating alpha, beta and continuing...
+After sweep 1 energy=-222.67462  maxlinkdim=1000 maxerr=4.97E-06 time=382.176
+After sweep 2 energy=-222.68716  maxlinkdim=1000 maxerr=7.63E-07 time=379.125
+After sweep 3 energy=-222.69194  maxlinkdim=1000 maxerr=1.46E-07 time=378.868
+After sweep 4 energy=-222.69576  maxlinkdim=1000 maxerr=3.64E-08 time=378.988
+After sweep 5 energy=-222.69739  maxlinkdim=1000 maxerr=4.15E-08 time=260.673
+After sweep 6 energy=-222.69565  maxlinkdim=1000 maxerr=3.01E-09 time=260.214
+After sweep 7 energy=-222.69507  maxlinkdim=1000 maxerr=1.97E-08 time=260.838
+After sweep 8 energy=-222.69542  maxlinkdim=1000 maxerr=3.07E-08 time=260.702
+After sweep 9 energy=-222.6963  maxlinkdim=1000 maxerr=1.46E-07 time=261.012
+After sweep 10 energy=-222.69655  maxlinkdim=1000 maxerr=4.43E-08 time=261.021
+After sweep 11 energy=-222.69757  maxlinkdim=1000 maxerr=3.29E-09 time=260.231
+After sweep 12 energy=-222.69789  maxlinkdim=1000 maxerr=7.00E-08 time=260.778
+After sweep 13 energy=-222.69629  maxlinkdim=1000 maxerr=1.67E-08 time=260.828
+After sweep 14 energy=-222.69728  maxlinkdim=1000 maxerr=3.35E-09 time=260.847
+After sweep 15 energy=-222.69618  maxlinkdim=1000 maxerr=7.29E-08 time=261.203
+After sweep 16 energy=-222.69785  maxlinkdim=1000 maxerr=1.09E-08 time=260.544
+After sweep 17 energy=-222.69614  maxlinkdim=1000 maxerr=3.08E-09 time=260.646
+After sweep 18 energy=-222.69626  maxlinkdim=1000 maxerr=2.68E-08 time=260.629
+Energy converged after sweep 18, stopping DMRG early
+Not same mu, searching again
+After sweep 1 energy=-223.87537  maxlinkdim=1000 maxerr=4.81E-06 time=380.427
+After sweep 2 energy=-223.8844  maxlinkdim=1000 maxerr=7.11E-07 time=379.154
+After sweep 3 energy=-223.89018  maxlinkdim=1000 maxerr=1.39E-07 time=379.143
+After sweep 4 energy=-223.89334  maxlinkdim=1000 maxerr=3.43E-08 time=378.396
+After sweep 5 energy=-223.89389  maxlinkdim=1000 maxerr=2.81E-08 time=260.681
+After sweep 6 energy=-223.89546  maxlinkdim=1000 maxerr=3.86E-09 time=260.441
+After sweep 7 energy=-223.89357  maxlinkdim=1000 maxerr=2.84E-09 time=260.635
+After sweep 8 energy=-223.89499  maxlinkdim=1000 maxerr=2.87E-08 time=261.178
+After sweep 9 energy=-223.89526  maxlinkdim=1000 maxerr=3.58E-08 time=260.616
+After sweep 10 energy=-223.89395  maxlinkdim=1000 maxerr=4.53E-08 time=260.606
+After sweep 11 energy=-223.89403  maxlinkdim=1000 maxerr=2.50E-08 time=260.544
+Energy converged after sweep 11, stopping DMRG early
+n0: 0.9343668; n1: 0.9377333; mu0: 1.4364526272027394; mu1: 1.4464526272027394
+FOUND MU; mu: 1.4464526272027394  n: 0.9377333
+Target density achieved with mu=1.4464526272027394, n=0.9377333
+Checking {alpha,beta} vs measured
+Alpha not converged.
+NOT CONVERGED; updating alpha, beta and continuing...
+After sweep 1 energy=-224.02695  maxlinkdim=1000 maxerr=4.67E-06 time=382.125
+After sweep 2 energy=-224.03868  maxlinkdim=1000 maxerr=6.83E-07 time=379.127
+After sweep 3 energy=-224.04233  maxlinkdim=1000 maxerr=1.36E-07 time=378.915
+After sweep 4 energy=-224.0472  maxlinkdim=1000 maxerr=3.33E-08 time=378.756
+After sweep 5 energy=-224.04716  maxlinkdim=1000 maxerr=7.58E-08 time=260.978
+Energy converged after sweep 5, stopping DMRG early
+Not same mu, searching again
+After sweep 1 energy=-225.22649  maxlinkdim=1000 maxerr=4.32E-06 time=380.402
+After sweep 2 energy=-225.23639  maxlinkdim=1000 maxerr=6.54E-07 time=379.513
+After sweep 3 energy=-225.24265  maxlinkdim=1000 maxerr=1.29E-07 time=379.197
+After sweep 4 energy=-225.24687  maxlinkdim=1000 maxerr=3.21E-08 time=379.062
+After sweep 5 energy=-225.24702  maxlinkdim=1000 maxerr=2.55E-08 time=260.750
+Energy converged after sweep 5, stopping DMRG early
+n0: 0.9356098; n1: 0.93881005; mu0: 1.4464526272027394; mu1: 1.4564526272027394
+FOUND MU; mu: 1.4564526272027394  n: 0.93881005
+Target density achieved with mu=1.4564526272027394, n=0.93881005
+Checking {alpha,beta} vs measured
+Alpha not converged.
+NOT CONVERGED; updating alpha, beta and continuing...
+After sweep 1 energy=-225.35028  maxlinkdim=1000 maxerr=4.30E-06 time=381.874
+After sweep 2 energy=-225.3604  maxlinkdim=1000 maxerr=6.39E-07 time=379.749
+After sweep 3 energy=-225.36682  maxlinkdim=1000 maxerr=1.25E-07 time=378.834
+After sweep 4 energy=-225.37096  maxlinkdim=1000 maxerr=3.08E-08 time=378.771
+After sweep 5 energy=-225.36978  maxlinkdim=1000 maxerr=1.44E-07 time=260.640
+After sweep 6 energy=-225.37025  maxlinkdim=1000 maxerr=5.26E-08 time=261.168
+After sweep 7 energy=-225.37068  maxlinkdim=1000 maxerr=1.68E-08 time=260.372
+After sweep 8 energy=-225.37083  maxlinkdim=1000 maxerr=2.34E-08 time=260.920
+Energy converged after sweep 8, stopping DMRG early
+Same mu: 1.4564526272027394 and continuing
+Target density achieved with mu=1.4564526272027394, n=0.9372882
+Checking {alpha,beta} vs measured
+Alpha not converged.
+NOT CONVERGED; updating alpha, beta and continuing...
+After sweep 1 energy=-225.41492  maxlinkdim=1000 maxerr=4.15E-06 time=381.386
+After sweep 2 energy=-225.42705  maxlinkdim=1000 maxerr=6.40E-07 time=379.457
+After sweep 3 energy=-225.43279  maxlinkdim=1000 maxerr=1.24E-07 time=378.437
+After sweep 4 energy=-225.43633  maxlinkdim=1000 maxerr=3.00E-08 time=378.198
+After sweep 5 energy=-225.4361  maxlinkdim=1000 maxerr=4.97E-08 time=260.703
+After sweep 6 energy=-225.43552  maxlinkdim=1000 maxerr=1.46E-08 time=260.666
+After sweep 7 energy=-225.43623  maxlinkdim=1000 maxerr=7.00E-08 time=260.409
+After sweep 8 energy=-225.43628  maxlinkdim=1000 maxerr=3.88E-08 time=259.983
+Energy converged after sweep 8, stopping DMRG early
+Same mu: 1.4564526272027394 and continuing
+Target density achieved with mu=1.4564526272027394, n=0.93644553
+Checking {alpha,beta} vs measured
+Alpha not converged.
+NOT CONVERGED; updating alpha, beta and continuing...
+After sweep 1 energy=-225.4627  maxlinkdim=1000 maxerr=3.99E-06 time=381.931
+After sweep 2 energy=-225.47205  maxlinkdim=1000 maxerr=6.24E-07 time=378.859
+After sweep 3 energy=-225.47842  maxlinkdim=1000 maxerr=1.20E-07 time=378.544
+After sweep 4 energy=-225.48343  maxlinkdim=1000 maxerr=2.94E-08 time=379.044
+After sweep 5 energy=-225.48106  maxlinkdim=1000 maxerr=6.52E-08 time=260.195
+After sweep 6 energy=-225.4827  maxlinkdim=1000 maxerr=5.04E-09 time=261.412
+After sweep 7 energy=-225.48259  maxlinkdim=1000 maxerr=5.64E-09 time=261.003
+Energy converged after sweep 7, stopping DMRG early
+Same mu: 1.4564526272027394 and continuing
+Target density achieved with mu=1.4564526272027394, n=0.93585384
+Checking {alpha,beta} vs measured
+Alpha not converged.
+NOT CONVERGED; updating alpha, beta and continuing...
+After sweep 1 energy=-225.49638  maxlinkdim=1000 maxerr=3.92E-06 time=382.166
+After sweep 2 energy=-225.50925  maxlinkdim=1000 maxerr=6.15E-07 time=379.106
+After sweep 3 energy=-225.51358  maxlinkdim=1000 maxerr=1.17E-07 time=378.762
+After sweep 4 energy=-225.51573  maxlinkdim=1000 maxerr=2.90E-08 time=378.645
+After sweep 5 energy=-225.51625  maxlinkdim=1000 maxerr=1.95E-09 time=260.707
+After sweep 6 energy=-225.5163  maxlinkdim=1000 maxerr=3.69E-08 time=260.755
+Energy converged after sweep 6, stopping DMRG early
+Not same mu, searching again
+After sweep 1 energy=-226.69666  maxlinkdim=1000 maxerr=3.70E-06 time=380.451
+After sweep 2 energy=-226.70854  maxlinkdim=1000 maxerr=5.69E-07 time=379.727
+After sweep 3 energy=-226.71149  maxlinkdim=1000 maxerr=1.12E-07 time=378.798
+After sweep 4 energy=-226.71524  maxlinkdim=1000 maxerr=2.81E-08 time=379.099
+After sweep 5 energy=-226.71729  maxlinkdim=1000 maxerr=1.35E-07 time=260.701
+After sweep 6 energy=-226.71564  maxlinkdim=1000 maxerr=6.47E-08 time=260.728
+After sweep 7 energy=-226.71683  maxlinkdim=1000 maxerr=2.08E-08 time=260.793
+After sweep 8 energy=-226.71838  maxlinkdim=1000 maxerr=2.20E-08 time=260.688
+After sweep 9 energy=-226.71732  maxlinkdim=1000 maxerr=5.02E-08 time=260.703
+slurmstepd: error: *** STEP 49459846.0 ON nid008476 CANCELLED AT 2026-03-01T22:47:12 ***
+slurmstepd: error: *** JOB 49459846 ON nid008476 CANCELLED AT 2026-03-01T22:47:12 ***

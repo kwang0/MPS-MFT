@@ -1,0 +1,30 @@
+outfile_name: results_L_64_U_8.0_t0_1.0_t_p_0.15_chi_1000_cpu.h5
+[ Info:  started timer at: 2026-03-04T01:31:18.289
+Inheriting alpha/beta/mu from results_L_64_U_8.0_t0_1.0_t_p_0.15_chi_1000_gpu.h5
+Running with t0=1.0 t_p=0.15 U=8.0 L=64 chi_max=1000 E_p=0.134 mu_init=1.5005330342868357
+After sweep 1 energy=-220.96750695156967  maxlinkdim=10 maxerr=2.19E-03 time=41.324
+After sweep 2 energy=-228.31679132436383  maxlinkdim=20 maxerr=1.65E-03 time=13.163
+After sweep 3 energy=-231.7729253541576  maxlinkdim=100 maxerr=1.42E-05 time=29.330
+After sweep 4 energy=-232.36510285956558  maxlinkdim=1000 maxerr=7.95E-10 time=326.539
+After sweep 5 energy=-232.76185774812015  maxlinkdim=1000 maxerr=1.24E-09 time=744.174
+After sweep 6 energy=-232.96957097721088  maxlinkdim=1000 maxerr=7.55E-10 time=772.083
+After sweep 7 energy=-233.12405151725875  maxlinkdim=1000 maxerr=2.62E-09 time=790.339
+After sweep 8 energy=-233.283155163284  maxlinkdim=1000 maxerr=3.20E-08 time=823.999
+After sweep 9 energy=-233.44771176394866  maxlinkdim=1000 maxerr=1.50E-07 time=853.520
+After sweep 10 energy=-233.59044700447393  maxlinkdim=1000 maxerr=5.77E-08 time=897.619
+After sweep 11 energy=-233.71412845279065  maxlinkdim=1000 maxerr=3.50E-08 time=903.529
+After sweep 12 energy=-233.88290960172992  maxlinkdim=1000 maxerr=4.41E-07 time=907.143
+After sweep 13 energy=-233.98508511552518  maxlinkdim=1000 maxerr=1.87E-07 time=911.478
+After sweep 14 energy=-234.09201459111708  maxlinkdim=1000 maxerr=1.16E-06 time=905.393
+After sweep 15 energy=-234.18825428425808  maxlinkdim=1000 maxerr=2.98E-07 time=922.075
+After sweep 16 energy=-234.34650465129417  maxlinkdim=1000 maxerr=1.05E-06 time=894.478
+After sweep 17 energy=-234.5424750423413  maxlinkdim=1000 maxerr=1.75E-06 time=882.817
+After sweep 18 energy=-234.70285430234085  maxlinkdim=1000 maxerr=1.53E-07 time=898.983
+After sweep 19 energy=-234.83201250882837  maxlinkdim=1000 maxerr=1.50E-07 time=894.026
+After sweep 20 energy=-234.9525992270585  maxlinkdim=1000 maxerr=2.52E-07 time=897.350
+After sweep 21 energy=-235.06188406209014  maxlinkdim=1000 maxerr=2.65E-07 time=880.340
+After sweep 22 energy=-235.18310684175364  maxlinkdim=1000 maxerr=4.07E-06 time=881.807
+After sweep 23 energy=-235.26919852878294  maxlinkdim=1000 maxerr=2.73E-07 time=899.675
+After sweep 24 energy=-235.30666913802006  maxlinkdim=1000 maxerr=5.22E-07 time=890.905
+slurmstepd: error: *** STEP 49631599.0 ON nid007081 CANCELLED AT 2026-03-04T14:37:36 ***
+slurmstepd: error: *** JOB 49631599 ON nid007081 CANCELLED AT 2026-03-04T14:37:36 ***
