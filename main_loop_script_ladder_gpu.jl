@@ -420,6 +420,10 @@ function close_ab(alpha, alpha_meas, beta, beta_meas, r_range; mu_cdw=nothing, m
 
     for σ in 1:2, j in 1:2, j_p in 1:2
         for r in 0:r_range
+            if r == 0 && j == j_p
+                # Onsite beta entries aren't added to MPO; CDW is handled by mu_cdw but this was previously factored into close_ab
+                continue
+            end
             n_diag = size(beta, 2) - r
             n_diag <= 0 && continue
             # beta
