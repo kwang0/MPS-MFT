@@ -749,6 +749,29 @@ function dwave_order_parameter(psi::MPS, s; L_rungs::Int)
     return leg_pair - rung_pair
 end
 
+function local_dwave_profile(psi::MPS; L_rungs::Int, edge_rungs::Int=2)
+    C = correlation_matrix(psi, "Cup", "Cdn")
+    if L_rungs <= 1
+        return Int[], Float64[]
+    end
+    rungs = if L_rungs > 2 * edge_rungs + 1
+        collect((1 + edge_rungs):(L_rungs - 1 - edge_rungs))
+    else
+        collect(1:(L_rungs - 1))
+    end
+    prof = zeros(Float64, length(rungs))
+    for (idx, i_rung) in enumerate(rungs)
+        s00 = rung_leg_to_site(i_rung, 0)
+        s01 = rung_leg_to_site(i_rung, 1)
+        s10 = rung_leg_to_site(i_rung + 1, 0)
+        s11 = rung_leg_to_site(i_rung + 1, 1)
+        leg_pair = 0.5 * real(C[s00, s10] + C[s01, s11])
+        rung_pair = real(C[s00, s01])
+        prof[idx] = leg_pair - rung_pair
+    end
+    return rungs, prof
+end
+
 # Charge density wave order parameter
 # Measures density modulation at wavevector q (default q=π for period-2 CDW)
 function cdw_order_parameter(psi::MPS, s; L_rungs::Int, q::Float64=Float64(π))
@@ -792,11 +815,16 @@ function main_loop(model_params; n_target::Float64, E_p::Float64, z_c::Int=4, al
         s = make_sites(2 * L)
     end
 
-    # Track fields from past iterations to detect period-n SCF convergence
-    recent_checks = 8  # 0 means check all past steps-back; set >0 to check only that many most recent steps-back (set as 8 for now)
-    alpha_hist = Vector{Array{Float64,4}}()
-    beta_hist = Vector{Array{Float64,5}}()
-    mu_cdw_hist = Vector{Array{Float64,2}}()
+    # Track measured densities from past iterations to detect period-2 SCF convergence.
+    # Use only bulk sites to suppress OBC edge effects: ignore first 2 and last 2 rungs.
+    bulk_rungs = (L > 4) ? collect(3:(L-2)) : collect(1:L)
+    bulk_sites = Int[]
+    for i_rung in bulk_rungs, j_leg in 0:1
+        push!(bulk_sites, rung_leg_to_site(i_rung, j_leg))
+    end
+    rho_hist = Vector{Vector{Float64}}()
+    dwave_hist = Vector{Vector{Float64}}()
+    period2_tol = 1e-3
 
     for it in 1:max_iter
         # Warm-start from previous psi (nothing on first iteration = cold start)
@@ -809,33 +837,37 @@ function main_loop(model_params; n_target::Float64, E_p::Float64, z_c::Int=4, al
 
         alpha_meas, beta_meas = calculate_alpha_beta_measured(psi, s; L=L, r_range=r_range, z_c=z_c, t_p=t_p, E_p=E_p, threshold=1e-6)
         mu_cdw_meas = calculate_mu_cdw_measured(psi; L=L, t_p=t_p, E_p=E_p, threshold=1e-6)
+        rho = expect(psi, "Ntot")
+        _, dwave_prof = local_dwave_profile(psi; L_rungs=L, edge_rungs=2)
+        delta_d_prev = (length(dwave_hist) >= 1 && !isempty(dwave_prof)) ?
+            (sum(abs.(dwave_prof .- dwave_hist[end])) / length(dwave_prof)) : NaN
+        delta_d_period2 = (length(dwave_hist) >= 2 && !isempty(dwave_prof)) ?
+            (sum(abs.(dwave_prof .- dwave_hist[end-1])) / length(dwave_prof)) : NaN
+        dwave_abs_mean = !isempty(dwave_prof) ? (sum(abs.(dwave_prof)) / length(dwave_prof)) : NaN
         alpha_list == [] ? alpha_list = alpha_meas : alpha_list = cat(alpha_list, alpha_meas, dims=length(size(alpha_meas))+1)
         beta_list == [] ? beta_list = beta_meas : beta_list = cat(beta_list, beta_meas, dims=length(size(beta_meas))+1)
 
         println("Checking {alpha,beta,mu_cdw} vs measured")
-        if close_ab(alpha, alpha_meas, beta, beta_meas, r_range; mu_cdw=mu_cdw, mu_cdw_meas=mu_cdw_meas, thresh=5e-3)
+        if close_ab(alpha, alpha_meas, beta, beta_meas, r_range; mu_cdw=mu_cdw, mu_cdw_meas=mu_cdw_meas, thresh=5e-3) #This first check (5e-3) is more restrictive than the second one (1e-3)?
             println("Converged {alpha,beta,mu_cdw}. mu=$mu, n=$n_meas\nExiting loop")
             return alpha, beta, mu_cdw, alpha_list, beta_list, mu, psi, E, s, H
         end
+        println("Local d-wave profile: mean_abs=$(dwave_abs_mean), delta_d_prev=$(delta_d_prev), delta_d_period2=$(delta_d_period2)")
 
-        if !isempty(alpha_hist)
-            start_idx = (recent_checks <= 0) ? 1 : max(1, length(alpha_hist) - recent_checks + 1)
-            for idx in start_idx:length(alpha_hist)
-                n_steps_back = length(alpha_hist) - idx + 1
-                n_steps_back == 1 && continue
-                if close_ab(alpha_hist[idx], alpha, beta_hist[idx], beta, r_range; mu_cdw=mu_cdw_hist[idx], mu_cdw_meas=mu_cdw, thresh=1e-3)
-                    println("Converged {alpha,beta,mu_cdw}. n_steps_back=$(n_steps_back), mu=$mu, n=$n_meas\nExiting loop")
-                    return alpha, beta, mu_cdw, alpha_list, beta_list, mu, psi, E, s, H
-                end
+        if length(rho_hist) >= 2
+            delta_n_prev = sum(abs.(rho[bulk_sites] .- rho_hist[end][bulk_sites])) / length(bulk_sites)
+            delta_n_period2 = sum(abs.(rho[bulk_sites] .- rho_hist[end-1][bulk_sites])) / length(bulk_sites)
+            if delta_n_period2 < period2_tol && delta_n_prev > period2_tol
+                println("Detected period-2 bulk-density cycle. delta_n_prev=$(delta_n_prev), delta_n_period2=$(delta_n_period2), mu=$mu, n=$n_meas\nExiting loop")
+                return alpha, beta, mu_cdw, alpha_list, beta_list, mu, psi, E, s, H
             end
         end
 
         println("NOT CONVERGED; updating alpha, beta, mu_cdw and continuing...")
 
-        # Save current fields for n-step-back detection in later iterations.
-        push!(alpha_hist, copy(alpha))
-        push!(beta_hist, copy(beta))
-        push!(mu_cdw_hist, copy(mu_cdw))
+        # Save current measured density for period-2 detection in later iterations.
+        push!(rho_hist, copy(rho))
+        push!(dwave_hist, copy(dwave_prof))
 
         alpha = damp * alpha_meas + (1 - damp) * alpha
         beta  = damp * beta_meas  + (1 - damp) * beta
