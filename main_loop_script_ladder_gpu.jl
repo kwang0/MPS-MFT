@@ -988,24 +988,7 @@ function run_loop(L::Int, t::Float64, U::Float64, V::Float64, t0::Float64, t_p::
     end
 
     if period2_cycle_detected
-        println("Period-2 density cycle detected. Skipping excited-state gap and fixed-point postprocessing.")
-        F = h5open(outfile, "w")
-        F["U"] = U
-        F["V"] = V
-        F["t0"] = t0
-        F["t_p"] = t_p
-        F["alpha"] = alpha
-        F["beta"] = beta
-        F["mu_cdw"] = mu_cdw
-        F["mu"] = mu
-        F["psi"] = ITensors.cpu(psi)
-        F["E"] = E
-        F["alpha_list"] = alpha_list
-        F["beta_list"] = beta_list
-        F["completed"] = true
-        F["period2_cycle_detected"] = true
-        close(F)
-        return
+        println("Period-2 density cycle detected. Exiting.")
     end
 
 
@@ -1036,7 +1019,7 @@ function run_loop(L::Int, t::Float64, U::Float64, V::Float64, t0::Float64, t_p::
     F["alpha_list"] = alpha_list
     F["beta_list"] = beta_list
     F["completed"] = true
-    F["period2_cycle_detected"] = false
+    F["period2_cycle_detected"] = period2_cycle_detected
     close(F)
     return
 end
