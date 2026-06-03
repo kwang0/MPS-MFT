@@ -151,6 +151,26 @@ function _density_corr_title(spin, leg::Integer; rung_tex::AbstractString="i")
     return _math("C^{" * sigma * "}_{\\mathrm{exc}}[(" * rung_tex * "," * leg_tex * "),(" * rung_tex * "," * leg_tex * ")] = " * expr)
 end
 
+function _cdw_corr_expr(; rung_tex::AbstractString="i", leg_tex::AbstractString="\\ell")
+    return "\\langle n_{" * rung_tex * "," * leg_tex * ",\\uparrow} + n_{" * rung_tex * "," * leg_tex * ",\\downarrow} \\rangle"
+end
+
+function _sdw_corr_expr(; rung_tex::AbstractString="i", leg_tex::AbstractString="\\ell")
+    return "\\langle n_{" * rung_tex * "," * leg_tex * ",\\uparrow} - n_{" * rung_tex * "," * leg_tex * ",\\downarrow} \\rangle"
+end
+
+function _cdw_corr_title(leg::Integer; rung_tex::AbstractString="i")
+    leg_tex = string(leg)
+    lhs = "C^{\\uparrow}_{\\mathrm{exc}}[(" * rung_tex * "," * leg_tex * "),(" * rung_tex * "," * leg_tex * ")] + C^{\\downarrow}_{\\mathrm{exc}}[(" * rung_tex * "," * leg_tex * "),(" * rung_tex * "," * leg_tex * ")]"
+    return _math(lhs * " = " * _cdw_corr_expr(; rung_tex=rung_tex, leg_tex=leg_tex))
+end
+
+function _sdw_corr_title(leg::Integer; rung_tex::AbstractString="i")
+    leg_tex = string(leg)
+    lhs = "C^{\\uparrow}_{\\mathrm{exc}}[(" * rung_tex * "," * leg_tex * "),(" * rung_tex * "," * leg_tex * ")] - C^{\\downarrow}_{\\mathrm{exc}}[(" * rung_tex * "," * leg_tex * "),(" * rung_tex * "," * leg_tex * ")]"
+    return _math(lhs * " = " * _sdw_corr_expr(; rung_tex=rung_tex, leg_tex=leg_tex))
+end
+
 function _onsite_pair_corr_expr(; rung_tex::AbstractString="i", leg_tex::AbstractString="\\ell")
     return "\\langle c_{" * rung_tex * "," * leg_tex * ",\\uparrow} c_{" * rung_tex * "," * leg_tex * ",\\downarrow} \\rangle"
 end
@@ -192,6 +212,24 @@ function density_from_beta(beta; spin=:up, leg::Integer=1, iteration=nothing, us
     return rungs, _plot_values(vals; use_abs=use_abs)
 end
 
+function cdw_from_beta(beta; leg::Integer=1, iteration=nothing, use_abs::Bool=false)
+    b = _final_array(beta, 5, iteration, "beta")
+    leg = _check_leg(leg)
+    L = size(b, 2)
+    rungs = collect(1:L)
+    vals = [b[2, i, i, leg, leg] + b[1, i, i, leg, leg] for i in rungs]
+    return rungs, _plot_values(vals; use_abs=use_abs)
+end
+
+function sdw_from_beta(beta; leg::Integer=1, iteration=nothing, use_abs::Bool=false)
+    b = _final_array(beta, 5, iteration, "beta")
+    leg = _check_leg(leg)
+    L = size(b, 2)
+    rungs = collect(1:L)
+    vals = [b[2, i, i, leg, leg] - b[1, i, i, leg, leg] for i in rungs]
+    return rungs, _plot_values(vals; use_abs=use_abs)
+end
+
 function density_from_correlations(C_exc_dn, C_exc_up; spin=:up, leg::Integer=1, iteration=nothing, use_abs::Bool=false)
     c = _normal_corr(C_exc_dn, C_exc_up, spin, iteration)
     leg = _check_leg(leg)
@@ -199,6 +237,35 @@ function density_from_correlations(C_exc_dn, C_exc_up; spin=:up, leg::Integer=1,
     size(c, 2) == 2 * L || throw(ArgumentError("raw normal correlation matrix must be square"))
     rungs = collect(1:L)
     vals = [c[_plot_rung_leg_to_site(i, leg), _plot_rung_leg_to_site(i, leg)] for i in rungs]
+    return rungs, _plot_values(vals; use_abs=use_abs)
+end
+
+function _normal_corr_pair(C_exc_dn, C_exc_up, iteration)
+    cdn = _final_array(C_exc_dn, 2, iteration, "C_exc_dn_list")
+    cup = _final_array(C_exc_up, 2, iteration, "C_exc_up_list")
+    size(cdn) == size(cup) || throw(ArgumentError("C_exc_dn and C_exc_up must have the same shape"))
+    return cdn, cup
+end
+
+function cdw_from_correlations(C_exc_dn, C_exc_up; leg::Integer=1, iteration=nothing, use_abs::Bool=false)
+    cdn, cup = _normal_corr_pair(C_exc_dn, C_exc_up, iteration)
+    leg = _check_leg(leg)
+    L = _rung_count_from_sites(size(cup, 1))
+    size(cup, 2) == 2 * L || throw(ArgumentError("raw normal correlation matrices must be square"))
+    rungs = collect(1:L)
+    vals = [cup[_plot_rung_leg_to_site(i, leg), _plot_rung_leg_to_site(i, leg)] +
+            cdn[_plot_rung_leg_to_site(i, leg), _plot_rung_leg_to_site(i, leg)] for i in rungs]
+    return rungs, _plot_values(vals; use_abs=use_abs)
+end
+
+function sdw_from_correlations(C_exc_dn, C_exc_up; leg::Integer=1, iteration=nothing, use_abs::Bool=false)
+    cdn, cup = _normal_corr_pair(C_exc_dn, C_exc_up, iteration)
+    leg = _check_leg(leg)
+    L = _rung_count_from_sites(size(cup, 1))
+    size(cup, 2) == 2 * L || throw(ArgumentError("raw normal correlation matrices must be square"))
+    rungs = collect(1:L)
+    vals = [cup[_plot_rung_leg_to_site(i, leg), _plot_rung_leg_to_site(i, leg)] -
+            cdn[_plot_rung_leg_to_site(i, leg), _plot_rung_leg_to_site(i, leg)] for i in rungs]
     return rungs, _plot_values(vals; use_abs=use_abs)
 end
 
@@ -280,6 +347,26 @@ function middle_density_history(beta_list; spin=:up, leg::Integer=1, rung=nothin
     return iters, _plot_values(vals; use_abs=use_abs)
 end
 
+function middle_cdw_history(beta_list; leg::Integer=1, rung=nothing, use_abs::Bool=false)
+    b = _history_array(beta_list, 6, "beta_list")
+    leg = _check_leg(leg)
+    L = size(b, 2)
+    rung = rung === nothing ? middle_rung(L) : _check_index(rung, L, "rung")
+    iters = collect(1:size(b, 6))
+    vals = [b[2, rung, rung, leg, leg, it] + b[1, rung, rung, leg, leg, it] for it in iters]
+    return iters, _plot_values(vals; use_abs=use_abs)
+end
+
+function middle_sdw_history(beta_list; leg::Integer=1, rung=nothing, use_abs::Bool=false)
+    b = _history_array(beta_list, 6, "beta_list")
+    leg = _check_leg(leg)
+    L = size(b, 2)
+    rung = rung === nothing ? middle_rung(L) : _check_index(rung, L, "rung")
+    iters = collect(1:size(b, 6))
+    vals = [b[2, rung, rung, leg, leg, it] - b[1, rung, rung, leg, leg, it] for it in iters]
+    return iters, _plot_values(vals; use_abs=use_abs)
+end
+
 function middle_density_history_from_correlations(C_exc_dn_list, C_exc_up_list; spin=:up, leg::Integer=1, rung=nothing, use_abs::Bool=false)
     c = _normal_corr_history(C_exc_dn_list, C_exc_up_list, spin)
     leg = _check_leg(leg)
@@ -289,6 +376,37 @@ function middle_density_history_from_correlations(C_exc_dn_list, C_exc_up_list; 
     site = _plot_rung_leg_to_site(rung, leg)
     iters = collect(1:size(c, 3))
     vals = [c[site, site, it] for it in iters]
+    return iters, _plot_values(vals; use_abs=use_abs)
+end
+
+function _normal_corr_history_pair(C_exc_dn_list, C_exc_up_list)
+    cdn = _history_array(C_exc_dn_list, 3, "C_exc_dn_list")
+    cup = _history_array(C_exc_up_list, 3, "C_exc_up_list")
+    size(cdn) == size(cup) || throw(ArgumentError("C_exc_dn_list and C_exc_up_list must have the same shape"))
+    return cdn, cup
+end
+
+function middle_cdw_history_from_correlations(C_exc_dn_list, C_exc_up_list; leg::Integer=1, rung=nothing, use_abs::Bool=false)
+    cdn, cup = _normal_corr_history_pair(C_exc_dn_list, C_exc_up_list)
+    leg = _check_leg(leg)
+    L = _rung_count_from_sites(size(cup, 1))
+    size(cup, 2) == 2 * L || throw(ArgumentError("raw normal correlation matrices must be square"))
+    rung = rung === nothing ? middle_rung(L) : _check_index(rung, L, "rung")
+    site = _plot_rung_leg_to_site(rung, leg)
+    iters = collect(1:size(cup, 3))
+    vals = [cup[site, site, it] + cdn[site, site, it] for it in iters]
+    return iters, _plot_values(vals; use_abs=use_abs)
+end
+
+function middle_sdw_history_from_correlations(C_exc_dn_list, C_exc_up_list; leg::Integer=1, rung=nothing, use_abs::Bool=false)
+    cdn, cup = _normal_corr_history_pair(C_exc_dn_list, C_exc_up_list)
+    leg = _check_leg(leg)
+    L = _rung_count_from_sites(size(cup, 1))
+    size(cup, 2) == 2 * L || throw(ArgumentError("raw normal correlation matrices must be square"))
+    rung = rung === nothing ? middle_rung(L) : _check_index(rung, L, "rung")
+    site = _plot_rung_leg_to_site(rung, leg)
+    iters = collect(1:size(cup, 3))
+    vals = [cup[site, site, it] - cdn[site, site, it] for it in iters]
     return iters, _plot_values(vals; use_abs=use_abs)
 end
 
@@ -568,12 +686,12 @@ end
 
 function plot_onsite_pairing_from_alpha(alpha; leg::Integer=1, iteration=nothing, use_abs::Bool=false, savepath=nothing, figure_title=nothing, kwargs...)
     rungs, vals = onsite_pairing_from_alpha(alpha; leg=leg, iteration=iteration, use_abs=use_abs)
-    ylabel = use_abs ? "|onsite alpha|" : "onsite alpha"
+    ylabel = use_abs ? "|s-wave alpha|" : "s-wave alpha"
     fig, ax = _figure((8.5, 4.0))
     _plot_series!(ax, rungs, vals;
         xlabel="Rung index",
         ylabel=ylabel,
-        title="On-site pairing from alpha, leg $leg",
+        title="s-wave pairing from alpha, leg $leg",
         kwargs...)
     _finish_figure(fig; figure_title=figure_title)
     return _save_if_requested(fig, savepath)
@@ -586,7 +704,7 @@ function plot_onsite_pairing_from_correlations(C_pair; leg::Integer=1, iteration
     _plot_series!(ax, rungs, vals;
         xlabel="Rung index \$i\$",
         ylabel=_corr_value_label(expr, use_abs),
-        title=_onsite_pair_corr_title(leg),
+        title="s-wave: " * _onsite_pair_corr_title(leg),
         kwargs...)
     _finish_figure(fig; figure_title=figure_title)
     return _save_if_requested(fig, savepath)
@@ -603,13 +721,13 @@ function plot_rung_pairing_from_alpha(alpha;
     kwargs...)
 
     rungs, vals = rung_pairing_from_alpha(alpha; leg1=leg1, leg2=leg2, iteration=iteration, symmetrize=symmetrize, use_abs=use_abs)
-    ylabel = use_abs ? "|rung alpha|" : "rung alpha"
+    ylabel = use_abs ? "|d-wave alpha|" : "d-wave alpha"
     title_suffix = symmetrize ? "avg legs $leg1,$leg2" : "legs $leg1,$leg2"
     fig, ax = _figure((8.5, 4.0))
     _plot_series!(ax, rungs, vals;
         xlabel="Rung index",
         ylabel=ylabel,
-        title="Rung pairing from alpha, $title_suffix",
+        title="d-wave pairing from alpha, $title_suffix",
         kwargs...)
     _finish_figure(fig; figure_title=figure_title)
     return _save_if_requested(fig, savepath)
@@ -631,7 +749,7 @@ function plot_rung_pairing_from_correlations(C_pair;
     _plot_series!(ax, rungs, vals;
         xlabel="Rung index \$i\$",
         ylabel=_corr_value_label(expr, use_abs),
-        title=_rung_pair_corr_title(leg1, leg2; symmetrize=symmetrize),
+        title="d-wave: " * _rung_pair_corr_title(leg1, leg2; symmetrize=symmetrize),
         kwargs...)
     _finish_figure(fig; figure_title=figure_title)
     return _save_if_requested(fig, savepath)
@@ -649,19 +767,22 @@ function plot_mf_profiles(alpha, beta;
     figure_title=nothing,
     kwargs...)
 
-    r1, v1 = density_from_beta(beta; spin=spin, leg=leg, iteration=iteration, use_abs=use_abs)
-    r2, v2 = onsite_pairing_from_alpha(alpha; leg=leg, iteration=iteration, use_abs=use_abs)
-    r3, v3 = rung_pairing_from_alpha(alpha; leg1=leg1, leg2=leg2, iteration=iteration, symmetrize=symmetrize_rung, use_abs=use_abs)
+    r1, v1 = cdw_from_beta(beta; leg=leg, iteration=iteration, use_abs=use_abs)
+    r2, v2 = sdw_from_beta(beta; leg=leg, iteration=iteration, use_abs=use_abs)
+    r3, v3 = onsite_pairing_from_alpha(alpha; leg=leg, iteration=iteration, use_abs=use_abs)
+    r4, v4 = rung_pairing_from_alpha(alpha; leg1=leg1, leg2=leg2, iteration=iteration, symmetrize=symmetrize_rung, use_abs=use_abs)
 
-    fig, axes = PyPlot.subplots(3, 1, figsize=(8.5, 8.5))
-    density_ylabel = use_abs ? "|onsite beta $( _spin_label(spin) )|" : "onsite beta $(_spin_label(spin))"
-    onsite_ylabel = use_abs ? "|onsite alpha|" : "onsite alpha"
-    rung_ylabel = use_abs ? "|rung alpha|" : "rung alpha"
+    fig, axes = PyPlot.subplots(4, 1, figsize=(8.5, 10.5))
+    cdw_ylabel = use_abs ? "|CDW beta proxy|" : "CDW beta proxy"
+    sdw_ylabel = use_abs ? "|SDW beta proxy|" : "SDW beta proxy"
+    onsite_ylabel = use_abs ? "|s-wave alpha|" : "s-wave alpha"
+    rung_ylabel = use_abs ? "|d-wave alpha|" : "d-wave alpha"
     rung_suffix = symmetrize_rung ? "avg legs $leg1,$leg2" : "legs $leg1,$leg2"
 
-    _plot_series!(axes[1], r1, v1; xlabel="Rung index", ylabel=density_ylabel, title="Density proxy from beta, leg $leg", kwargs...)
-    _plot_series!(axes[2], r2, v2; xlabel="Rung index", ylabel=onsite_ylabel, title="On-site pairing from alpha, leg $leg", kwargs...)
-    _plot_series!(axes[3], r3, v3; xlabel="Rung index", ylabel=rung_ylabel, title="Rung pairing from alpha, $rung_suffix", kwargs...)
+    _plot_series!(axes[1], r1, v1; xlabel="Rung index", ylabel=cdw_ylabel, title="CDW beta proxy: up + down, leg $leg", kwargs...)
+    _plot_series!(axes[2], r2, v2; xlabel="Rung index", ylabel=sdw_ylabel, title="SDW beta proxy: up - down, leg $leg", kwargs...)
+    _plot_series!(axes[3], r3, v3; xlabel="Rung index", ylabel=onsite_ylabel, title="s-wave pairing from alpha, leg $leg", kwargs...)
+    _plot_series!(axes[4], r4, v4; xlabel="Rung index", ylabel=rung_ylabel, title="d-wave pairing from alpha, $rung_suffix", kwargs...)
 
     tight_rect = figure_title === nothing ? nothing : (0, 0, 1, 0.95)
     _finish_figure(fig; figure_title=figure_title, tight_rect=tight_rect)
@@ -680,18 +801,21 @@ function plot_correlation_profiles(C_pair, C_exc_dn, C_exc_up;
     figure_title=nothing,
     kwargs...)
 
-    r1, v1 = density_from_correlations(C_exc_dn, C_exc_up; spin=spin, leg=leg, iteration=iteration, use_abs=use_abs)
-    r2, v2 = onsite_pairing_from_correlations(C_pair; leg=leg, iteration=iteration, use_abs=use_abs)
-    r3, v3 = rung_pairing_from_correlations(C_pair; leg1=leg1, leg2=leg2, iteration=iteration, symmetrize=symmetrize_rung, use_abs=use_abs)
+    r1, v1 = cdw_from_correlations(C_exc_dn, C_exc_up; leg=leg, iteration=iteration, use_abs=use_abs)
+    r2, v2 = sdw_from_correlations(C_exc_dn, C_exc_up; leg=leg, iteration=iteration, use_abs=use_abs)
+    r3, v3 = onsite_pairing_from_correlations(C_pair; leg=leg, iteration=iteration, use_abs=use_abs)
+    r4, v4 = rung_pairing_from_correlations(C_pair; leg1=leg1, leg2=leg2, iteration=iteration, symmetrize=symmetrize_rung, use_abs=use_abs)
 
-    fig, axes = PyPlot.subplots(3, 1, figsize=(8.5, 8.5))
-    density_expr = _density_corr_expr(spin; leg_tex=string(leg))
+    fig, axes = PyPlot.subplots(4, 1, figsize=(8.5, 10.5))
+    cdw_expr = _cdw_corr_expr(; leg_tex=string(leg))
+    sdw_expr = _sdw_corr_expr(; leg_tex=string(leg))
     onsite_expr = _onsite_pair_corr_expr(; leg_tex=string(leg))
     rung_expr = _rung_pair_corr_expr(; leg1_tex=string(leg1), leg2_tex=string(leg2), symmetrize=symmetrize_rung)
 
-    _plot_series!(axes[1], r1, v1; xlabel="Rung index \$i\$", ylabel=_corr_value_label(density_expr, use_abs), title=_density_corr_title(spin, leg), kwargs...)
-    _plot_series!(axes[2], r2, v2; xlabel="Rung index \$i\$", ylabel=_corr_value_label(onsite_expr, use_abs), title=_onsite_pair_corr_title(leg), kwargs...)
-    _plot_series!(axes[3], r3, v3; xlabel="Rung index \$i\$", ylabel=_corr_value_label(rung_expr, use_abs), title=_rung_pair_corr_title(leg1, leg2; symmetrize=symmetrize_rung), kwargs...)
+    _plot_series!(axes[1], r1, v1; xlabel="Rung index \$i\$", ylabel=_corr_value_label(cdw_expr, use_abs), title="CDW: " * _cdw_corr_title(leg), kwargs...)
+    _plot_series!(axes[2], r2, v2; xlabel="Rung index \$i\$", ylabel=_corr_value_label(sdw_expr, use_abs), title="SDW: " * _sdw_corr_title(leg), kwargs...)
+    _plot_series!(axes[3], r3, v3; xlabel="Rung index \$i\$", ylabel=_corr_value_label(onsite_expr, use_abs), title="s-wave: " * _onsite_pair_corr_title(leg), kwargs...)
+    _plot_series!(axes[4], r4, v4; xlabel="Rung index \$i\$", ylabel=_corr_value_label(rung_expr, use_abs), title="d-wave: " * _rung_pair_corr_title(leg1, leg2; symmetrize=symmetrize_rung), kwargs...)
 
     tight_rect = figure_title === nothing ? nothing : (0, 0, 1, 0.95)
     _finish_figure(fig; figure_title=figure_title, tight_rect=tight_rect)
@@ -714,18 +838,21 @@ function plot_middle_histories(alpha_list, beta_list;
     L = size(b, 2)
     rung_to_plot = rung === nothing ? middle_rung(L) : _check_index(rung, L, "rung")
 
-    it1, v1 = middle_density_history(beta_list; spin=spin, leg=leg, rung=rung_to_plot, use_abs=use_abs)
-    it2, v2 = middle_onsite_pairing_history(alpha_list; leg=leg, rung=rung_to_plot, use_abs=use_abs)
-    it3, v3 = middle_rung_pairing_history(alpha_list; rung=rung_to_plot, leg1=leg1, leg2=leg2, symmetrize=symmetrize_rung, use_abs=use_abs)
+    it1, v1 = middle_cdw_history(beta_list; leg=leg, rung=rung_to_plot, use_abs=use_abs)
+    it2, v2 = middle_sdw_history(beta_list; leg=leg, rung=rung_to_plot, use_abs=use_abs)
+    it3, v3 = middle_onsite_pairing_history(alpha_list; leg=leg, rung=rung_to_plot, use_abs=use_abs)
+    it4, v4 = middle_rung_pairing_history(alpha_list; rung=rung_to_plot, leg1=leg1, leg2=leg2, symmetrize=symmetrize_rung, use_abs=use_abs)
 
-    fig, axes = PyPlot.subplots(3, 1, figsize=(8.5, 8.5))
-    density_ylabel = use_abs ? "|onsite beta $( _spin_label(spin) )|" : "onsite beta $(_spin_label(spin))"
-    onsite_ylabel = use_abs ? "|onsite alpha|" : "onsite alpha"
-    rung_ylabel = use_abs ? "|rung alpha|" : "rung alpha"
+    fig, axes = PyPlot.subplots(4, 1, figsize=(8.5, 10.5))
+    cdw_ylabel = use_abs ? "|CDW beta proxy|" : "CDW beta proxy"
+    sdw_ylabel = use_abs ? "|SDW beta proxy|" : "SDW beta proxy"
+    onsite_ylabel = use_abs ? "|s-wave alpha|" : "s-wave alpha"
+    rung_ylabel = use_abs ? "|d-wave alpha|" : "d-wave alpha"
 
-    _plot_series!(axes[1], it1, v1; xlabel="MF iteration", ylabel=density_ylabel, title="Middle rung $rung_to_plot density proxy", kwargs...)
-    _plot_series!(axes[2], it2, v2; xlabel="MF iteration", ylabel=onsite_ylabel, title="Middle rung $rung_to_plot on-site pairing", kwargs...)
-    _plot_series!(axes[3], it3, v3; xlabel="MF iteration", ylabel=rung_ylabel, title="Middle rung $rung_to_plot rung pairing", kwargs...)
+    _plot_series!(axes[1], it1, v1; xlabel="MF iteration", ylabel=cdw_ylabel, title="Middle rung $rung_to_plot CDW beta proxy: up + down", kwargs...)
+    _plot_series!(axes[2], it2, v2; xlabel="MF iteration", ylabel=sdw_ylabel, title="Middle rung $rung_to_plot SDW beta proxy: up - down", kwargs...)
+    _plot_series!(axes[3], it3, v3; xlabel="MF iteration", ylabel=onsite_ylabel, title="Middle rung $rung_to_plot s-wave pairing", kwargs...)
+    _plot_series!(axes[4], it4, v4; xlabel="MF iteration", ylabel=rung_ylabel, title="Middle rung $rung_to_plot d-wave pairing", kwargs...)
 
     tight_rect = figure_title === nothing ? nothing : (0, 0, 1, 0.95)
     _finish_figure(fig; figure_title=figure_title, tight_rect=tight_rect)
@@ -748,19 +875,22 @@ function plot_middle_histories_from_correlations(C_pair_list, C_exc_dn_list, C_e
     L = _rung_count_from_sites(size(c, 1))
     rung_to_plot = rung === nothing ? middle_rung(L) : _check_index(rung, L, "rung")
 
-    it1, v1 = middle_density_history_from_correlations(C_exc_dn_list, C_exc_up_list; spin=spin, leg=leg, rung=rung_to_plot, use_abs=use_abs)
-    it2, v2 = middle_onsite_pairing_history_from_correlations(C_pair_list; leg=leg, rung=rung_to_plot, use_abs=use_abs)
-    it3, v3 = middle_rung_pairing_history_from_correlations(C_pair_list; rung=rung_to_plot, leg1=leg1, leg2=leg2, symmetrize=symmetrize_rung, use_abs=use_abs)
+    it1, v1 = middle_cdw_history_from_correlations(C_exc_dn_list, C_exc_up_list; leg=leg, rung=rung_to_plot, use_abs=use_abs)
+    it2, v2 = middle_sdw_history_from_correlations(C_exc_dn_list, C_exc_up_list; leg=leg, rung=rung_to_plot, use_abs=use_abs)
+    it3, v3 = middle_onsite_pairing_history_from_correlations(C_pair_list; leg=leg, rung=rung_to_plot, use_abs=use_abs)
+    it4, v4 = middle_rung_pairing_history_from_correlations(C_pair_list; rung=rung_to_plot, leg1=leg1, leg2=leg2, symmetrize=symmetrize_rung, use_abs=use_abs)
 
-    fig, axes = PyPlot.subplots(3, 1, figsize=(8.5, 8.5))
+    fig, axes = PyPlot.subplots(4, 1, figsize=(8.5, 10.5))
     rung_tex = string(rung_to_plot)
-    density_expr = _density_corr_expr(spin; rung_tex=rung_tex, leg_tex=string(leg))
+    cdw_expr = _cdw_corr_expr(; rung_tex=rung_tex, leg_tex=string(leg))
+    sdw_expr = _sdw_corr_expr(; rung_tex=rung_tex, leg_tex=string(leg))
     onsite_expr = _onsite_pair_corr_expr(; rung_tex=rung_tex, leg_tex=string(leg))
     rung_expr = _rung_pair_corr_expr(; rung_tex=rung_tex, leg1_tex=string(leg1), leg2_tex=string(leg2), symmetrize=symmetrize_rung)
 
-    _plot_series!(axes[1], it1, v1; xlabel="MF iteration \$m\$", ylabel=_corr_value_label(density_expr, use_abs), title=_density_corr_title(spin, leg; rung_tex=rung_tex), kwargs...)
-    _plot_series!(axes[2], it2, v2; xlabel="MF iteration \$m\$", ylabel=_corr_value_label(onsite_expr, use_abs), title=_onsite_pair_corr_title(leg; rung_tex=rung_tex), kwargs...)
-    _plot_series!(axes[3], it3, v3; xlabel="MF iteration \$m\$", ylabel=_corr_value_label(rung_expr, use_abs), title=_rung_pair_corr_title(leg1, leg2; rung_tex=rung_tex, symmetrize=symmetrize_rung), kwargs...)
+    _plot_series!(axes[1], it1, v1; xlabel="MF iteration \$m\$", ylabel=_corr_value_label(cdw_expr, use_abs), title="CDW: " * _cdw_corr_title(leg; rung_tex=rung_tex), kwargs...)
+    _plot_series!(axes[2], it2, v2; xlabel="MF iteration \$m\$", ylabel=_corr_value_label(sdw_expr, use_abs), title="SDW: " * _sdw_corr_title(leg; rung_tex=rung_tex), kwargs...)
+    _plot_series!(axes[3], it3, v3; xlabel="MF iteration \$m\$", ylabel=_corr_value_label(onsite_expr, use_abs), title="s-wave: " * _onsite_pair_corr_title(leg; rung_tex=rung_tex), kwargs...)
+    _plot_series!(axes[4], it4, v4; xlabel="MF iteration \$m\$", ylabel=_corr_value_label(rung_expr, use_abs), title="d-wave: " * _rung_pair_corr_title(leg1, leg2; rung_tex=rung_tex, symmetrize=symmetrize_rung), kwargs...)
 
     tight_rect = figure_title === nothing ? nothing : (0, 0, 1, 0.95)
     _finish_figure(fig; figure_title=figure_title, tight_rect=tight_rect)
