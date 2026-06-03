@@ -1,5 +1,8 @@
 using HDF5
 import PyPlot
+import PyCall
+
+const _MatplotlibWidgets = PyCall.pyimport("matplotlib.widgets")
 
 # Usage:
 #   include("plot_ladder_mf_observables.jl")
@@ -7,6 +10,8 @@ import PyPlot
 #   plot_middle_histories_from_file("stateless_data/results_...h5")
 #   plot_mf_profiles_from_file("stateless_data/results_...h5"; source=:correlations)
 #   plot_middle_histories_from_file("stateless_data/results_...h5"; source=:correlations)
+#   plot_mf_change_slider_from_file("stateless_data/results_...h5"; field=:alpha)
+#   plot_mf_change_slider_from_file("stateless_data/results_...h5"; field=:beta, spin=:up)
 # The file-based wrappers put the HDF5 basename in the PyPlot figure title.
 #
 # Array convention:
@@ -389,6 +394,150 @@ _filename_title(filename::AbstractString) = basename(filename)
 function _figure(figsize)
     fig, ax = PyPlot.subplots(figsize=figsize)
     return fig, ax
+end
+
+function _mf_change_field(field, spin)
+    f = field isa Symbol ? field : Symbol(lowercase(String(field)))
+    if f in (:alpha, :alphas)
+        return :alpha, spin
+    elseif f in (:beta, :betas)
+        return :beta, spin
+    elseif f in (:beta_up, :betaup, :up)
+        return :beta, :up
+    elseif f in (:beta_down, :betadown, :beta_dn, :betadn, :down, :dn)
+        return :beta, :down
+    end
+    throw(ArgumentError("field must be :alpha, :beta, :beta_up, or :beta_down"))
+end
+
+function _mf_change_history(alpha_list, beta_list; field=:alpha, spin=:up, leg1::Integer=1, leg2::Integer=1, zero_threshold::Real=1e-4)
+    quantity, spin = _mf_change_field(field, spin)
+    leg1 = _check_leg(leg1)
+    leg2 = _check_leg(leg2)
+
+    if quantity == :alpha
+        a = _history_array(alpha_list, 5, "alpha_list")
+        hist = Array(@view a[:, :, leg1, leg2, :])
+        label = "\\alpha[i,i'," * ",$leg1,$leg2]"
+    else
+        b = _history_array(beta_list, 6, "beta_list")
+        sigma = _spin_index(spin)
+        hist = Array(@view b[sigma, :, :, leg1, leg2, :])
+        label = "\\beta_{$(_spin_tex(spin))}[i,i'," * ",$leg1,$leg2]"
+    end
+
+    hist[abs.(hist) .< zero_threshold] .= zero(eltype(hist))
+    return hist, label
+end
+
+function _mf_change_frame(hist, it::Integer; eps::Real=1e-12, threshold::Real=1e-3, mode::Symbol=:mask)
+    niter = size(hist, 3)
+    2 <= it <= niter || throw(ArgumentError("it must be between 2 and $niter; got $it"))
+
+    cur = @view hist[:, :, it]
+    prev = @view hist[:, :, it - 1]
+    if mode in (:mask, :threshold, :bool)
+        rel = abs.(cur .- prev) ./ (abs.(prev) .+ eps)
+        return rel .> threshold
+    elseif mode in (:relative, :rel)
+        return abs.(cur .- prev) ./ (abs.(prev) .+ eps)
+    elseif mode in (:absolute, :absdiff, :diff)
+        return abs.(cur .- prev)
+    end
+    throw(ArgumentError("mode must be :mask, :relative, or :absolute"))
+end
+
+function _mf_change_colorbar_label(mode::Symbol, threshold::Real)
+    if mode in (:mask, :threshold, :bool)
+        return "relative change > $threshold"
+    elseif mode in (:relative, :rel)
+        return "relative change"
+    elseif mode in (:absolute, :absdiff, :diff)
+        return "absolute change"
+    end
+    return "change"
+end
+
+function _mf_change_title(label::AbstractString, it::Integer, niter::Integer; mode::Symbol=:mask, threshold::Real=1e-3)
+    mode_text = mode in (:mask, :threshold, :bool) ? "relative-change mask, threshold=$threshold" :
+        mode in (:relative, :rel) ? "relative change" : "absolute change"
+    return _math(label * "\\quad " * "\\mathrm{" * mode_text * "}\\quad m=" * string(it) * "/" * string(niter))
+end
+
+function plot_mf_change_slider(alpha_list, beta_list;
+    field=:alpha,
+    spin=:up,
+    leg1::Integer=1,
+    leg2::Integer=1,
+    idx0=nothing,
+    eps::Real=1e-12,
+    threshold::Real=1e-3,
+    zero_threshold::Real=1e-4,
+    mode::Symbol=:mask,
+    figsize=(7.0, 6.0),
+    cmap::AbstractString="viridis",
+    savepath=nothing,
+    figure_title=nothing,
+    kwargs...)
+
+    hist, label = _mf_change_history(alpha_list, beta_list; field=field, spin=spin, leg1=leg1, leg2=leg2, zero_threshold=zero_threshold)
+    niter = size(hist, 3)
+    niter >= 2 || throw(ArgumentError("need at least two MF iterations to plot changes; got $niter"))
+    it0 = idx0 === nothing ? 2 : _check_index(idx0, niter, "idx0")
+    it0 >= 2 || throw(ArgumentError("idx0 must be at least 2 because changes compare idx0 to idx0 - 1"))
+
+    frame = _mf_change_frame(hist, it0; eps=eps, threshold=threshold, mode=mode)
+    fig, ax = PyPlot.subplots(figsize=figsize)
+    imshow_kwargs = mode in (:mask, :threshold, :bool) ? (vmin=0, vmax=1) : NamedTuple()
+    img = ax.imshow(frame; origin="lower", aspect="auto", cmap=cmap, imshow_kwargs..., kwargs...)
+    cbar = fig.colorbar(img, ax=ax)
+    cbar.set_label(_mf_change_colorbar_label(mode, threshold))
+    ax.set_xlabel("Rung index \$i'\$")
+    ax.set_ylabel("Rung index \$i\$")
+    ax.set_title(_mf_change_title(label, it0, niter; mode=mode, threshold=threshold))
+
+    slider_ax = fig.add_axes([0.25, 0.05, 0.50, 0.03])
+    slider = _MatplotlibWidgets.Slider(slider_ax, "MF iteration", 2, niter; valinit=it0, valstep=1, valfmt="%0.0f")
+
+    function update(val)
+        it = Int(round(val))
+        img.set_data(_mf_change_frame(hist, it; eps=eps, threshold=threshold, mode=mode))
+        ax.set_title(_mf_change_title(label, it, niter; mode=mode, threshold=threshold))
+        fig.canvas.draw_idle()
+        return nothing
+    end
+
+    callback_id = slider.on_changed(update)
+    if figure_title !== nothing
+        fig.suptitle(figure_title)
+        fig.subplots_adjust(bottom=0.18, top=0.88)
+    else
+        fig.subplots_adjust(bottom=0.18)
+    end
+    _save_if_requested(fig, savepath)
+
+    return (
+        fig=fig,
+        ax=ax,
+        image=img,
+        colorbar=cbar,
+        slider=slider,
+        callback=update,
+        callback_id=callback_id,
+        data=hist,
+    )
+end
+
+function plot_mf_change_slider_from_file(filename::AbstractString;
+    field=:alpha,
+    spin=:up,
+    leg1::Integer=1,
+    leg2::Integer=1,
+    figure_title=_filename_title(filename),
+    kwargs...)
+
+    data = load_mf_data(filename)
+    return plot_mf_change_slider(data.alpha_list, data.beta_list; field=field, spin=spin, leg1=leg1, leg2=leg2, figure_title=figure_title, kwargs...)
 end
 
 function plot_density_from_beta(beta; spin=:up, leg::Integer=1, iteration=nothing, use_abs::Bool=false, savepath=nothing, figure_title=nothing, kwargs...)
