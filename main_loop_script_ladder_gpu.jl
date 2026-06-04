@@ -397,24 +397,45 @@ end
 # end
 
 # Check convergence of alpha/beta by checking rms of relative errors along diagonals up to r_range
-function close_ab(alpha, alpha_meas, beta, beta_meas, r_range; mu_cdw=nothing, mu_cdw_meas=nothing, thresh=1e-4)
+function close_ab(alpha, alpha_meas, beta, beta_meas, r_range; mu_cdw=nothing, mu_cdw_meas=nothing, alpha_list=nothing, beta_list=nothing, mu_cdw_list=nothing, thresh=1e-4)
     eps = 1e-12
+    alpha_hist_len = (alpha_list === nothing || isempty(alpha_list)) ? 0 : (ndims(alpha_list) == ndims(alpha_meas) ? 1 : size(alpha_list, ndims(alpha_list)))
+    beta_hist_len = (beta_list === nothing || isempty(beta_list)) ? 0 : (ndims(beta_list) == ndims(beta_meas) ? 1 : size(beta_list, ndims(beta_list)))
+    mu_cdw_hist_len = (mu_cdw_list === nothing || isempty(mu_cdw_list) || mu_cdw_meas === nothing) ? 0 : (ndims(mu_cdw_list) == ndims(mu_cdw_meas) ? 1 : size(mu_cdw_list, ndims(mu_cdw_list)))
     for j in 1:2, j_p in 1:2
         for r in 0:r_range
             n_diag = size(alpha, 1) - r
             n_diag <= 0 && continue
             # alpha
-            a = [alpha[i, i+r, j, j_p] for i in 1:n_diag]
-            am = [alpha_meas[i, i+r, j, j_p] for i in 1:n_diag]
-            mask = (abs.(a) .< thresh) .& (abs.(am) .< thresh)
-            am[mask] .= 0.0
-            a[mask] .= 0.0
-            errs = (am .- a) ./ (abs.(a) .+ eps)
-            rms_err = sqrt(sum(errs .^ 2) / length(errs))
-            if rms_err > thresh
+            best_period = 1
+            best_rms_err = Inf
+            passing_period = 0
+            for period in 1:max(1, alpha_hist_len - 1)
+                a = period == 1 ?
+                    [alpha[i, i+r, j, j_p] for i in 1:n_diag] :
+                    [alpha_list[i, i+r, j, j_p, alpha_hist_len-period] for i in 1:n_diag]
+                am = [alpha_meas[i, i+r, j, j_p] for i in 1:n_diag]
+                mask = (abs.(a) .< thresh) .& (abs.(am) .< thresh)
+                am[mask] .= 0.0
+                a[mask] .= 0.0
+                errs = (am .- a) ./ (abs.(a) .+ eps)
+                rms_err = sqrt(sum(errs .^ 2) / length(errs))
+                if rms_err < best_rms_err
+                    best_period = period
+                    best_rms_err = rms_err
+                end
+                if rms_err <= thresh
+                    passing_period = period
+                    break
+                end
+            end
+            if best_rms_err > thresh
                 println("Alpha not converged.")
-                println("r = $r, j = $j, j_p = $(j_p), rms_err = $(rms_err)")
+                println("r = $r, j = $j, j_p = $(j_p), best_period = $(best_period), rms_err = $(best_rms_err)")
                 return false
+            elseif passing_period > 1
+                println("Alpha converged with period $(passing_period).")
+                println("r = $r, j = $j, j_p = $(j_p)")
             end
         end
     end
@@ -428,32 +449,67 @@ function close_ab(alpha, alpha_meas, beta, beta_meas, r_range; mu_cdw=nothing, m
             n_diag = size(beta, 2) - r
             n_diag <= 0 && continue
             # beta
-            b = [beta[σ, i, i+r, j, j_p] for i in 1:n_diag]
-            bm = [beta_meas[σ, i, i+r, j, j_p] for i in 1:n_diag]
-            mask = (abs.(b) .< thresh) .& (abs.(bm) .< thresh)
-            bm[mask] .= 0.0
-            b[mask] .= 0.0
-            errs = (bm .- b) ./ (abs.(b) .+ eps)
-            rms_err = sqrt(sum(errs .^ 2) / length(errs))
-            if rms_err > thresh
+            best_period = 1
+            best_rms_err = Inf
+            passing_period = 0
+            for period in 1:max(1, beta_hist_len - 1)
+                b = period == 1 ?
+                    [beta[σ, i, i+r, j, j_p] for i in 1:n_diag] :
+                    [beta_list[σ, i, i+r, j, j_p, beta_hist_len-period] for i in 1:n_diag]
+                bm = [beta_meas[σ, i, i+r, j, j_p] for i in 1:n_diag]
+                mask = (abs.(b) .< thresh) .& (abs.(bm) .< thresh)
+                bm[mask] .= 0.0
+                b[mask] .= 0.0
+                errs = (bm .- b) ./ (abs.(b) .+ eps)
+                rms_err = sqrt(sum(errs .^ 2) / length(errs))
+                if rms_err < best_rms_err
+                    best_period = period
+                    best_rms_err = rms_err
+                end
+                if rms_err <= thresh
+                    passing_period = period
+                    break
+                end
+            end
+            if best_rms_err > thresh
                 println("Beta not converged.")
+                println("σ = $σ, r = $r, j = $j, j_p = $(j_p), best_period = $(best_period), rms_err = $(best_rms_err)")
                 return false
+            elseif passing_period > 1
+                println("Beta converged with period $(passing_period).")
+                println("σ = $σ, r = $r, j = $j, j_p = $(j_p)")
             end
         end
     end
 
-    if mu_cdw !== nothing && mu_cdw_meas !== nothing
-        mu_cdw_cmp = copy(mu_cdw)
+    best_period = 1
+    best_rms_err = Inf
+    passing_period = 0
+    for period in 1:max(1, mu_cdw_hist_len - 1)
+        mu_cdw_cmp = period == 1 ?
+            copy(mu_cdw) :
+            copy(mu_cdw_list[:, :, mu_cdw_hist_len-period])
         mu_cdw_meas_cmp = copy(mu_cdw_meas)
         mask = (abs.(mu_cdw_cmp) .< thresh) .& (abs.(mu_cdw_meas_cmp) .< thresh)
         mu_cdw_cmp[mask] .= 0.0
         mu_cdw_meas_cmp[mask] .= 0.0
         errs = (mu_cdw_meas_cmp .- mu_cdw_cmp) ./ (abs.(mu_cdw_cmp) .+ eps)
         rms_err = sqrt(sum(errs .^ 2) / length(errs))
-        if rms_err > thresh
-            println("mu_cdw not converged.")
-            return false
+        if rms_err < best_rms_err
+            best_period = period
+            best_rms_err = rms_err
         end
+        if rms_err <= thresh
+            passing_period = period
+            break
+        end
+    end
+    if best_rms_err > thresh
+        println("mu_cdw not converged.")
+        println("best_period = $(best_period), rms_err = $(best_rms_err)")
+        return false
+    elseif passing_period > 1
+        println("mu_cdw converged with period $(passing_period).")
     end
 
     return true
@@ -801,7 +857,7 @@ function cdw_order_parameter(psi::MPS, s; L_rungs::Int, q::Float64=Float64(π))
 end
 
 # Main SCF loop: adjust mu for target density, then update alpha/beta until self-consistent; creates site indices once and reuses it and old MPS for DMRG across SCF iterations
-function main_loop(model_params; n_target::Float64, E_p::Float64, z_c::Int=4, alpha_list, beta_list, C_pair_list, C_exc_dn_list, C_exc_up_list, psi_init=nothing, max_iter::Int=150, nsweeps=10, maxdim=200, cutoff=1e-10, energy_tol=1e-6, damp=1.0)
+function main_loop(model_params; n_target::Float64, E_p::Float64, z_c::Int=4, alpha_list, beta_list, mu_cdw_list, C_pair_list, C_exc_dn_list, C_exc_up_list, psi_init=nothing, max_iter::Int=150, nsweeps=10, maxdim=200, cutoff=1e-10, energy_tol=1e-6, damp=1.0)
     alpha = model_params[:alpha]
     beta = model_params[:beta]
     mu_cdw = model_params[:mu_cdw]
@@ -822,29 +878,19 @@ function main_loop(model_params; n_target::Float64, E_p::Float64, z_c::Int=4, al
         s = make_sites(2 * L)
     end
 
-    # Track measured densities from past iterations to detect period-2 SCF convergence.
-    # Use only bulk sites to suppress OBC edge effects: ignore first 2 and last 2 rungs.
-    bulk_rungs = (L > 4) ? collect(3:(L-2)) : collect(1:L)
-    bulk_sites = Int[]
-    for i_rung in bulk_rungs, j_leg in 0:1
-        push!(bulk_sites, rung_leg_to_site(i_rung, j_leg))
-    end
-    rho_hist = Vector{Vector{Float64}}()
     dwave_hist = Vector{Vector{Float64}}()
-    period2_tol = 1e-3
 
     for it in 1:max_iter
         # Warm-start from previous psi (nothing on first iteration = cold start)
         mu, n_meas, E, psi, H = find_mu_for_target_density(s, model_params, alpha, beta, mu, n_target;
             psi_init=psi, tol=2e-3, dmrg_kw=(nsweeps=nsweeps, maxdim=maxdim, cutoff=cutoff, energy_tol=energy_tol))
         if TIME_LIMIT_EXCEEDED[] || peektimer() > TIME_LIMIT_SECONDS
-            return alpha, beta, mu_cdw, alpha_list, beta_list, C_pair_list, C_exc_dn_list, C_exc_up_list, mu, psi, E, s, H, false
+            return alpha, beta, mu_cdw, alpha_list, beta_list, mu_cdw_list, C_pair_list, C_exc_dn_list, C_exc_up_list, mu, psi, E, s, H, false
         end
         println("Target density achieved with mu=$mu, n=$n_meas")
 
         alpha_meas, beta_meas, C_pair, C_exc_dn, C_exc_up = calculate_alpha_beta_measured(psi, s; L=L, r_range=r_range, z_c=z_c, t_p=t_p, E_p=E_p, threshold=1e-6)
         mu_cdw_meas = calculate_mu_cdw_measured(psi; L=L, t_p=t_p, E_p=E_p, threshold=1e-6)
-        rho = expect(psi, "Ntot")
         _, dwave_prof = local_dwave_profile(psi; L_rungs=L, edge_rungs=2)
         delta_d_prev = (length(dwave_hist) >= 1 && !isempty(dwave_prof)) ?
             (sum(abs.(dwave_prof .- dwave_hist[end])) / length(dwave_prof)) : NaN
@@ -853,30 +899,20 @@ function main_loop(model_params; n_target::Float64, E_p::Float64, z_c::Int=4, al
         dwave_abs_mean = !isempty(dwave_prof) ? (sum(abs.(dwave_prof)) / length(dwave_prof)) : NaN
         alpha_list == [] ? alpha_list = alpha_meas : alpha_list = cat(alpha_list, alpha_meas, dims=length(size(alpha_meas))+1)
         beta_list == [] ? beta_list = beta_meas : beta_list = cat(beta_list, beta_meas, dims=length(size(beta_meas))+1)
+        mu_cdw_list == [] ? mu_cdw_list = mu_cdw_meas : mu_cdw_list = cat(mu_cdw_list, mu_cdw_meas, dims=length(size(mu_cdw_meas))+1)
         C_pair_list == [] ? C_pair_list = C_pair : C_pair_list = cat(C_pair_list, C_pair, dims=length(size(C_pair))+1)
         C_exc_dn_list == [] ? C_exc_dn_list = C_exc_dn : C_exc_dn_list = cat(C_exc_dn_list, C_exc_dn, dims=length(size(C_exc_dn))+1)
         C_exc_up_list == [] ? C_exc_up_list = C_exc_up : C_exc_up_list = cat(C_exc_up_list, C_exc_up, dims=length(size(C_exc_up))+1)
 
         println("Checking {alpha,beta,mu_cdw} vs measured")
-        if close_ab(alpha, alpha_meas, beta, beta_meas, r_range; mu_cdw=mu_cdw, mu_cdw_meas=mu_cdw_meas, thresh=5e-3) #This first check (5e-3) is more restrictive than the second one (1e-3)?
+        if close_ab(alpha, alpha_meas, beta, beta_meas, r_range; mu_cdw=mu_cdw, mu_cdw_meas=mu_cdw_meas, alpha_list=alpha_list, beta_list=beta_list, mu_cdw_list=mu_cdw_list, thresh=5e-3) #This first check (5e-3) is more restrictive than the second one (1e-3)?
             println("Converged {alpha,beta,mu_cdw}. mu=$mu, n=$n_meas\nExiting loop")
-            return alpha, beta, mu_cdw, alpha_list, beta_list, C_pair_list, C_exc_dn_list, C_exc_up_list, mu, psi, E, s, H, false
+            return alpha, beta, mu_cdw, alpha_list, beta_list, mu_cdw_list, C_pair_list, C_exc_dn_list, C_exc_up_list, mu, psi, E, s, H, false
         end
         println("Local d-wave profile: mean_abs=$(dwave_abs_mean), delta_d_prev=$(delta_d_prev), delta_d_period2=$(delta_d_period2)")
 
-        if length(rho_hist) >= 2
-            delta_n_prev = sum(abs.(rho[bulk_sites] .- rho_hist[end][bulk_sites])) / length(bulk_sites)
-            delta_n_period2 = sum(abs.(rho[bulk_sites] .- rho_hist[end-1][bulk_sites])) / length(bulk_sites)
-            if delta_n_period2 < period2_tol && delta_n_prev > period2_tol
-                println("Detected period-2 bulk-density cycle. delta_n_prev=$(delta_n_prev), delta_n_period2=$(delta_n_period2), mu=$mu, n=$n_meas\nExiting loop")
-                return alpha, beta, mu_cdw, alpha_list, beta_list, C_pair_list, C_exc_dn_list, C_exc_up_list, mu, psi, E, s, H, true
-            end
-        end
-
         println("NOT CONVERGED; updating alpha, beta, mu_cdw and continuing...")
 
-        # Save current measured density for period-2 detection in later iterations.
-        push!(rho_hist, copy(rho))
         push!(dwave_hist, copy(dwave_prof))
 
         alpha = damp * alpha_meas + (1 - damp) * alpha
@@ -900,6 +936,7 @@ function main_loop(model_params; n_target::Float64, E_p::Float64, z_c::Int=4, al
         F["psi"] = ITensors.cpu(psi)
         F["alpha_list"] = alpha_list
         F["beta_list"] = beta_list
+        F["mu_cdw_list"] = mu_cdw_list
         F["C_pair_list"] = C_pair_list
         F["C_exc_dn_list"] = C_exc_dn_list
         F["C_exc_up_list"] = C_exc_up_list
@@ -908,7 +945,7 @@ function main_loop(model_params; n_target::Float64, E_p::Float64, z_c::Int=4, al
     end
 
     @warn "Failed to converge alpha and beta within the maximum number of iterations"
-    return alpha, beta, mu_cdw, alpha_list, beta_list, C_pair_list, C_exc_dn_list, C_exc_up_list, mu, psi, E, s, nothing, false
+    return alpha, beta, mu_cdw, alpha_list, beta_list, mu_cdw_list, C_pair_list, C_exc_dn_list, C_exc_up_list, mu, psi, E, s, nothing, false
 end
 
 # Convenience: run the full loop and then compute gap and order parameter
@@ -927,6 +964,7 @@ function run_loop(L::Int, t::Float64, U::Float64, V::Float64, t0::Float64, t_p::
         mu_cdw = haskey(F, "mu_cdw") ? read(F, "mu_cdw") : zeros(Float64, 2, 2 * L) #Did a check in case we use initial state that doesn't have cdw implementation
         alpha_list = read(F, "alpha_list")
         beta_list = read(F, "beta_list")
+        mu_cdw_list = haskey(F, "mu_cdw_list") ? read(F, "mu_cdw_list") : Vector{Any}()
         C_pair_list = read(F, "C_pair_list")
         C_exc_dn_list = read(F, "C_exc_dn_list")
         C_exc_up_list = read(F, "C_exc_up_list")
@@ -944,6 +982,7 @@ function run_loop(L::Int, t::Float64, U::Float64, V::Float64, t0::Float64, t_p::
         close(F)
         alpha_list = Vector{Any}()
         beta_list = Vector{Any}()
+        mu_cdw_list = Vector{Any}()
         C_pair_list = Vector{Any}()
         C_exc_dn_list = Vector{Any}()
         C_exc_up_list = Vector{Any}()
@@ -967,6 +1006,7 @@ function run_loop(L::Int, t::Float64, U::Float64, V::Float64, t0::Float64, t_p::
         end
         alpha_list = Vector{Any}()
         beta_list = Vector{Any}()
+        mu_cdw_list = Vector{Any}()
         C_pair_list = Vector{Any}()
         C_exc_dn_list = Vector{Any}()
         C_exc_up_list = Vector{Any}()
@@ -991,7 +1031,7 @@ function run_loop(L::Int, t::Float64, U::Float64, V::Float64, t0::Float64, t_p::
         :outfile => outfile,
     )
 
-    alpha, beta, mu_cdw, alpha_list, beta_list, C_pair_list, C_exc_dn_list, C_exc_up_list, mu, psi, E, s, H, period2_cycle_detected = main_loop(model_params; n_target=n_target, E_p=E_p, z_c=z_c, alpha_list=alpha_list, beta_list=beta_list, C_pair_list=C_pair_list, C_exc_dn_list=C_exc_dn_list, C_exc_up_list=C_exc_up_list, psi_init=psi_resume, nsweeps=nsweeps, maxdim=chi_max, cutoff=cutoff, energy_tol=energy_tol)
+    alpha, beta, mu_cdw, alpha_list, beta_list, mu_cdw_list, C_pair_list, C_exc_dn_list, C_exc_up_list, mu, psi, E, s, H, period2_cycle_detected = main_loop(model_params; n_target=n_target, E_p=E_p, z_c=z_c, alpha_list=alpha_list, beta_list=beta_list, mu_cdw_list=mu_cdw_list, C_pair_list=C_pair_list, C_exc_dn_list=C_exc_dn_list, C_exc_up_list=C_exc_up_list, psi_init=psi_resume, nsweeps=nsweeps, maxdim=chi_max, cutoff=cutoff, energy_tol=energy_tol)
 
     if H === nothing
         println("Main loop returned nothing for H (convergence failure). Exiting.")
@@ -1033,6 +1073,7 @@ function run_loop(L::Int, t::Float64, U::Float64, V::Float64, t0::Float64, t_p::
     F["E"] = E
     F["alpha_list"] = alpha_list
     F["beta_list"] = beta_list
+    F["mu_cdw_list"] = mu_cdw_list
     F["C_pair_list"] = C_pair_list
     F["C_exc_dn_list"] = C_exc_dn_list
     F["C_exc_up_list"] = C_exc_up_list
