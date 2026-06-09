@@ -857,7 +857,7 @@ function cdw_order_parameter(psi::MPS, s; L_rungs::Int, q::Float64=Float64(π))
 end
 
 # Main SCF loop: adjust mu for target density, then update alpha/beta until self-consistent; creates site indices once and reuses it and old MPS for DMRG across SCF iterations
-function main_loop(model_params; n_target::Float64, E_p::Float64, z_c::Int=4, alpha_list, beta_list, mu_cdw_list, C_pair_list, C_exc_dn_list, C_exc_up_list, psi_init=nothing, max_iter::Int=150, nsweeps=10, maxdim=200, cutoff=1e-10, energy_tol=1e-6, damp=1.0)
+function main_loop(model_params; n_target::Float64, E_p::Float64, z_c::Int=4, alpha_list, beta_list, mu_cdw_list, C_pair_list, C_exc_dn_list, C_exc_up_list, psi_init=nothing, max_iter::Int=30, nsweeps=10, maxdim=200, cutoff=1e-10, energy_tol=1e-6, damp=1.0)
     alpha = model_params[:alpha]
     beta = model_params[:beta]
     mu_cdw = model_params[:mu_cdw]
@@ -951,7 +951,7 @@ end
 # Convenience: run the full loop and then compute gap and order parameter
 # inherit_from: path to another run's HDF5 file to inherit alpha/beta/mu from
 function run_loop(L::Int, t::Float64, U::Float64, V::Float64, t0::Float64, t_p::Float64, mu_init::Float64, n_target::Float64,
-    r_range::Int, z_c::Int, E_p::Real, chi_max::Int=200; nsweeps=30, cutoff=1e-10, energy_tol=1e-6, inherit_from::Union{Nothing,String}=nothing)
+    r_range::Int, z_c::Int, E_p::Real, chi_max::Int=200; nsweeps=30, cutoff=1e-10, energy_tol=1e-6, mf_max_iter::Int=30, inherit_from::Union{Nothing,String}=nothing)
     
     tick()
 
@@ -1013,7 +1013,7 @@ function run_loop(L::Int, t::Float64, U::Float64, V::Float64, t0::Float64, t_p::
         psi_resume = nothing
     end
 
-    println("Running with t0=$(t0) t_p=$(t_p) U=$U V=$V L=$L chi_max=$(chi_max) E_p=$(E_p) mu_init=$(mu_init) density=$(n_target)")
+    println("Running with t0=$(t0) t_p=$(t_p) U=$U V=$V L=$L chi_max=$(chi_max) E_p=$(E_p) mu_init=$(mu_init) density=$(n_target) mf_max_iter=$(mf_max_iter)")
 
     model_params = Dict{Symbol,Any}(
         :L => L,
@@ -1031,7 +1031,7 @@ function run_loop(L::Int, t::Float64, U::Float64, V::Float64, t0::Float64, t_p::
         :outfile => outfile,
     )
 
-    alpha, beta, mu_cdw, alpha_list, beta_list, mu_cdw_list, C_pair_list, C_exc_dn_list, C_exc_up_list, mu, psi, E, s, H, period2_cycle_detected = main_loop(model_params; n_target=n_target, E_p=E_p, z_c=z_c, alpha_list=alpha_list, beta_list=beta_list, mu_cdw_list=mu_cdw_list, C_pair_list=C_pair_list, C_exc_dn_list=C_exc_dn_list, C_exc_up_list=C_exc_up_list, psi_init=psi_resume, nsweeps=nsweeps, maxdim=chi_max, cutoff=cutoff, energy_tol=energy_tol)
+    alpha, beta, mu_cdw, alpha_list, beta_list, mu_cdw_list, C_pair_list, C_exc_dn_list, C_exc_up_list, mu, psi, E, s, H, period2_cycle_detected = main_loop(model_params; n_target=n_target, E_p=E_p, z_c=z_c, alpha_list=alpha_list, beta_list=beta_list, mu_cdw_list=mu_cdw_list, C_pair_list=C_pair_list, C_exc_dn_list=C_exc_dn_list, C_exc_up_list=C_exc_up_list, psi_init=psi_resume, max_iter=mf_max_iter, nsweeps=nsweeps, maxdim=chi_max, cutoff=cutoff, energy_tol=energy_tol)
 
     if H === nothing
         println("Main loop returned nothing for H (convergence failure). Exiting.")
@@ -1119,8 +1119,9 @@ t = 1.0
 n_target = density
 r_range = 4
 z_c = 4  # Still used in calculate_alpha_beta_measured
+mf_max_iter = 30
 
 ITensors.Strided.set_num_threads(1)
 BLAS.set_num_threads(1)
 
-result = run_loop(L, t, U, V, t0, t_p, mu_init, n_target, r_range, z_c, E_p, chi_max; energy_tol=energy_tol, inherit_from=inherit_from)
+result = run_loop(L, t, U, V, t0, t_p, mu_init, n_target, r_range, z_c, E_p, chi_max; energy_tol=energy_tol, mf_max_iter=mf_max_iter, inherit_from=inherit_from)
