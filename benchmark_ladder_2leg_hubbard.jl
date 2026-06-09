@@ -218,7 +218,7 @@ function fixedN_dwave_order_param(psi, s; L::Int)
     return val / (L - 1)
 end
 
-# Not relevant right now, but asked codex to generate these based on the MFT script; needs to be checked
+# Not relevant right now, but asked codex to generate these to help bug test
 function structure_factors(psi; L::Int)
     nup = expect(psi, "Nup")
     ndn = expect(psi, "Ndn")
@@ -274,17 +274,21 @@ function main(args=ARGS)
     println("N=$N Nup=$Nup Ndn=$Ndn nsweeps=$nsweeps cutoff=$cutoff")
     E, psi = run_dmrg_ground(s, H, states; nsweeps=nsweeps, maxdim=chi, cutoff=cutoff)
 
-    Dbar_rung_value, _, _, _, D_rung_1, _ = Dbar_rung(psi, s; L=L)
+    Dbar_rung_value, Dbar_ells, Dbar_values, Dbar_ratios, D_rung_1, D_rung_1_values = Dbar_rung(psi, s; L=L)
     Delta_d_global_fixedN = fixedN_dwave_order_param(psi, s; L=L)
     density = expect(psi, "Ntot")
+    rung_density = [0.5 * (density[site(r, 0)] + density[site(r, 1)]) for r in 1:L]
     n_meas = mean(density)
     cdw = cdw_pi(psi; L=L)
-    _, _, _, cdw_peak, cdw_peak_q, sdw_peak, sdw_peak_q = structure_factors(psi; L=L)
+    q_values, cdw_structure, sdw_structure, cdw_peak, cdw_peak_q, sdw_peak, sdw_peak_q = structure_factors(psi; L=L)
 
     @printf("E = %.16g\n", E)
     @printf("n = %.16g\n", n_meas)
     @printf("Dbar_rung = %.16g\n", Dbar_rung_value)
     @printf("D_rung(1) = %.16g\n", D_rung_1)
+    @printf("Dbar_ells = %s\n", string(Dbar_ells))
+    @printf("Dbar_values = %s\n", string(Dbar_values))
+    @printf("Dbar_ratios = %s\n", string(Dbar_ratios))
     @printf("CDW(pi) = %.16g\n", cdw)
     @printf("CDW peak = %.16g at q = %.16g\n", cdw_peak, cdw_peak_q)
     @printf("SDW peak = %.16g at q = %.16g\n", sdw_peak, sdw_peak_q)
@@ -310,10 +314,19 @@ function main(args=ARGS)
         F["E_per_site"] = E / 2L
         F["num_sites"] = 2L
         F["measured_density"] = n_meas
+        F["density_profile"] = density
+        F["rung_density_profile"] = rung_density
         F["cdw_staggered_amplitude"] = cdw
         F["global_dwave_order_param_fixedN"] = Delta_d_global_fixedN
         F["Dbar_rung"] = Dbar_rung_value
         F["D_rung_1"] = D_rung_1
+        F["Dbar_ells"] = Dbar_ells
+        F["Dbar_values"] = Dbar_values
+        F["Dbar_ratios"] = Dbar_ratios
+        F["D_rung_1_values"] = D_rung_1_values
+        F["structure_q_values"] = q_values
+        F["cdw_structure_factor"] = cdw_structure
+        F["sdw_structure_factor"] = sdw_structure
         F["cdw_structure_peak_value"] = cdw_peak
         F["cdw_structure_peak_q"] = cdw_peak_q
         F["sdw_structure_peak_value"] = sdw_peak
