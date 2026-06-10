@@ -835,6 +835,21 @@ function local_dwave_profile(psi::MPS; L_rungs::Int, edge_rungs::Int=2)
     return rungs, prof
 end
 
+function rung_pair_mpo(s, i::Int, j::Int)
+    os = OpSum()
+    a, b = rung_leg_to_site(i, 0), rung_leg_to_site(i, 1)
+    c, d = rung_leg_to_site(j, 0), rung_leg_to_site(j, 1)
+    add!(os, -1.0, "Cup", a, "Cdn", b, "Cdagup", c, "Cdagdn", d)
+    add!(os,  1.0, "Cup", a, "Cdn", b, "Cdagdn", c, "Cdagup", d)
+    add!(os,  1.0, "Cdn", a, "Cup", b, "Cdagup", c, "Cdagdn", d)
+    add!(os, -1.0, "Cdn", a, "Cup", b, "Cdagdn", c, "Cdagup", d)
+    return MPO(os, s)
+end
+
+function rung_pair_matrix(psi, s; L::Int)
+    return [real(inner(psi', rung_pair_mpo(s, i, j), psi)) for i in 1:L, j in 1:L]
+end
+
 # Charge density wave order parameter
 # Measures density modulation at wavevector q (default q=π for period-2 CDW)
 function cdw_order_parameter(psi::MPS, s; L_rungs::Int, q::Float64=Float64(π))
@@ -1052,6 +1067,8 @@ function run_loop(L::Int, t::Float64, U::Float64, V::Float64, t0::Float64, t_p::
     order_param = order_parameter(psi, s)
     dwave_op = dwave_order_parameter(psi, s; L_rungs=L)
     cdw_op = cdw_order_parameter(psi, s; L_rungs=L)
+    psi_cpu = ITensors.cpu(psi)
+    D_rung_matrix = rung_pair_matrix(psi_cpu, siteinds(psi_cpu); L=L)
 
     println("Calculation finished. Saving results to $outfile")
 
@@ -1065,10 +1082,11 @@ function run_loop(L::Int, t::Float64, U::Float64, V::Float64, t0::Float64, t_p::
     F["beta"] = beta
     F["mu_cdw"] = mu_cdw
     F["mu"] = mu
-    F["psi"] = ITensors.cpu(psi)
+    F["psi"] = psi_cpu
     F["order_param"] = order_param
     F["dwave_order_param"] = dwave_op
     F["cdw_order_param"] = cdw_op
+    F["D_rung_matrix"] = D_rung_matrix
     F["gap"] = gap
     F["E"] = E
     F["alpha_list"] = alpha_list
