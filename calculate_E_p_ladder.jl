@@ -179,14 +179,18 @@ end
 
 const DEFAULT_E_TOL = 1e-5
 
-function make_sweeps(maxsweeps::Int, maxdim::Int; cutoff::Float64)
+function make_sweeps(maxsweeps::Int, maxdim::Int; cutoff::Float64, warm_start::Bool=false)
     sweeps = Sweeps(maxsweeps)
-    maxdim!(sweeps,
-            min(20, maxdim),
-            min(50, maxdim),
-            min(100, maxdim),
-            min(200, maxdim),
-            maxdim)
+    if warm_start
+        maxdim!(sweeps, maxdim)
+    else
+        maxdim!(sweeps,
+                min(20, maxdim),
+                min(50, maxdim),
+                min(100, maxdim),
+                min(200, maxdim),
+                maxdim)
+    end
     cutoff!(sweeps, cutoff)
     noise!(sweeps, 1e-4, 1e-5, 1e-6, 1e-7, 0.0)
     return sweeps
@@ -199,11 +203,16 @@ function run_dmrg_energy(L::Int, N_particles::Int; t::Float64=1.0, U::Float64=0.
 
     local sites
     local psi0
+    warm_start = psi_init !== nothing
+    effective_maxdim = maxdim
     if psi_init !== nothing
         length(psi_init) == 2 * L || error("Inherited MPS has $(length(psi_init)) sites, expected $(2 * L) for L=$L")
+        inherited_maxdim = maxlinkdim(psi_init)
+        effective_maxdim = max(maxdim, inherited_maxdim)
         sites = siteinds(psi_init)
         psi0 = psi_init
-        println("  Initial state: inherited MPS for N=$N_particles")
+        println("  Initial state: inherited MPS for N=$N_particles with maxlinkdim=$inherited_maxdim")
+        effective_maxdim > maxdim && println("  Promoting DMRG maxdim from $maxdim to inherited maxlinkdim $effective_maxdim")
     else
         states = ladder_initial_state(L, N_particles)
         total, n_up, n_dn = count_particles(states)
@@ -214,7 +223,7 @@ function run_dmrg_energy(L::Int, N_particles::Int; t::Float64=1.0, U::Float64=0.
     end
 
     _, H = build_hubbard_ladder(L=L, t=t, U=U, V=V, mu=mu, t0=t0, sites=sites)
-    sweeps = make_sweeps(maxsweeps, maxdim; cutoff=cutoff)
+    sweeps = make_sweeps(maxsweeps, effective_maxdim; cutoff=cutoff, warm_start=warm_start)
     energy, psi = dmrg(H, psi0, sweeps; observer = DemoObserver(E_tol), outputlevel=1)
     return energy, psi
 end
