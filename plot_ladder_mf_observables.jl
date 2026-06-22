@@ -47,6 +47,8 @@ end
 #   plot_mf_change_slider_from_file("stateless_data/results_...h5"; field=:alpha)
 #   plot_mf_change_slider_from_file("stateless_data/results_...h5"; field=:beta, spin=:up)
 # The file-based wrappers put the HDF5 basename in the PyPlot figure title.
+# Fourier heatmap/grid routines trim 5 boundary rungs from each end by default;
+# pass trim_boundary_rungs=0 to include the full ladder.
 #
 # Array convention:
 #   alpha[i, ip, leg, legp] and alpha_list[i, ip, leg, legp, iter]
@@ -161,6 +163,15 @@ end
 function _rung_count_from_sites(nsites::Integer)
     iseven(nsites) || throw(ArgumentError("raw correlation matrices must have an even number of sites; got $nsites"))
     return div(nsites, 2)
+end
+
+function _trimmed_rung_range(L::Integer, trim_boundary_rungs::Integer; min_rungs::Integer=2)
+    trim = Int(trim_boundary_rungs)
+    trim >= 0 || throw(ArgumentError("trim_boundary_rungs must be nonnegative; got $trim"))
+    remaining = L - 2 * trim
+    remaining >= min_rungs ||
+        throw(ArgumentError("trim_boundary_rungs=$trim removes $(2 * trim) rungs from L=$L, leaving $(max(remaining, 0)); need at least $min_rungs rungs"))
+    return (trim + 1):(L - trim)
 end
 
 _math(expr::AbstractString) = "\$" * expr * "\$"
@@ -942,19 +953,20 @@ function _order_fields_from_file(filename::AbstractString;
     iteration=nothing,
     leg1::Integer=1,
     leg2::Integer=2,
-    symmetrize_rung::Bool=false)
+    symmetrize_rung::Bool=false,
+    trim_boundary_rungs::Integer=0)
 
     data = load_mf_data(filename)
     if _source(source, use_correlations) == :correlations
         C_pair_source = (iteration === nothing && data.C_pair !== nothing) ? data.C_pair : data.C_pair_list
         C_exc_dn_source = (iteration === nothing && data.C_exc_dn !== nothing) ? data.C_exc_dn : data.C_exc_dn_list
         C_exc_up_source = (iteration === nothing && data.C_exc_up !== nothing) ? data.C_exc_up : data.C_exc_up_list
-        return _correlation_order_fields(C_pair_source, C_exc_dn_source, C_exc_up_source; iteration=iteration, leg1=leg1, leg2=leg2)
+        return _correlation_order_fields(C_pair_source, C_exc_dn_source, C_exc_up_source; iteration=iteration, leg1=leg1, leg2=leg2, trim_boundary_rungs=trim_boundary_rungs)
     end
 
     alpha_source = (iteration === nothing && data.alpha !== nothing) ? data.alpha : data.alpha_list
     beta_source = (iteration === nothing && data.beta !== nothing) ? data.beta : data.beta_list
-    return _mf_order_fields(alpha_source, beta_source; iteration=iteration, leg1=leg1, leg2=leg2, symmetrize_rung=symmetrize_rung)
+    return _mf_order_fields(alpha_source, beta_source; iteration=iteration, leg1=leg1, leg2=leg2, symmetrize_rung=symmetrize_rung, trim_boundary_rungs=trim_boundary_rungs)
 end
 
 function _max_fourier_component(heatmap, qx; ladder::Bool)
@@ -1251,7 +1263,7 @@ function _install_order_grid_click!(fig, ax, regions; iteration=nothing)
         y = Float64(event.ydata)
         for region in regions
             if region.x0 <= x <= region.x1 && region.y0 <= y <= region.y1
-                heatmap_fig = plot_order_fourier_heatmaps_from_file(region.filename; use_correlations=true, iteration=iteration)
+                heatmap_fig = plot_order_fourier_heatmaps_from_file(region.filename; use_correlations=true, iteration=iteration, trim_boundary_rungs=region.trim_boundary_rungs)
                 detail_fig = plot_mf_profiles_and_middle_histories_from_file(region.filename; use_correlations=true, iteration=iteration)
                 push!(spawned_heatmap_figures, heatmap_fig)
                 push!(spawned_detail_figures, detail_fig)
@@ -1311,7 +1323,8 @@ function _mf_order_fields(alpha, beta;
     iteration=nothing,
     leg1::Integer=1,
     leg2::Integer=2,
-    symmetrize_rung::Bool=false)
+    symmetrize_rung::Bool=false,
+    trim_boundary_rungs::Integer=0)
 
     a = _final_array(alpha, 4, iteration, "alpha")
     b = _final_array(beta, 5, iteration, "beta")
@@ -1319,6 +1332,13 @@ function _mf_order_fields(alpha, beta;
     leg2 = _check_leg(leg2)
     L = size(b, 2)
     size(a, 1) == L || throw(ArgumentError("alpha and beta must have the same rung count"))
+    size(a, 2) == L && size(b, 3) == L || throw(ArgumentError("alpha and beta rung dimensions must be square"))
+    rungs = _trimmed_rung_range(L, trim_boundary_rungs)
+    if first(rungs) != 1 || last(rungs) != L
+        a = a[rungs, rungs, :, :]
+        b = b[:, rungs, rungs, :, :]
+        L = length(rungs)
+    end
     L > 1 || throw(ArgumentError("need at least two rungs to compute local d-wave profile"))
 
     cdw = [b[2, i, i, leg, leg] + b[1, i, i, leg, leg] for i in 1:L, leg in 1:2]
@@ -1332,7 +1352,8 @@ end
 function _correlation_order_fields(C_pair, C_exc_dn, C_exc_up;
     iteration=nothing,
     leg1::Integer=1,
-    leg2::Integer=2)
+    leg2::Integer=2,
+    trim_boundary_rungs::Integer=0)
 
     cpair = _final_array(C_pair, 2, iteration, "C_pair_list")
     cdn, cup = _normal_corr_pair(C_exc_dn, C_exc_up, iteration)
@@ -1341,6 +1362,14 @@ function _correlation_order_fields(C_pair, C_exc_dn, C_exc_up;
     L = _rung_count_from_sites(size(cpair, 1))
     size(cpair, 2) == 2 * L || throw(ArgumentError("raw pairing correlation matrix must be square"))
     size(cdn) == size(cup) == size(cpair) || throw(ArgumentError("raw correlation matrices must have the same shape"))
+    rungs = _trimmed_rung_range(L, trim_boundary_rungs)
+    if first(rungs) != 1 || last(rungs) != L
+        sites = [_plot_rung_leg_to_site(i, leg) for i in rungs for leg in 1:2]
+        cpair = cpair[sites, sites]
+        cdn = cdn[sites, sites]
+        cup = cup[sites, sites]
+        L = length(rungs)
+    end
     L > 1 || throw(ArgumentError("need at least two rungs to compute local d-wave profile"))
 
     cdw = [cup[_plot_rung_leg_to_site(i, leg), _plot_rung_leg_to_site(i, leg)] +
@@ -1982,6 +2011,7 @@ function plot_order_fourier_heatmaps(alpha, beta;
     leg1::Integer=1,
     leg2::Integer=2,
     symmetrize_rung::Bool=false,
+    trim_boundary_rungs::Integer=5,
     value::Symbol=:abs,
     normalize::Bool=true,
     cmap::AbstractString="inferno",
@@ -1992,7 +2022,7 @@ function plot_order_fourier_heatmaps(alpha, beta;
     figure_title=nothing,
     kwargs...)
 
-    fields = _mf_order_fields(alpha, beta; iteration=iteration, leg1=leg1, leg2=leg2, symmetrize_rung=symmetrize_rung)
+    fields = _mf_order_fields(alpha, beta; iteration=iteration, leg1=leg1, leg2=leg2, symmetrize_rung=symmetrize_rung, trim_boundary_rungs=trim_boundary_rungs)
     return _plot_order_fourier_heatmaps(fields; value=value, normalize=normalize, cmap=cmap, logscale=logscale, vmin=vmin, figsize=figsize, savepath=savepath, figure_title=figure_title, source_label="alpha/beta", kwargs...)
 end
 
@@ -2000,6 +2030,7 @@ function plot_order_fourier_heatmaps_from_correlations(C_pair, C_exc_dn, C_exc_u
     iteration=nothing,
     leg1::Integer=1,
     leg2::Integer=2,
+    trim_boundary_rungs::Integer=5,
     value::Symbol=:abs,
     normalize::Bool=true,
     cmap::AbstractString="inferno",
@@ -2010,7 +2041,7 @@ function plot_order_fourier_heatmaps_from_correlations(C_pair, C_exc_dn, C_exc_u
     figure_title=nothing,
     kwargs...)
 
-    fields = _correlation_order_fields(C_pair, C_exc_dn, C_exc_up; iteration=iteration, leg1=leg1, leg2=leg2)
+    fields = _correlation_order_fields(C_pair, C_exc_dn, C_exc_up; iteration=iteration, leg1=leg1, leg2=leg2, trim_boundary_rungs=trim_boundary_rungs)
     return _plot_order_fourier_heatmaps(fields; value=value, normalize=normalize, cmap=cmap, logscale=logscale, vmin=vmin, figsize=figsize, savepath=savepath, figure_title=figure_title, source_label="correlations", kwargs...)
 end
 
@@ -2027,6 +2058,7 @@ function plot_order_fourier_max_grid(;
     leg1::Integer=1,
     leg2::Integer=2,
     symmetrize_rung::Bool=false,
+    trim_boundary_rungs::Integer=5,
     value::Symbol=:abs,
     normalize::Bool=true,
     logscale::Bool=true,
@@ -2065,7 +2097,8 @@ function plot_order_fourier_max_grid(;
             iteration=iteration,
             leg1=leg1,
             leg2=leg2,
-            symmetrize_rung=symmetrize_rung)
+            symmetrize_rung=symmetrize_rung,
+            trim_boundary_rungs=trim_boundary_rungs)
         maxima = _order_fourier_maxima(fields; value=value, normalize=normalize)
         push!(records, (filename=filename, params=params, V0=params.V0, t0=t0_grid, maxima=maxima))
     end
@@ -2129,6 +2162,7 @@ function plot_order_fourier_max_grid(;
             y0=y0,
             y1=y0 + h,
             filename=rec.filename,
+            trim_boundary_rungs=trim_boundary_rungs,
         ))
 
         subw = w / 2
@@ -2863,16 +2897,16 @@ function plot_middle_histories_from_file(filename::AbstractString; source::Symbo
     end
 end
 
-function plot_order_fourier_heatmaps_from_file(filename::AbstractString; iteration=nothing, source::Symbol=:mf, use_correlations::Bool=false, savepath=nothing, kwargs...)
+function plot_order_fourier_heatmaps_from_file(filename::AbstractString; iteration=nothing, source::Symbol=:mf, use_correlations::Bool=false, trim_boundary_rungs::Integer=5, savepath=nothing, kwargs...)
     data = load_mf_data(filename)
     if _source(source, use_correlations) == :correlations
         C_pair_source = (iteration === nothing && data.C_pair !== nothing) ? data.C_pair : data.C_pair_list
         C_exc_dn_source = (iteration === nothing && data.C_exc_dn !== nothing) ? data.C_exc_dn : data.C_exc_dn_list
         C_exc_up_source = (iteration === nothing && data.C_exc_up !== nothing) ? data.C_exc_up : data.C_exc_up_list
-        return plot_order_fourier_heatmaps_from_correlations(C_pair_source, C_exc_dn_source, C_exc_up_source; iteration=iteration, figure_title=_filename_title(filename), savepath=savepath, kwargs...)
+        return plot_order_fourier_heatmaps_from_correlations(C_pair_source, C_exc_dn_source, C_exc_up_source; iteration=iteration, trim_boundary_rungs=trim_boundary_rungs, figure_title=_filename_title(filename), savepath=savepath, kwargs...)
     else
         alpha_source = (iteration === nothing && data.alpha !== nothing) ? data.alpha : data.alpha_list
         beta_source = (iteration === nothing && data.beta !== nothing) ? data.beta : data.beta_list
-        return plot_order_fourier_heatmaps(alpha_source, beta_source; iteration=iteration, figure_title=_filename_title(filename), savepath=savepath, kwargs...)
+        return plot_order_fourier_heatmaps(alpha_source, beta_source; iteration=iteration, trim_boundary_rungs=trim_boundary_rungs, figure_title=_filename_title(filename), savepath=savepath, kwargs...)
     end
 end
