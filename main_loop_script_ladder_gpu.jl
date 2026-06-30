@@ -90,6 +90,19 @@ function site_to_rung_leg(s::Int)
     return i, j
 end
 
+const TRANSVERSE_GEOMETRIES = (:cubic_frustrated, :cubic_unfrustrated, :square)
+
+function normalize_transverse_geometry(geometry)::Symbol
+    raw = lowercase(strip(string(geometry)))
+    raw = startswith(raw, "--geometry=") ? raw[length("--geometry=")+1:end] : raw
+    normalized = replace(raw, "-" => "_", " " => "_")
+    geom = Symbol(normalized)
+    if geom ∉ TRANSVERSE_GEOMETRIES
+        throw(ArgumentError("Unknown transverse geometry '$geometry'. Valid options: $(join(string.(TRANSVERSE_GEOMETRIES), ", "))"))
+    end
+    return geom
+end
+
 # -----------------------------
 # Pair-binding energy E_p at half-filling n=0.5 (conserving N)
 # -----------------------------
@@ -670,10 +683,11 @@ function find_mu_for_target_density(s, model_params, alpha, beta, mu_init, n_tar
 end
 
 # Measure alpha, beta from correlators using ladder formulas (Appendix E)
-function calculate_alpha_beta_measured(psi::MPS, s; L::Int, r_range::Int, z_c::Int, t_p::Float64, E_p::Float64, threshold::Float64=1e-5)
+function calculate_alpha_beta_measured(psi::MPS, s; L::Int, r_range::Int, z_c::Int, t_p::Float64, E_p::Float64, transverse_geometry=:cubic_unfrustrated, threshold::Float64=1e-5)
     # L is number of rungs
     # alpha[i, i', j, j'] for rungs i,i' and legs j,j'
     # beta[σ, i, i', j, j'] for spin σ, rungs i,i' and legs j,j'
+    transverse_geometry = normalize_transverse_geometry(transverse_geometry)
     alpha_meas = zeros(Float64, L, L, 2, 2)
     beta_meas = zeros(Float64, 2, L, L, 2, 2)
 
@@ -686,6 +700,7 @@ function calculate_alpha_beta_measured(psi::MPS, s; L::Int, r_range::Int, z_c::I
     C_exc_dn = correlation_matrix(psi, "Cdagdn", "Cdn")
     # For exchange up: <c†_up c_up>
     C_exc_up = correlation_matrix(psi, "Cdagup", "Cup")
+    C_exc = cat(C_exc_dn, C_exc_up; dims=3)
 
     # Compute alpha and beta for each rung pair within r_range
     for i in 1:L, i_p in 1:L
@@ -696,55 +711,50 @@ function calculate_alpha_beta_measured(psi::MPS, s; L::Int, r_range::Int, z_c::I
             site_ip0 = rung_leg_to_site(i_p, 0)
             site_ip1 = rung_leg_to_site(i_p, 1)
 
-            # Alpha pairing terms (Appendix E, Eqs. E10-E13)
-            # Same-leg pairing (0,0): α_{i,i',0,0} = pref * (<c_{i',1,↑} c_{i,1,↓}> + 2<c_{i',0,↑} c_{i,0,↓}>)
-            val = pref * (C_pair[site_ip1, site_i1] + 2 * C_pair[site_ip0, site_i0])
-            alpha_meas[i, i_p, 1, 1] = (abs(val) > threshold) ? val : 0.0
+            if transverse_geometry == :cubic_frustrated
+                # Original Appendix E geometry: two same-leg vertical bonds plus one leg-swapping side bond.
+                alpha00 = pref * (C_pair[site_ip1, site_i1] + 2 * C_pair[site_ip0, site_i0])
+                alpha11 = pref * (C_pair[site_ip0, site_i0] + 2 * C_pair[site_ip1, site_i1])
+                alpha10 = 2 * pref * C_pair[site_ip0, site_i1]
+                alpha01 = 2 * pref * C_pair[site_ip1, site_i0]
 
-            # Same-leg pairing (1,1): α_{i,i',1,1} = pref * (<c_{i',0,↑} c_{i,0,↓}> + 2<c_{i',1,↑} c_{i,1,↓}>)
-            val = pref * (C_pair[site_ip0, site_i0] + 2 * C_pair[site_ip1, site_i1])
-            alpha_meas[i, i_p, 2, 2] = (abs(val) > threshold) ? val : 0.0
+                beta00 = pref .* (C_exc[site_i1, site_ip1, :] .+ 2 .* C_exc[site_i0, site_ip0, :])
+                beta11 = pref .* (C_exc[site_i0, site_ip0, :] .+ 2 .* C_exc[site_i1, site_ip1, :])
+                beta10 = 2 .* pref .* C_exc[site_ip0, site_i1, :]
+                beta01 = 2 .* pref .* C_exc[site_ip1, site_i0, :]
+            elseif transverse_geometry == :cubic_unfrustrated
+                # Mirrored cubic stacking: all three transverse bonds swap ladder legs.
+                alpha00 = 3 * pref * C_pair[site_ip1, site_i1]
+                alpha11 = 3 * pref * C_pair[site_ip0, site_i0]
+                alpha10 = 2 * pref * C_pair[site_ip1, site_i0]
+                alpha01 = 2 * pref * C_pair[site_ip0, site_i1]
 
-            # Cross-leg pairing (1,0): α_{i,i',1,0} = 2*pref * <c_{i',0,↑} c_{i,1,↓}>
-            val = 2 * pref * C_pair[site_ip0, site_i1]
-            alpha_meas[i, i_p, 2, 1] = (abs(val) > threshold) ? val : 0.0
+                beta00 = 3 .* pref .* C_exc[site_i1, site_ip1, :]
+                beta11 = 3 .* pref .* C_exc[site_i0, site_ip0, :]
+                beta10 = 2 .* pref .* C_exc[site_ip1, site_i0, :]
+                beta01 = 2 .* pref .* C_exc[site_ip0, site_i1, :]
+            else
+                # Square lattice: only the side-by-side transverse bond remains.
+                alpha00 = pref * C_pair[site_ip1, site_i1]
+                alpha11 = pref * C_pair[site_ip0, site_i0]
+                alpha10 = 0.0
+                alpha01 = 0.0
 
-            # Cross-leg pairing (0,1): α_{i,i',0,1} = 2*pref * <c_{i',1,↑} c_{i,0,↓}>
-            val = 2 * pref * C_pair[site_ip1, site_i0]
-            alpha_meas[i, i_p, 1, 2] = (abs(val) > threshold) ? val : 0.0
+                beta00 = pref .* C_exc[site_i1, site_ip1, :]
+                beta11 = pref .* C_exc[site_i0, site_ip0, :]
+                beta10 = zeros(Float64, 2)
+                beta01 = zeros(Float64, 2)
+            end
 
-            # Beta exchange terms (Appendix E, Eqs. E14-E17)
-            # Down spin, same-leg (0,0): β_{i,i',0,0,↓} = pref * (<c†_{i,1,↓} c_{i',1,↓}> + 2<c†_{i,0,↓} c_{i',0,↓}>)
-            val = pref * (C_exc_dn[site_i1, site_ip1] + 2 * C_exc_dn[site_i0, site_ip0])
-            beta_meas[1, i, i_p, 1, 1] = (abs(val) > threshold) ? val : 0.0
+            alpha_meas[i, i_p, 1, 1] = (abs(alpha00) > threshold) ? alpha00 : 0.0
+            alpha_meas[i, i_p, 2, 2] = (abs(alpha11) > threshold) ? alpha11 : 0.0
+            alpha_meas[i, i_p, 2, 1] = (abs(alpha10) > threshold) ? alpha10 : 0.0
+            alpha_meas[i, i_p, 1, 2] = (abs(alpha01) > threshold) ? alpha01 : 0.0
 
-            # Down spin, same-leg (1,1): β_{i,i',1,1,↓} = pref * (<c†_{i,0,↓} c_{i',0,↓}> + 2<c†_{i,1,↓} c_{i',1,↓}>)
-            val = pref * (C_exc_dn[site_i0, site_ip0] + 2 * C_exc_dn[site_i1, site_ip1])
-            beta_meas[1, i, i_p, 2, 2] = (abs(val) > threshold) ? val : 0.0
-
-            # Down spin, cross-leg (1,0): β_{i,i',1,0,↓} = 2*pref * <c†_{i',0,↓} c_{i,1,↓}>
-            val = 2 * pref * C_exc_dn[site_ip0, site_i1]
-            beta_meas[1, i, i_p, 2, 1] = (abs(val) > threshold) ? val : 0.0
-
-            # Down spin, cross-leg (0,1): β_{i,i',0,1,↓} = 2*pref * <c†_{i',1,↓} c_{i,0,↓}>
-            val = 2 * pref * C_exc_dn[site_ip1, site_i0]
-            beta_meas[1, i, i_p, 1, 2] = (abs(val) > threshold) ? val : 0.0
-
-            # Up spin, same-leg (0,0): β_{i,i',0,0,↑} = pref * (<c†_{i,1,↑} c_{i',1,↑}> + 2<c†_{i,0,↑} c_{i',0,↑}>)
-            val = pref * (C_exc_up[site_i1, site_ip1] + 2 * C_exc_up[site_i0, site_ip0])
-            beta_meas[2, i, i_p, 1, 1] = (abs(val) > threshold) ? val : 0.0
-
-            # Up spin, same-leg (1,1): β_{i,i',1,1,↑} = pref * (<c†_{i,0,↑} c_{i',0,↑}> + 2<c†_{i,1,↑} c_{i',1,↑}>)
-            val = pref * (C_exc_up[site_i0, site_ip0] + 2 * C_exc_up[site_i1, site_ip1])
-            beta_meas[2, i, i_p, 2, 2] = (abs(val) > threshold) ? val : 0.0
-
-            # Up spin, cross-leg (1,0): β_{i,i',1,0,↑} = 2*pref * <c†_{i',0,↑} c_{i,1,↑}>
-            val = 2 * pref * C_exc_up[site_ip0, site_i1]
-            beta_meas[2, i, i_p, 2, 1] = (abs(val) > threshold) ? val : 0.0
-
-            # Up spin, cross-leg (0,1): β_{i,i',0,1,↑} = 2*pref * <c†_{i',1,↑} c_{i,0,↑}>
-            val = 2 * pref * C_exc_up[site_ip1, site_i0]
-            beta_meas[2, i, i_p, 1, 2] = (abs(val) > threshold) ? val : 0.0
+            beta_meas[:, i, i_p, 1, 1] .= ifelse.(abs.(beta00) .> threshold, beta00, 0.0)
+            beta_meas[:, i, i_p, 2, 2] .= ifelse.(abs.(beta11) .> threshold, beta11, 0.0)
+            beta_meas[:, i, i_p, 2, 1] .= ifelse.(abs.(beta10) .> threshold, beta10, 0.0)
+            beta_meas[:, i, i_p, 1, 2] .= ifelse.(abs.(beta01) .> threshold, beta01, 0.0)
         end
     end
 
@@ -752,7 +762,8 @@ function calculate_alpha_beta_measured(psi::MPS, s; L::Int, r_range::Int, z_c::I
 end
 
 # Measure site and spin-resolved CDW mu field
-function calculate_mu_cdw_measured(psi::MPS; L::Int, t_p::Float64, E_p::Float64, threshold::Float64=1e-5)
+function calculate_mu_cdw_measured(psi::MPS; L::Int, t_p::Float64, E_p::Float64, transverse_geometry=:cubic_unfrustrated, threshold::Float64=1e-5)
+    transverse_geometry = normalize_transverse_geometry(transverse_geometry)
     n_up = expect(psi, "Nup")
     n_dn = expect(psi, "Ndn")
     mu_cdw_meas = zeros(Float64, 2, 2*L)
@@ -762,11 +773,22 @@ function calculate_mu_cdw_measured(psi::MPS; L::Int, t_p::Float64, E_p::Float64,
         s0 = rung_leg_to_site(i_rung, 0)
         s1 = rung_leg_to_site(i_rung, 1)
 
-        mu_cdw_meas[1, s0] = pref * (4 * n_dn[s0] + 2 * n_dn[s1] - 3)
-        mu_cdw_meas[2, s0] = pref * (4 * n_up[s0] + 2 * n_up[s1] - 3)
-        
-        mu_cdw_meas[1, s1] = pref * (4 * n_dn[s1] + 2 * n_dn[s0] - 3)
-        mu_cdw_meas[2, s1] = pref * (4 * n_up[s1] + 2 * n_up[s0] - 3)
+        if transverse_geometry == :cubic_frustrated
+            mu_cdw_meas[1, s0] = pref * (4 * n_dn[s0] + 2 * n_dn[s1] - 3)
+            mu_cdw_meas[2, s0] = pref * (4 * n_up[s0] + 2 * n_up[s1] - 3)
+            mu_cdw_meas[1, s1] = pref * (4 * n_dn[s1] + 2 * n_dn[s0] - 3)
+            mu_cdw_meas[2, s1] = pref * (4 * n_up[s1] + 2 * n_up[s0] - 3)
+        elseif transverse_geometry == :cubic_unfrustrated
+            mu_cdw_meas[1, s0] = pref * (6 * n_dn[s1] - 3)
+            mu_cdw_meas[2, s0] = pref * (6 * n_up[s1] - 3)
+            mu_cdw_meas[1, s1] = pref * (6 * n_dn[s0] - 3)
+            mu_cdw_meas[2, s1] = pref * (6 * n_up[s0] - 3)
+        else
+            mu_cdw_meas[1, s0] = pref * (2 * n_dn[s1] - 1)
+            mu_cdw_meas[2, s0] = pref * (2 * n_up[s1] - 1)
+            mu_cdw_meas[1, s1] = pref * (2 * n_dn[s0] - 1)
+            mu_cdw_meas[2, s1] = pref * (2 * n_up[s0] - 1)
+        end
     end
     mu_cdw_meas[abs.(mu_cdw_meas) .< threshold] .= 0.0
     
@@ -880,6 +902,7 @@ function main_loop(model_params; n_target::Float64, E_p::Float64, z_c::Int=4, al
     U = model_params[:U]
     V = model_params[:V]
     t_p = model_params[:t_p]
+    transverse_geometry = normalize_transverse_geometry(model_params[:transverse_geometry])
     r_range = model_params[:r_range]
     L = model_params[:L]
     outfile = model_params[:outfile]
@@ -904,8 +927,8 @@ function main_loop(model_params; n_target::Float64, E_p::Float64, z_c::Int=4, al
         end
         println("Target density achieved with mu=$mu, n=$n_meas")
 
-        alpha_meas, beta_meas, C_pair, C_exc_dn, C_exc_up = calculate_alpha_beta_measured(psi, s; L=L, r_range=r_range, z_c=z_c, t_p=t_p, E_p=E_p, threshold=1e-6)
-        mu_cdw_meas = calculate_mu_cdw_measured(psi; L=L, t_p=t_p, E_p=E_p, threshold=1e-6)
+        alpha_meas, beta_meas, C_pair, C_exc_dn, C_exc_up = calculate_alpha_beta_measured(psi, s; L=L, r_range=r_range, z_c=z_c, t_p=t_p, E_p=E_p, transverse_geometry=transverse_geometry, threshold=1e-6)
+        mu_cdw_meas = calculate_mu_cdw_measured(psi; L=L, t_p=t_p, E_p=E_p, transverse_geometry=transverse_geometry, threshold=1e-6)
         _, dwave_prof = local_dwave_profile(psi; L_rungs=L, edge_rungs=2)
         delta_d_prev = (length(dwave_hist) >= 1 && !isempty(dwave_prof)) ?
             (sum(abs.(dwave_prof .- dwave_hist[end])) / length(dwave_prof)) : NaN
@@ -943,6 +966,7 @@ function main_loop(model_params; n_target::Float64, E_p::Float64, z_c::Int=4, al
         F["U"] = U
         F["V"] = V
         F["t_p"] = t_p
+        F["transverse_geometry"] = string(transverse_geometry)
         F["alpha"] = alpha
         F["beta"] = beta
         F["mu_cdw"] = mu_cdw
@@ -966,14 +990,19 @@ end
 # Convenience: run the full loop and then compute gap and order parameter
 # inherit_from: path to another run's HDF5 file to inherit alpha/beta/mu from
 function run_loop(L::Int, t::Float64, U::Float64, V::Float64, t0::Float64, t_p::Float64, mu_init::Float64, n_target::Float64,
-    r_range::Int, z_c::Int, E_p::Real, chi_max::Int=200; nsweeps=30, cutoff=1e-10, energy_tol=1e-6, mf_max_iter::Int=30, inherit_from::Union{Nothing,String}=nothing)
+    r_range::Int, z_c::Int, E_p::Real, chi_max::Int=200; nsweeps=30, cutoff=1e-10, energy_tol=1e-6, mf_max_iter::Int=30, inherit_from::Union{Nothing,String}=nothing, transverse_geometry=:cubic_unfrustrated)
     
     tick()
+    transverse_geometry = normalize_transverse_geometry(transverse_geometry)
 
-    outfile = "results_L_$(L)_U_$(U)_V_$(V)_t0_$(t0)_t_p_$(t_p)_chi_$(chi_max)_density_$(n_target)_gpu_nodamping.h5"
+    outfile = "results_L_$(L)_U_$(U)_V_$(V)_t0_$(t0)_t_p_$(t_p)_geometry_$(transverse_geometry)_chi_$(chi_max)_density_$(n_target)_gpu.h5"
     if (isfile(outfile))
         println("Resuming from checkpoint $outfile")
         F = h5open(outfile,"r")
+        if haskey(F, "transverse_geometry")
+            saved_geometry = normalize_transverse_geometry(read(F, "transverse_geometry"))
+            saved_geometry != transverse_geometry && @warn "Checkpoint transverse_geometry=$(saved_geometry) differs from requested $(transverse_geometry)"
+        end
         alpha = read(F, "alpha")
         beta = read(F, "beta")
         mu_cdw = haskey(F, "mu_cdw") ? read(F, "mu_cdw") : zeros(Float64, 2, 2 * L) #Did a check in case we use initial state that doesn't have cdw implementation
@@ -990,6 +1019,10 @@ function run_loop(L::Int, t::Float64, U::Float64, V::Float64, t0::Float64, t_p::
     elseif inherit_from !== nothing && isfile(inherit_from)
         println("Inheriting alpha/beta/mu from $inherit_from")
         F = h5open(inherit_from, "r")
+        if haskey(F, "transverse_geometry")
+            inherited_geometry = normalize_transverse_geometry(read(F, "transverse_geometry"))
+            inherited_geometry != transverse_geometry && @warn "Inherited transverse_geometry=$(inherited_geometry) differs from requested $(transverse_geometry)"
+        end
         alpha = read(F, "alpha")
         beta = read(F, "beta")
         mu_cdw = haskey(F, "mu_cdw") ? read(F, "mu_cdw") : zeros(Float64, 2, 2 * L)
@@ -1028,7 +1061,7 @@ function run_loop(L::Int, t::Float64, U::Float64, V::Float64, t0::Float64, t_p::
         psi_resume = nothing
     end
 
-    println("Running with t0=$(t0) t_p=$(t_p) U=$U V=$V L=$L chi_max=$(chi_max) E_p=$(E_p) mu_init=$(mu_init) density=$(n_target) mf_max_iter=$(mf_max_iter)")
+    println("Running with t0=$(t0) t_p=$(t_p) U=$U V=$V L=$L chi_max=$(chi_max) E_p=$(E_p) mu_init=$(mu_init) density=$(n_target) transverse_geometry=$(transverse_geometry) mf_max_iter=$(mf_max_iter)")
 
     model_params = Dict{Symbol,Any}(
         :L => L,
@@ -1037,6 +1070,7 @@ function run_loop(L::Int, t::Float64, U::Float64, V::Float64, t0::Float64, t_p::
         :V => V,
         :t0 => t0,
         :t_p => t_p,
+        :transverse_geometry => transverse_geometry,
         :mu => mu_init,
         :mu_cdw => mu_cdw,
         :r_range => r_range,
@@ -1078,6 +1112,7 @@ function run_loop(L::Int, t::Float64, U::Float64, V::Float64, t0::Float64, t_p::
     F["V"] = V
     F["t0"] = t0
     F["t_p"] = t_p
+    F["transverse_geometry"] = string(transverse_geometry)
     F["alpha"] = alpha
     F["beta"] = beta
     F["mu_cdw"] = mu_cdw
@@ -1105,8 +1140,8 @@ end
 # CLI entry point
 # -----------------------------
 
-if length(ARGS) < 9 || length(ARGS) > 11
-    println("Usage: julia main_loop_script_ladder_gpu.jl <L> <U> <V> <t0> <t_p> <chi_max> <E_p> <mu_init> <density> [energy_tol] [inherit_from]")
+if length(ARGS) < 9
+    println("Usage: julia main_loop_script_ladder_gpu.jl <L> <U> <V> <t0> <t_p> <chi_max> <E_p> <mu_init> <density> [geometry] [energy_tol] [inherit_from]")
     println("  L: number of rungs (total sites = 2L)")
     println("  U: onsite interaction (repulsive, U > 0 for ladders)")
     println("  V: nearest-neighbor interaction strength")
@@ -1116,9 +1151,44 @@ if length(ARGS) < 9 || length(ARGS) > 11
     println("  E_p: pair binding energy")
     println("  mu_init: initial chemical potential")
     println("  density: target particle density (e.g. 0.9375)")
+    println("  geometry: (optional) cubic_unfrustrated, cubic_frustrated, or square (default cubic_unfrustrated)")
     println("  energy_tol: (optional) relative energy tolerance for early DMRG exit (default 1e-6)")
     println("  inherit_from: (optional) path to HDF5 file to inherit alpha/beta/mu/mu_cdw from it")
     return
+end
+
+function parse_optional_cli_args(args)
+    energy_tol = 1e-6
+    transverse_geometry = :cubic_unfrustrated
+    inherit_from = nothing
+
+    for arg in args
+        numeric_arg = tryparse(Float64, arg)
+        if numeric_arg !== nothing
+            energy_tol = numeric_arg
+            continue
+        end
+
+        if startswith(lowercase(strip(arg)), "--geometry=")
+            transverse_geometry = normalize_transverse_geometry(arg)
+            continue
+        end
+
+        try
+            transverse_geometry = normalize_transverse_geometry(arg)
+            continue
+        catch err
+            err isa ArgumentError || rethrow(err)
+        end
+
+        if inherit_from === nothing
+            inherit_from = arg
+        else
+            throw(ArgumentError("Unrecognized extra argument '$arg'. Only one inherit_from path is supported."))
+        end
+    end
+
+    return energy_tol, inherit_from, transverse_geometry
 end
 
 L = parse(Int, ARGS[1])
@@ -1130,8 +1200,7 @@ chi_max = parse(Int, ARGS[6])
 E_p = parse(Float64, ARGS[7])
 mu_init = parse(Float64, ARGS[8])
 density = parse(Float64, ARGS[9])
-energy_tol = length(ARGS) >= 10 ? parse(Float64, ARGS[10]) : 1e-6
-inherit_from = length(ARGS) >= 11 ? ARGS[11] : nothing
+energy_tol, inherit_from, transverse_geometry = parse_optional_cli_args(ARGS[10:end])
 
 t = 1.0
 n_target = density
@@ -1142,4 +1211,4 @@ mf_max_iter = 30
 ITensors.Strided.set_num_threads(1)
 BLAS.set_num_threads(1)
 
-result = run_loop(L, t, U, V, t0, t_p, mu_init, n_target, r_range, z_c, E_p, chi_max; energy_tol=energy_tol, mf_max_iter=mf_max_iter, inherit_from=inherit_from)
+result = run_loop(L, t, U, V, t0, t_p, mu_init, n_target, r_range, z_c, E_p, chi_max; energy_tol=energy_tol, mf_max_iter=mf_max_iter, inherit_from=inherit_from, transverse_geometry=transverse_geometry)

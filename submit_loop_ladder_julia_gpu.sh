@@ -18,6 +18,7 @@
 # $7 = E_p
 # $8 = mu_init
 # $9 = density
+# Optional trailing args include geometry (cubic_unfrustrated, cubic_frustrated, square), energy_tol, inherit_from
 
 export SLURM_CPU_BIND="cores"
 
@@ -28,14 +29,44 @@ module load libfabric
 module load python
 conda activate tenpy-env
 
-outfile_name="results_L_${1}_U_${2}_V_${3}_t0_${4}_t_p_${5}_chi_${6}_density_${9}_gpu_nodamping.h5"
+geometry="cubic_unfrustrated"
+for arg in "${@:10}"; do
+  case "$arg" in
+    --geometry=*)
+      geometry="${arg#--geometry=}"
+      ;;
+    cubic_unfrustrated|cubic-unfrustrated|"cubic unfrustrated")
+      geometry="cubic_unfrustrated"
+      ;;
+    cubic_frustrated|cubic-frustrated|"cubic frustrated")
+      geometry="cubic_frustrated"
+      ;;
+    square)
+      geometry="square"
+      ;;
+  esac
+done
+geometry="$(printf '%s' "$geometry" | tr '[:upper:]' '[:lower:]')"
+geometry="${geometry//-/_}"
+geometry="${geometry// /_}"
+case "$geometry" in
+  cubic_unfrustrated|cubic_frustrated|square)
+    ;;
+  *)
+    echo "Unknown transverse geometry: $geometry"
+    exit 2
+    ;;
+esac
+
+outfile_name="results_L_${1}_U_${2}_V_${3}_t0_${4}_t_p_${5}_geometry_${geometry}_chi_${6}_density_${9}_gpu.h5"
 
 echo "outfile_name: $outfile_name"
+echo "transverse_geometry: $geometry"
 
 mkdir -p logs_julia
 
 srun -u julia main_loop_script_ladder_gpu.jl "$@" \
-  | tee -a logs_julia/dmrg_ladder_L_${1}_U_${2}_V_${3}_t0_${4}_t_p_${5}_chi_${6}_density_${9}_gpu.log
+  | tee -a logs_julia/dmrg_ladder_L_${1}_U_${2}_V_${3}_t0_${4}_t_p_${5}_geometry_${geometry}_chi_${6}_density_${9}_gpu.log
 
 python <<END
 import h5py, sys
@@ -56,4 +87,4 @@ else
     echo "Run completed successfully!"
 fi
     
-#Monitor job with: tail -f logs_julia/dmrg_ladder_L_${1}_U_${2}_V_${3}_t0_${4}_t_p_${5}_chi_${6}_gpu.log
+#Monitor job with: tail -f logs_julia/dmrg_ladder_L_${1}_U_${2}_V_${3}_t0_${4}_t_p_${5}_geometry_${geometry}_chi_${6}_density_${9}_gpu.log
