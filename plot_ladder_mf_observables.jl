@@ -6,10 +6,17 @@ const _MatplotlibWidgets = PyCall.pyimport("matplotlib.widgets")
 const _MatplotlibColors = PyCall.pyimport("matplotlib.colors")
 const _MatplotlibPatches = PyCall.pyimport("matplotlib.patches")
 const _MatplotlibCm = PyCall.pyimport("matplotlib.cm")
+const _MatplotlibLegendHandler = PyCall.pyimport("matplotlib.legend_handler")
+const _MatplotlibLines = PyCall.pyimport("matplotlib.lines")
+const _MatplotlibPath = PyCall.pyimport("matplotlib.path")
 const _CDW_LEG_COLORS = ("#cb181d", "#fcae91")
 const _SDW_LEG_COLORS = ("#000000", "#969696")
 const _SWAVE_LEG_COLORS = ("#006d2c", "#a1d99b")
+const _EXT_SWAVE_COLOR = "#006d2c"
 const _DWAVE_COLOR = "purple"
+const _ORDER_GRID_LEGEND_MARKER_SIZE = 10
+const _MF_STACK_H_PAD = 1.6
+const _FOURIER_STACK_HSPACE = 0.1
 const _SCREEN_RESOLUTION_PIXELS = Ref{Any}(missing)
 const _FIGURE_CALLBACK_REFS = IdDict{Any, Any}()
 const _MACOS_COREGRAPHICS = "/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics"
@@ -40,6 +47,8 @@ end
 #   plot_mf_change_slider_from_file("stateless_data/results_...h5"; field=:alpha)
 #   plot_mf_change_slider_from_file("stateless_data/results_...h5"; field=:beta, spin=:up)
 # The file-based wrappers put the HDF5 basename in the PyPlot figure title.
+# Fourier heatmap/grid routines trim 5 boundary rungs from each end by default;
+# pass trim_boundary_rungs=0 to include the full ladder.
 #
 # Array convention:
 #   alpha[i, ip, leg, legp] and alpha_list[i, ip, leg, legp, iter]
@@ -156,6 +165,15 @@ function _rung_count_from_sites(nsites::Integer)
     return div(nsites, 2)
 end
 
+function _trimmed_rung_range(L::Integer, trim_boundary_rungs::Integer; min_rungs::Integer=2)
+    trim = Int(trim_boundary_rungs)
+    trim >= 0 || throw(ArgumentError("trim_boundary_rungs must be nonnegative; got $trim"))
+    remaining = L - 2 * trim
+    remaining >= min_rungs ||
+        throw(ArgumentError("trim_boundary_rungs=$trim removes $(2 * trim) rungs from L=$L, leaving $(max(remaining, 0)); need at least $min_rungs rungs"))
+    return (trim + 1):(L - trim)
+end
+
 _math(expr::AbstractString) = "\$" * expr * "\$"
 _spin_tex(spin) = _spin_index(spin) == 1 ? "\\downarrow" : "\\uparrow"
 
@@ -233,6 +251,7 @@ _site_tex(rung_tex::AbstractString, leg_tex::AbstractString) = "(" * rung_tex * 
 _next_rung_tex(rung_tex::AbstractString) = all(isdigit, rung_tex) ? string(parse(Int, rung_tex) + 1) : rung_tex * "+1"
 _singlet_pair_corr_def() = "\\Delta^s_{a,b}=\\frac{1}{2}\\left(\\langle c_{a,\\uparrow}c_{b,\\downarrow}\\rangle-\\langle c_{a,\\downarrow}c_{b,\\uparrow}\\rangle\\right)"
 _dwave_corr_symbol(rung_tex::AbstractString="i") = "\\Delta^d_{" * rung_tex * "}"
+_extended_swave_corr_symbol(rung_tex::AbstractString="i") = "\\Delta^{s_{\\mathrm{ext}}}_{" * rung_tex * "}"
 
 function _dwave_corr_expr(; rung_tex::AbstractString="i", leg1_tex::AbstractString="1", leg2_tex::AbstractString="2")
     next_tex = _next_rung_tex(rung_tex)
@@ -243,11 +262,27 @@ function _dwave_corr_expr(; rung_tex::AbstractString="i", leg1_tex::AbstractStri
     return _dwave_corr_symbol(rung_tex) * "=\\frac{1}{2}\\left(\\Delta^s_{" * site_i1 * "," * site_ip1 * "}+\\Delta^s_{" * site_i2 * "," * site_ip2 * "}\\right)-\\Delta^s_{" * site_i1 * "," * site_i2 * "}"
 end
 
-function _dwave_corr_title(leg1::Integer, leg2::Integer; rung_tex::AbstractString="i")
-    return _math(_singlet_pair_corr_def()) * "\n" * _math(_dwave_corr_expr(; rung_tex=rung_tex, leg1_tex=string(leg1), leg2_tex=string(leg2)))
+function _dwave_corr_title(leg1::Integer, leg2::Integer; rung_tex::AbstractString="i", include_singlet_def::Bool=true)
+    expr = _math(_dwave_corr_expr(; rung_tex=rung_tex, leg1_tex=string(leg1), leg2_tex=string(leg2)))
+    return include_singlet_def ? _math(_singlet_pair_corr_def()) * "\n" * expr : expr
+end
+
+function _extended_swave_corr_expr(; rung_tex::AbstractString="i", leg1_tex::AbstractString="1", leg2_tex::AbstractString="2")
+    next_tex = _next_rung_tex(rung_tex)
+    site_i1 = _site_tex(rung_tex, leg1_tex)
+    site_i2 = _site_tex(rung_tex, leg2_tex)
+    site_ip1 = _site_tex(next_tex, leg1_tex)
+    site_ip2 = _site_tex(next_tex, leg2_tex)
+    return _extended_swave_corr_symbol(rung_tex) * "=\\frac{1}{2}\\left(\\Delta^s_{" * site_i1 * "," * site_ip1 * "}+\\Delta^s_{" * site_i2 * "," * site_ip2 * "}\\right)+\\Delta^s_{" * site_i1 * "," * site_i2 * "}"
+end
+
+function _extended_swave_corr_title(leg1::Integer, leg2::Integer; rung_tex::AbstractString="i", include_singlet_def::Bool=true)
+    expr = _math(_extended_swave_corr_expr(; rung_tex=rung_tex, leg1_tex=string(leg1), leg2_tex=string(leg2)))
+    return include_singlet_def ? _math(_singlet_pair_corr_def()) * "\n" * expr : expr
 end
 
 _dwave_alpha_symbol(rung_tex::AbstractString="i") = "\\Delta^d_{\\alpha," * rung_tex * "}"
+_extended_swave_alpha_symbol(rung_tex::AbstractString="i") = "\\Delta^{s_{\\mathrm{ext}}}_{\\alpha," * rung_tex * "}"
 
 function _dwave_alpha_expr(; rung_tex::AbstractString="i", leg1_tex::AbstractString="1", leg2_tex::AbstractString="2", symmetrize::Bool=false)
     next_tex = _next_rung_tex(rung_tex)
@@ -262,6 +297,21 @@ end
 
 function _dwave_alpha_title(leg1::Integer, leg2::Integer; rung_tex::AbstractString="i", symmetrize::Bool=false)
     return _math(_dwave_alpha_expr(; rung_tex=rung_tex, leg1_tex=string(leg1), leg2_tex=string(leg2), symmetrize=symmetrize))
+end
+
+function _extended_swave_alpha_expr(; rung_tex::AbstractString="i", leg1_tex::AbstractString="1", leg2_tex::AbstractString="2", symmetrize::Bool=false)
+    next_tex = _next_rung_tex(rung_tex)
+    leg_term = "\\frac{1}{2}\\left(\\alpha_{" * rung_tex * "," * next_tex * "," * leg1_tex * "," * leg1_tex * "}+\\alpha_{" * rung_tex * "," * next_tex * "," * leg2_tex * "," * leg2_tex * "}\\right)"
+    rung_term = if symmetrize
+        "\\frac{1}{2}\\left(\\alpha_{" * rung_tex * "," * rung_tex * "," * leg1_tex * "," * leg2_tex * "}+\\alpha_{" * rung_tex * "," * rung_tex * "," * leg2_tex * "," * leg1_tex * "}\\right)"
+    else
+        "\\alpha_{" * rung_tex * "," * rung_tex * "," * leg1_tex * "," * leg2_tex * "}"
+    end
+    return _extended_swave_alpha_symbol(rung_tex) * "=" * leg_term * "+" * rung_term
+end
+
+function _extended_swave_alpha_title(leg1::Integer, leg2::Integer; rung_tex::AbstractString="i", symmetrize::Bool=false)
+    return _math(_extended_swave_alpha_expr(; rung_tex=rung_tex, leg1_tex=string(leg1), leg2_tex=string(leg2), symmetrize=symmetrize))
 end
 
 function density_from_beta(beta; spin=:up, leg::Integer=1, iteration=nothing, use_abs::Bool=false)
@@ -417,6 +467,22 @@ function _local_dwave_alpha_value(a, i::Integer, leg1::Integer, leg2::Integer, s
     return leg_pair - rung_pair
 end
 
+function _local_extended_swave_alpha_value(a, i::Integer, leg1::Integer, leg2::Integer, symmetrize::Bool, it=nothing)
+    leg_pair = 0.5 * (
+        _alpha_entry(a, i, i + 1, leg1, leg1, it) +
+        _alpha_entry(a, i, i + 1, leg2, leg2, it)
+    )
+    rung_pair = if symmetrize
+        0.5 * (
+            _alpha_entry(a, i, i, leg1, leg2, it) +
+            _alpha_entry(a, i, i, leg2, leg1, it)
+        )
+    else
+        _alpha_entry(a, i, i, leg1, leg2, it)
+    end
+    return leg_pair + rung_pair
+end
+
 function dwave_profile_from_alpha(alpha;
     leg1::Integer=1,
     leg2::Integer=2,
@@ -431,6 +497,23 @@ function dwave_profile_from_alpha(alpha;
     L <= 1 && return Int[], Float64[]
     rungs = collect(1:(L - 1))
     vals = [_local_dwave_alpha_value(a, i, leg1, leg2, symmetrize) for i in rungs]
+    return rungs, _plot_values(vals; use_abs=use_abs)
+end
+
+function extended_swave_profile_from_alpha(alpha;
+    leg1::Integer=1,
+    leg2::Integer=2,
+    iteration=nothing,
+    symmetrize::Bool=false,
+    use_abs::Bool=false)
+
+    a = _final_array(alpha, 4, iteration, "alpha")
+    leg1 = _check_leg(leg1)
+    leg2 = _check_leg(leg2)
+    L = size(a, 1)
+    L <= 1 && return Int[], Float64[]
+    rungs = collect(1:(L - 1))
+    vals = [_local_extended_swave_alpha_value(a, i, leg1, leg2, symmetrize) for i in rungs]
     return rungs, _plot_values(vals; use_abs=use_abs)
 end
 
@@ -450,6 +533,19 @@ function _local_dwave_corr_value(c, i::Integer, leg1::Integer, leg2::Integer)
     return leg_pair - rung_pair
 end
 
+function _local_extended_swave_corr_value(c, i::Integer, leg1::Integer, leg2::Integer)
+    site_i1 = _plot_rung_leg_to_site(i, leg1)
+    site_i2 = _plot_rung_leg_to_site(i, leg2)
+    site_ip1 = _plot_rung_leg_to_site(i + 1, leg1)
+    site_ip2 = _plot_rung_leg_to_site(i + 1, leg2)
+    leg_pair = 0.5 * (
+        _singlet_bond_from_pair_corr(c, site_i1, site_ip1) +
+        _singlet_bond_from_pair_corr(c, site_i2, site_ip2)
+    )
+    rung_pair = _singlet_bond_from_pair_corr(c, site_i1, site_i2)
+    return leg_pair + rung_pair
+end
+
 function dwave_profile_from_correlations(C_pair;
     leg1::Integer=1,
     leg2::Integer=2,
@@ -464,6 +560,23 @@ function dwave_profile_from_correlations(C_pair;
     L <= 1 && return Int[], Float64[]
     rungs = collect(1:(L - 1))
     vals = [_local_dwave_corr_value(c, i, leg1, leg2) for i in rungs]
+    return rungs, _plot_values(vals; use_abs=use_abs)
+end
+
+function extended_swave_profile_from_correlations(C_pair;
+    leg1::Integer=1,
+    leg2::Integer=2,
+    iteration=nothing,
+    use_abs::Bool=false)
+
+    c = _final_array(C_pair, 2, iteration, "C_pair_list")
+    leg1 = _check_leg(leg1)
+    leg2 = _check_leg(leg2)
+    L = _rung_count_from_sites(size(c, 1))
+    size(c, 2) == 2 * L || throw(ArgumentError("raw pairing correlation matrix must be square"))
+    L <= 1 && return Int[], Float64[]
+    rungs = collect(1:(L - 1))
+    vals = [_local_extended_swave_corr_value(c, i, leg1, leg2) for i in rungs]
     return rungs, _plot_values(vals; use_abs=use_abs)
 end
 
@@ -630,6 +743,24 @@ function middle_dwave_history(alpha_list;
     return iters, _plot_values(vals; use_abs=use_abs)
 end
 
+function middle_extended_swave_history(alpha_list;
+    rung=nothing,
+    leg1::Integer=1,
+    leg2::Integer=2,
+    symmetrize::Bool=false,
+    use_abs::Bool=false)
+
+    a = _history_array(alpha_list, 5, "alpha_list")
+    leg1 = _check_leg(leg1)
+    leg2 = _check_leg(leg2)
+    L = size(a, 1)
+    L > 1 || throw(ArgumentError("need at least two rungs to compute local extended s-wave profile"))
+    rung = rung === nothing ? min(middle_rung(L), L - 1) : _check_index(rung, L - 1, "extended s-wave rung")
+    iters = collect(1:size(a, 5))
+    vals = [_local_extended_swave_alpha_value(a, rung, leg1, leg2, symmetrize, it) for it in iters]
+    return iters, _plot_values(vals; use_abs=use_abs)
+end
+
 function middle_dwave_history_from_correlations(C_pair_list;
     rung=nothing,
     leg1::Integer=1,
@@ -645,6 +776,24 @@ function middle_dwave_history_from_correlations(C_pair_list;
     rung = rung === nothing ? min(middle_rung(L), L - 1) : _check_index(rung, L - 1, "d-wave rung")
     iters = collect(1:size(c, 3))
     vals = [_local_dwave_corr_value(selectdim(c, 3, it), rung, leg1, leg2) for it in iters]
+    return iters, _plot_values(vals; use_abs=use_abs)
+end
+
+function middle_extended_swave_history_from_correlations(C_pair_list;
+    rung=nothing,
+    leg1::Integer=1,
+    leg2::Integer=2,
+    use_abs::Bool=false)
+
+    c = _history_array(C_pair_list, 3, "C_pair_list")
+    leg1 = _check_leg(leg1)
+    leg2 = _check_leg(leg2)
+    L = _rung_count_from_sites(size(c, 1))
+    size(c, 2) == 2 * L || throw(ArgumentError("raw pairing correlation matrices must be square"))
+    L > 1 || throw(ArgumentError("need at least two rungs to compute local extended s-wave profile"))
+    rung = rung === nothing ? min(middle_rung(L), L - 1) : _check_index(rung, L - 1, "extended s-wave rung")
+    iters = collect(1:size(c, 3))
+    vals = [_local_extended_swave_corr_value(selectdim(c, 3, it), rung, leg1, leg2) for it in iters]
     return iters, _plot_values(vals; use_abs=use_abs)
 end
 
@@ -698,6 +847,10 @@ function _fourier_colorbar_label(value::Symbol)
     value == :imag && return "Im Fourier component"
     return "Fourier value"
 end
+
+_rung_index_xlabel() = "Rung index " * _math("i")
+_mf_iteration_xlabel() = "MF iteration " * _math("m")
+_kx_xlabel() = _math("k_x")
 
 function _ladder_fourier_map(field; subtract_average::Bool=false, normalize::Bool=true, value::Symbol=:abs)
     size(field, 2) == 2 || throw(ArgumentError("ladder Fourier map expects an L x 2 order field"))
@@ -800,19 +953,20 @@ function _order_fields_from_file(filename::AbstractString;
     iteration=nothing,
     leg1::Integer=1,
     leg2::Integer=2,
-    symmetrize_rung::Bool=false)
+    symmetrize_rung::Bool=false,
+    trim_boundary_rungs::Integer=0)
 
     data = load_mf_data(filename)
     if _source(source, use_correlations) == :correlations
         C_pair_source = (iteration === nothing && data.C_pair !== nothing) ? data.C_pair : data.C_pair_list
         C_exc_dn_source = (iteration === nothing && data.C_exc_dn !== nothing) ? data.C_exc_dn : data.C_exc_dn_list
         C_exc_up_source = (iteration === nothing && data.C_exc_up !== nothing) ? data.C_exc_up : data.C_exc_up_list
-        return _correlation_order_fields(C_pair_source, C_exc_dn_source, C_exc_up_source; iteration=iteration, leg1=leg1, leg2=leg2)
+        return _correlation_order_fields(C_pair_source, C_exc_dn_source, C_exc_up_source; iteration=iteration, leg1=leg1, leg2=leg2, trim_boundary_rungs=trim_boundary_rungs)
     end
 
     alpha_source = (iteration === nothing && data.alpha !== nothing) ? data.alpha : data.alpha_list
     beta_source = (iteration === nothing && data.beta !== nothing) ? data.beta : data.beta_list
-    return _mf_order_fields(alpha_source, beta_source; iteration=iteration, leg1=leg1, leg2=leg2, symmetrize_rung=symmetrize_rung)
+    return _mf_order_fields(alpha_source, beta_source; iteration=iteration, leg1=leg1, leg2=leg2, symmetrize_rung=symmetrize_rung, trim_boundary_rungs=trim_boundary_rungs)
 end
 
 function _max_fourier_component(heatmap, qx; ladder::Bool)
@@ -858,12 +1012,14 @@ function _order_fourier_maxima(fields; value::Symbol=:abs, normalize::Bool=true)
     qx_cdw, cdw_map = _ladder_fourier_map(fields.cdw; subtract_average=true, normalize=normalize, value=value)
     qx_sdw, sdw_map = _ladder_fourier_map(fields.sdw; normalize=normalize, value=value)
     qx_swave, swave_map = _ladder_fourier_map(fields.swave; normalize=normalize, value=value)
+    qx_extended_swave, extended_swave_map = _chain_fourier_map(fields.extended_swave; normalize=normalize, value=value)
     qx_dwave, dwave_map = _chain_fourier_map(fields.dwave; normalize=normalize, value=value)
 
     return (
         cdw=_max_fourier_component(cdw_map, qx_cdw; ladder=true),
         sdw=_max_fourier_component(sdw_map, qx_sdw; ladder=true),
         swave=_max_fourier_component(swave_map, qx_swave; ladder=true),
+        extended_swave=_max_fourier_component(extended_swave_map, qx_extended_swave; ladder=false),
         dwave=_max_fourier_component(dwave_map, qx_dwave; ladder=false),
     )
 end
@@ -934,12 +1090,77 @@ function _order_grid_legend_label(key::Symbol, label::AbstractString; leg1::Inte
         return label * "  " * _math("O^{\\mathrm{SDW}}_{i,\\ell}=n_{i,\\ell,\\uparrow}-n_{i,\\ell,\\downarrow}")
     elseif key == :swave
         return label * "  " * _math("O^{s}_{i,\\ell}=\\langle c_{i,\\ell,\\uparrow}c_{i,\\ell,\\downarrow}\\rangle")
+    elseif key == :extended_swave
+        l1 = string(_check_leg(leg1))
+        l2 = string(_check_leg(leg2))
+        return label * "  " * _math("O^{s_{\\mathrm{ext}}}_i=\\frac{1}{2}(\\Delta^s_{i" * l1 * ",i+1\\," * l1 * "}+\\Delta^s_{i" * l2 * ",i+1\\," * l2 * "})+\\Delta^s_{i" * l1 * ",i" * l2 * "}")
     elseif key == :dwave
         l1 = string(_check_leg(leg1))
         l2 = string(_check_leg(leg2))
         return label * "  " * _math("O^d_i=\\frac{1}{2}(\\Delta^s_{i" * l1 * ",i+1\\," * l1 * "}+\\Delta^s_{i" * l2 * ",i+1\\," * l2 * "})-\\Delta^s_{i" * l1 * ",i" * l2 * "}")
     end
     return label
+end
+
+function _order_grid_legend_marker(marker; facecolor, edgecolor="black", linewidth::Real=1.4)
+    return _MatplotlibLines.Line2D([0], [0];
+        linestyle="None",
+        marker=marker,
+        markersize=_ORDER_GRID_LEGEND_MARKER_SIZE,
+        markerfacecolor=facecolor,
+        markeredgecolor=edgecolor,
+        markeredgewidth=linewidth)
+end
+
+_order_grid_lower_left_triangle_marker() = _MatplotlibPath.Path([
+    (-0.5, -0.5),
+    (0.5, -0.5),
+    (-0.5, 0.5),
+    (-0.5, -0.5),
+])
+
+_order_grid_upper_right_triangle_marker() = _MatplotlibPath.Path([
+    (0.5, 0.5),
+    (0.5, -0.5),
+    (-0.5, 0.5),
+    (0.5, 0.5),
+])
+
+function _order_grid_legend_handle(spec)
+    facecolor = Tuple(spec.cmap(0.75))
+    if spec.shape == :onsite_swave_triangle
+        return (
+            _order_grid_legend_marker(_order_grid_lower_left_triangle_marker(); facecolor=facecolor),
+            _order_grid_legend_marker("s"; facecolor="none"),
+        )
+    elseif spec.shape == :extended_swave_triangle
+        return (
+            _order_grid_legend_marker(_order_grid_upper_right_triangle_marker(); facecolor=facecolor),
+            _order_grid_legend_marker("s"; facecolor="none"),
+        )
+    end
+    return _order_grid_legend_marker("s"; facecolor=facecolor)
+end
+
+function _point_in_triangle(x::Real, y::Real, vertices)
+    x1, y1 = vertices[1]
+    x2, y2 = vertices[2]
+    x3, y3 = vertices[3]
+    denom = (y2 - y3) * (x1 - x3) + (x3 - x2) * (y1 - y3)
+    abs(denom) <= eps(Float64) && return false
+    a = ((y2 - y3) * (x - x3) + (x3 - x2) * (y - y3)) / denom
+    b = ((y3 - y1) * (x - x3) + (x1 - x3) * (y - y3)) / denom
+    c = 1 - a - b
+    tol = 1e-12
+    return a >= -tol && b >= -tol && c >= -tol
+end
+
+function _order_grid_region_contains(region, x::Real, y::Real)
+    region.x0 <= x <= region.x1 && region.y0 <= y <= region.y1 || return false
+    if :vertices in propertynames(region)
+        return _point_in_triangle(x, y, region.vertices)
+    end
+    return true
 end
 
 function _order_grid_hover_text(label::AbstractString, rec, summary)
@@ -1004,7 +1225,7 @@ function _install_order_grid_hover!(fig, ax, regions; position=(0.97, 0.04), rig
         hit_index = 0
         hit_text = ""
         for (idx, region) in enumerate(regions)
-            if region.x0 <= x <= region.x1 && region.y0 <= y <= region.y1
+            if _order_grid_region_contains(region, x, y)
                 hit_index = idx
                 hit_text = region.text
                 break
@@ -1042,7 +1263,7 @@ function _install_order_grid_click!(fig, ax, regions; iteration=nothing)
         y = Float64(event.ydata)
         for region in regions
             if region.x0 <= x <= region.x1 && region.y0 <= y <= region.y1
-                heatmap_fig = plot_order_fourier_heatmaps_from_file(region.filename; use_correlations=true, iteration=iteration)
+                heatmap_fig = plot_order_fourier_heatmaps_from_file(region.filename; use_correlations=true, iteration=iteration, trim_boundary_rungs=region.trim_boundary_rungs)
                 detail_fig = plot_mf_profiles_and_middle_histories_from_file(region.filename; use_correlations=true, iteration=iteration)
                 push!(spawned_heatmap_figures, heatmap_fig)
                 push!(spawned_detail_figures, detail_fig)
@@ -1102,7 +1323,8 @@ function _mf_order_fields(alpha, beta;
     iteration=nothing,
     leg1::Integer=1,
     leg2::Integer=2,
-    symmetrize_rung::Bool=false)
+    symmetrize_rung::Bool=false,
+    trim_boundary_rungs::Integer=0)
 
     a = _final_array(alpha, 4, iteration, "alpha")
     b = _final_array(beta, 5, iteration, "beta")
@@ -1110,19 +1332,28 @@ function _mf_order_fields(alpha, beta;
     leg2 = _check_leg(leg2)
     L = size(b, 2)
     size(a, 1) == L || throw(ArgumentError("alpha and beta must have the same rung count"))
+    size(a, 2) == L && size(b, 3) == L || throw(ArgumentError("alpha and beta rung dimensions must be square"))
+    rungs = _trimmed_rung_range(L, trim_boundary_rungs)
+    if first(rungs) != 1 || last(rungs) != L
+        a = a[rungs, rungs, :, :]
+        b = b[:, rungs, rungs, :, :]
+        L = length(rungs)
+    end
     L > 1 || throw(ArgumentError("need at least two rungs to compute local d-wave profile"))
 
     cdw = [b[2, i, i, leg, leg] + b[1, i, i, leg, leg] for i in 1:L, leg in 1:2]
     sdw = [b[2, i, i, leg, leg] - b[1, i, i, leg, leg] for i in 1:L, leg in 1:2]
     swave = [a[i, i, leg, leg] for i in 1:L, leg in 1:2]
+    extended_swave = [_local_extended_swave_alpha_value(a, i, leg1, leg2, symmetrize_rung) for i in 1:(L - 1)]
     dwave = [_local_dwave_alpha_value(a, i, leg1, leg2, symmetrize_rung) for i in 1:(L - 1)]
-    return (cdw=cdw, sdw=sdw, swave=swave, dwave=dwave)
+    return (cdw=cdw, sdw=sdw, swave=swave, extended_swave=extended_swave, dwave=dwave)
 end
 
 function _correlation_order_fields(C_pair, C_exc_dn, C_exc_up;
     iteration=nothing,
     leg1::Integer=1,
-    leg2::Integer=2)
+    leg2::Integer=2,
+    trim_boundary_rungs::Integer=0)
 
     cpair = _final_array(C_pair, 2, iteration, "C_pair_list")
     cdn, cup = _normal_corr_pair(C_exc_dn, C_exc_up, iteration)
@@ -1131,6 +1362,14 @@ function _correlation_order_fields(C_pair, C_exc_dn, C_exc_up;
     L = _rung_count_from_sites(size(cpair, 1))
     size(cpair, 2) == 2 * L || throw(ArgumentError("raw pairing correlation matrix must be square"))
     size(cdn) == size(cup) == size(cpair) || throw(ArgumentError("raw correlation matrices must have the same shape"))
+    rungs = _trimmed_rung_range(L, trim_boundary_rungs)
+    if first(rungs) != 1 || last(rungs) != L
+        sites = [_plot_rung_leg_to_site(i, leg) for i in rungs for leg in 1:2]
+        cpair = cpair[sites, sites]
+        cdn = cdn[sites, sites]
+        cup = cup[sites, sites]
+        L = length(rungs)
+    end
     L > 1 || throw(ArgumentError("need at least two rungs to compute local d-wave profile"))
 
     cdw = [cup[_plot_rung_leg_to_site(i, leg), _plot_rung_leg_to_site(i, leg)] +
@@ -1138,8 +1377,9 @@ function _correlation_order_fields(C_pair, C_exc_dn, C_exc_up;
     sdw = [cup[_plot_rung_leg_to_site(i, leg), _plot_rung_leg_to_site(i, leg)] -
            cdn[_plot_rung_leg_to_site(i, leg), _plot_rung_leg_to_site(i, leg)] for i in 1:L, leg in 1:2]
     swave = [cpair[_plot_rung_leg_to_site(i, leg), _plot_rung_leg_to_site(i, leg)] for i in 1:L, leg in 1:2]
+    extended_swave = [_local_extended_swave_corr_value(cpair, i, leg1, leg2) for i in 1:(L - 1)]
     dwave = [_local_dwave_corr_value(cpair, i, leg1, leg2) for i in 1:(L - 1)]
-    return (cdw=cdw, sdw=sdw, swave=swave, dwave=dwave)
+    return (cdw=cdw, sdw=sdw, swave=swave, extended_swave=extended_swave, dwave=dwave)
 end
 
 function _plot_fourier_panel!(fig, ax, heatmap;
@@ -1147,6 +1387,7 @@ function _plot_fourier_panel!(fig, ax, heatmap;
     ladder::Bool,
     cmap::AbstractString,
     norm=nothing,
+    xlabel::AbstractString=_kx_xlabel(),
     kwargs...)
 
     ncols = size(heatmap, 2)
@@ -1158,7 +1399,7 @@ function _plot_fourier_panel!(fig, ax, heatmap;
     end
     ax.set_xlim(-0.5, ncols - 0.5)
     ax.set_ylim(-0.5, size(heatmap, 1) - 0.5)
-    ax.set_xlabel(_math("k_x"))
+    ax.set_xlabel(xlabel)
     ax.set_ylabel(ladder ? _math("k_y") : "")
     ax.set_xticks([0, zero_tick, ncols - 1])
     ax.set_xticklabels([_math("-\\pi"), "0", _math("\\pi")])
@@ -1174,7 +1415,7 @@ function _plot_order_fourier_heatmaps(fields;
     cmap::AbstractString="inferno",
     logscale::Bool=true,
     vmin::Real=1e-7,
-    figsize=(9.0, 7.2),
+    figsize=(9.0, 8.8),
     savepath=nothing,
     figure_title=nothing,
     source_label::AbstractString="",
@@ -1183,30 +1424,33 @@ function _plot_order_fourier_heatmaps(fields;
     _, cdw_map = _ladder_fourier_map(fields.cdw; subtract_average=true, normalize=normalize, value=value)
     _, sdw_map = _ladder_fourier_map(fields.sdw; normalize=normalize, value=value)
     _, swave_map = _ladder_fourier_map(fields.swave; normalize=normalize, value=value)
+    _, extended_swave_map = _chain_fourier_map(fields.extended_swave; normalize=normalize, value=value)
     _, dwave_map = _chain_fourier_map(fields.dwave; normalize=normalize, value=value)
     norm = nothing
     if logscale
-        norm, log_floor = _shared_log_norm((cdw_map, sdw_map, swave_map, dwave_map), value; vmin=vmin)
+        norm, log_floor = _shared_log_norm((cdw_map, sdw_map, swave_map, extended_swave_map, dwave_map), value; vmin=vmin)
         cdw_map = _floor_for_lognorm(cdw_map, log_floor)
         sdw_map = _floor_for_lognorm(sdw_map, log_floor)
         swave_map = _floor_for_lognorm(swave_map, log_floor)
+        extended_swave_map = _floor_for_lognorm(extended_swave_map, log_floor)
         dwave_map = _floor_for_lognorm(dwave_map, log_floor)
     end
 
-    fig, axes = PyPlot.subplots(4, 1, figsize=_screen_figsize(figsize))
+    fig, axes = PyPlot.subplots(5, 1, figsize=_screen_figsize(figsize))
     axs = vec(axes)
     cbar_label = _fourier_colorbar_label(value)
     imgs = [
-        _plot_fourier_panel!(fig, axs[1], cdw_map; title="CDW, mean subtracted", ladder=true, cmap=cmap, norm=norm, kwargs...),
-        _plot_fourier_panel!(fig, axs[2], sdw_map; title="SDW", ladder=true, cmap=cmap, norm=norm, kwargs...),
-        _plot_fourier_panel!(fig, axs[3], swave_map; title="s-wave", ladder=true, cmap=cmap, norm=norm, kwargs...),
-        _plot_fourier_panel!(fig, axs[4], dwave_map; title="d-wave local profile", ladder=false, cmap=cmap, norm=norm, kwargs...),
+        _plot_fourier_panel!(fig, axs[1], cdw_map; title="CDW, mean subtracted", ladder=true, cmap=cmap, norm=norm, xlabel="", kwargs...),
+        _plot_fourier_panel!(fig, axs[2], sdw_map; title="SDW", ladder=true, cmap=cmap, norm=norm, xlabel="", kwargs...),
+        _plot_fourier_panel!(fig, axs[3], swave_map; title="on-site s-wave", ladder=true, cmap=cmap, norm=norm, xlabel="", kwargs...),
+        _plot_fourier_panel!(fig, axs[4], extended_swave_map; title="extended s-wave local profile", ladder=false, cmap=cmap, norm=norm, xlabel="", kwargs...),
+        _plot_fourier_panel!(fig, axs[5], dwave_map; title="d-wave local profile", ladder=false, cmap=cmap, norm=norm, kwargs...),
     ]
     if figure_title !== nothing
         fig.suptitle(figure_title)
     end
     top = figure_title === nothing ? 0.96 : 0.92
-    fig.subplots_adjust(left=0.11, right=0.84, bottom=0.08, top=top, hspace=0.75)
+    fig.subplots_adjust(left=0.11, right=0.84, bottom=0.08, top=top, hspace=_FOURIER_STACK_HSPACE)
     cax = fig.add_axes([0.88, 0.12, 0.025, top - 0.16])
     cbar = fig.colorbar(imgs[1], cax=cax)
     cbar.set_label(cbar_label)
@@ -1454,14 +1698,18 @@ function _install_iteration_slider!(fig, niter::Integer, initial_iteration::Inte
     return refs
 end
 
-function _finish_figure(fig; figure_title=nothing, tight_rect=nothing)
+function _finish_figure(fig; figure_title=nothing, tight_rect=nothing, h_pad=nothing)
     if figure_title !== nothing
         fig.suptitle(figure_title)
     end
-    if tight_rect === nothing
+    if tight_rect === nothing && h_pad === nothing
         fig.tight_layout()
-    else
+    elseif tight_rect === nothing
+        fig.tight_layout(h_pad=h_pad)
+    elseif h_pad === nothing
         fig.tight_layout(rect=tight_rect)
+    else
+        fig.tight_layout(rect=tight_rect, h_pad=h_pad)
     end
     return fig
 end
@@ -1669,6 +1917,50 @@ function plot_onsite_pairing_from_correlations(C_pair; leg::Integer=1, iteration
     return _save_if_requested(fig, savepath)
 end
 
+function plot_extended_swave_from_alpha(alpha;
+    leg1::Integer=1,
+    leg2::Integer=2,
+    iteration=nothing,
+    symmetrize::Bool=false,
+    use_abs::Bool=false,
+    savepath=nothing,
+    figure_title=nothing,
+    kwargs...)
+
+    rungs, vals = extended_swave_profile_from_alpha(alpha; leg1=leg1, leg2=leg2, iteration=iteration, symmetrize=symmetrize, use_abs=use_abs)
+    ylabel = use_abs ? "|extended s-wave alpha|" : "extended s-wave alpha"
+    fig, ax = _figure((8.5, 4.0))
+    _plot_series!(ax, rungs, vals;
+        xlabel="Rung index",
+        ylabel=ylabel,
+        title="extended s-wave alpha proxy: " * _extended_swave_alpha_title(leg1, leg2; symmetrize=symmetrize),
+        color=_EXT_SWAVE_COLOR,
+        kwargs...)
+    _finish_figure(fig; figure_title=figure_title)
+    return _save_if_requested(fig, savepath)
+end
+
+function plot_extended_swave_from_correlations(C_pair;
+    leg1::Integer=1,
+    leg2::Integer=2,
+    iteration=nothing,
+    use_abs::Bool=false,
+    savepath=nothing,
+    figure_title=nothing,
+    kwargs...)
+
+    rungs, vals = extended_swave_profile_from_correlations(C_pair; leg1=leg1, leg2=leg2, iteration=iteration, use_abs=use_abs)
+    fig, ax = _figure((8.5, 4.0))
+    _plot_series!(ax, rungs, vals;
+        xlabel="Rung index \$i\$",
+        ylabel=_corr_value_label(_extended_swave_corr_symbol(), use_abs),
+        title="extended s-wave: " * _extended_swave_corr_title(leg1, leg2),
+        color=_EXT_SWAVE_COLOR,
+        kwargs...)
+    _finish_figure(fig; figure_title=figure_title)
+    return _save_if_requested(fig, savepath)
+end
+
 function plot_rung_pairing_from_alpha(alpha;
     leg1::Integer=1,
     leg2::Integer=2,
@@ -1719,17 +2011,18 @@ function plot_order_fourier_heatmaps(alpha, beta;
     leg1::Integer=1,
     leg2::Integer=2,
     symmetrize_rung::Bool=false,
+    trim_boundary_rungs::Integer=5,
     value::Symbol=:abs,
     normalize::Bool=true,
     cmap::AbstractString="inferno",
     logscale::Bool=true,
     vmin::Real=1e-7,
-    figsize=(9.0, 7.2),
+    figsize=(9.0, 8.8),
     savepath=nothing,
     figure_title=nothing,
     kwargs...)
 
-    fields = _mf_order_fields(alpha, beta; iteration=iteration, leg1=leg1, leg2=leg2, symmetrize_rung=symmetrize_rung)
+    fields = _mf_order_fields(alpha, beta; iteration=iteration, leg1=leg1, leg2=leg2, symmetrize_rung=symmetrize_rung, trim_boundary_rungs=trim_boundary_rungs)
     return _plot_order_fourier_heatmaps(fields; value=value, normalize=normalize, cmap=cmap, logscale=logscale, vmin=vmin, figsize=figsize, savepath=savepath, figure_title=figure_title, source_label="alpha/beta", kwargs...)
 end
 
@@ -1737,6 +2030,7 @@ function plot_order_fourier_heatmaps_from_correlations(C_pair, C_exc_dn, C_exc_u
     iteration=nothing,
     leg1::Integer=1,
     leg2::Integer=2,
+    trim_boundary_rungs::Integer=5,
     value::Symbol=:abs,
     normalize::Bool=true,
     cmap::AbstractString="inferno",
@@ -1747,16 +2041,16 @@ function plot_order_fourier_heatmaps_from_correlations(C_pair, C_exc_dn, C_exc_u
     figure_title=nothing,
     kwargs...)
 
-    fields = _correlation_order_fields(C_pair, C_exc_dn, C_exc_up; iteration=iteration, leg1=leg1, leg2=leg2)
+    fields = _correlation_order_fields(C_pair, C_exc_dn, C_exc_up; iteration=iteration, leg1=leg1, leg2=leg2, trim_boundary_rungs=trim_boundary_rungs)
     return _plot_order_fourier_heatmaps(fields; value=value, normalize=normalize, cmap=cmap, logscale=logscale, vmin=vmin, figsize=figsize, savepath=savepath, figure_title=figure_title, source_label="correlations", kwargs...)
 end
 
 function plot_order_fourier_max_grid(;
     data_dir::AbstractString="stateless_data",
     suffix::AbstractString="_nodamping.h5",
-    t0_values=0.8:0.2:1.4,
+    t0_values=0.8:0.2:1.6,
     t0_min::Real=0.8,
-    t0_max::Real=1.4,
+    t0_max::Real=1.6,
     t0_atol::Real=1e-8,
     source::Symbol=:mf,
     use_correlations::Bool=false,
@@ -1764,6 +2058,7 @@ function plot_order_fourier_max_grid(;
     leg1::Integer=1,
     leg2::Integer=2,
     symmetrize_rung::Bool=false,
+    trim_boundary_rungs::Integer=5,
     value::Symbol=:abs,
     normalize::Bool=true,
     logscale::Bool=true,
@@ -1802,7 +2097,8 @@ function plot_order_fourier_max_grid(;
             iteration=iteration,
             leg1=leg1,
             leg2=leg2,
-            symmetrize_rung=symmetrize_rung)
+            symmetrize_rung=symmetrize_rung,
+            trim_boundary_rungs=trim_boundary_rungs)
         maxima = _order_fourier_maxima(fields; value=value, normalize=normalize)
         push!(records, (filename=filename, params=params, V0=params.V0, t0=t0_grid, maxima=maxima))
     end
@@ -1821,11 +2117,19 @@ function plot_order_fourier_max_grid(;
         grid[key] = rec
     end
 
+    swave_cmap = _order_grid_cmap(getfield(order_cmaps, :swave))
     order_specs = (
-        (key=:cdw, label="CDW", cmap=_order_grid_cmap(getfield(order_cmaps, :cdw)), xslot=1, yslot=2),
-        (key=:sdw, label="SDW", cmap=_order_grid_cmap(getfield(order_cmaps, :sdw)), xslot=2, yslot=2),
-        (key=:swave, label="s-wave", cmap=_order_grid_cmap(getfield(order_cmaps, :swave)), xslot=1, yslot=1),
-        (key=:dwave, label="d-wave", cmap=_order_grid_cmap(getfield(order_cmaps, :dwave)), xslot=2, yslot=1),
+        (key=:cdw, label="CDW", cmap=_order_grid_cmap(getfield(order_cmaps, :cdw)), xslot=1, yslot=2, shape=:rect),
+        (key=:sdw, label="SDW", cmap=_order_grid_cmap(getfield(order_cmaps, :sdw)), xslot=2, yslot=2, shape=:rect),
+        (key=:swave, label="on-site s-wave", cmap=swave_cmap, xslot=1, yslot=1, shape=:onsite_swave_triangle),
+        (key=:extended_swave, label="extended s-wave", cmap=swave_cmap, xslot=1, yslot=1, shape=:extended_swave_triangle),
+        (key=:dwave, label="d-wave", cmap=_order_grid_cmap(getfield(order_cmaps, :dwave)), xslot=2, yslot=1, shape=:rect),
+    )
+    colorbar_specs = (
+        (label="CDW", cmap=getfield(order_specs, 1).cmap),
+        (label="SDW", cmap=getfield(order_specs, 2).cmap),
+        (label="s-wave", cmap=swave_cmap),
+        (label="d-wave", cmap=getfield(order_specs, 5).cmap),
     )
 
     max_values = Float64[]
@@ -1858,47 +2162,80 @@ function plot_order_fourier_max_grid(;
             y0=y0,
             y1=y0 + h,
             filename=rec.filename,
+            trim_boundary_rungs=trim_boundary_rungs,
         ))
 
         subw = w / 2
         subh = h / 2
         strongest_value = -Inf
-        strongest_rect = nothing
+        strongest_shape = nothing
         for spec in order_specs
             summary = getfield(rec.maxima, spec.key)
             sx = x0 + (spec.xslot - 1) * subw
             sy = y0 + (spec.yslot - 1) * subh
+            facecolor = _order_grid_facecolor(spec.cmap, summary.value, scale)
+            vertices = nothing
+            shape_ref = if spec.shape == :onsite_swave_triangle
+                vertices = [(sx, sy), (sx + subw, sy), (sx, sy + subh)]
+                ax.add_patch(_MatplotlibPatches.Polygon(vertices;
+                    closed=true,
+                    facecolor=facecolor,
+                    edgecolor="none",
+                    linewidth=0,
+                    zorder=1))
+                (kind=:triangle, vertices=vertices)
+            elseif spec.shape == :extended_swave_triangle
+                vertices = [(sx + subw, sy + subh), (sx + subw, sy), (sx, sy + subh)]
+                ax.add_patch(_MatplotlibPatches.Polygon(vertices;
+                    closed=true,
+                    facecolor=facecolor,
+                    edgecolor="none",
+                    linewidth=0,
+                    zorder=1))
+                (kind=:triangle, vertices=vertices)
+            else
+                ax.add_patch(_MatplotlibPatches.Rectangle((sx, sy), subw, subh;
+                    facecolor=facecolor,
+                    edgecolor="none",
+                    linewidth=0,
+                    zorder=1))
+                (kind=:rect, x=sx, y=sy, w=subw, h=subh)
+            end
             summary_value = Float64(summary.value)
             if isfinite(summary_value) && summary_value > strongest_value
                 strongest_value = summary_value
-                strongest_rect = (x=sx, y=sy, w=subw, h=subh)
+                strongest_shape = shape_ref
             end
-            ax.add_patch(_MatplotlibPatches.Rectangle((sx, sy), subw, subh;
-                facecolor=_order_grid_facecolor(spec.cmap, summary.value, scale),
-                edgecolor="none",
-                linewidth=0,
-                zorder=1))
-            hover && push!(hover_regions, (
-                x0=sx,
-                x1=sx + subw,
-                y0=sy,
-                y1=sy + subh,
-                text=_order_grid_hover_text(spec.label, rec, summary),
-            ))
+            if hover
+                region = vertices === nothing ?
+                    (x0=sx, x1=sx + subw, y0=sy, y1=sy + subh, text=_order_grid_hover_text(spec.label, rec, summary)) :
+                    (x0=sx, x1=sx + subw, y0=sy, y1=sy + subh, vertices=vertices, text=_order_grid_hover_text(spec.label, rec, summary))
+                push!(hover_regions, region)
+            end
         end
         ax.plot([x0 + subw, x0 + subw], [y0, y0 + h]; color="black", linewidth=1.2, zorder=3)
         ax.plot([x0, x0 + w], [y0 + subh, y0 + subh]; color="black", linewidth=1.2, zorder=3)
+        ax.plot([x0 + subw, x0], [y0, y0 + subh]; color="black", linewidth=1.2, zorder=3)
         ax.add_patch(_MatplotlibPatches.Rectangle((x0, y0), w, h;
             facecolor="none",
             edgecolor="black",
             linewidth=1.2,
             zorder=3))
-        if strongest_rect !== nothing
-            ax.add_patch(_MatplotlibPatches.Rectangle((strongest_rect.x, strongest_rect.y), strongest_rect.w, strongest_rect.h;
-                facecolor="none",
-                edgecolor="yellow",
-                linewidth=2.0,
-                zorder=5))
+        if strongest_shape !== nothing
+            if strongest_shape.kind == :triangle
+                ax.add_patch(_MatplotlibPatches.Polygon(strongest_shape.vertices;
+                    closed=true,
+                    facecolor="none",
+                    edgecolor="yellow",
+                    linewidth=2.0,
+                    zorder=5))
+            else
+                ax.add_patch(_MatplotlibPatches.Rectangle((strongest_shape.x, strongest_shape.y), strongest_shape.w, strongest_shape.h;
+                    facecolor="none",
+                    edgecolor="yellow",
+                    linewidth=2.0,
+                    zorder=5))
+            end
         end
     end
 
@@ -1927,25 +2264,28 @@ function plot_order_fourier_max_grid(;
         ax.set_title(figure_title)
     end
 
-    legend_handles = [_MatplotlibPatches.Patch(
-        facecolor=Tuple(spec.cmap(0.75)),
-        edgecolor="black",
-        label=_order_grid_legend_label(spec.key, spec.label; leg1=leg1, leg2=leg2),
-    ) for spec in order_specs]
+    legend_handles = [_order_grid_legend_handle(spec) for spec in order_specs]
+    legend_labels = [_order_grid_legend_label(spec.key, spec.label; leg1=leg1, leg2=leg2) for spec in order_specs]
+    legend_handler_map = Dict(
+        PyCall.pybuiltin("tuple") => _MatplotlibLegendHandler.HandlerTuple(ndivide=1, pad=0.0)
+    )
     legend = ax.legend(
         handles=legend_handles,
+        labels=legend_labels,
         loc="upper center",
         bbox_to_anchor=(0.5, -0.18),
         ncol=1,
         frameon=false,
-        handlelength=1.4,
+        handler_map=legend_handler_map,
+        handlelength=1.0,
+        handleheight=1.0,
         handletextpad=0.7,
         labelspacing=0.65)
 
     top = 0.92
-    fig.subplots_adjust(left=0.11, right=0.76, bottom=0.36, top=top)
+    fig.subplots_adjust(left=0.11, right=0.76, bottom=0.42, top=top)
     colorbars = []
-    for (idx, spec) in enumerate(order_specs)
+    for (idx, spec) in enumerate(colorbar_specs)
         sm = _MatplotlibCm.ScalarMappable(norm=scale.norm, cmap=spec.cmap)
         sm.set_array(max_values)
         cax = fig.add_axes([0.0, 0.0, 0.01, 0.01])
@@ -1957,7 +2297,7 @@ function plot_order_fourier_max_grid(;
             ha="left",
             va="center",
             clip_on=false)
-        if idx < length(order_specs)
+        if idx < length(colorbar_specs)
             cbar.ax.tick_params(labelleft=false, labelright=false)
         end
         push!(colorbars, cbar)
@@ -2027,11 +2367,12 @@ function plot_mf_profiles(alpha, beta;
         r1, v1 = cdw_from_beta(beta; leg=leg, iteration=it, use_abs=use_abs)
         r2, v2 = sdw_from_beta(beta; leg=leg, iteration=it, use_abs=use_abs)
         r3, v3 = onsite_pairing_from_alpha(alpha; leg=leg, iteration=it, use_abs=use_abs)
-        r4, v4 = dwave_profile_from_alpha(alpha; leg1=leg1, leg2=leg2, iteration=it, symmetrize=symmetrize_rung, use_abs=use_abs)
+        r4, v4 = extended_swave_profile_from_alpha(alpha; leg1=leg1, leg2=leg2, iteration=it, symmetrize=symmetrize_rung, use_abs=use_abs)
+        r5, v5 = dwave_profile_from_alpha(alpha; leg1=leg1, leg2=leg2, iteration=it, symmetrize=symmetrize_rung, use_abs=use_abs)
         r1o, v1o = cdw_from_beta(beta; leg=other_leg, iteration=it, use_abs=use_abs)
         r2o, v2o = sdw_from_beta(beta; leg=other_leg, iteration=it, use_abs=use_abs)
         r3o, v3o = onsite_pairing_from_alpha(alpha; leg=other_leg, iteration=it, use_abs=use_abs)
-        return (r1=r1, v1=v1, r2=r2, v2=v2, r3=r3, v3=v3, r4=r4, v4=v4,
+        return (r1=r1, v1=v1, r2=r2, v2=v2, r3=r3, v3=v3, r4=r4, v4=v4, r5=r5, v5=v5,
             r1o=r1o, v1o=v1o, r2o=r2o, v2o=v2o, r3o=r3o, v3o=v3o)
     end
 
@@ -2039,28 +2380,32 @@ function plot_mf_profiles(alpha, beta;
     profile_history = has_slider ? [profile_data(it) for it in 1:niter] : nothing
     data = has_slider ? profile_history[profile_iteration] : profile_data(profile_iteration)
 
-    fig, axes = PyPlot.subplots(4, 1, figsize=_screen_figsize((8.5, 10.5)))
+    fig, axes = PyPlot.subplots(5, 1, figsize=_screen_figsize((8.5, 12.5)))
     cdw_ylabel = use_abs ? "|CDW beta proxy|" : "CDW beta proxy"
     sdw_ylabel = use_abs ? "|SDW beta proxy|" : "SDW beta proxy"
     onsite_ylabel = use_abs ? "|s-wave alpha|" : "s-wave alpha"
+    extended_swave_ylabel = use_abs ? "|extended s-wave alpha|" : "extended s-wave alpha"
     rung_ylabel = use_abs ? "|d-wave alpha|" : "d-wave alpha"
 
     leg_title = show_other_leg ? "" : ", leg $leg"
-    cdw_lines = _plot_leg_pair!(axes[1], data.r1, data.v1, data.r1o, data.v1o; leg=leg, other_leg=other_leg, show_other_leg=show_other_leg, color_fn=_cdw_leg_color, xlabel="Rung index", ylabel=cdw_ylabel, title="CDW beta proxy: up + down$leg_title", kwargs...)
-    sdw_lines = _plot_leg_pair!(axes[2], data.r2, data.v2, data.r2o, data.v2o; leg=leg, other_leg=other_leg, show_other_leg=show_other_leg, color_fn=_sdw_leg_color, xlabel="Rung index", ylabel=sdw_ylabel, title="SDW beta proxy: up - down$leg_title", kwargs...)
-    swave_lines = _plot_leg_pair!(axes[3], data.r3, data.v3, data.r3o, data.v3o; leg=leg, other_leg=other_leg, show_other_leg=show_other_leg, color_fn=_swave_leg_color, xlabel="Rung index", ylabel=onsite_ylabel, title="s-wave pairing from alpha$leg_title", kwargs...)
-    _plot_series!(axes[4], data.r4, data.v4; xlabel="Rung index", ylabel=rung_ylabel, title="d-wave alpha proxy: " * _dwave_alpha_title(leg1, leg2; symmetrize=symmetrize_rung), color=_DWAVE_COLOR, kwargs...)
-    dwave_line = axes[4].lines[end]
+    cdw_lines = _plot_leg_pair!(axes[1], data.r1, data.v1, data.r1o, data.v1o; leg=leg, other_leg=other_leg, show_other_leg=show_other_leg, color_fn=_cdw_leg_color, xlabel="", ylabel=cdw_ylabel, title="CDW beta proxy: up + down$leg_title", kwargs...)
+    sdw_lines = _plot_leg_pair!(axes[2], data.r2, data.v2, data.r2o, data.v2o; leg=leg, other_leg=other_leg, show_other_leg=show_other_leg, color_fn=_sdw_leg_color, xlabel="", ylabel=sdw_ylabel, title="SDW beta proxy: up - down$leg_title", kwargs...)
+    swave_lines = _plot_leg_pair!(axes[3], data.r3, data.v3, data.r3o, data.v3o; leg=leg, other_leg=other_leg, show_other_leg=show_other_leg, color_fn=_swave_leg_color, xlabel="", ylabel=onsite_ylabel, title="s-wave pairing from alpha$leg_title", kwargs...)
+    _plot_series!(axes[4], data.r4, data.v4; xlabel="", ylabel=extended_swave_ylabel, title="extended s-wave alpha proxy: " * _extended_swave_alpha_title(leg1, leg2; symmetrize=symmetrize_rung), color=_EXT_SWAVE_COLOR, kwargs...)
+    extended_swave_line = axes[4].lines[end]
+    _plot_series!(axes[5], data.r5, data.v5; xlabel=_rung_index_xlabel(), ylabel=rung_ylabel, title="d-wave alpha proxy: " * _dwave_alpha_title(leg1, leg2; symmetrize=symmetrize_rung), color=_DWAVE_COLOR, kwargs...)
+    dwave_line = axes[5].lines[end]
 
     if has_slider
         _set_profile_axis_limits!(axes[1], profile_history, :r1, :v1; other_xfield=:r1o, other_yfield=:v1o, show_other_leg=show_other_leg)
         _set_profile_axis_limits!(axes[2], profile_history, :r2, :v2; other_xfield=:r2o, other_yfield=:v2o, show_other_leg=show_other_leg)
         _set_profile_axis_limits!(axes[3], profile_history, :r3, :v3; other_xfield=:r3o, other_yfield=:v3o, show_other_leg=show_other_leg)
         _set_profile_axis_limits!(axes[4], profile_history, :r4, :v4)
+        _set_profile_axis_limits!(axes[5], profile_history, :r5, :v5)
     end
 
     tight_rect = _profile_tight_rect(figure_title, has_slider)
-    _finish_figure(fig; figure_title=figure_title, tight_rect=tight_rect)
+    _finish_figure(fig; figure_title=figure_title, tight_rect=tight_rect, h_pad=_MF_STACK_H_PAD)
     if has_slider
         function update_iteration(it)
             updated = profile_history[it]
@@ -2070,7 +2415,8 @@ function plot_mf_profiles(alpha, beta;
             show_other_leg && _set_line_data!(sdw_lines.other, updated.r2o, updated.v2o)
             _set_line_data!(swave_lines.main, updated.r3, updated.v3)
             show_other_leg && _set_line_data!(swave_lines.other, updated.r3o, updated.v3o)
-            _set_line_data!(dwave_line, updated.r4, updated.v4)
+            _set_line_data!(extended_swave_line, updated.r4, updated.v4)
+            _set_line_data!(dwave_line, updated.r5, updated.v5)
             return nothing
         end
         _install_iteration_slider!(fig, niter, profile_iteration, update_iteration; figure_title=figure_title, target_axes=axes)
@@ -2099,11 +2445,12 @@ function plot_correlation_profiles(C_pair, C_exc_dn, C_exc_up;
         r1, v1 = cdw_from_correlations(C_exc_dn, C_exc_up; leg=leg, iteration=it, use_abs=use_abs)
         r2, v2 = sdw_from_correlations(C_exc_dn, C_exc_up; leg=leg, iteration=it, use_abs=use_abs)
         r3, v3 = onsite_pairing_from_correlations(C_pair; leg=leg, iteration=it, use_abs=use_abs)
-        r4, v4 = dwave_profile_from_correlations(C_pair; leg1=leg1, leg2=leg2, iteration=it, use_abs=use_abs)
+        r4, v4 = extended_swave_profile_from_correlations(C_pair; leg1=leg1, leg2=leg2, iteration=it, use_abs=use_abs)
+        r5, v5 = dwave_profile_from_correlations(C_pair; leg1=leg1, leg2=leg2, iteration=it, use_abs=use_abs)
         r1o, v1o = cdw_from_correlations(C_exc_dn, C_exc_up; leg=other_leg, iteration=it, use_abs=use_abs)
         r2o, v2o = sdw_from_correlations(C_exc_dn, C_exc_up; leg=other_leg, iteration=it, use_abs=use_abs)
         r3o, v3o = onsite_pairing_from_correlations(C_pair; leg=other_leg, iteration=it, use_abs=use_abs)
-        return (r1=r1, v1=v1, r2=r2, v2=v2, r3=r3, v3=v3, r4=r4, v4=v4,
+        return (r1=r1, v1=v1, r2=r2, v2=v2, r3=r3, v3=v3, r4=r4, v4=v4, r5=r5, v5=v5,
             r1o=r1o, v1o=v1o, r2o=r2o, v2o=v2o, r3o=r3o, v3o=v3o)
     end
 
@@ -2111,32 +2458,36 @@ function plot_correlation_profiles(C_pair, C_exc_dn, C_exc_up;
     profile_history = has_slider ? [profile_data(it) for it in 1:niter] : nothing
     data = has_slider ? profile_history[profile_iteration] : profile_data(profile_iteration)
 
-    fig, axes = PyPlot.subplots(4, 1, figsize=_screen_figsize((8.5, 10.5)))
+    fig, axes = PyPlot.subplots(5, 1, figsize=_screen_figsize((8.5, 12.5)))
     leg_tex = show_other_leg ? "\\ell" : string(leg)
     leg_title = show_other_leg ? "legs $leg and $other_leg" : "leg $leg"
     cdw_expr = _cdw_corr_expr(; leg_tex=leg_tex)
     sdw_expr = _sdw_corr_expr(; leg_tex=leg_tex)
     onsite_expr = _onsite_pair_corr_expr(; leg_tex=leg_tex)
+    extended_swave_expr = _extended_swave_corr_symbol()
     dwave_expr = _dwave_corr_symbol()
     cdw_title = show_other_leg ? "CDW" : "CDW: " * _cdw_corr_title(leg)
     sdw_title = show_other_leg ? "SDW" : "SDW: " * _sdw_corr_title(leg)
     onsite_title = show_other_leg ? "s-wave" : "s-wave: " * _onsite_pair_corr_title(leg)
 
-    cdw_lines = _plot_leg_pair!(axes[1], data.r1, data.v1, data.r1o, data.v1o; leg=leg, other_leg=other_leg, show_other_leg=show_other_leg, color_fn=_cdw_leg_color, xlabel="Rung index \$i\$", ylabel=_corr_value_label(cdw_expr, use_abs), title=cdw_title, kwargs...)
-    sdw_lines = _plot_leg_pair!(axes[2], data.r2, data.v2, data.r2o, data.v2o; leg=leg, other_leg=other_leg, show_other_leg=show_other_leg, color_fn=_sdw_leg_color, xlabel="Rung index \$i\$", ylabel=_corr_value_label(sdw_expr, use_abs), title=sdw_title, kwargs...)
-    swave_lines = _plot_leg_pair!(axes[3], data.r3, data.v3, data.r3o, data.v3o; leg=leg, other_leg=other_leg, show_other_leg=show_other_leg, color_fn=_swave_leg_color, xlabel="Rung index \$i\$", ylabel=_corr_value_label(onsite_expr, use_abs), title=onsite_title, kwargs...)
-    _plot_series!(axes[4], data.r4, data.v4; xlabel="Rung index \$i\$", ylabel=_corr_value_label(dwave_expr, use_abs), title="d-wave: " * _dwave_corr_title(leg1, leg2), color=_DWAVE_COLOR, kwargs...)
-    dwave_line = axes[4].lines[end]
+    cdw_lines = _plot_leg_pair!(axes[1], data.r1, data.v1, data.r1o, data.v1o; leg=leg, other_leg=other_leg, show_other_leg=show_other_leg, color_fn=_cdw_leg_color, xlabel="", ylabel=_corr_value_label(cdw_expr, use_abs), title=cdw_title, kwargs...)
+    sdw_lines = _plot_leg_pair!(axes[2], data.r2, data.v2, data.r2o, data.v2o; leg=leg, other_leg=other_leg, show_other_leg=show_other_leg, color_fn=_sdw_leg_color, xlabel="", ylabel=_corr_value_label(sdw_expr, use_abs), title=sdw_title, kwargs...)
+    swave_lines = _plot_leg_pair!(axes[3], data.r3, data.v3, data.r3o, data.v3o; leg=leg, other_leg=other_leg, show_other_leg=show_other_leg, color_fn=_swave_leg_color, xlabel="", ylabel=_corr_value_label(onsite_expr, use_abs), title=onsite_title, kwargs...)
+    _plot_series!(axes[4], data.r4, data.v4; xlabel="", ylabel=_corr_value_label(extended_swave_expr, use_abs), title="extended s-wave: " * _extended_swave_corr_title(leg1, leg2; include_singlet_def=false), color=_EXT_SWAVE_COLOR, kwargs...)
+    extended_swave_line = axes[4].lines[end]
+    _plot_series!(axes[5], data.r5, data.v5; xlabel=_rung_index_xlabel(), ylabel=_corr_value_label(dwave_expr, use_abs), title="d-wave: " * _dwave_corr_title(leg1, leg2; include_singlet_def=false), color=_DWAVE_COLOR, kwargs...)
+    dwave_line = axes[5].lines[end]
 
     if has_slider
         _set_profile_axis_limits!(axes[1], profile_history, :r1, :v1; other_xfield=:r1o, other_yfield=:v1o, show_other_leg=show_other_leg)
         _set_profile_axis_limits!(axes[2], profile_history, :r2, :v2; other_xfield=:r2o, other_yfield=:v2o, show_other_leg=show_other_leg)
         _set_profile_axis_limits!(axes[3], profile_history, :r3, :v3; other_xfield=:r3o, other_yfield=:v3o, show_other_leg=show_other_leg)
         _set_profile_axis_limits!(axes[4], profile_history, :r4, :v4)
+        _set_profile_axis_limits!(axes[5], profile_history, :r5, :v5)
     end
 
     tight_rect = _profile_tight_rect(figure_title, has_slider)
-    _finish_figure(fig; figure_title=figure_title, tight_rect=tight_rect)
+    _finish_figure(fig; figure_title=figure_title, tight_rect=tight_rect, h_pad=_MF_STACK_H_PAD)
     if has_slider
         function update_iteration(it)
             updated = profile_history[it]
@@ -2146,7 +2497,8 @@ function plot_correlation_profiles(C_pair, C_exc_dn, C_exc_up;
             show_other_leg && _set_line_data!(sdw_lines.other, updated.r2o, updated.v2o)
             _set_line_data!(swave_lines.main, updated.r3, updated.v3)
             show_other_leg && _set_line_data!(swave_lines.other, updated.r3o, updated.v3o)
-            _set_line_data!(dwave_line, updated.r4, updated.v4)
+            _set_line_data!(extended_swave_line, updated.r4, updated.v4)
+            _set_line_data!(dwave_line, updated.r5, updated.v5)
             return nothing
         end
         _install_iteration_slider!(fig, niter, profile_iteration, update_iteration; figure_title=figure_title, target_axes=axes)
@@ -2175,29 +2527,32 @@ function plot_middle_histories(alpha_list, beta_list;
     it1, v1 = middle_cdw_history(beta_list; leg=leg, rung=rung_to_plot, use_abs=use_abs)
     it2, v2 = middle_sdw_history(beta_list; leg=leg, rung=rung_to_plot, use_abs=use_abs)
     it3, v3 = middle_onsite_pairing_history(alpha_list; leg=leg, rung=rung_to_plot, use_abs=use_abs)
-    it4, v4 = middle_dwave_history(alpha_list; rung=rung_to_plot, leg1=leg1, leg2=leg2, symmetrize=symmetrize_rung, use_abs=use_abs)
+    it4, v4 = middle_extended_swave_history(alpha_list; rung=rung_to_plot, leg1=leg1, leg2=leg2, symmetrize=symmetrize_rung, use_abs=use_abs)
+    it5, v5 = middle_dwave_history(alpha_list; rung=rung_to_plot, leg1=leg1, leg2=leg2, symmetrize=symmetrize_rung, use_abs=use_abs)
     other_leg = _other_leg(leg)
     it1o, v1o = middle_cdw_history(beta_list; leg=other_leg, rung=rung_to_plot, use_abs=use_abs)
     it2o, v2o = middle_sdw_history(beta_list; leg=other_leg, rung=rung_to_plot, use_abs=use_abs)
     it3o, v3o = middle_onsite_pairing_history(alpha_list; leg=other_leg, rung=rung_to_plot, use_abs=use_abs)
 
-    fig, axes = PyPlot.subplots(4, 1, figsize=_screen_figsize((8.5, 10.5)))
+    fig, axes = PyPlot.subplots(5, 1, figsize=_screen_figsize((8.5, 12.5)))
     cdw_ylabel = use_abs ? "|CDW beta proxy|" : "CDW beta proxy"
     sdw_ylabel = use_abs ? "|SDW beta proxy|" : "SDW beta proxy"
     onsite_ylabel = use_abs ? "|s-wave alpha|" : "s-wave alpha"
+    extended_swave_ylabel = use_abs ? "|extended s-wave alpha|" : "extended s-wave alpha"
     rung_ylabel = use_abs ? "|d-wave alpha|" : "d-wave alpha"
 
     leg_title = show_other_leg ? "" : ", leg $leg"
-    _plot_series!(axes[1], it1, v1; xlabel="MF iteration", ylabel=cdw_ylabel, title="Middle rung $rung_to_plot CDW beta proxy: up + down$leg_title", label="leg $leg", color=_cdw_leg_color(leg), kwargs...)
+    _plot_series!(axes[1], it1, v1; xlabel="", ylabel=cdw_ylabel, title="Middle rung $rung_to_plot CDW beta proxy: up + down$leg_title", label="leg $leg", color=_cdw_leg_color(leg), kwargs...)
     show_other_leg && _plot_other_leg!(axes[1], it1o, v1o; leg=other_leg, color=_cdw_leg_color(other_leg))
-    _plot_series!(axes[2], it2, v2; xlabel="MF iteration", ylabel=sdw_ylabel, title="Middle rung $rung_to_plot SDW beta proxy: up - down$leg_title", label="leg $leg", color=_sdw_leg_color(leg), kwargs...)
+    _plot_series!(axes[2], it2, v2; xlabel="", ylabel=sdw_ylabel, title="Middle rung $rung_to_plot SDW beta proxy: up - down$leg_title", label="leg $leg", color=_sdw_leg_color(leg), kwargs...)
     show_other_leg && _plot_other_leg!(axes[2], it2o, v2o; leg=other_leg, color=_sdw_leg_color(other_leg))
-    _plot_series!(axes[3], it3, v3; xlabel="MF iteration", ylabel=onsite_ylabel, title="Middle rung $rung_to_plot s-wave pairing$leg_title", label="leg $leg", color=_swave_leg_color(leg), kwargs...)
+    _plot_series!(axes[3], it3, v3; xlabel="", ylabel=onsite_ylabel, title="Middle rung $rung_to_plot s-wave pairing$leg_title", label="leg $leg", color=_swave_leg_color(leg), kwargs...)
     show_other_leg && _plot_other_leg!(axes[3], it3o, v3o; leg=other_leg, color=_swave_leg_color(other_leg))
-    _plot_series!(axes[4], it4, v4; xlabel="MF iteration", ylabel=rung_ylabel, title="Middle rung $rung_to_plot d-wave alpha proxy: " * _dwave_alpha_title(leg1, leg2; rung_tex=string(rung_to_plot), symmetrize=symmetrize_rung), color=_DWAVE_COLOR, kwargs...)
+    _plot_series!(axes[4], it4, v4; xlabel="", ylabel=extended_swave_ylabel, title="Middle rung $rung_to_plot extended s-wave alpha proxy: " * _extended_swave_alpha_title(leg1, leg2; rung_tex=string(rung_to_plot), symmetrize=symmetrize_rung), color=_EXT_SWAVE_COLOR, kwargs...)
+    _plot_series!(axes[5], it5, v5; xlabel=_mf_iteration_xlabel(), ylabel=rung_ylabel, title="Middle rung $rung_to_plot d-wave alpha proxy: " * _dwave_alpha_title(leg1, leg2; rung_tex=string(rung_to_plot), symmetrize=symmetrize_rung), color=_DWAVE_COLOR, kwargs...)
 
     tight_rect = figure_title === nothing ? nothing : (0, 0, 1, 0.95)
-    _finish_figure(fig; figure_title=figure_title, tight_rect=tight_rect)
+    _finish_figure(fig; figure_title=figure_title, tight_rect=tight_rect, h_pad=_MF_STACK_H_PAD)
     return _save_if_requested(fig, savepath)
 end
 
@@ -2222,34 +2577,37 @@ function plot_middle_histories_from_correlations(C_pair_list, C_exc_dn_list, C_e
     it1, v1 = middle_cdw_history_from_correlations(C_exc_dn_list, C_exc_up_list; leg=leg, rung=rung_to_plot, use_abs=use_abs)
     it2, v2 = middle_sdw_history_from_correlations(C_exc_dn_list, C_exc_up_list; leg=leg, rung=rung_to_plot, use_abs=use_abs)
     it3, v3 = middle_onsite_pairing_history_from_correlations(C_pair_list; leg=leg, rung=rung_to_plot, use_abs=use_abs)
-    it4, v4 = middle_dwave_history_from_correlations(C_pair_list; rung=rung_to_plot, leg1=leg1, leg2=leg2, use_abs=use_abs)
+    it4, v4 = middle_extended_swave_history_from_correlations(C_pair_list; rung=rung_to_plot, leg1=leg1, leg2=leg2, use_abs=use_abs)
+    it5, v5 = middle_dwave_history_from_correlations(C_pair_list; rung=rung_to_plot, leg1=leg1, leg2=leg2, use_abs=use_abs)
     other_leg = _other_leg(leg)
     it1o, v1o = middle_cdw_history_from_correlations(C_exc_dn_list, C_exc_up_list; leg=other_leg, rung=rung_to_plot, use_abs=use_abs)
     it2o, v2o = middle_sdw_history_from_correlations(C_exc_dn_list, C_exc_up_list; leg=other_leg, rung=rung_to_plot, use_abs=use_abs)
     it3o, v3o = middle_onsite_pairing_history_from_correlations(C_pair_list; leg=other_leg, rung=rung_to_plot, use_abs=use_abs)
 
-    fig, axes = PyPlot.subplots(4, 1, figsize=_screen_figsize((8.5, 10.5)))
+    fig, axes = PyPlot.subplots(5, 1, figsize=_screen_figsize((8.5, 12.5)))
     rung_tex = string(rung_to_plot)
     leg_tex = show_other_leg ? "\\ell" : string(leg)
     leg_title = show_other_leg ? "" : ", leg $leg"
     cdw_expr = _cdw_corr_expr(; rung_tex=rung_tex, leg_tex=leg_tex)
     sdw_expr = _sdw_corr_expr(; rung_tex=rung_tex, leg_tex=leg_tex)
     onsite_expr = _onsite_pair_corr_expr(; rung_tex=rung_tex, leg_tex=leg_tex)
+    extended_swave_expr = _extended_swave_corr_symbol(rung_tex)
     dwave_expr = _dwave_corr_symbol(rung_tex)
     cdw_title = show_other_leg ? "Middle rung $rung_to_plot CDW" : "CDW: " * _cdw_corr_title(leg; rung_tex=rung_tex)
     sdw_title = show_other_leg ? "Middle rung $rung_to_plot SDW" : "SDW: " * _sdw_corr_title(leg; rung_tex=rung_tex)
     onsite_title = show_other_leg ? "Middle rung $rung_to_plot s-wave" : "s-wave: " * _onsite_pair_corr_title(leg; rung_tex=rung_tex)
 
-    _plot_series!(axes[1], it1, v1; xlabel="MF iteration \$m\$", ylabel=_corr_value_label(cdw_expr, use_abs), title=cdw_title, label="leg $leg", color=_cdw_leg_color(leg), kwargs...)
+    _plot_series!(axes[1], it1, v1; xlabel="", ylabel=_corr_value_label(cdw_expr, use_abs), title=cdw_title, label="leg $leg", color=_cdw_leg_color(leg), kwargs...)
     show_other_leg && _plot_other_leg!(axes[1], it1o, v1o; leg=other_leg, color=_cdw_leg_color(other_leg))
-    _plot_series!(axes[2], it2, v2; xlabel="MF iteration \$m\$", ylabel=_corr_value_label(sdw_expr, use_abs), title=sdw_title, label="leg $leg", color=_sdw_leg_color(leg), kwargs...)
+    _plot_series!(axes[2], it2, v2; xlabel="", ylabel=_corr_value_label(sdw_expr, use_abs), title=sdw_title, label="leg $leg", color=_sdw_leg_color(leg), kwargs...)
     show_other_leg && _plot_other_leg!(axes[2], it2o, v2o; leg=other_leg, color=_sdw_leg_color(other_leg))
-    _plot_series!(axes[3], it3, v3; xlabel="MF iteration \$m\$", ylabel=_corr_value_label(onsite_expr, use_abs), title=onsite_title, label="leg $leg", color=_swave_leg_color(leg), kwargs...)
+    _plot_series!(axes[3], it3, v3; xlabel="", ylabel=_corr_value_label(onsite_expr, use_abs), title=onsite_title, label="leg $leg", color=_swave_leg_color(leg), kwargs...)
     show_other_leg && _plot_other_leg!(axes[3], it3o, v3o; leg=other_leg, color=_swave_leg_color(other_leg))
-    _plot_series!(axes[4], it4, v4; xlabel="MF iteration \$m\$", ylabel=_corr_value_label(dwave_expr, use_abs), title="d-wave: " * _dwave_corr_title(leg1, leg2; rung_tex=rung_tex), color=_DWAVE_COLOR, kwargs...)
+    _plot_series!(axes[4], it4, v4; xlabel="", ylabel=_corr_value_label(extended_swave_expr, use_abs), title="extended s-wave: " * _extended_swave_corr_title(leg1, leg2; rung_tex=rung_tex, include_singlet_def=false), color=_EXT_SWAVE_COLOR, kwargs...)
+    _plot_series!(axes[5], it5, v5; xlabel=_mf_iteration_xlabel(), ylabel=_corr_value_label(dwave_expr, use_abs), title="d-wave: " * _dwave_corr_title(leg1, leg2; rung_tex=rung_tex, include_singlet_def=false), color=_DWAVE_COLOR, kwargs...)
 
     tight_rect = figure_title === nothing ? nothing : (0, 0, 1, 0.95)
-    _finish_figure(fig; figure_title=figure_title, tight_rect=tight_rect)
+    _finish_figure(fig; figure_title=figure_title, tight_rect=tight_rect, h_pad=_MF_STACK_H_PAD)
     return _save_if_requested(fig, savepath)
 end
 
@@ -2277,11 +2635,12 @@ function plot_mf_profiles_and_middle_histories(alpha, beta, alpha_list, beta_lis
         r1, v1 = cdw_from_beta(profile_beta; leg=leg, iteration=it, use_abs=use_abs)
         r2, v2 = sdw_from_beta(profile_beta; leg=leg, iteration=it, use_abs=use_abs)
         r3, v3 = onsite_pairing_from_alpha(profile_alpha; leg=leg, iteration=it, use_abs=use_abs)
-        r4, v4 = dwave_profile_from_alpha(profile_alpha; leg1=leg1, leg2=leg2, iteration=it, symmetrize=symmetrize_rung, use_abs=use_abs)
+        r4, v4 = extended_swave_profile_from_alpha(profile_alpha; leg1=leg1, leg2=leg2, iteration=it, symmetrize=symmetrize_rung, use_abs=use_abs)
+        r5, v5 = dwave_profile_from_alpha(profile_alpha; leg1=leg1, leg2=leg2, iteration=it, symmetrize=symmetrize_rung, use_abs=use_abs)
         r1o, v1o = cdw_from_beta(profile_beta; leg=other_leg, iteration=it, use_abs=use_abs)
         r2o, v2o = sdw_from_beta(profile_beta; leg=other_leg, iteration=it, use_abs=use_abs)
         r3o, v3o = onsite_pairing_from_alpha(profile_alpha; leg=other_leg, iteration=it, use_abs=use_abs)
-        return (r1=r1, v1=v1, r2=r2, v2=v2, r3=r3, v3=v3, r4=r4, v4=v4,
+        return (r1=r1, v1=v1, r2=r2, v2=v2, r3=r3, v3=v3, r4=r4, v4=v4, r5=r5, v5=v5,
             r1o=r1o, v1o=v1o, r2o=r2o, v2o=v2o, r3o=r3o, v3o=v3o)
     end
 
@@ -2296,38 +2655,44 @@ function plot_mf_profiles_and_middle_histories(alpha, beta, alpha_list, beta_lis
     it1, hv1 = middle_cdw_history(beta_list; leg=leg, rung=rung_to_plot, use_abs=use_abs)
     it2, hv2 = middle_sdw_history(beta_list; leg=leg, rung=rung_to_plot, use_abs=use_abs)
     it3, hv3 = middle_onsite_pairing_history(alpha_list; leg=leg, rung=rung_to_plot, use_abs=use_abs)
-    it4, hv4 = middle_dwave_history(alpha_list; rung=rung_to_plot, leg1=leg1, leg2=leg2, symmetrize=symmetrize_rung, use_abs=use_abs)
+    it4, hv4 = middle_extended_swave_history(alpha_list; rung=rung_to_plot, leg1=leg1, leg2=leg2, symmetrize=symmetrize_rung, use_abs=use_abs)
+    it5, hv5 = middle_dwave_history(alpha_list; rung=rung_to_plot, leg1=leg1, leg2=leg2, symmetrize=symmetrize_rung, use_abs=use_abs)
     it1o, hv1o = middle_cdw_history(beta_list; leg=other_leg, rung=rung_to_plot, use_abs=use_abs)
     it2o, hv2o = middle_sdw_history(beta_list; leg=other_leg, rung=rung_to_plot, use_abs=use_abs)
     it3o, hv3o = middle_onsite_pairing_history(alpha_list; leg=other_leg, rung=rung_to_plot, use_abs=use_abs)
 
-    fig, axes = PyPlot.subplots(4, 2, figsize=_screen_figsize((15.0, 10.5)))
+    fig, axes = PyPlot.subplots(5, 2, figsize=_screen_figsize((15.0, 12.5)))
     cdw_ylabel = use_abs ? "|CDW beta proxy|" : "CDW beta proxy"
     sdw_ylabel = use_abs ? "|SDW beta proxy|" : "SDW beta proxy"
     onsite_ylabel = use_abs ? "|s-wave alpha|" : "s-wave alpha"
+    extended_swave_ylabel = use_abs ? "|extended s-wave alpha|" : "extended s-wave alpha"
     rung_ylabel = use_abs ? "|d-wave alpha|" : "d-wave alpha"
     leg_title = show_other_leg ? "" : ", leg $leg"
 
-    cdw_profile_lines = _plot_leg_pair!(axes[1, 1], data.r1, data.v1, data.r1o, data.v1o; leg=leg, other_leg=other_leg, show_other_leg=show_other_leg, color_fn=_cdw_leg_color, xlabel="Rung index", ylabel=cdw_ylabel, title="CDW beta proxy: up + down$leg_title", kwargs...)
-    _plot_leg_pair!(axes[1, 2], it1, hv1, it1o, hv1o; leg=leg, other_leg=other_leg, show_other_leg=show_other_leg, color_fn=_cdw_leg_color, xlabel="MF iteration", ylabel=cdw_ylabel, title="Middle rung $rung_to_plot CDW beta proxy: up + down$leg_title", kwargs...)
-    sdw_profile_lines = _plot_leg_pair!(axes[2, 1], data.r2, data.v2, data.r2o, data.v2o; leg=leg, other_leg=other_leg, show_other_leg=show_other_leg, color_fn=_sdw_leg_color, xlabel="Rung index", ylabel=sdw_ylabel, title="SDW beta proxy: up - down$leg_title", kwargs...)
-    _plot_leg_pair!(axes[2, 2], it2, hv2, it2o, hv2o; leg=leg, other_leg=other_leg, show_other_leg=show_other_leg, color_fn=_sdw_leg_color, xlabel="MF iteration", ylabel=sdw_ylabel, title="Middle rung $rung_to_plot SDW beta proxy: up - down$leg_title", kwargs...)
-    swave_profile_lines = _plot_leg_pair!(axes[3, 1], data.r3, data.v3, data.r3o, data.v3o; leg=leg, other_leg=other_leg, show_other_leg=show_other_leg, color_fn=_swave_leg_color, xlabel="Rung index", ylabel=onsite_ylabel, title="s-wave pairing from alpha$leg_title", kwargs...)
-    _plot_leg_pair!(axes[3, 2], it3, hv3, it3o, hv3o; leg=leg, other_leg=other_leg, show_other_leg=show_other_leg, color_fn=_swave_leg_color, xlabel="MF iteration", ylabel=onsite_ylabel, title="Middle rung $rung_to_plot s-wave pairing$leg_title", kwargs...)
-    _plot_series!(axes[4, 1], data.r4, data.v4; xlabel="Rung index", ylabel=rung_ylabel, title="d-wave alpha proxy: " * _dwave_alpha_title(leg1, leg2; symmetrize=symmetrize_rung), color=_DWAVE_COLOR, kwargs...)
-    dwave_profile_line = axes[4, 1].lines[end]
-    _plot_series!(axes[4, 2], it4, hv4; xlabel="MF iteration", ylabel=rung_ylabel, title="Middle rung $rung_to_plot d-wave alpha proxy: " * _dwave_alpha_title(leg1, leg2; rung_tex=string(rung_to_plot), symmetrize=symmetrize_rung), color=_DWAVE_COLOR, kwargs...)
-    markers = [_add_iteration_marker!(axes[row, 2], profile_iteration) for row in 1:4]
+    cdw_profile_lines = _plot_leg_pair!(axes[1, 1], data.r1, data.v1, data.r1o, data.v1o; leg=leg, other_leg=other_leg, show_other_leg=show_other_leg, color_fn=_cdw_leg_color, xlabel="", ylabel=cdw_ylabel, title="CDW beta proxy: up + down$leg_title", kwargs...)
+    _plot_leg_pair!(axes[1, 2], it1, hv1, it1o, hv1o; leg=leg, other_leg=other_leg, show_other_leg=show_other_leg, color_fn=_cdw_leg_color, xlabel="", ylabel=cdw_ylabel, title="Middle rung $rung_to_plot CDW beta proxy: up + down$leg_title", kwargs...)
+    sdw_profile_lines = _plot_leg_pair!(axes[2, 1], data.r2, data.v2, data.r2o, data.v2o; leg=leg, other_leg=other_leg, show_other_leg=show_other_leg, color_fn=_sdw_leg_color, xlabel="", ylabel=sdw_ylabel, title="SDW beta proxy: up - down$leg_title", kwargs...)
+    _plot_leg_pair!(axes[2, 2], it2, hv2, it2o, hv2o; leg=leg, other_leg=other_leg, show_other_leg=show_other_leg, color_fn=_sdw_leg_color, xlabel="", ylabel=sdw_ylabel, title="Middle rung $rung_to_plot SDW beta proxy: up - down$leg_title", kwargs...)
+    swave_profile_lines = _plot_leg_pair!(axes[3, 1], data.r3, data.v3, data.r3o, data.v3o; leg=leg, other_leg=other_leg, show_other_leg=show_other_leg, color_fn=_swave_leg_color, xlabel="", ylabel=onsite_ylabel, title="s-wave pairing from alpha$leg_title", kwargs...)
+    _plot_leg_pair!(axes[3, 2], it3, hv3, it3o, hv3o; leg=leg, other_leg=other_leg, show_other_leg=show_other_leg, color_fn=_swave_leg_color, xlabel="", ylabel=onsite_ylabel, title="Middle rung $rung_to_plot s-wave pairing$leg_title", kwargs...)
+    _plot_series!(axes[4, 1], data.r4, data.v4; xlabel="", ylabel=extended_swave_ylabel, title="extended s-wave alpha proxy: " * _extended_swave_alpha_title(leg1, leg2; symmetrize=symmetrize_rung), color=_EXT_SWAVE_COLOR, kwargs...)
+    extended_swave_profile_line = axes[4, 1].lines[end]
+    _plot_series!(axes[4, 2], it4, hv4; xlabel="", ylabel=extended_swave_ylabel, title="Middle rung $rung_to_plot extended s-wave alpha proxy: " * _extended_swave_alpha_title(leg1, leg2; rung_tex=string(rung_to_plot), symmetrize=symmetrize_rung), color=_EXT_SWAVE_COLOR, kwargs...)
+    _plot_series!(axes[5, 1], data.r5, data.v5; xlabel=_rung_index_xlabel(), ylabel=rung_ylabel, title="d-wave alpha proxy: " * _dwave_alpha_title(leg1, leg2; symmetrize=symmetrize_rung), color=_DWAVE_COLOR, kwargs...)
+    dwave_profile_line = axes[5, 1].lines[end]
+    _plot_series!(axes[5, 2], it5, hv5; xlabel=_mf_iteration_xlabel(), ylabel=rung_ylabel, title="Middle rung $rung_to_plot d-wave alpha proxy: " * _dwave_alpha_title(leg1, leg2; rung_tex=string(rung_to_plot), symmetrize=symmetrize_rung), color=_DWAVE_COLOR, kwargs...)
+    markers = [_add_iteration_marker!(axes[row, 2], profile_iteration) for row in 1:5]
 
     if has_slider
         _set_profile_axis_limits!(axes[1, 1], profile_history, :r1, :v1; other_xfield=:r1o, other_yfield=:v1o, show_other_leg=show_other_leg)
         _set_profile_axis_limits!(axes[2, 1], profile_history, :r2, :v2; other_xfield=:r2o, other_yfield=:v2o, show_other_leg=show_other_leg)
         _set_profile_axis_limits!(axes[3, 1], profile_history, :r3, :v3; other_xfield=:r3o, other_yfield=:v3o, show_other_leg=show_other_leg)
         _set_profile_axis_limits!(axes[4, 1], profile_history, :r4, :v4)
+        _set_profile_axis_limits!(axes[5, 1], profile_history, :r5, :v5)
     end
 
     tight_rect = _profile_tight_rect(figure_title, has_slider)
-    _finish_figure(fig; figure_title=figure_title, tight_rect=tight_rect)
+    _finish_figure(fig; figure_title=figure_title, tight_rect=tight_rect, h_pad=_MF_STACK_H_PAD)
     if has_slider
         function update_iteration(it)
             updated = profile_history[it]
@@ -2337,13 +2702,14 @@ function plot_mf_profiles_and_middle_histories(alpha, beta, alpha_list, beta_lis
             show_other_leg && _set_line_data!(sdw_profile_lines.other, updated.r2o, updated.v2o)
             _set_line_data!(swave_profile_lines.main, updated.r3, updated.v3)
             show_other_leg && _set_line_data!(swave_profile_lines.other, updated.r3o, updated.v3o)
-            _set_line_data!(dwave_profile_line, updated.r4, updated.v4)
+            _set_line_data!(extended_swave_profile_line, updated.r4, updated.v4)
+            _set_line_data!(dwave_profile_line, updated.r5, updated.v5)
             for marker in markers
                 _set_iteration_marker!(marker, it)
             end
             return nothing
         end
-        _install_iteration_slider!(fig, niter, profile_iteration, update_iteration; figure_title=figure_title, target_axes=[axes[row, 1] for row in 1:4])
+        _install_iteration_slider!(fig, niter, profile_iteration, update_iteration; figure_title=figure_title, target_axes=[axes[row, 1] for row in 1:5])
     end
     return _save_if_requested(fig, savepath)
 end
@@ -2373,11 +2739,12 @@ function plot_correlation_profiles_and_middle_histories(C_pair, C_exc_dn, C_exc_
         r1, v1 = cdw_from_correlations(profile_C_exc_dn, profile_C_exc_up; leg=leg, iteration=it, use_abs=use_abs)
         r2, v2 = sdw_from_correlations(profile_C_exc_dn, profile_C_exc_up; leg=leg, iteration=it, use_abs=use_abs)
         r3, v3 = onsite_pairing_from_correlations(profile_C_pair; leg=leg, iteration=it, use_abs=use_abs)
-        r4, v4 = dwave_profile_from_correlations(profile_C_pair; leg1=leg1, leg2=leg2, iteration=it, use_abs=use_abs)
+        r4, v4 = extended_swave_profile_from_correlations(profile_C_pair; leg1=leg1, leg2=leg2, iteration=it, use_abs=use_abs)
+        r5, v5 = dwave_profile_from_correlations(profile_C_pair; leg1=leg1, leg2=leg2, iteration=it, use_abs=use_abs)
         r1o, v1o = cdw_from_correlations(profile_C_exc_dn, profile_C_exc_up; leg=other_leg, iteration=it, use_abs=use_abs)
         r2o, v2o = sdw_from_correlations(profile_C_exc_dn, profile_C_exc_up; leg=other_leg, iteration=it, use_abs=use_abs)
         r3o, v3o = onsite_pairing_from_correlations(profile_C_pair; leg=other_leg, iteration=it, use_abs=use_abs)
-        return (r1=r1, v1=v1, r2=r2, v2=v2, r3=r3, v3=v3, r4=r4, v4=v4,
+        return (r1=r1, v1=v1, r2=r2, v2=v2, r3=r3, v3=v3, r4=r4, v4=v4, r5=r5, v5=v5,
             r1o=r1o, v1o=v1o, r2o=r2o, v2o=v2o, r3o=r3o, v3o=v3o)
     end
 
@@ -2392,12 +2759,13 @@ function plot_correlation_profiles_and_middle_histories(C_pair, C_exc_dn, C_exc_
     it1, hv1 = middle_cdw_history_from_correlations(C_exc_dn_list, C_exc_up_list; leg=leg, rung=rung_to_plot, use_abs=use_abs)
     it2, hv2 = middle_sdw_history_from_correlations(C_exc_dn_list, C_exc_up_list; leg=leg, rung=rung_to_plot, use_abs=use_abs)
     it3, hv3 = middle_onsite_pairing_history_from_correlations(C_pair_list; leg=leg, rung=rung_to_plot, use_abs=use_abs)
-    it4, hv4 = middle_dwave_history_from_correlations(C_pair_list; rung=rung_to_plot, leg1=leg1, leg2=leg2, use_abs=use_abs)
+    it4, hv4 = middle_extended_swave_history_from_correlations(C_pair_list; rung=rung_to_plot, leg1=leg1, leg2=leg2, use_abs=use_abs)
+    it5, hv5 = middle_dwave_history_from_correlations(C_pair_list; rung=rung_to_plot, leg1=leg1, leg2=leg2, use_abs=use_abs)
     it1o, hv1o = middle_cdw_history_from_correlations(C_exc_dn_list, C_exc_up_list; leg=other_leg, rung=rung_to_plot, use_abs=use_abs)
     it2o, hv2o = middle_sdw_history_from_correlations(C_exc_dn_list, C_exc_up_list; leg=other_leg, rung=rung_to_plot, use_abs=use_abs)
     it3o, hv3o = middle_onsite_pairing_history_from_correlations(C_pair_list; leg=other_leg, rung=rung_to_plot, use_abs=use_abs)
 
-    fig, axes = PyPlot.subplots(4, 2, figsize=_screen_figsize((15.0, 10.5)))
+    fig, axes = PyPlot.subplots(5, 2, figsize=_screen_figsize((15.0, 12.5)))
     profile_leg_tex = show_other_leg ? "\\ell" : string(leg)
     history_rung_tex = string(rung_to_plot)
     history_leg_tex = show_other_leg ? "\\ell" : string(leg)
@@ -2407,6 +2775,8 @@ function plot_correlation_profiles_and_middle_histories(C_pair, C_exc_dn, C_exc_
     history_cdw_expr = _cdw_corr_expr(; rung_tex=history_rung_tex, leg_tex=history_leg_tex)
     history_sdw_expr = _sdw_corr_expr(; rung_tex=history_rung_tex, leg_tex=history_leg_tex)
     history_onsite_expr = _onsite_pair_corr_expr(; rung_tex=history_rung_tex, leg_tex=history_leg_tex)
+    profile_extended_swave_expr = _extended_swave_corr_symbol()
+    history_extended_swave_expr = _extended_swave_corr_symbol(history_rung_tex)
     profile_dwave_expr = _dwave_corr_symbol()
     history_dwave_expr = _dwave_corr_symbol(history_rung_tex)
     leg_title = show_other_leg ? "" : ", leg $leg"
@@ -2417,26 +2787,30 @@ function plot_correlation_profiles_and_middle_histories(C_pair, C_exc_dn, C_exc_
     history_sdw_title = show_other_leg ? "Middle rung $rung_to_plot SDW" : "SDW: " * _sdw_corr_title(leg; rung_tex=history_rung_tex)
     history_onsite_title = show_other_leg ? "Middle rung $rung_to_plot s-wave" : "s-wave: " * _onsite_pair_corr_title(leg; rung_tex=history_rung_tex)
 
-    cdw_profile_lines = _plot_leg_pair!(axes[1, 1], data.r1, data.v1, data.r1o, data.v1o; leg=leg, other_leg=other_leg, show_other_leg=show_other_leg, color_fn=_cdw_leg_color, xlabel="Rung index \$i\$", ylabel=_corr_value_label(profile_cdw_expr, use_abs), title=profile_cdw_title, kwargs...)
-    _plot_leg_pair!(axes[1, 2], it1, hv1, it1o, hv1o; leg=leg, other_leg=other_leg, show_other_leg=show_other_leg, color_fn=_cdw_leg_color, xlabel="MF iteration \$m\$", ylabel=_corr_value_label(history_cdw_expr, use_abs), title=history_cdw_title, kwargs...)
-    sdw_profile_lines = _plot_leg_pair!(axes[2, 1], data.r2, data.v2, data.r2o, data.v2o; leg=leg, other_leg=other_leg, show_other_leg=show_other_leg, color_fn=_sdw_leg_color, xlabel="Rung index \$i\$", ylabel=_corr_value_label(profile_sdw_expr, use_abs), title=profile_sdw_title, kwargs...)
-    _plot_leg_pair!(axes[2, 2], it2, hv2, it2o, hv2o; leg=leg, other_leg=other_leg, show_other_leg=show_other_leg, color_fn=_sdw_leg_color, xlabel="MF iteration \$m\$", ylabel=_corr_value_label(history_sdw_expr, use_abs), title=history_sdw_title, kwargs...)
-    swave_profile_lines = _plot_leg_pair!(axes[3, 1], data.r3, data.v3, data.r3o, data.v3o; leg=leg, other_leg=other_leg, show_other_leg=show_other_leg, color_fn=_swave_leg_color, xlabel="Rung index \$i\$", ylabel=_corr_value_label(profile_onsite_expr, use_abs), title=profile_onsite_title, kwargs...)
-    _plot_leg_pair!(axes[3, 2], it3, hv3, it3o, hv3o; leg=leg, other_leg=other_leg, show_other_leg=show_other_leg, color_fn=_swave_leg_color, xlabel="MF iteration \$m\$", ylabel=_corr_value_label(history_onsite_expr, use_abs), title=history_onsite_title, kwargs...)
-    _plot_series!(axes[4, 1], data.r4, data.v4; xlabel="Rung index \$i\$", ylabel=_corr_value_label(profile_dwave_expr, use_abs), title="d-wave: " * _dwave_corr_title(leg1, leg2), color=_DWAVE_COLOR, kwargs...)
-    dwave_profile_line = axes[4, 1].lines[end]
-    _plot_series!(axes[4, 2], it4, hv4; xlabel="MF iteration \$m\$", ylabel=_corr_value_label(history_dwave_expr, use_abs), title="d-wave: " * _dwave_corr_title(leg1, leg2; rung_tex=history_rung_tex), color=_DWAVE_COLOR, kwargs...)
-    markers = [_add_iteration_marker!(axes[row, 2], profile_iteration) for row in 1:4]
+    cdw_profile_lines = _plot_leg_pair!(axes[1, 1], data.r1, data.v1, data.r1o, data.v1o; leg=leg, other_leg=other_leg, show_other_leg=show_other_leg, color_fn=_cdw_leg_color, xlabel="", ylabel=_corr_value_label(profile_cdw_expr, use_abs), title=profile_cdw_title, kwargs...)
+    _plot_leg_pair!(axes[1, 2], it1, hv1, it1o, hv1o; leg=leg, other_leg=other_leg, show_other_leg=show_other_leg, color_fn=_cdw_leg_color, xlabel="", ylabel=_corr_value_label(history_cdw_expr, use_abs), title=history_cdw_title, kwargs...)
+    sdw_profile_lines = _plot_leg_pair!(axes[2, 1], data.r2, data.v2, data.r2o, data.v2o; leg=leg, other_leg=other_leg, show_other_leg=show_other_leg, color_fn=_sdw_leg_color, xlabel="", ylabel=_corr_value_label(profile_sdw_expr, use_abs), title=profile_sdw_title, kwargs...)
+    _plot_leg_pair!(axes[2, 2], it2, hv2, it2o, hv2o; leg=leg, other_leg=other_leg, show_other_leg=show_other_leg, color_fn=_sdw_leg_color, xlabel="", ylabel=_corr_value_label(history_sdw_expr, use_abs), title=history_sdw_title, kwargs...)
+    swave_profile_lines = _plot_leg_pair!(axes[3, 1], data.r3, data.v3, data.r3o, data.v3o; leg=leg, other_leg=other_leg, show_other_leg=show_other_leg, color_fn=_swave_leg_color, xlabel="", ylabel=_corr_value_label(profile_onsite_expr, use_abs), title=profile_onsite_title, kwargs...)
+    _plot_leg_pair!(axes[3, 2], it3, hv3, it3o, hv3o; leg=leg, other_leg=other_leg, show_other_leg=show_other_leg, color_fn=_swave_leg_color, xlabel="", ylabel=_corr_value_label(history_onsite_expr, use_abs), title=history_onsite_title, kwargs...)
+    _plot_series!(axes[4, 1], data.r4, data.v4; xlabel="", ylabel=_corr_value_label(profile_extended_swave_expr, use_abs), title="extended s-wave: " * _extended_swave_corr_title(leg1, leg2; include_singlet_def=false), color=_EXT_SWAVE_COLOR, kwargs...)
+    extended_swave_profile_line = axes[4, 1].lines[end]
+    _plot_series!(axes[4, 2], it4, hv4; xlabel="", ylabel=_corr_value_label(history_extended_swave_expr, use_abs), title="extended s-wave: " * _extended_swave_corr_title(leg1, leg2; rung_tex=history_rung_tex, include_singlet_def=false), color=_EXT_SWAVE_COLOR, kwargs...)
+    _plot_series!(axes[5, 1], data.r5, data.v5; xlabel=_rung_index_xlabel(), ylabel=_corr_value_label(profile_dwave_expr, use_abs), title="d-wave: " * _dwave_corr_title(leg1, leg2; include_singlet_def=false), color=_DWAVE_COLOR, kwargs...)
+    dwave_profile_line = axes[5, 1].lines[end]
+    _plot_series!(axes[5, 2], it5, hv5; xlabel=_mf_iteration_xlabel(), ylabel=_corr_value_label(history_dwave_expr, use_abs), title="d-wave: " * _dwave_corr_title(leg1, leg2; rung_tex=history_rung_tex, include_singlet_def=false), color=_DWAVE_COLOR, kwargs...)
+    markers = [_add_iteration_marker!(axes[row, 2], profile_iteration) for row in 1:5]
 
     if has_slider
         _set_profile_axis_limits!(axes[1, 1], profile_history, :r1, :v1; other_xfield=:r1o, other_yfield=:v1o, show_other_leg=show_other_leg)
         _set_profile_axis_limits!(axes[2, 1], profile_history, :r2, :v2; other_xfield=:r2o, other_yfield=:v2o, show_other_leg=show_other_leg)
         _set_profile_axis_limits!(axes[3, 1], profile_history, :r3, :v3; other_xfield=:r3o, other_yfield=:v3o, show_other_leg=show_other_leg)
         _set_profile_axis_limits!(axes[4, 1], profile_history, :r4, :v4)
+        _set_profile_axis_limits!(axes[5, 1], profile_history, :r5, :v5)
     end
 
     tight_rect = _profile_tight_rect(figure_title, has_slider)
-    _finish_figure(fig; figure_title=figure_title, tight_rect=tight_rect)
+    _finish_figure(fig; figure_title=figure_title, tight_rect=tight_rect, h_pad=_MF_STACK_H_PAD)
     if has_slider
         function update_iteration(it)
             updated = profile_history[it]
@@ -2446,13 +2820,14 @@ function plot_correlation_profiles_and_middle_histories(C_pair, C_exc_dn, C_exc_
             show_other_leg && _set_line_data!(sdw_profile_lines.other, updated.r2o, updated.v2o)
             _set_line_data!(swave_profile_lines.main, updated.r3, updated.v3)
             show_other_leg && _set_line_data!(swave_profile_lines.other, updated.r3o, updated.v3o)
-            _set_line_data!(dwave_profile_line, updated.r4, updated.v4)
+            _set_line_data!(extended_swave_profile_line, updated.r4, updated.v4)
+            _set_line_data!(dwave_profile_line, updated.r5, updated.v5)
             for marker in markers
                 _set_iteration_marker!(marker, it)
             end
             return nothing
         end
-        _install_iteration_slider!(fig, niter, profile_iteration, update_iteration; figure_title=figure_title, target_axes=[axes[row, 1] for row in 1:4])
+        _install_iteration_slider!(fig, niter, profile_iteration, update_iteration; figure_title=figure_title, target_axes=[axes[row, 1] for row in 1:5])
     end
     return _save_if_requested(fig, savepath)
 end
@@ -2522,16 +2897,16 @@ function plot_middle_histories_from_file(filename::AbstractString; source::Symbo
     end
 end
 
-function plot_order_fourier_heatmaps_from_file(filename::AbstractString; iteration=nothing, source::Symbol=:mf, use_correlations::Bool=false, savepath=nothing, kwargs...)
+function plot_order_fourier_heatmaps_from_file(filename::AbstractString; iteration=nothing, source::Symbol=:mf, use_correlations::Bool=false, trim_boundary_rungs::Integer=5, savepath=nothing, kwargs...)
     data = load_mf_data(filename)
     if _source(source, use_correlations) == :correlations
         C_pair_source = (iteration === nothing && data.C_pair !== nothing) ? data.C_pair : data.C_pair_list
         C_exc_dn_source = (iteration === nothing && data.C_exc_dn !== nothing) ? data.C_exc_dn : data.C_exc_dn_list
         C_exc_up_source = (iteration === nothing && data.C_exc_up !== nothing) ? data.C_exc_up : data.C_exc_up_list
-        return plot_order_fourier_heatmaps_from_correlations(C_pair_source, C_exc_dn_source, C_exc_up_source; iteration=iteration, figure_title=_filename_title(filename), savepath=savepath, kwargs...)
+        return plot_order_fourier_heatmaps_from_correlations(C_pair_source, C_exc_dn_source, C_exc_up_source; iteration=iteration, trim_boundary_rungs=trim_boundary_rungs, figure_title=_filename_title(filename), savepath=savepath, kwargs...)
     else
         alpha_source = (iteration === nothing && data.alpha !== nothing) ? data.alpha : data.alpha_list
         beta_source = (iteration === nothing && data.beta !== nothing) ? data.beta : data.beta_list
-        return plot_order_fourier_heatmaps(alpha_source, beta_source; iteration=iteration, figure_title=_filename_title(filename), savepath=savepath, kwargs...)
+        return plot_order_fourier_heatmaps(alpha_source, beta_source; iteration=iteration, trim_boundary_rungs=trim_boundary_rungs, figure_title=_filename_title(filename), savepath=savepath, kwargs...)
     end
 end
