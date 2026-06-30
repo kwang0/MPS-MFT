@@ -2048,9 +2048,9 @@ end
 function plot_order_fourier_max_grid(;
     data_dir::AbstractString="stateless_data",
     suffix::AbstractString="_nodamping.h5",
-    t0_values=0.8:0.2:1.4,
+    t0_values=0.8:0.2:1.6,
     t0_min::Real=0.8,
-    t0_max::Real=1.4,
+    t0_max::Real=1.6,
     t0_atol::Real=1e-8,
     source::Symbol=:mf,
     use_correlations::Bool=false,
