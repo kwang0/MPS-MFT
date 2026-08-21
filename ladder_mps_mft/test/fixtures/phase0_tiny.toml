@@ -1,0 +1,42 @@
+[model]
+L = 2
+t = 1.0
+U = 2.0
+V = 0.0
+t0 = 1.0
+tp = 0.02
+density = 1.0
+mu_initial = 0.0
+r_range = 1
+geometry = "square"
+
+[pair_binding]
+registry = "test/fixtures/E_p_tiny.csv"
+
+[dmrg]
+nsweeps = 1
+maxdim = 4
+cutoff = 1.0e-8
+energy_tol = 0.0
+eigsolve_krylovdim = 4
+max_time_seconds = 180.0
+output_level = 0
+
+[runtime]
+backend = "cpu"
+blas_threads = 1
+strided_threads = 1
+threaded_blocksparse = false
+
+[run]
+output_directory = "output"
+branch_label = "phase0_script_smoke"
+preparation = "deterministic_pairing_seed"
+direction = "none"
+seed_label = "tiny"
+random_seed = 7
+initial_seed = "pairing"
+initial_amplitude = 1.0e-3
+max_iterations = 1
+require_fixed_point = false
+quick_diagnostics = false

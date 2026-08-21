@@ -1,0 +1,41 @@
+# Phases 0 to 4
+
+Status date: 2026-08-21.
+
+## Phase 0 — CPU resource calibration
+
+Status: implemented locally; not submitted on Perlmutter.
+
+The matrix uses one immutable L=64, chi=64 warm-start state and benchmarks 11 exclusive configurations: serial, block-sparse at 2/4/8/16 threads, Strided at 2/4/8 threads, and BLAS at 2/4/8 threads. Every candidate runs three copies of the same two-sweep DMRG payload. A candidate is eligible only if its energy per site and density reproduce `serial-t1` within the report tolerances and MaxRSS was measured.
+
+The current guarded worst-case reservation is 1.511718750 Perlmutter CPU node-hours, below the 3-node-hour Phase 0 cap. After the matrix, submit exactly one chi=200, six-sweep validation using the recommended backend and right-sized memory. Do not use the winner for production before that validation.
+
+Acceptance evidence:
+
+- all matrix and validation job IDs and terminal Slurm states;
+- immutable seed and metric SHA-256 values;
+- `summary.csv`, `recommendation.md`, MaxRSS, and projected shared-QOS charge;
+- numerical equivalence to serial and successful chi=200 validation;
+- an entry in `RUN_LOG.md` that distinguishes timing validation from scientific convergence.
+
+## Phase 1 — controlled fixed-point branches
+
+Run independent pairing, SDW, and CDW seeds at one representative model point for each transverse geometry. Require period-1 convergence, density, energy-change, Hamiltonian-identity, and DMRG-energy consistency gates. Repeat the lowest-energy branch from a second seed. Diagnose any period-p orbit without averaging it.
+
+Phase 1 is complete only when accepted immutable states can be ranked by the common zero-temperature functional at matched model and numerical fingerprints.
+
+## Phase 2 — transition and hysteresis scans
+
+For the frustrated geometry, resolve the candidate transition near t0=1.0–1.2 with spacing 0.025 for V=-0.4,-0.2,0. Use independent seeds plus forward and reverse continuations. Preserve every branch and its parent SHA; do not replace a metastable continuation merely because another state has lower energy.
+
+Apply a targeted square-geometry scan in t0 and t_perp only after Phase 1 establishes reliable branch controls. Record recurrence and convergence status at every point.
+
+## Phase 3 — finite-size, bond-dimension, and isolated-ladder controls
+
+Use at least L=32,48,64,96,128 where E_p and model coverage permit, and chi=200,400,800,1200+ as resources allow. Extrapolate energy and long-distance observables against discarded-weight or controlled chi proxies. Recompute or extend the E_p registry rather than interpolating it silently.
+
+Run the fixed-sector diagnostics separately to obtain spin and charge gaps and particle/hole pair binding. Check t_perp against all known isolated-ladder scales, not only |E_p|.
+
+## Phase 4 — publication analysis
+
+Report common-functional branch energies, finite-size/chi uncertainty, structure-factor peak positions and scaling, `K_rho`, entanglement fits, and sign-resolved pair correlations. Separate robust findings, candidate phase boundaries, finite-chi enhancement, and unresolved cases. Archive the exact accepted states, configs, hashes, code commit, implementation fingerprint, and selection table used for every figure.

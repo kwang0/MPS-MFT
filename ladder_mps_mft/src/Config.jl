@@ -1,0 +1,167 @@
+const PROJECT_ROOT = normpath(joinpath(@__DIR__, ".."))
+
+_table(raw, key) = haskey(raw, key) ? raw[key] : Dict{String,Any}()
+_value(table, key, default) = haskey(table, key) ? table[key] : default
+
+function _project_path(path::AbstractString)
+    isempty(path) && return ""
+    return isabspath(path) ? normpath(path) : normpath(joinpath(PROJECT_ROOT, path))
+end
+
+function load_settings(path::AbstractString)
+    config_path = abspath(path)
+    isfile(config_path) || throw(ArgumentError("configuration not found: $config_path"))
+    raw = TOML.parsefile(config_path)
+    model_raw = _table(raw, "model")
+    ep_raw = _table(raw, "pair_binding")
+    dmrg_raw = _table(raw, "dmrg")
+    mixing_raw = _table(raw, "mixing")
+    convergence_raw = _table(raw, "convergence")
+    runtime_raw = _table(raw, "runtime")
+    run_raw = _table(raw, "run")
+
+    L = Int(_value(model_raw, "L", 64))
+    U = Float64(_value(model_raw, "U", 8.0))
+    V = Float64(_value(model_raw, "V", 0.0))
+    t0 = Float64(_value(model_raw, "t0", 1.0))
+    tp = Float64(_value(model_raw, "tp", 0.1))
+    density = Float64(_value(model_raw, "density", 0.9375))
+    registry_path = _project_path(String(_value(ep_raw, "registry", "data/E_p_values.csv")))
+    allow_unbound = Bool(_value(run_raw, "allow_unbound_ep", false))
+    selection = lookup_ep(
+        registry_path;
+        L,
+        U,
+        V,
+        t0,
+        density,
+        tp,
+        require_bound=!allow_unbound,
+    )
+
+    model = ModelSettings(;
+        L=L,
+        t=Float64(_value(model_raw, "t", 1.0)),
+        U=U,
+        V=V,
+        t0=t0,
+        tp=tp,
+        density=density,
+        mu_initial=Float64(_value(model_raw, "mu_initial", 0.0)),
+        r_range=Int(_value(model_raw, "r_range", 4)),
+        geometry=normalize_geometry(_value(model_raw, "geometry", "cubic_frustrated")),
+        ep=selection.denominator,
+        ep_signed=selection.record.E_p,
+        ep_source=selection.source_path,
+    )
+    dmrg = DMRGSettings(;
+        nsweeps=Int(_value(dmrg_raw, "nsweeps", 12)),
+        maxdim=Int(_value(dmrg_raw, "maxdim", 200)),
+        cutoff=Float64(_value(dmrg_raw, "cutoff", 1e-10)),
+        energy_tol=Float64(_value(dmrg_raw, "energy_tol", 1e-8)),
+        eigsolve_krylovdim=Int(_value(dmrg_raw, "eigsolve_krylovdim", 8)),
+        max_time_seconds=Float64(_value(dmrg_raw, "max_time_seconds", 23.5 * 3600)),
+        output_level=Int(_value(dmrg_raw, "output_level", 1)),
+        mu_density_tol=Float64(_value(dmrg_raw, "mu_density_tol", 2e-4)),
+        mu_max_iterations=Int(_value(dmrg_raw, "mu_max_iterations", 16)),
+        mu_bracket_step=Float64(_value(dmrg_raw, "mu_bracket_step", 0.05)),
+        mu_bracket_growth=Float64(_value(dmrg_raw, "mu_bracket_growth", 2.0)),
+        mu_interval_tol=Float64(_value(dmrg_raw, "mu_interval_tol", 1e-6)),
+    )
+    mixing = MixingSettings(;
+        method=Symbol(lowercase(String(_value(mixing_raw, "method", "anderson")))),
+        damping=Float64(_value(mixing_raw, "damping", 0.5)),
+        minimum_damping=Float64(_value(mixing_raw, "minimum_damping", 0.05)),
+        maximum_damping=Float64(_value(mixing_raw, "maximum_damping", 0.8)),
+        memory=Int(_value(mixing_raw, "memory", 5)),
+        regularization=Float64(_value(mixing_raw, "regularization", 1e-10)),
+        adaptive=Bool(_value(mixing_raw, "adaptive", true)),
+    )
+    convergence = ConvergenceSettings(;
+        field_abs_tol=Float64(_value(convergence_raw, "field_abs_tol", 1e-6)),
+        field_rel_tol=Float64(_value(convergence_raw, "field_rel_tol", 5e-3)),
+        density_tol=Float64(_value(convergence_raw, "density_tol", 1e-5)),
+        variational_energy_tol=Float64(_value(convergence_raw, "variational_energy_tol", 1e-7)),
+        hamiltonian_identity_tol=Float64(_value(convergence_raw, "hamiltonian_identity_tol", 1e-9)),
+        effective_energy_consistency_tol=Float64(_value(convergence_raw, "effective_energy_consistency_tol", 1e-6)),
+        stable_iterations=Int(_value(convergence_raw, "stable_iterations", 2)),
+        max_period=Int(_value(convergence_raw, "max_period", 8)),
+        period_repeats=Int(_value(convergence_raw, "period_repeats", 3)),
+        period_abs_tol=Float64(_value(convergence_raw, "period_abs_tol", 2e-6)),
+        period_rel_tol=Float64(_value(convergence_raw, "period_rel_tol", 1e-2)),
+        cycle_action=Symbol(lowercase(String(_value(convergence_raw, "cycle_action", "stop")))),
+        stagnation_window=Int(_value(convergence_raw, "stagnation_window", 10)),
+        stagnation_min_relative_improvement=Float64(_value(convergence_raw, "stagnation_min_relative_improvement", 1e-2)),
+        divergence_factor=Float64(_value(convergence_raw, "divergence_factor", 8.0)),
+    )
+    runtime = RuntimeSettings(;
+        backend=Symbol(lowercase(String(_value(runtime_raw, "backend", "cpu")))),
+        blas_threads=Int(_value(runtime_raw, "blas_threads", 1)),
+        strided_threads=Int(_value(runtime_raw, "strided_threads", 1)),
+        threaded_blocksparse=Bool(_value(runtime_raw, "threaded_blocksparse", true)),
+    )
+    run = RunSettings(;
+        output_directory=_project_path(String(_value(run_raw, "output_directory", "output"))),
+        branch_label=String(_value(run_raw, "branch_label", "independent")),
+        preparation=String(_value(run_raw, "preparation", "independent_seed")),
+        direction=String(_value(run_raw, "direction", "none")),
+        seed_label=String(_value(run_raw, "seed_label", "seed_1")),
+        random_seed=Int(_value(run_raw, "random_seed", 1)),
+        initial_seed=Symbol(lowercase(String(_value(run_raw, "initial_seed", "pairing")))),
+        initial_amplitude=Float64(_value(run_raw, "initial_amplitude", 1e-3)),
+        parent_checkpoint=haskey(run_raw, "parent_checkpoint") ? _project_path(String(run_raw["parent_checkpoint"])) : nothing,
+        parent_sha256=haskey(run_raw, "parent_sha256") ? lowercase(String(run_raw["parent_sha256"])) : nothing,
+        resume_checkpoint=haskey(run_raw, "resume_checkpoint") ? _project_path(String(run_raw["resume_checkpoint"])) : nothing,
+        resume_sha256=haskey(run_raw, "resume_sha256") ? lowercase(String(run_raw["resume_sha256"])) : nothing,
+        max_iterations=Int(_value(run_raw, "max_iterations", 80)),
+        save_every=Int(_value(run_raw, "save_every", 1)),
+        require_fixed_point=Bool(_value(run_raw, "require_fixed_point", true)),
+        allow_unbound_ep=allow_unbound,
+        quick_diagnostics=Bool(_value(run_raw, "quick_diagnostics", true)),
+        full_pair_correlations=Bool(_value(run_raw, "full_pair_correlations", false)),
+    )
+    settings = ProjectSettings(; model, dmrg, mixing, convergence, runtime, run, config_path)
+    validate_settings(settings)
+    return settings
+end
+
+function validate_settings(settings::ProjectSettings)
+    model = settings.model
+    model.L >= 2 || throw(ArgumentError("model.L must be at least 2 rungs"))
+    0 < model.density <= 2 || throw(ArgumentError("density must lie in (0,2] per site"))
+    model.r_range >= 0 || throw(ArgumentError("r_range must be nonnegative"))
+    model.tp >= 0 || throw(ArgumentError("tp must be nonnegative"))
+    model.ep > 0 || throw(ArgumentError("the selected |E_p| must be positive"))
+    settings.runtime.backend == :cpu || throw(ArgumentError(
+        "Phase 0 supports backend=cpu only; GPU support was intentionally not copied",
+    ))
+    settings.runtime.blas_threads >= 1 || throw(ArgumentError("blas_threads must be positive"))
+    settings.runtime.strided_threads >= 1 || throw(ArgumentError("strided_threads must be positive"))
+    settings.dmrg.nsweeps >= 1 || throw(ArgumentError("nsweeps must be positive"))
+    settings.dmrg.maxdim >= 1 || throw(ArgumentError("maxdim must be positive"))
+    settings.dmrg.mu_density_tol > 0 || throw(ArgumentError("mu_density_tol must be positive"))
+    settings.dmrg.mu_max_iterations >= 1 || throw(ArgumentError("mu_max_iterations must be positive"))
+    settings.dmrg.mu_bracket_step > 0 || throw(ArgumentError("mu_bracket_step must be positive"))
+    settings.dmrg.mu_bracket_growth > 1 || throw(ArgumentError("mu_bracket_growth must exceed 1"))
+    settings.mixing.method in (:linear, :anderson) || throw(ArgumentError("mixing.method must be linear or anderson"))
+    0 < settings.mixing.minimum_damping <= settings.mixing.damping <= settings.mixing.maximum_damping <= 1 ||
+        throw(ArgumentError("mixing damping values must satisfy 0 < min <= damping <= max <= 1"))
+    settings.mixing.memory >= 1 || throw(ArgumentError("Anderson memory must be positive"))
+    settings.convergence.max_period >= 1 || throw(ArgumentError("max_period must be positive"))
+    settings.convergence.hamiltonian_identity_tol > 0 || throw(ArgumentError("hamiltonian_identity_tol must be positive"))
+    settings.convergence.effective_energy_consistency_tol > 0 || throw(ArgumentError("effective_energy_consistency_tol must be positive"))
+    settings.convergence.period_repeats >= 2 || throw(ArgumentError("period_repeats must be at least 2"))
+    settings.convergence.cycle_action in (:stop, :continue) || throw(ArgumentError("cycle_action must be stop or continue"))
+    settings.run.max_iterations >= 1 || throw(ArgumentError("run.max_iterations must be positive"))
+    settings.run.save_every >= 1 || throw(ArgumentError("run.save_every must be positive"))
+    settings.run.initial_seed in (:pairing, :sdw, :cdw, :zero) ||
+        throw(ArgumentError("initial_seed must be pairing, sdw, cdw, or zero"))
+    settings.run.initial_amplitude >= 0 || throw(ArgumentError("initial_amplitude must be nonnegative"))
+    settings.run.parent_checkpoint !== nothing && settings.run.resume_checkpoint !== nothing &&
+        throw(ArgumentError("set either parent_checkpoint or resume_checkpoint, not both"))
+    settings.run.parent_checkpoint !== nothing && settings.run.parent_sha256 === nothing &&
+        throw(ArgumentError("parent_sha256 is required with parent_checkpoint"))
+    settings.run.resume_checkpoint !== nothing && settings.run.resume_sha256 === nothing &&
+        throw(ArgumentError("resume_sha256 is required with resume_checkpoint"))
+    return settings
+end

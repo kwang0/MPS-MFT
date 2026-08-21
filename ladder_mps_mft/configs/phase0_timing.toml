@@ -1,0 +1,50 @@
+[model]
+L = 64
+t = 1.0
+U = 8.0
+V = 0.0
+t0 = 1.0
+tp = 0.1
+density = 0.9375
+mu_initial = 0.0
+r_range = 4
+geometry = "cubic_frustrated"
+
+[pair_binding]
+registry = "data/E_p_values.csv"
+
+[dmrg]
+nsweeps = 2
+maxdim = 64
+cutoff = 1.0e-8
+energy_tol = 0.0
+eigsolve_krylovdim = 8
+max_time_seconds = 3300.0
+output_level = 0
+mu_density_tol = 2.0e-3
+mu_max_iterations = 8
+mu_bracket_step = 0.05
+mu_bracket_growth = 2.0
+mu_interval_tol = 1.0e-6
+
+[runtime]
+backend = "cpu"
+blas_threads = 1
+strided_threads = 1
+threaded_blocksparse = true
+
+[run]
+output_directory = "output"
+branch_label = "phase0_timing_only"
+preparation = "deterministic_pairing_seed"
+direction = "none"
+seed_label = "phase0_seed_20260821"
+random_seed = 20260821
+initial_seed = "pairing"
+initial_amplitude = 1.0e-3
+max_iterations = 1
+save_every = 1
+require_fixed_point = false
+allow_unbound_ep = false
+quick_diagnostics = false
+full_pair_correlations = false
