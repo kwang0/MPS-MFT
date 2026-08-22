@@ -1,14 +1,29 @@
 # Phases 0 to 4
 
-Status date: 2026-08-21.
+Status date: 2026-08-22.
 
 ## Phase 0 — CPU resource calibration
 
-Status: implemented locally; not submitted on Perlmutter.
+Status: v2 matrix completed on Perlmutter but is rejected for wrong density;
+the corrected v1.2.0 workflow is implemented and awaits a new v3 submission.
 
-The matrix uses one immutable L=64, chi=64 warm-start state and benchmarks 11 exclusive configurations: serial, block-sparse at 2/4/8/16 threads, Strided at 2/4/8 threads, and BLAS at 2/4/8 threads. Every candidate runs three copies of the same two-sweep DMRG payload. A candidate is eligible only if its energy per site and density reproduce `serial-t1` within the report tolerances and MaxRSS was measured.
+The matrix uses one immutable, density-targeted L=64, chi=64 warm-start state
+and benchmarks 11 exclusive configurations: serial, block-sparse at 2/4/8/16
+threads, Strided at 2/4/8 threads, and BLAS at 2/4/8 threads. Every candidate
+runs three copies of the same density search, with two DMRG sweeps per search
+evaluation. A candidate is eligible only if every repetition reaches the
+configured target density, follows the serial search path, reproduces
+`serial-t1` energy, density, and chemical potential within the report
+tolerances, has exact provenance and exclusive thread topology, and records
+MaxRSS.
 
-The current guarded worst-case reservation is 1.511718750 Perlmutter CPU node-hours, below the 3-node-hour Phase 0 cap. After the matrix, submit exactly one chi=200, six-sweep validation using the recommended backend and right-sized memory. Do not use the winner for production before that validation.
+The current guarded worst-case reservation is 1.511718750 Perlmutter CPU
+node-hours, below the 3-node-hour Phase 0 cap. The completed v2 matrix used only
+about 0.1017513 node-hours, but its `n=0.5614` workload missed the `n=0.9375`
+target and cannot select a backend. After a fresh schema-v3 matrix passes,
+submit exactly one chi=200, six-sweep-per-evaluation validation using the
+recommended backend and right-sized memory. Do not use the winner for
+production before that validation.
 
 Acceptance evidence:
 

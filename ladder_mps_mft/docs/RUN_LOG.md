@@ -36,3 +36,59 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
 - Root cause: `run.env` attempted to assign `PHASE0_SCRIPT_VERSION` after the worker had declared that variable readonly. Julia never started; neither `metrics/seed.time` nor `seed_state.h5` was created. This is a launcher/process failure and supplies no timing, resource, convergence, or physics evidence.
 - Fix: Phase 0 script v1.0.1 persists the submitted version as `PHASE0_RUN_SCRIPT_VERSION`, verifies it against the worker version after loading, and rejects legacy run environments with a clear message. Preserve the failed run directory and use a new run ID after synchronizing this fix.
 - Validation: the focused shell environment round trip passed, the guarded plan remains `1.511718750` node-hours, and the full 83-test Julia suite passed.
+
+## 2026-08-22 — Phase 0 v2 audit and density-targeted correction
+
+- Run ID: `20260821_phase0_cpu_v2`. Seed job `57393191`, all eleven backend
+  jobs `57393193`--`57393215`, and report job `57393217` completed with exit
+  code `0:0`. The synchronized `sacct.txt` is the resource/accounting source.
+- Provenance is internally consistent across all eleven metrics: git commit
+  `acc60f1725ce9647a57ca9256d6813e5c73e0d71`, implementation fingerprint
+  `8a8920aa75996298b836f6e584bca6946f0f1ce1009212e53c25ab33b084d2fa`,
+  config SHA-256
+  `105a0e78f48324ee4d01942590d61a234bf63dab4aabc7239546dcaf79317e59`,
+  E_p SHA-256
+  `2209bd2ca3c1ad02c0e542d1a9d63ecf90fdfa49120ad9cc3af599a5b4bc1f0e`,
+  and seed SHA-256
+  `b97dc1f3b8e8943e742422d70d84fa05110f7a08e1283c3c7978bae4ca497f29`.
+- Every candidate repeated its energy and density exactly at stored precision;
+  cross-backend differences are at most approximately `1e-15` in energy per
+  site and `1.3e-14` in density. This validates backend equivalence for the
+  calculation that actually ran.
+- Critical failure: the target density was `0.9375`, but the seed density was
+  `0.5614556102812898` and the timing payload density was
+  `0.56137567423918...`, an absolute miss of `0.3761243257608...`. The v2
+  seed and payload called fixed-`mu=0` DMRG directly and bypassed
+  `find_mu_for_density`. Because the anomalous fields conserve total `S_z` and
+  fermion-number parity but not full particle number, the initial product-state
+  density did not constrain the optimized state.
+- Conditional wrong-workload result: `serial-t1` had median `71.666 s`, a
+  `0.77%` repeat range, MaxRSS `1.368 GiB`, and a right-sized projection of
+  `4 GiB`, two physical cores, and `3.1105e-4` node-hours per solve.
+  `blocksparse-t4` was fastest in wall time (`51.318 s`) but `1.43x` the
+  projected charge; `strided-t4` had a `24%` timing range. None of this ranking
+  is promoted because density-search workloads can require multiple DMRGs.
+- Actual v2 charge reconstructed from parent-job elapsed time and allocated
+  CPUs is approximately `0.101751302083` node-hours for seed, matrix, and
+  report. This is budget evidence, not production performance evidence.
+- Decision: reject the v2 recommendation for resource selection and do not
+  submit its chi=200 validation. Preserve all v2 artifacts unchanged.
+- Correction: Phase 0 script v1.2.0 creates a density-targeted seed and times a
+  complete `find_mu_for_density` call from that common seed for every repeat.
+  Metric schema v3 stores target errors, converged chemical potentials, search
+  statuses, and DMRG evaluation counts. The report now requires target-density,
+  repeated search-path, chemical-potential, energy/density, model/config/code/
+  seed provenance, exclusive topology, timing-stability, and MaxRSS gates.
+  The separate chi=200 validation targets density independently at its own
+  converged chemical potential.
+- Configuration: Phase 0 density tolerance is `5e-4`; timing density search has
+  up to 16 evaluations. The guarded worst-case reservation remains
+  `1.511718750` node-hours under the `3.0` cap.
+- Validation: Julia syntax parsing, shell syntax, `git diff --check`, and the
+  guarded plan passed. The full Julia suite passed all 100 tests, including a
+  pairing-seeded end-to-end density search and explicit rejection of a
+  tampered wrong-density metric.
+- Perlmutter jobs submitted by this correction: none. Next action after pushing
+  and pulling the correction is a new immutable
+  `20260822_phase0_cpu_v3` plan/submission; only a passing schema-v3 report may
+  authorize the one chi=200 validation.

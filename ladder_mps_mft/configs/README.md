@@ -1,6 +1,12 @@
 # Configuration guide
 
-`phase0_timing.toml` is a timing-only L=64, chi=64, two-sweep payload. `phase0_validation.toml` expands the same model and seed to chi=200 and six sweeps. Neither runs an SCF loop or constitutes a publishable state.
+`phase0_timing.toml` is a timing-only L=64, chi=64 density-search
+payload, with two DMRG sweeps per chemical-potential evaluation.
+`phase0_validation.toml` expands the same model and seed to chi=200 and six
+sweeps per evaluation. The Phase 0 driver requires every payload repetition to
+retarget the configured density because anomalous pairing conserves fermion
+parity, not full particle number. Neither config runs an SCF loop or constitutes
+a publishable state.
 
 `example_scf.toml` is a production-shaped template. Copy or generate variants before changing it. The `scripts/prepare_branch_scan.jl` helper makes SC, SDW, and CDW configurations that differ only in run lineage and initial seed.
 

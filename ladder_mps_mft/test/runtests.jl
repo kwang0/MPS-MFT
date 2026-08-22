@@ -4,6 +4,7 @@ using ITensorMPS
 using LadderMPSMFT
 using LinearAlgebra
 using Random
+using TOML
 
 const ROOT = normpath(joinpath(@__DIR__, ".."))
 
@@ -106,6 +107,8 @@ end
     @test settings.convergence.unmixed_cycle_probe
     @test settings.convergence.accepted_periods == [1, 2]
     @test settings.convergence.orbit_bulk_fraction == 0.5
+    @test settings.dmrg.mu_density_tol == 5e-4
+    @test settings.dmrg.mu_max_iterations == 16
     @test !settings.run.require_accepted_solution
     first_seed = initial_fields(test_model(); seed=:pairing, rng=MersenneTwister(7))
     second_seed = initial_fields(test_model(); seed=:pairing, rng=MersenneTwister(7))
@@ -120,9 +123,93 @@ end
         command = `bash -c 'source "$1" plan >/dev/null; write_environment "$2/run.env"; load_environment "$2"; printf "%s\n" "$PHASE0_RUN_SCRIPT_VERSION"' bash $script $directory`
         loaded_version = read(command, String)
         environment = read(joinpath(directory, "run.env"), String)
-        @test occursin(r"(?m)^PHASE0_RUN_SCRIPT_VERSION=1\.0\.1$", environment)
+        @test occursin(r"(?m)^PHASE0_RUN_SCRIPT_VERSION=1\.2\.0$", environment)
         @test !occursin(r"(?m)^PHASE0_SCRIPT_VERSION=", environment)
-        @test strip(loaded_version) == "1.0.1"
+        @test strip(loaded_version) == "1.2.0"
+    end
+end
+
+@testset "density-targeted Phase 0 payload and report" begin
+    config = joinpath(ROOT, "test", "fixtures", "phase0_tiny.toml")
+    seed_script = joinpath(ROOT, "scripts", "phase0_prepare_seed.jl")
+    payload_script = joinpath(ROOT, "scripts", "phase0_payload.jl")
+    report_script = joinpath(ROOT, "scripts", "phase0_report.jl")
+    julia = Base.julia_cmd()
+    mktempdir() do directory
+        seed_path = joinpath(directory, "seed_state.h5")
+        run(pipeline(
+            `$julia --startup-file=no --project=$ROOT $seed_script $config $seed_path`,
+            stdout=devnull,
+        ))
+        seed = h5open(seed_path, "r") do file
+            return (
+                schema=Int(read(file, "schema_version")),
+                density=Float64(read(file, "density")),
+                target=Float64(read(file, "target_density")),
+                tolerance=Float64(read(file, "mu_density_tolerance")),
+                converged=Bool(read(file, "mu_density_converged")),
+                chemical_potential=Float64(read(file, "chemical_potential")),
+            )
+        end
+        @test seed.schema == 2
+        @test seed.converged
+        @test abs(seed.density - seed.target) <= seed.tolerance
+        @test isfinite(seed.chemical_potential)
+
+        metrics_directory = joinpath(directory, "metrics")
+        mkpath(metrics_directory)
+        metric_path = joinpath(metrics_directory, "serial-t1.toml")
+        payload_command = addenv(
+            `$julia --startup-file=no --project=$ROOT $payload_script $config $metric_path serial-t1 serial`,
+            "PHASE0_SEED_STATE" => seed_path,
+            "PHASE0_REPETITIONS" => "1",
+            "PHASE0_COMPILE_WARMUP" => "0",
+        )
+        run(pipeline(payload_command, stdout=devnull))
+        metric = TOML.parsefile(metric_path)
+        @test metric["schema_version"] == 3
+        @test metric["seed_mu_density_converged"]
+        @test all(metric["mu_density_converged"])
+        @test metric["maximum_density_error_to_target"] <= metric["density_target_tolerance"]
+        @test metric["seed_chemical_potential"] ≈ seed.chemical_potential
+        @test metric["seed_config_sha256"] == metric["config_sha256"]
+        @test length(metric["chemical_potentials"]) == 1
+        @test length(metric["mu_evaluations"]) == 1
+
+        write(joinpath(directory, "candidates.tsv"),
+            "label\tjulia_threads\tbackend\tslurm_logical_cpus\nserial-t1\t1\tserial\t2\n")
+        write(joinpath(metrics_directory, "serial-t1.time"),
+            "Maximum resident set size (kbytes): 1024\nExit status: 0\n")
+        run(pipeline(
+            `$julia --startup-file=no --project=$ROOT $report_script $directory`,
+            stdout=devnull,
+        ))
+        recommendation = read(joinpath(directory, "recommendation.md"), String)
+        @test occursin("Target density / achieved maximum error", recommendation)
+        @test !occursin("Validation metric present", recommendation)
+
+        bad_directory = joinpath(directory, "bad-density")
+        bad_metrics = joinpath(bad_directory, "metrics")
+        mkpath(bad_metrics)
+        write(joinpath(bad_directory, "candidates.tsv"),
+            "label\tjulia_threads\tbackend\tslurm_logical_cpus\nserial-t1\t1\tserial\t2\n")
+        bad_metric = deepcopy(metric)
+        bad_metric["densities"] = [0.5]
+        bad_metric["representative_density"] = 0.5
+        bad_metric["density_spread"] = 0.0
+        bad_metric["density_errors_to_target"] = [abs(0.5 - bad_metric["target_density"])]
+        bad_metric["maximum_density_error_to_target"] = only(bad_metric["density_errors_to_target"])
+        open(joinpath(bad_metrics, "serial-t1.toml"), "w") do io
+            TOML.print(io, bad_metric; sorted=true)
+        end
+        write(joinpath(bad_metrics, "serial-t1.time"),
+            "Maximum resident set size (kbytes): 1024\nExit status: 0\n")
+        bad_report = run(pipeline(
+            ignorestatus(`$julia --startup-file=no --project=$ROOT $report_script $bad_directory`),
+            stdout=devnull,
+            stderr=devnull,
+        ))
+        @test !success(bad_report)
     end
 end
 

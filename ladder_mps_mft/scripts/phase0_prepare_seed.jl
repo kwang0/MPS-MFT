@@ -25,21 +25,30 @@ psi0 = productMPS(
     sites,
     density_product_state(2 * settings.model.L, settings.model.density; rng=MersenneTwister(settings.run.random_seed)),
 )
-hamiltonian = build_mf_mpo(sites, settings.model, fields, settings.model.mu_initial)
-result = run_dmrg_ground(
+result = find_mu_for_density(
     sites,
-    hamiltonian,
-    settings.model.density,
+    settings.model,
+    fields,
+    settings.model.mu_initial,
     settings.dmrg;
     psi_init=psi0,
     rng=MersenneTwister(settings.run.random_seed),
     deadline=time() + settings.dmrg.max_time_seconds,
 )
-result.timed_out && error("Phase 0 seed DMRG reached its time limit")
+result.timed_out && error("Phase 0 density-targeted seed search reached its time limit")
+result.converged || error(
+    "Phase 0 seed failed density targeting: status=$(result.status), " *
+    "density=$(result.density), target=$(settings.model.density), evaluations=$(result.evaluations)",
+)
+seed_density = LadderMPSMFT.average_density(result.psi)
+seed_density_error = abs(seed_density - settings.model.density)
+seed_density_error <= settings.dmrg.mu_density_tol || error(
+    "Phase 0 seed density error $seed_density_error exceeds tolerance $(settings.dmrg.mu_density_tol)",
+)
 mkpath(dirname(output_path))
 temporary = tempname(dirname(output_path))
 h5open(temporary, "w") do file
-    file["schema_version"] = 1
+    file["schema_version"] = 2
     file["artifact_kind"] = "phase0_timing_seed"
     file["scientific_state"] = false
     file["psi"] = result.psi
@@ -48,7 +57,14 @@ h5open(temporary, "w") do file
     fields_group["beta"] = fields.beta
     fields_group["mu_cdw"] = fields.mu_cdw
     file["energy"] = result.energy
-    file["density"] = LadderMPSMFT.average_density(result.psi)
+    file["chemical_potential"] = result.mu
+    file["density"] = seed_density
+    file["target_density"] = settings.model.density
+    file["density_error"] = seed_density_error
+    file["mu_density_tolerance"] = settings.dmrg.mu_density_tol
+    file["mu_search_status"] = String(result.status)
+    file["mu_evaluations"] = result.evaluations
+    file["mu_density_converged"] = result.converged
     file["maximum_bond_dimension"] = maxlinkdim(result.psi)
     file["model_fingerprint"] = LadderMPSMFT.model_fingerprint(settings.model)
     file["config_sha256"] = LadderMPSMFT.sha256_file(config_path)
@@ -61,3 +77,7 @@ end
 mv(temporary, output_path)
 println("seed_path=$output_path")
 println("seed_sha256=$(LadderMPSMFT.sha256_file(output_path))")
+println("seed_mu=$(result.mu)")
+println("seed_density=$seed_density")
+println("seed_density_error=$seed_density_error")
+println("seed_mu_evaluations=$(result.evaluations)")

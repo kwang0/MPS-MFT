@@ -5,7 +5,7 @@
 
 set -euo pipefail
 
-readonly PHASE0_SCRIPT_VERSION="1.0.1"
+readonly PHASE0_SCRIPT_VERSION="1.2.0"
 readonly MIB_PER_LOGICAL_CPU=1952
 readonly PHYSICAL_CORES_PER_NODE=128
 
@@ -106,16 +106,18 @@ print_plan() {
   cat <<EOF
 Ladder MPS+MF Phase 0 CPU calibration
 
-Timing payload:      L=64, chi=64, 2 sweeps, cubic_frustrated
-Candidate jobs:      $count (${PHASE0_REPETITIONS} identical solves each)
-Shared seed:         one immutable chi=64 warm-start state (not a scientific result)
+Timing payload:      L=64, chi=64, 2 sweeps/evaluation, cubic_frustrated
+Candidate jobs:      $count (${PHASE0_REPETITIONS} identical density searches each)
+Shared seed:         one immutable, density-targeted chi=64 warm-start state
 Backends:            serial, block-sparse, Strided, BLAS; mutually exclusive
 Candidate request:   ${PHASE0_BENCH_MEMORY}, ${PHASE0_BENCH_TIME}, shared QOS
 Validation:          L=64, chi=200, 6 sweeps; submitted only after reporting
 Worst-case reserve:  $bound node-hours
 Enforced Phase 0 cap: $PHASE0_MAX_NODE_HOURS node-hours
 
-The matrix ranks only candidates that reproduce serial-t1 energy and density.
+The matrix ranks only candidates that reproduce the serial-t1 density-search path, chemical
+potential, energy, and density. Every repetition starts from the same seed and retargets the
+configured density; a fixed-mu solve is not accepted as a proxy.
 Run \`bash $script_path submit [RUN_ID]\` to perform the external state change.
 EOF
   if awk -v bound="$bound" -v cap="$PHASE0_MAX_NODE_HOURS" 'BEGIN {exit !(bound > cap)}'; then

@@ -10,9 +10,13 @@ The implementation currently provides:
 - a mixer-independent raw-map probe that accepts physical period-two mean-field solutions, followed only when needed by adaptive linear or Anderson fixed-point acceleration;
 - immutable final HDF5 states, hash-checked parent/restart lineage, model/numerics/implementation fingerprints, and accepted-only selection;
 - charge and spin structure factors, `K_rho`, rung-cut entanglement/central-charge fits, sign-resolved pair correlations, and separate fixed-sector spin/charge/pair-gap calculations;
-- a guarded Perlmutter Phase 0 CPU calibration with exclusive ITensor threading backends, a common immutable warm-start state, numerical-equivalence gates, shared-QOS budget accounting, and a separate chi=200 validation.
+- a guarded Perlmutter Phase 0 CPU calibration with exclusive ITensor threading backends, a common immutable density-targeted warm-start state, full density-search payloads, numerical-equivalence gates, shared-QOS budget accounting, and a separate chi=200 validation.
 
-Phase 0 has been implemented and validated locally at smoke-test scale. No Perlmutter jobs have been submitted, so there is not yet evidence that CPU is cheaper or faster than the legacy GPU path.
+The first complete Perlmutter matrix (`20260821_phase0_cpu_v2`) is retained as
+backend-equivalence evidence but rejected for resource selection because it
+accidentally ran at `n=0.5614` rather than `n=0.9375`. Phase 0 v1.2.0 corrects
+that workload and awaits a new run. There is not yet evidence that CPU is
+cheaper or faster than the legacy GPU path.
 
 ## Quick start
 
@@ -47,6 +51,8 @@ julia --project=. scripts/compare_branches.jl /path/to/sc/state.h5 /path/to/sdw/
 ```
 
 See `docs/PHASES_0_TO_4.md` for the staged plan, `docs/LITERATURE_AND_PUBLICATION_GATES.md` for numerical context, and `docs/RUN_LOG.md` for the append-only synchronization record.
+The v2 data-quality decision and conditional timing observations are recorded
+in `docs/PHASE0_V2_AUDIT.md`.
 
 ## Important interpretation rules
 
