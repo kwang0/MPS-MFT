@@ -114,6 +114,18 @@ end
     @test all(iszero, first_seed.beta)
 end
 
+@testset "Phase 0 run environment round trip" begin
+    script = joinpath(ROOT, "slurm", "phase0_calibrate_cpu.sh")
+    mktempdir() do directory
+        command = `bash -c 'source "$1" plan >/dev/null; write_environment "$2/run.env"; load_environment "$2"; printf "%s\n" "$PHASE0_RUN_SCRIPT_VERSION"' bash $script $directory`
+        loaded_version = read(command, String)
+        environment = read(joinpath(directory, "run.env"), String)
+        @test occursin(r"(?m)^PHASE0_RUN_SCRIPT_VERSION=1\.0\.1$", environment)
+        @test !occursin(r"(?m)^PHASE0_SCRIPT_VERSION=", environment)
+        @test strip(loaded_version) == "1.0.1"
+    end
+end
+
 @testset "variational double-counting functional" begin
     model = test_model()
     fields = test_fields()
