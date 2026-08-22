@@ -89,6 +89,11 @@ function load_settings(path::AbstractString)
         period_repeats=Int(_value(convergence_raw, "period_repeats", 3)),
         period_abs_tol=Float64(_value(convergence_raw, "period_abs_tol", 2e-6)),
         period_rel_tol=Float64(_value(convergence_raw, "period_rel_tol", 1e-2)),
+        unmixed_cycle_probe=Bool(_value(convergence_raw, "unmixed_cycle_probe", true)),
+        probe_max_period=Int(_value(convergence_raw, "probe_max_period", 2)),
+        probe_iterations=Int(_value(convergence_raw, "probe_iterations", 20)),
+        accepted_periods=sort(unique(Int.(_value(convergence_raw, "accepted_periods", [1, 2])))),
+        orbit_bulk_fraction=Float64(_value(convergence_raw, "orbit_bulk_fraction", 0.5)),
         cycle_action=Symbol(lowercase(String(_value(convergence_raw, "cycle_action", "stop")))),
         stagnation_window=Int(_value(convergence_raw, "stagnation_window", 10)),
         stagnation_min_relative_improvement=Float64(_value(convergence_raw, "stagnation_min_relative_improvement", 1e-2)),
@@ -115,7 +120,11 @@ function load_settings(path::AbstractString)
         resume_sha256=haskey(run_raw, "resume_sha256") ? lowercase(String(run_raw["resume_sha256"])) : nothing,
         max_iterations=Int(_value(run_raw, "max_iterations", 80)),
         save_every=Int(_value(run_raw, "save_every", 1)),
-        require_fixed_point=Bool(_value(run_raw, "require_fixed_point", true)),
+        require_accepted_solution=Bool(_value(
+            run_raw,
+            "require_accepted_solution",
+            _value(run_raw, "require_fixed_point", true),
+        )),
         allow_unbound_ep=allow_unbound,
         quick_diagnostics=Bool(_value(run_raw, "quick_diagnostics", true)),
         full_pair_correlations=Bool(_value(run_raw, "full_pair_correlations", false)),
@@ -151,6 +160,23 @@ function validate_settings(settings::ProjectSettings)
     settings.convergence.hamiltonian_identity_tol > 0 || throw(ArgumentError("hamiltonian_identity_tol must be positive"))
     settings.convergence.effective_energy_consistency_tol > 0 || throw(ArgumentError("effective_energy_consistency_tol must be positive"))
     settings.convergence.period_repeats >= 2 || throw(ArgumentError("period_repeats must be at least 2"))
+    settings.convergence.probe_max_period >= 2 || throw(ArgumentError("probe_max_period must be at least 2"))
+    settings.convergence.probe_max_period <= settings.convergence.max_period || throw(ArgumentError(
+        "probe_max_period cannot exceed max_period",
+    ))
+    !isempty(settings.convergence.accepted_periods) || throw(ArgumentError("accepted_periods cannot be empty"))
+    1 in settings.convergence.accepted_periods || throw(ArgumentError("accepted_periods must include period 1"))
+    all(period -> 1 <= period <= settings.convergence.probe_max_period, settings.convergence.accepted_periods) ||
+        throw(ArgumentError("accepted_periods must lie between 1 and probe_max_period"))
+    0 < settings.convergence.orbit_bulk_fraction <= 1 || throw(ArgumentError(
+        "orbit_bulk_fraction must lie in (0,1]",
+    ))
+    minimum_probe_iterations = settings.convergence.probe_max_period *
+        (settings.convergence.period_repeats + 1) + 1
+    (!settings.convergence.unmixed_cycle_probe || settings.convergence.probe_iterations >= minimum_probe_iterations) ||
+        throw(ArgumentError(
+            "probe_iterations must be at least $minimum_probe_iterations for all-phase orbit validation",
+        ))
     settings.convergence.cycle_action in (:stop, :continue) || throw(ArgumentError("cycle_action must be stop or continue"))
     settings.run.max_iterations >= 1 || throw(ArgumentError("run.max_iterations must be positive"))
     settings.run.save_every >= 1 || throw(ArgumentError("run.save_every must be positive"))

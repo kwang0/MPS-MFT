@@ -49,6 +49,6 @@ open(manifest_path, "w") do io
         println(io, "- `julia --project=. scripts/run_scf.jl $path`")
     end
     println(io)
-    println(io, "Only after all branches are accepted fixed points, compare their immutable `state.h5` files with `scripts/compare_branches.jl`. The comparison script rejects mismatched model fingerprints and non-fixed-point states.")
+    println(io, "Only after all branches are accepted fixed points or unmixed validated periodic solutions, compare their immutable `state.h5` files with `scripts/compare_branches.jl`. The comparison script rejects mismatched fingerprints and mixer-dependent recurrences.")
 end
 println("manifest_path=$manifest_path")

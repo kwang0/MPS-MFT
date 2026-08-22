@@ -53,6 +53,11 @@ Base.@kwdef struct ConvergenceSettings
     period_repeats::Int = 3
     period_abs_tol::Float64 = 2e-6
     period_rel_tol::Float64 = 1e-2
+    unmixed_cycle_probe::Bool = true
+    probe_max_period::Int = 2
+    probe_iterations::Int = 20
+    accepted_periods::Vector{Int} = [1, 2]
+    orbit_bulk_fraction::Float64 = 0.5
     cycle_action::Symbol = :stop
     stagnation_window::Int = 10
     stagnation_min_relative_improvement::Float64 = 1e-2
@@ -81,7 +86,7 @@ Base.@kwdef struct RunSettings
     resume_sha256::Union{Nothing,String} = nothing
     max_iterations::Int = 80
     save_every::Int = 1
-    require_fixed_point::Bool = true
+    require_accepted_solution::Bool = true
     allow_unbound_ep::Bool = false
     quick_diagnostics::Bool = true
     full_pair_correlations::Bool = false
@@ -139,7 +144,13 @@ Base.@kwdef struct ConvergenceDiagnostic
     status::Symbol = :insufficient_history
     accepted::Bool = false
     reason::String = "insufficient history"
+    solution_kind::Symbol = :none
     fundamental_period::Int = 0
+    orbit_validated::Bool = false
+    unmixed_probe::Bool = false
+    solution_canonical_variational_energy::Float64 = NaN
+    orbit_energy_spread::Float64 = NaN
+    orbit_density_contrast::Float64 = NaN
     fixed_point_abs_residual::Float64 = Inf
     fixed_point_rel_residual::Float64 = Inf
     cycle_abs_residual::Float64 = Inf
@@ -153,6 +164,7 @@ end
 
 Base.@kwdef struct IterationRecord
     iteration::Int
+    update_mode::Symbol = :unknown
     applied::FieldState
     measured::FieldState
     correlations::CorrelationState

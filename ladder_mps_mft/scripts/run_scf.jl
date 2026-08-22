@@ -9,6 +9,6 @@ println("state_path=$(result.state_path)")
 println("summary_path=$(result.summary_path)")
 println("status=$(result.diagnostic.status)")
 println("accepted=$(result.diagnostic.accepted)")
-if settings.run.require_fixed_point && !result.diagnostic.accepted
+if settings.run.require_accepted_solution && !result.diagnostic.accepted
     exit(2)
 end

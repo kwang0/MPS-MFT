@@ -10,9 +10,9 @@ For a trial MPS `psi`, the effective single-ladder Hamiltonian is written
 H_eff = H_ladder - mu N + H_lin[alpha,beta,mu_mf].
 ```
 
-The DMRG eigenvalue by itself depends on the chemical potential and on how the decoupled transverse terms were split between linear fields and constants. It therefore cannot rank SDW, CDW, and SC fixed points.
+The DMRG eigenvalue by itself depends on the chemical potential and on how the decoupled transverse terms were split between linear fields and constants. It therefore cannot rank SDW, CDW, and SC solutions.
 
-Let `L = <H_lin>` use the fields actually applied in `H_eff`. Let `E_perp` be the quadratic transverse mean-field energy evaluated from the measured correlators and therefore from the newly measured self-consistent fields. The required double-counting constant is
+Let `L = <H_lin>` use the partner fields actually applied in `H_eff`. The quadratic transverse mean-field energy `E_perp` is evaluated from those applied partner fields and the current MPS correlators. At a period-one solution, applied and newly measured fields coincide. At a physical period-`p` solution, the applied fields belong to the preceding orbit phase and must remain distinct. The required double-counting constant is
 
 ```text
 C_dc = E_perp - L.
@@ -48,7 +48,9 @@ L_density  = sum_a mu_mf,a n_a
 E_density  = 1/2 sum_a mu_mf,a delta n_a.
 ```
 
-Thus the pair and exchange constants remove one copy of a bilinear mean-field contraction, while the density constant also contains the reference-density shift. These are the “MF double-counting constants”: they restore the expectation value of the original quadratic mean-field functional after its derivative has been inserted as a linear one-body field. Away from a fixed point the applied field is used only in `L`, while the measured field is used in `E_perp`; at convergence they coincide.
+Thus the pair and exchange constants remove one copy of a bilinear mean-field contraction, while the density constant also contains the reference-density shift. These are the “MF double-counting constants”: they restore the expectation value of the original quadratic mean-field functional after its derivative has been inserted as a linear one-body field.
+
+For a physical two-cycle, phase A is solved in the fields produced by phase B and vice versa. Each phase energy therefore uses its applied partner field. The reported solution energy is the arithmetic mean of the two phase energies. Replacing the partner field by an Anderson average or by phase A's outgoing field would change the physical transverse contraction and can erase the CDW solution.
 
 ## Internal identity check
 
@@ -62,8 +64,8 @@ The error per physical site must pass `hamiltonian_identity_tol`. The final DMRG
 
 ## When a comparison is permitted
 
-`scripts/compare_branches.jl` requires every state to be an accepted period-1 fixed point and requires identical model, numerical, implementation, and E_p-registry fingerprints. It rejects cross-geometry ranking because the geometries define different Hamiltonians.
+`scripts/compare_branches.jl` accepts either a gated period-one fixed point or an unmixed, validated periodic solution. It requires identical model, numerical, implementation, and E_p-registry fingerprints. For a periodic solution it ranks the orbit-averaged canonical energy, never a single phase or an averaged field. It rejects cross-geometry ranking because the geometries define different Hamiltonians.
 
-This functional is stationary only at a self-consistent solution. Energies from intermediate iterations or periodic SCF cycles are diagnostic and must not be published as phase competition.
+Mixer-dependent recurrences and intermediate iterations remain diagnostic. A periodic branch may enter phase competition only when every phase, recurrence link, density, phase-energy recurrence, and Hamiltonian-consistency gate passes in the unmixed probe. Periods beyond those explicitly mapped to the transverse physics remain candidates rather than automatically accepted solutions.
 
 The implementation restores field-dependent mean-field constants. A field-independent offset from the underlying perturbative derivation, if present, cancels among branches of the same model but would be needed for an absolute comparison between different transverse geometries. This is another reason cross-geometry phase ranking is disabled.

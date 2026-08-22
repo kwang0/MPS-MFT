@@ -58,13 +58,14 @@ function test_energy(value=0.0)
     )
 end
 
-function test_record(iteration, applied, measured; energy=0.0, density=1.0)
+function test_record(iteration, applied, measured; energy=0.0, density=1.0, update_mode=:unknown, correlations=test_correlations())
     absolute, relative = LadderMPSMFT.hybrid_distance(measured, applied)
     return IterationRecord(;
         iteration=iteration,
+        update_mode,
         applied,
         measured,
-        correlations=test_correlations(),
+        correlations,
         density,
         chemical_potential=0.0,
         mu_search_status=:density_tolerance,
@@ -102,6 +103,10 @@ end
     @test settings.model.ep_signed < 0
     @test settings.run.initial_seed == :pairing
     @test settings.runtime.backend == :cpu
+    @test settings.convergence.unmixed_cycle_probe
+    @test settings.convergence.accepted_periods == [1, 2]
+    @test settings.convergence.orbit_bulk_fraction == 0.5
+    @test !settings.run.require_accepted_solution
     first_seed = initial_fields(test_model(); seed=:pairing, rng=MersenneTwister(7))
     second_seed = initial_fields(test_model(); seed=:pairing, rng=MersenneTwister(7))
     @test first_seed.alpha == second_seed.alpha
@@ -143,7 +148,7 @@ end
         fields,
         correlations,
         model;
-        self_consistent_fields=measured_fields,
+        interaction_fields=measured_fields,
     )
     @test off_fixed_point.pair_field_energy ≈ -0.24
     @test off_fixed_point.pair_transverse_energy ≈ -0.24
@@ -172,9 +177,11 @@ end
         period_rel_tol=1e-10,
         stagnation_window=20,
     )
-    @test detect_period(test_fields.([0.0, 1.0, 0.0, 1.0, 0.0]), settings).period == 2
-    @test detect_period(test_fields.([0.0, 1.0, 2.0, 0.0, 1.0, 2.0, 0.0]), settings).period == 3
-    @test detect_period(test_fields.([0.0, 1.0, 2.0, 3.0, 0.0, 1.0, 2.0, 3.0, 0.0]), settings).period == 4
+    @test detect_period(test_fields.([0.0, 1.0, 0.0, 1.0, 0.0, 1.0]), settings).period == 2
+    @test detect_period(test_fields.([0.0, 1.0, 2.0, 0.0, 1.0, 2.0, 0.0, 1.0, 2.0]), settings).period == 3
+    @test detect_period(test_fields.([0.0, 1.0, 2.0, 3.0, 0.0, 1.0, 2.0, 3.0, 0.0, 1.0, 2.0, 3.0]), settings).period == 4
+    # Repeating only one phase is insufficient: every phase must recur.
+    @test detect_period(test_fields.([0.0, 1.0, 0.0, 2.0, 0.0, 3.0]), settings).period == 0
 
     fixed_records = [
         test_record(1, test_fields(1.0), test_fields(1.0 + 1e-12)),
@@ -184,12 +191,40 @@ end
     @test fixed.status == :fixed_point
     @test fixed.accepted
 
-    values = [0.0, 1.0, 0.0, 1.0, 0.0]
-    cycle_records = [test_record(index, test_fields(-value - 0.1), test_fields(value)) for (index, value) in enumerate(values)]
+    values = [0.0, 1.0, 0.0, 1.0, 0.0, 1.0]
+    applied_values = [1.0, values[1:end - 1]...]
+    cycle_records = IterationRecord[]
+    for (index, value) in enumerate(values)
+        correlations = test_correlations()
+        profile = value == 0.0 ? [0.6, 0.4, 0.6, 0.4] : [0.4, 0.6, 0.4, 0.6]
+        correlations.density_down .= profile
+        correlations.density_up .= profile
+        push!(cycle_records, test_record(
+            index,
+            test_fields(applied_values[index]),
+            test_fields(value);
+            energy=isodd(index) ? 0.0 : 2.0,
+            update_mode=:unmixed_probe,
+            correlations,
+        ))
+    end
     cycle = assess_convergence(cycle_records, settings, 1.0)
-    @test cycle.status == :periodic_cycle
+    @test cycle.status == :periodic_solution
     @test cycle.fundamental_period == 2
-    @test !cycle.accepted
+    @test cycle.accepted
+    @test cycle.orbit_validated
+    @test cycle.solution_canonical_variational_energy ≈ 1.0
+    @test cycle.orbit_energy_spread ≈ 2.0
+    @test cycle.orbit_density_contrast ≈ 0.4
+
+    mixed_cycle_records = [
+        test_record(index, test_fields(applied_values[index]), test_fields(value); update_mode=:anderson)
+        for (index, value) in enumerate(values)
+    ]
+    mixed_cycle = assess_convergence(mixed_cycle_records, settings, 1.0)
+    @test mixed_cycle.status == :periodic_candidate
+    @test !mixed_cycle.accepted
+    @test !mixed_cycle.orbit_validated
 end
 
 @testset "mixing" begin
@@ -200,6 +235,14 @@ end
     mixed, metadata = mix_fields!(state, applied, measured, settings)
     @test mixed.mu_cdw[1, 1] ≈ 0.25
     @test metadata.method == :linear
+
+    anderson = MixingSettings(method=:anderson, damping=0.5, minimum_damping=0.1,
+        maximum_damping=0.8, adaptive=false, regularization=1e-12)
+    anderson_state = LadderMPSMFT.MixingState(anderson)
+    mix_fields!(anderson_state, test_fields(0.0), test_fields(1.0), anderson)
+    midpoint, metadata = mix_fields!(anderson_state, test_fields(1.0), test_fields(0.0), anderson)
+    @test metadata.method == :anderson
+    @test midpoint.mu_cdw[1, 1] ≈ 0.5 atol=1e-10
 end
 
 @testset "ladder diagnostics primitives" begin
@@ -226,7 +269,11 @@ end
             status=:fixed_point,
             accepted=true,
             reason="test fixed point",
+            solution_kind=:fixed_point,
             fundamental_period=1,
+            solution_canonical_variational_energy=0.0,
+            orbit_energy_spread=0.0,
+            orbit_density_contrast=0.0,
             fixed_point_abs_residual=0.0,
             fixed_point_rel_residual=0.0,
             cycle_abs_residual=0.0,
@@ -257,10 +304,102 @@ end
         )
         second_path = joinpath(directory, "nested", "second", "state.h5")
         second_record = test_record(1, test_fields(0.0), test_fields(0.0); energy=-0.1)
-        write_checkpoint(second_path; settings=second_settings, psi, records=[second_record], diagnostic,
+        second_diagnostic = ConvergenceDiagnostic(
+            status=:fixed_point,
+            accepted=true,
+            reason="test fixed point",
+            solution_kind=:fixed_point,
+            fundamental_period=1,
+            solution_canonical_variational_energy=-0.1,
+            orbit_energy_spread=0.0,
+            orbit_density_contrast=0.0,
+            fixed_point_abs_residual=0.0,
+            fixed_point_rel_residual=0.0,
+            cycle_abs_residual=0.0,
+            cycle_rel_residual=0.0,
+            density_error=0.0,
+            variational_energy_change=0.0,
+            hamiltonian_identity_error_per_site=0.0,
+            effective_eigenvalue_error_per_site=0.0,
+            best_iteration=1,
+        )
+        write_checkpoint(second_path; settings=second_settings, psi, records=[second_record], diagnostic=second_diagnostic,
             restart_fields=test_fields(0.0), chemical_potential=0.0, immutable=true)
         ranking = compare_variational_branches([path, second_path])
         @test first(ranking).path == second_path
         @test first(ranking).energy ≈ -0.1
+
+        periodic_path = joinpath(directory, "nested", "periodic", "state.h5")
+        periodic_records = [
+            test_record(1, test_fields(1.0), test_fields(0.0); energy=-0.2, update_mode=:unmixed_probe),
+            test_record(2, test_fields(0.0), test_fields(1.0); energy=-0.4, update_mode=:unmixed_probe),
+        ]
+        periodic_diagnostic = ConvergenceDiagnostic(
+            status=:periodic_solution,
+            accepted=true,
+            reason="test periodic solution",
+            solution_kind=:periodic_orbit,
+            fundamental_period=2,
+            orbit_validated=true,
+            unmixed_probe=true,
+            solution_canonical_variational_energy=-0.3,
+            orbit_energy_spread=0.2,
+            orbit_density_contrast=0.5,
+            cycle_abs_residual=0.0,
+            cycle_rel_residual=0.0,
+            density_error=0.0,
+            variational_energy_change=0.0,
+            hamiltonian_identity_error_per_site=0.0,
+            effective_eigenvalue_error_per_site=0.0,
+            best_iteration=2,
+        )
+        phase_psis = Dict(1 => deepcopy(psi), 2 => deepcopy(psi))
+        write_checkpoint(
+            periodic_path;
+            settings,
+            psi,
+            records=periodic_records,
+            diagnostic=periodic_diagnostic,
+            restart_fields=test_fields(0.0),
+            chemical_potential=0.0,
+            immutable=true,
+            phase_psis,
+        )
+        periodic_checkpoint = read_checkpoint(periodic_path)
+        @test periodic_checkpoint.accepted
+        @test periodic_checkpoint.fundamental_period == 2
+        @test periodic_checkpoint.orbit_validated
+        @test length(read_orbit_phase_states(periodic_path)) == 2
+        ranking = compare_variational_branches([path, second_path, periodic_path])
+        @test first(ranking).path == periodic_path
+        @test first(ranking).energy ≈ -0.3
+
+        invalid_periodic_path = joinpath(directory, "nested", "invalid-periodic", "state.h5")
+        invalid_periodic_diagnostic = ConvergenceDiagnostic(
+            status=:periodic_solution,
+            accepted=true,
+            reason="deliberately inconsistent test artifact",
+            solution_kind=:periodic_orbit,
+            fundamental_period=2,
+            orbit_validated=false,
+            unmixed_probe=false,
+            solution_canonical_variational_energy=-1.0,
+            best_iteration=2,
+        )
+        write_checkpoint(
+            invalid_periodic_path;
+            settings,
+            psi,
+            records=periodic_records,
+            diagnostic=invalid_periodic_diagnostic,
+            restart_fields=test_fields(0.0),
+            chemical_potential=0.0,
+            immutable=true,
+        )
+        @test length(select_completed_runs(directory)) == 3
+        included = select_completed_runs(directory; include_incomplete=true)
+        invalid_row = only(filter(row -> row.path == invalid_periodic_path, included))
+        @test invalid_row.plot_style == "hatched"
+        @test_throws ArgumentError compare_variational_branches([path, invalid_periodic_path])
     end
 end

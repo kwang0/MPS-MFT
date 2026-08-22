@@ -38,5 +38,5 @@ random_seed = 7
 initial_seed = "pairing"
 initial_amplitude = 1.0e-3
 max_iterations = 1
-require_fixed_point = false
+require_accepted_solution = false
 quick_diagnostics = false

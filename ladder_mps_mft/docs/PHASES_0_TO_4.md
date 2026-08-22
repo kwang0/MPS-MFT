@@ -18,11 +18,11 @@ Acceptance evidence:
 - numerical equivalence to serial and successful chi=200 validation;
 - an entry in `RUN_LOG.md` that distinguishes timing validation from scientific convergence.
 
-## Phase 1 — controlled fixed-point branches
+## Phase 1 — controlled fixed-point and periodic branches
 
-Run independent pairing, SDW, and CDW seeds at one representative model point for each transverse geometry. Require period-1 convergence, density, energy-change, Hamiltonian-identity, and DMRG-energy consistency gates. Repeat the lowest-energy branch from a second seed. Diagnose any period-p orbit without averaging it.
+Run independent pairing, SDW, and CDW seeds at one representative model point for each transverse geometry. Begin with the unmixed period-two probe. Require either gated period-one convergence or a gated all-phase periodic solution, then repeat the lowest-energy branch from a second seed. Archive every orbit phase without averaging it; periods beyond two remain candidates until their transverse-sublattice meaning is established.
 
-Phase 1 is complete only when accepted immutable states can be ranked by the common zero-temperature functional at matched model and numerical fingerprints.
+Phase 1 is complete only when accepted immutable fixed points or unmixed validated periodic solutions can be ranked by the common zero-temperature functional at matched model and numerical fingerprints. Periodic branches use phase-resolved artifacts and orbit-averaged energies; fields are never averaged.
 
 ## Phase 2 — transition and hysteresis scans
 

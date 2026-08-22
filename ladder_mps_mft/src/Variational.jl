@@ -25,19 +25,23 @@ function variational_energy(
     correlations::CorrelationState,
     model::ModelSettings,
     ;
-    self_consistent_fields::FieldState=fields,
+    interaction_fields::FieldState=fields,
     effective_expectation::Real=effective_eigenvalue,
     bare_ladder_energy::Real=NaN,
 )
     linear = field_energy_components(fields, correlations, model)
-    transverse_linear = field_energy_components(self_consistent_fields, correlations, model)
+    # `fields` are the fields applied by the partner transverse subsystem. At
+    # a fixed point they equal the measured fields. On a physical p-cycle they
+    # belong to the preceding orbit phase and must not be replaced by an
+    # Anderson/linear average or by the current phase's outgoing fields.
+    transverse_linear = field_energy_components(interaction_fields, correlations, model)
     density_delta_down = correlations.density_down .- 0.5
     density_delta_up = correlations.density_up .- 0.5
     pair_transverse = 0.5 * transverse_linear.pair
     exchange_transverse = 0.5 * transverse_linear.exchange
     density_transverse = 0.5 * (
-        dot(self_consistent_fields.mu_cdw[1, :], density_delta_down) +
-        dot(self_consistent_fields.mu_cdw[2, :], density_delta_up)
+        dot(interaction_fields.mu_cdw[1, :], density_delta_down) +
+        dot(interaction_fields.mu_cdw[2, :], density_delta_up)
     )
     correction = pair_transverse + exchange_transverse + density_transverse -
         (linear.pair + linear.exchange + linear.density)

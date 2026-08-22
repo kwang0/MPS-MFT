@@ -271,12 +271,25 @@ function _copy_diagnostic(
     status::Symbol=diagnostic.status,
     accepted::Bool=diagnostic.accepted,
     reason::String=diagnostic.reason,
+    solution_kind::Symbol=diagnostic.solution_kind,
+    fundamental_period::Int=diagnostic.fundamental_period,
+    orbit_validated::Bool=diagnostic.orbit_validated,
+    unmixed_probe::Bool=diagnostic.unmixed_probe,
+    solution_canonical_variational_energy::Float64=diagnostic.solution_canonical_variational_energy,
+    orbit_energy_spread::Float64=diagnostic.orbit_energy_spread,
+    orbit_density_contrast::Float64=diagnostic.orbit_density_contrast,
 )
     return ConvergenceDiagnostic(;
         status=status,
         accepted=accepted,
         reason=reason,
-        fundamental_period=diagnostic.fundamental_period,
+        solution_kind=solution_kind,
+        fundamental_period=fundamental_period,
+        orbit_validated=orbit_validated,
+        unmixed_probe=unmixed_probe,
+        solution_canonical_variational_energy=solution_canonical_variational_energy,
+        orbit_energy_spread=orbit_energy_spread,
+        orbit_density_contrast=orbit_density_contrast,
         fixed_point_abs_residual=diagnostic.fixed_point_abs_residual,
         fixed_point_rel_residual=diagnostic.fixed_point_rel_residual,
         cycle_abs_residual=diagnostic.cycle_abs_residual,
@@ -333,6 +346,9 @@ function run_scf(settings::ProjectSettings)
     chemical_potential = start.chemical_potential
     diagnostic = ConvergenceDiagnostic()
     best_residual = Inf
+    update_mode = :initial
+    probe_disabled = false
+    phase_psis = Dict{Int,MPS}()
     provenance = collect_provenance(settings)
     provenance["initial_state_source"] = start.source
     provenance["threading"] = Dict(string(key) => value for (key, value) in pairs(threading))
@@ -362,12 +378,13 @@ function run_scf(settings::ProjectSettings)
             fields,
             correlations,
             settings.model,
-            self_consistent_fields=measured,
+            interaction_fields=fields,
             effective_expectation=effective_expectation,
             bare_ladder_energy=bare_energy,
         )
         record = IterationRecord(;
             iteration=iteration,
+            update_mode,
             applied=copy(fields),
             measured=measured,
             correlations=correlations,
@@ -383,6 +400,12 @@ function run_scf(settings::ProjectSettings)
             wall_seconds=time() - iteration_start,
         )
         push!(records, record)
+        if update_mode == :unmixed_probe
+            phase_psis[iteration] = deepcopy(psi)
+            while length(phase_psis) > settings.convergence.probe_max_period
+                delete!(phase_psis, minimum(keys(phase_psis)))
+            end
+        end
         diagnostic = assess_convergence(records, settings.convergence, settings.model.density)
         mu_result.timed_out && (diagnostic = _copy_diagnostic(
             diagnostic;
@@ -392,9 +415,19 @@ function run_scf(settings::ProjectSettings)
         ))
         _print_iteration(record, diagnostic, mu_result)
 
-        terminal = diagnostic.status in (:fixed_point, :stagnated, :diverging, :nonfinite, :time_limit)
-        if diagnostic.status == :periodic_cycle
-            cycle_path = joinpath(output_directory, @sprintf("cycle_period_%02d_iter_%04d.h5", diagnostic.fundamental_period, iteration))
+        terminal = diagnostic.status in (
+            :fixed_point,
+            :periodic_solution,
+            :stagnated,
+            :diverging,
+            :nonfinite,
+            :time_limit,
+        )
+        if diagnostic.status in (:periodic_solution, :periodic_candidate)
+            cycle_path = joinpath(
+                output_directory,
+                @sprintf("orbit_period_%02d_iter_%04d.h5", diagnostic.fundamental_period, iteration),
+            )
             write_checkpoint(
                 cycle_path;
                 settings,
@@ -405,10 +438,12 @@ function run_scf(settings::ProjectSettings)
                 chemical_potential,
                 provenance,
                 immutable=true,
+                phase_psis,
             )
-            if settings.convergence.cycle_action == :stop
+            if diagnostic.accepted || settings.convergence.cycle_action == :stop
                 terminal = true
             else
+                probe_disabled = true
                 empty!(mixing_state.x_history)
                 empty!(mixing_state.f_history)
                 empty!(mixing_state.residual_norms)
@@ -417,7 +452,14 @@ function run_scf(settings::ProjectSettings)
                     diagnostic;
                     status=:iterating,
                     accepted=false,
-                    reason="periodic cycle archived; mixing history reset and damping reduced",
+                    reason="unaccepted recurrence archived; entering accelerated mixing with reduced damping",
+                    solution_kind=:none,
+                    fundamental_period=0,
+                    orbit_validated=false,
+                    unmixed_probe=false,
+                    solution_canonical_variational_energy=NaN,
+                    orbit_energy_spread=NaN,
+                    orbit_density_contrast=NaN,
                 )
             end
         end
@@ -426,12 +468,24 @@ function run_scf(settings::ProjectSettings)
                 diagnostic;
                 status=:maximum_iterations,
                 accepted=false,
-                reason="maximum SCF iterations reached without an accepted fixed point",
+                reason="maximum SCF iterations reached without an accepted fixed point or periodic solution",
             )
             terminal = true
         end
 
-        next_fields = terminal ? measured : first(mix_fields!(mixing_state, fields, measured, settings.mixing))
+        next_fields = measured
+        next_update_mode = update_mode
+        if !terminal
+            probe_continues = settings.convergence.unmixed_cycle_probe &&
+                !probe_disabled && iteration < settings.convergence.probe_iterations
+            if probe_continues
+                next_fields = measured
+                next_update_mode = :unmixed_probe
+            else
+                next_fields, mixing_metadata = mix_fields!(mixing_state, fields, measured, settings.mixing)
+                next_update_mode = mixing_metadata.method
+            end
+        end
         if iteration % settings.run.save_every == 0 || terminal
             write_checkpoint(
                 joinpath(output_directory, "checkpoint_latest.h5");
@@ -458,6 +512,7 @@ function run_scf(settings::ProjectSettings)
             )
         end
         fields = next_fields
+        update_mode = next_update_mode
         terminal && break
     end
 
@@ -472,6 +527,7 @@ function run_scf(settings::ProjectSettings)
         chemical_potential,
         provenance,
         immutable=true,
+        phase_psis,
     )
     summary_path = write_run_summary_markdown(
         joinpath(output_directory, "run_summary.md"),
@@ -480,18 +536,49 @@ function run_scf(settings::ProjectSettings)
         records,
     )
     diagnostics_path = nothing
+    diagnostics_paths = String[]
     if diagnostic.accepted && settings.run.quick_diagnostics
-        diagnostics = compute_ladder_diagnostics(
-            psi,
-            settings.model;
-            full_pair_correlations=settings.run.full_pair_correlations,
-        )
-        diagnostics_path = write_diagnostics(
-            joinpath(output_directory, "diagnostics.h5"),
-            diagnostics;
-            state_sha256=sha256_file(final_path),
-            immutable=true,
-        )
+        state_hash = sha256_file(final_path)
+        if diagnostic.fundamental_period == 1
+            diagnostics = compute_ladder_diagnostics(
+                psi,
+                settings.model;
+                full_pair_correlations=settings.run.full_pair_correlations,
+            )
+            diagnostics_path = write_diagnostics(
+                joinpath(output_directory, "diagnostics.h5"),
+                diagnostics;
+                state_sha256=state_hash,
+                metadata=Dict("solution_kind" => "fixed_point", "phase" => 1, "period" => 1),
+                immutable=true,
+            )
+            push!(diagnostics_paths, diagnostics_path)
+        else
+            phase_records = records[(end - diagnostic.fundamental_period + 1):end]
+            for (phase, phase_record) in enumerate(phase_records)
+                haskey(phase_psis, phase_record.iteration) || error(
+                    "accepted periodic solution is missing the MPS for iteration $(phase_record.iteration)",
+                )
+                diagnostics = compute_ladder_diagnostics(
+                    phase_psis[phase_record.iteration],
+                    settings.model;
+                    full_pair_correlations=settings.run.full_pair_correlations,
+                )
+                path = write_diagnostics(
+                    joinpath(output_directory, @sprintf("diagnostics_phase_%03d.h5", phase)),
+                    diagnostics;
+                    state_sha256=state_hash,
+                    metadata=Dict(
+                        "solution_kind" => "periodic_orbit",
+                        "phase" => phase,
+                        "period" => diagnostic.fundamental_period,
+                        "iteration" => phase_record.iteration,
+                    ),
+                    immutable=true,
+                )
+                push!(diagnostics_paths, path)
+            end
+        end
     end
     return (
         diagnostic,
@@ -499,6 +586,7 @@ function run_scf(settings::ProjectSettings)
         state_path=final_path,
         summary_path,
         diagnostics_path,
+        diagnostics_paths,
         output_directory,
     )
 end

@@ -202,6 +202,7 @@ function write_diagnostics(
     path::AbstractString,
     diagnostics;
     state_sha256::AbstractString="",
+    metadata=Dict{String,Any}(),
     immutable::Bool=false,
 )
     immutable && ispath(path) && throw(ArgumentError("refusing to overwrite immutable diagnostics: $path"))
@@ -211,6 +212,9 @@ function write_diagnostics(
         file["schema_version"] = 1
         file["artifact_kind"] = "ladder_mps_mft_diagnostics"
         file["state_sha256"] = String(state_sha256)
+        for (key, value) in metadata
+            file[String(key)] = value isa Symbol ? String(value) : value
+        end
         file["density"] = diagnostics.density
         file["spin"] = diagnostics.spin
         file["expected_spin_q"] = diagnostics.expected_spin_q

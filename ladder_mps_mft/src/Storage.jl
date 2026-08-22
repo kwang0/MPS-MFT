@@ -24,6 +24,20 @@ function _read_fields(group)
     return FieldState(read(group, "alpha"), read(group, "beta"), read(group, "mu_cdw"))
 end
 
+function _write_correlations(group, correlations::CorrelationState)
+    group["pair"] = correlations.pair
+    group["exchange_down"] = correlations.exchange_down
+    group["exchange_up"] = correlations.exchange_up
+    group["density_down"] = correlations.density_down
+    group["density_up"] = correlations.density_up
+end
+
+function _write_energy(group, energy::EnergyBreakdown)
+    for field in fieldnames(EnergyBreakdown)
+        group[String(field)] = getfield(energy, field)
+    end
+end
+
 function write_checkpoint(
     path::AbstractString;
     settings::ProjectSettings,
@@ -34,19 +48,26 @@ function write_checkpoint(
     chemical_potential::Union{Nothing,Real}=nothing,
     provenance=collect_provenance(settings),
     immutable::Bool=false,
+    phase_psis=Dict{Int,MPS}(),
 )
     immutable && ispath(path) && throw(ArgumentError("refusing to overwrite immutable artifact: $path"))
     mkpath(dirname(path))
     temporary = tempname(dirname(path))
     h5open(temporary, "w") do file
-        file["schema_version"] = 2
+        file["schema_version"] = 3
         file["artifact_kind"] = "ladder_mps_mft_state"
         file["process_completed"] = diagnostic.status != :iterating
         file["accepted"] = diagnostic.accepted
         file["completed"] = diagnostic.accepted
         file["status"] = String(diagnostic.status)
         file["convergence_reason"] = diagnostic.reason
+        file["solution_kind"] = String(diagnostic.solution_kind)
         file["fundamental_period"] = diagnostic.fundamental_period
+        file["orbit_validated"] = diagnostic.orbit_validated
+        file["unmixed_cycle_probe"] = diagnostic.unmixed_probe
+        file["solution_canonical_variational_energy"] = diagnostic.solution_canonical_variational_energy
+        file["orbit_energy_spread"] = diagnostic.orbit_energy_spread
+        file["orbit_density_contrast"] = diagnostic.orbit_density_contrast
         file["fixed_point_abs_residual"] = diagnostic.fixed_point_abs_residual
         file["fixed_point_rel_residual"] = diagnostic.fixed_point_rel_residual
         file["cycle_abs_residual"] = diagnostic.cycle_abs_residual
@@ -77,17 +98,12 @@ function write_checkpoint(
             _write_fields(restart_group, something(restart_fields, last_record.measured))
             file["chemical_potential"] = Float64(something(chemical_potential, last_record.chemical_potential))
             correlations_group = create_group(file, "correlations")
-            correlations_group["pair"] = last_record.correlations.pair
-            correlations_group["exchange_down"] = last_record.correlations.exchange_down
-            correlations_group["exchange_up"] = last_record.correlations.exchange_up
-            correlations_group["density_down"] = last_record.correlations.density_down
-            correlations_group["density_up"] = last_record.correlations.density_up
+            _write_correlations(correlations_group, last_record.correlations)
             energy_group = create_group(file, "energy")
-            for field in fieldnames(EnergyBreakdown)
-                energy_group[String(field)] = getfield(last_record.variational, field)
-            end
+            _write_energy(energy_group, last_record.variational)
             history_group = create_group(file, "history")
             history_group["iteration"] = [record.iteration for record in records]
+            history_group["update_mode"] = String.(getfield.(records, :update_mode))
             history_group["density"] = [record.density for record in records]
             history_group["chemical_potential"] = [record.chemical_potential for record in records]
             history_group["mu_search_status"] = String.(getfield.(records, :mu_search_status))
@@ -105,8 +121,16 @@ function write_checkpoint(
                     member_group = create_group(cycle_group, lpad(string(member), 3, '0'))
                     _write_fields(create_group(member_group, "applied"), record.applied)
                     _write_fields(create_group(member_group, "measured"), record.measured)
+                    _write_correlations(create_group(member_group, "correlations"), record.correlations)
+                    _write_energy(create_group(member_group, "energy"), record.variational)
                     member_group["iteration"] = record.iteration
+                    member_group["update_mode"] = String(record.update_mode)
+                    member_group["density"] = record.density
+                    member_group["chemical_potential"] = record.chemical_potential
                     member_group["variational_energy"] = record.variational.canonical_variational_energy
+                    if haskey(phase_psis, record.iteration)
+                        member_group["psi"] = phase_psis[record.iteration]
+                    end
                 end
             end
         end
@@ -127,8 +151,29 @@ function read_checkpoint(path::AbstractString)
             chemical_potential=haskey(file, "chemical_potential") ? Float64(read(file, "chemical_potential")) : 0.0,
             accepted=Bool(read(file, "accepted")),
             status=Symbol(read(file, "status")),
+            solution_kind=haskey(file, "solution_kind") ? Symbol(read(file, "solution_kind")) : :unknown,
+            fundamental_period=haskey(file, "fundamental_period") ? Int(read(file, "fundamental_period")) : 0,
+            orbit_validated=haskey(file, "orbit_validated") && Bool(read(file, "orbit_validated")),
             model_fingerprint=read(file, "provenance/model_fingerprint"),
         )
+    end
+end
+
+function read_orbit_phase_states(path::AbstractString)
+    isfile(path) || throw(ArgumentError("state not found: $path"))
+    return h5open(path, "r") do file
+        haskey(file, "cycle_members") || return NamedTuple[]
+        states = NamedTuple[]
+        for name in sort(collect(keys(file["cycle_members"])))
+            group = file["cycle_members/$name"]
+            haskey(group, "psi") || throw(ArgumentError("orbit phase $name has no saved MPS"))
+            push!(states, (
+                phase=parse(Int, name),
+                iteration=Int(read(group, "iteration")),
+                psi=read(group, "psi", MPS),
+            ))
+        end
+        return states
     end
 end
 
@@ -157,9 +202,14 @@ function write_run_summary_markdown(path::AbstractString, settings::ProjectSetti
         println(io, "## Numerical outcome")
         println(io)
         println(io, "- Status: `$(diagnostic.status)`")
-        println(io, "- Accepted fixed point: `$(diagnostic.accepted)`")
+        println(io, "- Accepted physical solution: `$(diagnostic.accepted)`")
         println(io, "- Reason: $(diagnostic.reason)")
+        println(io, "- Solution kind: `$(diagnostic.solution_kind)`")
         println(io, "- Fundamental period: `$(diagnostic.fundamental_period)`")
+        println(io, "- Orbit validated from unmixed map: `$(diagnostic.orbit_validated && diagnostic.unmixed_probe)`")
+        println(io, "- Solution canonical variational energy: `$(diagnostic.solution_canonical_variational_energy)`")
+        println(io, "- Orbit phase-energy spread: `$(diagnostic.orbit_energy_spread)`")
+        println(io, "- Orbit density contrast: `$(diagnostic.orbit_density_contrast)`")
         println(io, "- Fixed-point residual (relative): `$(diagnostic.fixed_point_rel_residual)`")
         println(io, "- Hamiltonian identity error/site: `$(diagnostic.hamiltonian_identity_error_per_site)`")
         println(io, "- Effective eigenvalue error/site: `$(diagnostic.effective_eigenvalue_error_per_site)`")

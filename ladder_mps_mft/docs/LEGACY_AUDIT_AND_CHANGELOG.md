@@ -14,10 +14,10 @@ The refactor was based on the existing ladder CPU/GPU main-loop scripts and `plo
 
 - The monolithic global-state loop is a pinned Julia package with typed settings and explicit CPU-only runtime controls. CUDA was intentionally not copied into Phase 0.
 - E_p is selected from the CSV by exact model key. The signed value and source hash are stored; `abs(E_p)` is used as a denominator only for a bound pair by default.
-- The legacy elementwise relative mask and special period-2 exit are replaced by global absolute/relative residuals, stable-iteration gates, periods 1 through 8, and explicit nonaccepted cycle artifacts.
+- The legacy elementwise relative mask is replaced by global absolute/relative residuals and all-phase recurrence tests. Following Bollmark et al. (2025), period two is now a first-class physical mean-field solution when it is reproduced by an unmixed raw-map probe; mixer-dependent recurrences remain nonaccepted candidates.
 - Linear damping is supplemented by adaptive Anderson mixing. A detected cycle can stop or trigger a documented reset/reduction.
 - Chemical-potential search is safeguarded, bounded, warm-started, and reports unbracketed/time-limit outcomes instead of silently returning success.
-- Applied, measured, and next/restart fields are distinct in HDF5. A terminal process is not equivalent to an accepted fixed point.
+- Applied, measured, and next/restart fields are distinct in HDF5. A terminal process is not equivalent to an accepted physical solution. Schema v3 stores every field, correlator, energy, and MPS belonging to an accepted orbit.
 
 ## New variational comparison
 
