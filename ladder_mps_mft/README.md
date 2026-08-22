@@ -10,13 +10,16 @@ The implementation currently provides:
 - a mixer-independent raw-map probe that accepts physical period-two mean-field solutions, followed only when needed by adaptive linear or Anderson fixed-point acceleration;
 - immutable final HDF5 states, hash-checked parent/restart lineage, model/numerics/implementation fingerprints, and accepted-only selection;
 - charge and spin structure factors, `K_rho`, rung-cut entanglement/central-charge fits, sign-resolved pair correlations, and separate fixed-sector spin/charge/pair-gap calculations;
-- a guarded Perlmutter Phase 0 CPU calibration with exclusive ITensor threading backends, a common immutable density-targeted warm-start state, full density-search payloads, numerical-equivalence gates, shared-QOS budget accounting, and a separate chi=200 validation.
+- a guarded Perlmutter Phase 0 CPU calibration with exclusive ITensor threading backends, a common immutable fixed-mu warm-start state, exact DMRG-only timing, numerical-equivalence gates, and shared-QOS budget accounting.
 
 The first complete Perlmutter matrix (`20260821_phase0_cpu_v2`) is retained as
-backend-equivalence evidence but rejected for resource selection because it
-accidentally ran at `n=0.5614` rather than `n=0.9375`. Phase 0 v1.2.0 corrects
-that workload and awaits a new run. There is not yet evidence that CPU is
-cheaper or faster than the legacy GPU path.
+backend-equivalence and screening evidence. It shortlisted `serial-t1` and
+`blocksparse-t4`, but its `chi=64` fixed-`mu=0` workload ran at `n=0.5614`
+rather than `n=0.9375`, so it is not the final production-scale timing. The v3
+density-search seed failed and is no longer blocking calibration. Phase 0
+v1.3.0 directly compares the two finalists at fixed `mu=1.8`, `chi=200`, and
+six sweeps. The legacy-GPU comparison remains an estimate until a matched GPU
+timing and `sacct` record are available.
 
 ## Quick start
 

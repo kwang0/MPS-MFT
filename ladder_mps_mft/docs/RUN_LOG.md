@@ -92,3 +92,46 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   and pulling the correction is a new immutable
   `20260822_phase0_cpu_v3` plan/submission; only a passing schema-v3 report may
   authorize the one chi=200 validation.
+
+## 2026-08-22 — Phase 0 v3 failure and focused production benchmark
+
+- Run ID `20260822_phase0_cpu_v3`, commit
+  `10511f9a2cfe788c4f4c0436f7cad2ed60f1bdb0`, script v1.2.0. Seed job
+  `57405642` failed with exit code `1:0` after `22:51`; every dependent
+  benchmark was cancelled and the report failed because no serial metric
+  existed.
+- The seed exhausted 16 chemical-potential evaluations with status
+  `maximum_mu_iterations`, ending at density `0.9843323116910832` for target
+  `0.9375`. It produced neither `seed_state.h5` nor a candidate metric. Peak
+  resident memory was about 1.29 GiB by `/usr/bin/time` and 1.34 GiB by Slurm,
+  so this is a numerical search failure rather than memory, walltime, or
+  scheduler failure.
+- Phase 0's operational priority is the DMRG backend, not replacing the legacy
+  density search. The complete v2 matrix is sufficient to shortlist
+  `serial-t1` and `blocksparse-t4`; it remains numerical-equivalence evidence
+  for its fixed-mu calculation despite the density mismatch.
+- Script v1.3.0 now compares only those two finalists using the production-size
+  `configs/phase0_validation.toml`: `L=64`, `chi=200`, six sweeps, fixed
+  `mu=1.8`, and two repetitions from the same immutable seed. The timed region
+  is exactly `run_dmrg_ground`; seed preparation, compilation, MPO construction,
+  MPS copying, GC, density measurement, and chemical-potential search are
+  excluded. Metric schema v4 records this contract explicitly.
+- The default candidate limit is four hours at 32 GiB. The complete guarded
+  reservation is `0.570312500` CPU node-hours under the 3.0 cap. The report
+  ranks only candidates passing exact provenance/topology, energy/density
+  equivalence, MaxRSS, and 10% timing-range gates.
+- Pre-run CPU projection from v2, using `chi^2.5--chi^3` scaling and the
+  six-versus-two-sweep ratio: `blocksparse-t4` 44--78 min per solve and
+  `serial-t1` 62--109 min. These ranges are planning estimates that the focused
+  run will replace.
+- Legacy-GPU estimate: 35--60 s and `0.00243--0.00417` GPU node-hours for one
+  six-sweep `chi=200` fixed-mu solve, extrapolated from the saved `chi=500` and
+  `chi=1000` GPU sweep logs. It is not a matched measurement. CPU and GPU
+  allocation pools are separate, and the CPU path conserves total `S_z` plus
+  fermion-number parity while the legacy GPU path disables both QNs.
+- Validation: Julia syntax parsing, shell syntax, `git diff --check`, and the
+  guarded plan passed. The full Julia suite passed all 108 tests, including the
+  fixed-mu seed/payload/report integration fixture and rejection of a tampered
+  timing-region contract.
+- Perlmutter jobs submitted by this implementation: none. Next action is the
+  staged v4 seed preflight followed by the two-candidate matrix.

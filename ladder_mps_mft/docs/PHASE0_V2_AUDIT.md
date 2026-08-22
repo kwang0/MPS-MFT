@@ -88,3 +88,30 @@ Only after a fresh matrix passes these gates should one chi=200 validation be
 submitted. Phase 0 still measures performance and numerical reproducibility;
 it does not establish SCF convergence, a physical phase, or a CPU/GPU
 crossover.
+
+## 2026-08-22 revised interpretation after v3
+
+The preceding decision is preserved as the original audit, but Phase 0's scope
+has since been narrowed to choosing a DMRG configuration. Under that scope, v2
+is useful screening evidence: all backends performed the same fixed-mu solve,
+`blocksparse-t4` was the wall-time winner at `51.318 s`, and `serial-t1` was
+the most stable low-charge baseline at `71.666 s`. All other candidates can be
+removed from the next matrix.
+
+The v3 density-targeted seed job `57405642` failed after 16 chemical-potential
+evaluations with status `maximum_mu_iterations`, reaching density
+`0.9843323116910832` instead of `0.9375`. It created no seed or benchmark data.
+This is a numerical search failure, not a scheduler or resource failure.
+
+Script v1.3.0 therefore leaves the production density-search algorithm
+untouched and performs a focused fixed-mu comparison of only `serial-t1` and
+`blocksparse-t4`. It uses `mu=1.8`, `L=64`, `chi=200`, six sweeps, and two
+identical repetitions. Only `run_dmrg_ground` is timed; compilation, MPO
+construction, MPS copying, GC, density measurement, and chemical-potential
+search are excluded. This directly supplies the production-scale evidence that
+v2 lacked, so no separate chi=200 validation job is needed.
+
+The v2 result still cannot establish a CPU/GPU crossover. The current legacy
+GPU estimate is 35--60 s for a six-sweep `chi=200` solve, derived from saved
+`chi=500` and `chi=1000` sweep logs. A matched GPU timing and `sacct` record are
+required before making a definitive cost claim.

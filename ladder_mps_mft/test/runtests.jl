@@ -107,8 +107,10 @@ end
     @test settings.convergence.unmixed_cycle_probe
     @test settings.convergence.accepted_periods == [1, 2]
     @test settings.convergence.orbit_bulk_fraction == 0.5
+    @test settings.model.mu_initial == 0.0
     @test settings.dmrg.mu_density_tol == 5e-4
     @test settings.dmrg.mu_max_iterations == 16
+    @test settings.dmrg.mu_bracket_step == 0.05
     @test !settings.run.require_accepted_solution
     first_seed = initial_fields(test_model(); seed=:pairing, rng=MersenneTwister(7))
     second_seed = initial_fields(test_model(); seed=:pairing, rng=MersenneTwister(7))
@@ -123,13 +125,13 @@ end
         command = `bash -c 'source "$1" plan >/dev/null; write_environment "$2/run.env"; load_environment "$2"; printf "%s\n" "$PHASE0_RUN_SCRIPT_VERSION"' bash $script $directory`
         loaded_version = read(command, String)
         environment = read(joinpath(directory, "run.env"), String)
-        @test occursin(r"(?m)^PHASE0_RUN_SCRIPT_VERSION=1\.2\.0$", environment)
+        @test occursin(r"(?m)^PHASE0_RUN_SCRIPT_VERSION=1\.3\.0$", environment)
         @test !occursin(r"(?m)^PHASE0_SCRIPT_VERSION=", environment)
-        @test strip(loaded_version) == "1.2.0"
+        @test strip(loaded_version) == "1.3.0"
     end
 end
 
-@testset "density-targeted Phase 0 payload and report" begin
+@testset "fixed-mu Phase 0 payload and report" begin
     config = joinpath(ROOT, "test", "fixtures", "phase0_tiny.toml")
     seed_script = joinpath(ROOT, "scripts", "phase0_prepare_seed.jl")
     payload_script = joinpath(ROOT, "scripts", "phase0_payload.jl")
@@ -144,17 +146,18 @@ end
         seed = h5open(seed_path, "r") do file
             return (
                 schema=Int(read(file, "schema_version")),
+                benchmark_kind=String(read(file, "benchmark_kind")),
                 density=Float64(read(file, "density")),
                 target=Float64(read(file, "target_density")),
-                tolerance=Float64(read(file, "mu_density_tolerance")),
-                converged=Bool(read(file, "mu_density_converged")),
                 chemical_potential=Float64(read(file, "chemical_potential")),
+                maximum_bond_dimension=Int(read(file, "maximum_bond_dimension")),
             )
         end
-        @test seed.schema == 2
-        @test seed.converged
-        @test abs(seed.density - seed.target) <= seed.tolerance
+        @test seed.schema == 3
+        @test seed.benchmark_kind == "fixed_mu_dmrg"
+        @test 0.0 <= seed.density <= 2.0
         @test isfinite(seed.chemical_potential)
+        @test 1 <= seed.maximum_bond_dimension <= 4
 
         metrics_directory = joinpath(directory, "metrics")
         mkpath(metrics_directory)
@@ -167,14 +170,18 @@ end
         )
         run(pipeline(payload_command, stdout=devnull))
         metric = TOML.parsefile(metric_path)
-        @test metric["schema_version"] == 3
-        @test metric["seed_mu_density_converged"]
-        @test all(metric["mu_density_converged"])
-        @test metric["maximum_density_error_to_target"] <= metric["density_target_tolerance"]
+        @test metric["schema_version"] == 4
+        @test metric["benchmark_kind"] == "fixed_mu_dmrg"
+        @test metric["timed_region"] == "run_dmrg_ground_only"
+        @test metric["dmrg_solves"] == [1]
+        @test !metric["mpo_construction_timed"]
+        @test !metric["initial_mps_copy_timed"]
+        @test !metric["garbage_collection_timed"]
+        @test !metric["compile_warmup_timed"]
         @test metric["seed_chemical_potential"] ≈ seed.chemical_potential
         @test metric["seed_config_sha256"] == metric["config_sha256"]
-        @test length(metric["chemical_potentials"]) == 1
-        @test length(metric["mu_evaluations"]) == 1
+        @test metric["benchmark_chemical_potential"] ≈ seed.chemical_potential
+        @test length(metric["seconds"]) == 1
 
         write(joinpath(directory, "candidates.tsv"),
             "label\tjulia_threads\tbackend\tslurm_logical_cpus\nserial-t1\t1\tserial\t2\n")
@@ -185,20 +192,17 @@ end
             stdout=devnull,
         ))
         recommendation = read(joinpath(directory, "recommendation.md"), String)
-        @test occursin("Target density / achieved maximum error", recommendation)
-        @test !occursin("Validation metric present", recommendation)
+        @test occursin("Median fixed-mu DMRG time", recommendation)
+        @test occursin("run_dmrg_ground", recommendation)
+        @test occursin("Estimated comparison with the legacy GPU path", recommendation)
 
-        bad_directory = joinpath(directory, "bad-density")
+        bad_directory = joinpath(directory, "bad-workload")
         bad_metrics = joinpath(bad_directory, "metrics")
         mkpath(bad_metrics)
         write(joinpath(bad_directory, "candidates.tsv"),
             "label\tjulia_threads\tbackend\tslurm_logical_cpus\nserial-t1\t1\tserial\t2\n")
         bad_metric = deepcopy(metric)
-        bad_metric["densities"] = [0.5]
-        bad_metric["representative_density"] = 0.5
-        bad_metric["density_spread"] = 0.0
-        bad_metric["density_errors_to_target"] = [abs(0.5 - bad_metric["target_density"])]
-        bad_metric["maximum_density_error_to_target"] = only(bad_metric["density_errors_to_target"])
+        bad_metric["timed_region"] = "density_search"
         open(joinpath(bad_metrics, "serial-t1.toml"), "w") do io
             TOML.print(io, bad_metric; sorted=true)
         end

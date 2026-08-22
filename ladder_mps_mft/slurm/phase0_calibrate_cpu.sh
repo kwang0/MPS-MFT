@@ -5,7 +5,7 @@
 
 set -euo pipefail
 
-readonly PHASE0_SCRIPT_VERSION="1.2.0"
+readonly PHASE0_SCRIPT_VERSION="1.3.0"
 readonly MIB_PER_LOGICAL_CPU=1952
 readonly PHYSICAL_CORES_PER_NODE=128
 
@@ -18,11 +18,11 @@ PHASE0_QOS="${PHASE0_QOS:-shared}"
 PHASE0_JULIA="${PHASE0_JULIA:-julia}"
 PHASE0_MAX_NODE_HOURS="${PHASE0_MAX_NODE_HOURS:-3.0}"
 PHASE0_BENCH_MEMORY="${PHASE0_BENCH_MEMORY:-32G}"
-PHASE0_BENCH_TIME="${PHASE0_BENCH_TIME:-01:00:00}"
-PHASE0_VALIDATION_MEMORY_MAX_GIB="${PHASE0_VALIDATION_MEMORY_MAX_GIB:-96}"
-PHASE0_VALIDATION_TIME="${PHASE0_VALIDATION_TIME:-03:00:00}"
+PHASE0_BENCH_TIME="${PHASE0_BENCH_TIME:-04:00:00}"
+PHASE0_SEED_MEMORY="${PHASE0_SEED_MEMORY:-8G}"
+PHASE0_SEED_TIME="${PHASE0_SEED_TIME:-00:15:00}"
 PHASE0_REPORT_TIME="${PHASE0_REPORT_TIME:-00:15:00}"
-PHASE0_REPETITIONS="${PHASE0_REPETITIONS:-3}"
+PHASE0_REPETITIONS="${PHASE0_REPETITIONS:-2}"
 PHASE0_SEED_THREADS="${PHASE0_SEED_THREADS:-2}"
 
 die() { echo "error: $*" >&2; exit 1; }
@@ -32,16 +32,7 @@ ceil_div() { echo $(( ($1 + $2 - 1) / $2 )); }
 candidate_rows() {
   printf '%s\t%s\t%s\t%s\n' \
     serial-t1 1 serial 2 \
-    blocksparse-t2 2 blocksparse 4 \
-    blocksparse-t4 4 blocksparse 8 \
-    blocksparse-t8 8 blocksparse 16 \
-    blocksparse-t16 16 blocksparse 32 \
-    strided-t2 2 strided 4 \
-    strided-t4 4 strided 8 \
-    strided-t8 8 strided 16 \
-    blas-t2 2 blas 4 \
-    blas-t4 4 blas 8 \
-    blas-t8 8 blas 16
+    blocksparse-t4 4 blocksparse 8
 }
 
 memory_to_mib() {
@@ -75,19 +66,19 @@ upper_bound_node_hours() {
 }
 
 phase0_upper_bound() {
-  local total=0 memory_mib seconds label threads backend logical contribution
+  local total=0 memory_mib seconds seed_memory_mib seed_seconds label threads backend logical contribution
   memory_mib="$(memory_to_mib "$PHASE0_BENCH_MEMORY")"
   seconds="$(time_to_seconds "$PHASE0_BENCH_TIME")"
   while IFS=$'\t' read -r label threads backend logical; do
     contribution="$(upper_bound_node_hours "$logical" "$memory_mib" "$seconds")"
     total="$(awk -v a="$total" -v b="$contribution" 'BEGIN { printf "%.9f", a+b }')"
   done < <(candidate_rows)
-  contribution="$(upper_bound_node_hours $(( 2 * PHASE0_SEED_THREADS )) "$memory_mib" "$seconds")"
-  total="$(awk -v a="$total" -v b="$contribution" 'BEGIN { printf "%.9f", a+b }')"
-  contribution="$(upper_bound_node_hours 32 $(( PHASE0_VALIDATION_MEMORY_MAX_GIB * 1024 )) "$(time_to_seconds "$PHASE0_VALIDATION_TIME")")"
+  seed_memory_mib="$(memory_to_mib "$PHASE0_SEED_MEMORY")"
+  seed_seconds="$(time_to_seconds "$PHASE0_SEED_TIME")"
+  contribution="$(upper_bound_node_hours $(( 2 * PHASE0_SEED_THREADS )) "$seed_memory_mib" "$seed_seconds")"
   total="$(awk -v a="$total" -v b="$contribution" 'BEGIN { printf "%.9f", a+b }')"
   contribution="$(upper_bound_node_hours 2 2048 "$(time_to_seconds "$PHASE0_REPORT_TIME")")"
-  awk -v a="$total" -v b="$contribution" 'BEGIN { printf "%.9f", a+2*b }'
+  awk -v a="$total" -v b="$contribution" 'BEGIN { printf "%.9f", a+b }'
 }
 
 validate_project() {
@@ -104,20 +95,21 @@ print_plan() {
   bound="$(phase0_upper_bound)"
   count="$(candidate_rows | awk 'NF {n++} END {print n+0}')"
   cat <<EOF
-Ladder MPS+MF Phase 0 CPU calibration
+Ladder MPS+MF Phase 0 focused CPU calibration
 
-Timing payload:      L=64, chi=64, 2 sweeps/evaluation, cubic_frustrated
-Candidate jobs:      $count (${PHASE0_REPETITIONS} identical density searches each)
-Shared seed:         one immutable, density-targeted chi=64 warm-start state
-Backends:            serial, block-sparse, Strided, BLAS; mutually exclusive
+Timing payload:      L=64, chi=200, 6-sweep fixed-mu DMRG, cubic_frustrated
+Candidate jobs:      $count (${PHASE0_REPETITIONS} identical DMRG solves each)
+Shared seed:         one immutable fixed-mu chi<=64 warm-start MPS and MF-field state
+Backends:            serial-t1 and block-sparse-t4, shortlisted by the v2 matrix
 Candidate request:   ${PHASE0_BENCH_MEMORY}, ${PHASE0_BENCH_TIME}, shared QOS
-Validation:          L=64, chi=200, 6 sweeps; submitted only after reporting
 Worst-case reserve:  $bound node-hours
 Enforced Phase 0 cap: $PHASE0_MAX_NODE_HOURS node-hours
 
-The matrix ranks only candidates that reproduce the serial-t1 density-search path, chemical
-potential, energy, and density. Every repetition starts from the same seed and retargets the
-configured density; a fixed-mu solve is not accepted as a proxy.
+The matrix times only run_dmrg_ground at fixed mu=1.8. MPO construction, compilation, MPS
+copying, GC, density measurement, and chemical-potential search are outside the timed region.
+Every repetition starts from the same MPS, and candidates must reproduce the serial energy and
+density. Use \`submit-seed\` followed by \`submit-matrix\` to inspect the seed before allocating
+the two-job comparison.
 Run \`bash $script_path submit [RUN_ID]\` to perform the external state change.
 EOF
   if awk -v bound="$bound" -v cap="$PHASE0_MAX_NODE_HOURS" 'BEGIN {exit !(bound > cap)}'; then
@@ -139,8 +131,8 @@ write_environment() {
     printf 'PHASE0_MAX_NODE_HOURS=%q\n' "$PHASE0_MAX_NODE_HOURS"
     printf 'PHASE0_BENCH_MEMORY=%q\n' "$PHASE0_BENCH_MEMORY"
     printf 'PHASE0_BENCH_TIME=%q\n' "$PHASE0_BENCH_TIME"
-    printf 'PHASE0_VALIDATION_MEMORY_MAX_GIB=%q\n' "$PHASE0_VALIDATION_MEMORY_MAX_GIB"
-    printf 'PHASE0_VALIDATION_TIME=%q\n' "$PHASE0_VALIDATION_TIME"
+    printf 'PHASE0_SEED_MEMORY=%q\n' "$PHASE0_SEED_MEMORY"
+    printf 'PHASE0_SEED_TIME=%q\n' "$PHASE0_SEED_TIME"
     printf 'PHASE0_REPORT_TIME=%q\n' "$PHASE0_REPORT_TIME"
     printf 'PHASE0_REPETITIONS=%q\n' "$PHASE0_REPETITIONS"
     printf 'PHASE0_SEED_THREADS=%q\n' "$PHASE0_SEED_THREADS"
@@ -200,10 +192,8 @@ run_payload() {
     "$project_dir/scripts/phase0_payload.jl" "$config" "$metric" "$label" "$backend"
 }
 
-submit_phase0() {
-  print_plan
-  require_command sbatch
-  local run_id="${1:-$(date -u +%Y%m%dT%H%M%SZ)}"
+initialize_phase0_run() {
+  local run_id="$1"
   [[ "$run_id" =~ ^[A-Za-z0-9_.-]+$ ]] || die "unsafe run id: $run_id"
   local run_dir="$run_root/$run_id"
   [[ ! -e "$run_dir" ]] || die "run directory already exists: $run_dir"
@@ -213,17 +203,30 @@ submit_phase0() {
   candidate_rows >>"$run_dir/candidates.tsv"
   printf 'kind\tlabel\tbackend\tjulia_threads\tslurm_logical_cpus\tmemory\tjob_id\n' >"$run_dir/jobs.tsv"
   printf '%s\n' "$(phase0_upper_bound)" >"$run_dir/worst_case_node_hours.txt"
+  mkdir -p "$run_root"
+  printf '%s\n' "$run_dir" >"$run_root/latest_run.txt"
+  printf '%s\n' "$run_dir"
+}
 
+submit_seed_job() {
+  local run_dir="$1"
   local seed_logical seed_raw seed_id
   seed_logical=$(( 2 * PHASE0_SEED_THREADS ))
   seed_raw="$(sbatch --parsable --account="$PHASE0_ACCOUNT" --constraint=cpu --qos="$PHASE0_QOS" \
-    --nodes=1 --ntasks=1 --cpus-per-task="$seed_logical" --mem="$PHASE0_BENCH_MEMORY" \
-    --time="$PHASE0_BENCH_TIME" --job-name=lmf0-seed \
+    --nodes=1 --ntasks=1 --cpus-per-task="$seed_logical" --mem="$PHASE0_SEED_MEMORY" \
+    --time="$PHASE0_SEED_TIME" --job-name=lmf0-seed \
     --output="$run_dir/logs/seed-%j.out" --export=ALL \
     "$script_path" _seed "$run_dir")"
   seed_id="${seed_raw%%;*}"
-  printf 'seed\tseed\tblocksparse\t%s\t%s\t%s\t%s\n' "$PHASE0_SEED_THREADS" "$seed_logical" "$PHASE0_BENCH_MEMORY" "$seed_id" >>"$run_dir/jobs.tsv"
+  printf 'seed\tseed\tblocksparse\t%s\t%s\t%s\t%s\n' "$PHASE0_SEED_THREADS" "$seed_logical" "$PHASE0_SEED_MEMORY" "$seed_id" >>"$run_dir/jobs.tsv"
+  printf '%s\n' "$seed_id"
+}
 
+submit_matrix_jobs() {
+  local run_dir="$1" seed_id="$2"
+  if awk -F'\t' '$1 == "benchmark" || ($1 == "report" && $2 == "report") {found=1} END {exit !found}' "$run_dir/jobs.tsv"; then
+    die "benchmark matrix or primary report already recorded in $run_dir/jobs.tsv"
+  fi
   local -a job_ids=()
   local label threads backend logical raw job_id
   while IFS=$'\t' read -r label threads backend logical; do
@@ -246,10 +249,45 @@ submit_phase0() {
     --output="$run_dir/logs/report-%j.out" --export=ALL "$script_path" _report "$run_dir")"
   report_id="${report_raw%%;*}"
   printf 'report\treport\tserial\t1\t2\t2G\t%s\n' "$report_id" >>"$run_dir/jobs.tsv"
-  mkdir -p "$run_root"
-  printf '%s\n' "$run_dir" >"$run_root/latest_run.txt"
-  echo "Submitted Phase 0 run $run_id: seed $seed_id, matrix ${job_ids[*]} (report $report_id)"
+  echo "Submitted matrix ${job_ids[*]} and report $report_id after seed $seed_id"
+}
+
+submit_phase0() {
+  print_plan
+  require_command sbatch
+  local run_id="${1:-$(date -u +%Y%m%dT%H%M%SZ)}" run_dir seed_id
+  run_dir="$(initialize_phase0_run "$run_id")"
+  seed_id="$(submit_seed_job "$run_dir")"
+  submit_matrix_jobs "$run_dir" "$seed_id"
+  echo "Submitted Phase 0 run $run_id with seed $seed_id"
   echo "Monitor: bash $script_path status $run_id"
+}
+
+submit_seed_only() {
+  print_plan
+  require_command sbatch
+  local run_id="${1:-$(date -u +%Y%m%dT%H%M%SZ)}" run_dir seed_id
+  run_dir="$(initialize_phase0_run "$run_id")"
+  seed_id="$(submit_seed_job "$run_dir")"
+  echo "Submitted seed-only preflight $seed_id for Phase 0 run $run_id"
+  echo "Monitor: bash $script_path status $run_id"
+  echo "Inspect after completion: bash $script_path show-seed $run_id"
+}
+
+submit_matrix_phase0() {
+  require_command sbatch
+  require_command sacct
+  local run_dir seed_id state
+  run_dir="$(resolve_run_dir "${1:-}")"
+  load_environment "$run_dir"
+  print_plan
+  seed_id="$(awk -F'\t' '$1 == "seed" {print $7; exit}' "$run_dir/jobs.tsv")"
+  [[ -n "$seed_id" ]] || die "no seed job recorded in $run_dir/jobs.tsv"
+  state="$(sacct -X -j "$seed_id" --noheader --parsable2 --format=State | awk -F'|' 'NF {print $1; exit}')"
+  [[ "$state" == COMPLETED* ]] || die "seed job $seed_id is not complete (state: ${state:-unknown})"
+  [[ -f "$run_dir/seed_state.h5" ]] || die "completed seed job did not produce $run_dir/seed_state.h5"
+  submit_matrix_jobs "$run_dir" "$seed_id"
+  echo "Monitor: bash $script_path status $(basename "$run_dir")"
 }
 
 benchmark_worker() {
@@ -257,7 +295,7 @@ benchmark_worker() {
   load_environment "$run_dir"
   [[ -n "${SLURM_JOB_ID:-}" ]] || die "_bench must run in Slurm"
   run_payload "$run_dir" "$label" "$threads" "$backend" \
-    "$project_dir/configs/phase0_timing.toml" "$run_dir/metrics/$label.toml" "$run_dir/metrics/$label.time"
+    "$project_dir/configs/phase0_validation.toml" "$run_dir/metrics/$label.toml" "$run_dir/metrics/$label.time"
 }
 
 seed_worker() {
@@ -269,7 +307,7 @@ seed_worker() {
   srun --ntasks=1 --cpus-per-task="$logical" --cpu-bind=cores \
     /usr/bin/time -v -o "$run_dir/metrics/seed.time" \
     "$PHASE0_JULIA" --startup-file=no --threads="$PHASE0_SEED_THREADS" --project="$project_dir" \
-    "$project_dir/scripts/phase0_prepare_seed.jl" "$project_dir/configs/phase0_timing.toml" "$run_dir/seed_state.h5"
+    "$project_dir/scripts/phase0_prepare_seed.jl" "$project_dir/configs/phase0_validation.toml" "$run_dir/seed_state.h5"
 }
 
 report_worker() {
@@ -293,6 +331,20 @@ status_phase0() {
   done <"$run_dir/jobs.tsv"
 }
 
+show_seed_phase0() {
+  local run_dir seed_id log_path
+  run_dir="$(resolve_run_dir "${1:-}")"
+  seed_id="$(awk -F'\t' '$1 == "seed" {print $7; exit}' "$run_dir/jobs.tsv")"
+  [[ -n "$seed_id" ]] || die "no seed job recorded in $run_dir/jobs.tsv"
+  log_path="$run_dir/logs/seed-$seed_id.out"
+  [[ -f "$log_path" ]] || die "missing seed log: $log_path"
+  cat "$log_path"
+  if [[ -f "$run_dir/seed_state.h5" ]]; then
+    require_command sha256sum
+    sha256sum "$run_dir/seed_state.h5"
+  fi
+}
+
 show_phase0() {
   local run_dir; run_dir="$(resolve_run_dir "${1:-}")"
   [[ -f "$run_dir/recommendation.md" ]] || die "no recommendation yet; inspect status/logs"
@@ -306,54 +358,17 @@ manual_report() {
     "$project_dir/scripts/phase0_report.jl" "$run_dir"
 }
 
-submit_validation() {
-  require_command sbatch
-  local run_dir; run_dir="$(resolve_run_dir "${1:-}")"
-  load_environment "$run_dir"
-  [[ -f "$run_dir/recommendation.env" ]] || die "run/report the matrix first"
-  # shellcheck disable=SC1090
-  source "$run_dir/recommendation.env"
-  [[ ! -e "$run_dir/metrics/validation.toml" ]] || die "validation metric already exists"
-  local memory_gib=$(( PHASE0_RECOMMENDED_MEMORY_GIB * 4 ))
-  (( memory_gib < 32 )) && memory_gib=32
-  (( memory_gib > PHASE0_VALIDATION_MEMORY_MAX_GIB )) && memory_gib="$PHASE0_VALIDATION_MEMORY_MAX_GIB"
-  local raw job_id report_raw report_id
-  raw="$(sbatch --parsable --account="$PHASE0_ACCOUNT" --constraint=cpu --qos="$PHASE0_QOS" \
-    --nodes=1 --ntasks=1 --cpus-per-task="$PHASE0_RECOMMENDED_SLURM_CPUS" --mem="${memory_gib}G" \
-    --time="$PHASE0_VALIDATION_TIME" --job-name=lmf0-validate \
-    --output="$run_dir/logs/validation-%j.out" --export=ALL,PHASE0_REPETITIONS=1 \
-    "$script_path" _validate "$run_dir" "$PHASE0_RECOMMENDED_JULIA_THREADS" "$PHASE0_RECOMMENDED_BACKEND")"
-  job_id="${raw%%;*}"
-  printf 'validation\tchi200\t%s\t%s\t%s\t%sG\t%s\n' "$PHASE0_RECOMMENDED_BACKEND" "$PHASE0_RECOMMENDED_JULIA_THREADS" "$PHASE0_RECOMMENDED_SLURM_CPUS" "$memory_gib" "$job_id" >>"$run_dir/jobs.tsv"
-  report_raw="$(sbatch --parsable --account="$PHASE0_ACCOUNT" --constraint=cpu --qos="$PHASE0_QOS" \
-    --nodes=1 --ntasks=1 --cpus-per-task=2 --mem=2G --time="$PHASE0_REPORT_TIME" \
-    --job-name=lmf0-rereport --dependency="afterany:$job_id" --kill-on-invalid-dep=yes \
-    --output="$run_dir/logs/rereport-%j.out" --export=ALL "$script_path" _report "$run_dir")"
-  report_id="${report_raw%%;*}"
-  printf 'report\trereport\tserial\t1\t2\t2G\t%s\n' "$report_id" >>"$run_dir/jobs.tsv"
-  echo "Submitted validation $job_id and follow-up report $report_id"
-}
-
-validation_worker() {
-  local run_dir="$1" threads="$2" backend="$3"
-  load_environment "$run_dir"
-  [[ -n "${SLURM_JOB_ID:-}" ]] || die "_validate must run in Slurm"
-  PHASE0_REPETITIONS=1
-  export PHASE0_REPETITIONS
-  run_payload "$run_dir" validation "$threads" "$backend" \
-    "$project_dir/configs/phase0_validation.toml" "$run_dir/metrics/validation.toml" "$run_dir/metrics/validation.time"
-}
-
 case "${1:-plan}" in
   plan) print_plan;;
   submit) submit_phase0 "${2:-}";;
+  submit-seed) submit_seed_only "${2:-}";;
+  submit-matrix) submit_matrix_phase0 "${2:-}";;
   status) status_phase0 "${2:-}";;
+  show-seed) show_seed_phase0 "${2:-}";;
   show) show_phase0 "${2:-}";;
   report) manual_report "${2:-}";;
-  validate) submit_validation "${2:-}";;
   _bench) benchmark_worker "$2" "$3" "$4" "$5";;
   _seed) seed_worker "$2";;
   _report) report_worker "$2";;
-  _validate) validation_worker "$2" "$3" "$4";;
-  *) die "usage: $0 {plan|submit [RUN_ID]|status [RUN_ID]|show [RUN_ID]|report [RUN_ID]|validate [RUN_ID]}";;
+  *) die "usage: $0 {plan|submit [RUN_ID]|submit-seed [RUN_ID]|submit-matrix [RUN_ID]|status [RUN_ID]|show-seed [RUN_ID]|show [RUN_ID]|report [RUN_ID]}";;
 esac
