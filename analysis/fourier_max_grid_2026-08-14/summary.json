@@ -1,0 +1,130 @@
+{
+  "generated_utc": "2026-08-15T00:22:21.327925+00:00",
+  "groups": {
+    "cubic_unfrustrated": {
+      "V_values": [
+        -0.4,
+        -0.2,
+        0.0
+      ],
+      "completed_count": 5,
+      "dominant_correlation_channels": [
+        "sdw"
+      ],
+      "dominant_plot_channels": [
+        "sdw"
+      ],
+      "incomplete_count": 0,
+      "inferred_geometries": [
+        "cubic_unfrustrated"
+      ],
+      "local_pair_binding_available_count": 5,
+      "max_density_absolute_error": 7.3497255865806466e-06,
+      "run_count": 5,
+      "t0_values": [
+        0.8,
+        1.0,
+        1.4
+      ],
+      "tp_not_below_local_pair_binding_count": 1,
+      "used_mf_coupling_over_local_coupling_range": [
+        1.0,
+        1.0000129870152024
+      ]
+    },
+    "no_explicit_geometry": {
+      "V_values": [
+        -0.4,
+        -0.2,
+        0.0,
+        0.2,
+        0.4
+      ],
+      "completed_count": 10,
+      "dominant_correlation_channels": [
+        "dwave",
+        "sdw"
+      ],
+      "dominant_plot_channels": [
+        "dwave",
+        "sdw"
+      ],
+      "incomplete_count": 8,
+      "inferred_geometries": [
+        "cubic_frustrated"
+      ],
+      "local_pair_binding_available_count": 18,
+      "max_density_absolute_error": 0.0016044924212925693,
+      "run_count": 18,
+      "t0_values": [
+        0.8,
+        1.0,
+        1.2,
+        1.4,
+        1.6
+      ],
+      "tp_not_below_local_pair_binding_count": 4,
+      "used_mf_coupling_over_local_coupling_range": [
+        1.0,
+        1.0000482285532635
+      ]
+    },
+    "square": {
+      "V_values": [
+        -0.2,
+        0.0
+      ],
+      "completed_count": 5,
+      "dominant_correlation_channels": [
+        "sdw"
+      ],
+      "dominant_plot_channels": [
+        "sdw"
+      ],
+      "incomplete_count": 0,
+      "inferred_geometries": [
+        "square"
+      ],
+      "local_pair_binding_available_count": 5,
+      "max_density_absolute_error": 4.53611804962506e-06,
+      "run_count": 5,
+      "t0_values": [
+        0.8,
+        1.0,
+        1.2,
+        1.4
+      ],
+      "tp_not_below_local_pair_binding_count": 1,
+      "used_mf_coupling_over_local_coupling_range": [
+        1.0,
+        1.0000129870152021
+      ]
+    }
+  },
+  "selection_contract": {
+    "cubic_unfrustrated": {
+      "geometry_filter": "cubic_unfrustrated",
+      "suffix": "_gpu.h5"
+    },
+    "fourier_normalized": true,
+    "fourier_value": "abs",
+    "no_explicit_geometry": {
+      "geometry_filter": null,
+      "suffix": "_nodamping.h5"
+    },
+    "source": "mf",
+    "square": {
+      "geometry_filter": "square",
+      "suffix": "_gpu.h5"
+    },
+    "t0_grid": [
+      0.8,
+      1.0,
+      1.2,
+      1.4,
+      1.6
+    ],
+    "trim_boundary_rungs": 5
+  },
+  "total_runs": 28
+}

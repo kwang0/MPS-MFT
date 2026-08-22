@@ -44,6 +44,7 @@ end
 #   plot_middle_histories_from_file("stateless_data/results_...h5"; source=:correlations)
 #   plot_order_fourier_heatmaps_from_file("stateless_data/results_...h5"; source=:correlations)
 #   plot_order_fourier_max_grid()
+#   plot_order_fourier_max_grid(transverse_geometry=:square)
 #   plot_mf_change_slider_from_file("stateless_data/results_...h5"; field=:alpha)
 #   plot_mf_change_slider_from_file("stateless_data/results_...h5"; field=:beta, spin=:up)
 # The file-based wrappers put the HDF5 basename in the PyPlot figure title.
@@ -902,6 +903,32 @@ end
 _floor_for_lognorm(heatmap, floor::Real) = map(x -> isfinite(x) && x > floor ? x : floor, heatmap)
 
 const _DEFAULT_ORDER_GRID_CMAPS = (cdw="Reds", sdw="Greys", swave="Greens", dwave="Purples")
+const _PLOT_TRANSVERSE_GEOMETRIES = (:cubic_frustrated, :cubic_unfrustrated, :square)
+
+function _normalize_plot_transverse_geometry(geometry)
+    raw = lowercase(strip(string(geometry)))
+    raw = startswith(raw, "--geometry=") ? raw[length("--geometry=")+1:end] : raw
+    geom = Symbol(replace(raw, "-" => "_", " " => "_"))
+    geom in _PLOT_TRANSVERSE_GEOMETRIES ||
+        throw(ArgumentError("unknown transverse_geometry '$geometry'; valid options: $(join(string.(_PLOT_TRANSVERSE_GEOMETRIES), ", "))"))
+    return geom
+end
+
+function _filename_transverse_geometry(filename::AbstractString)
+    m = match(r"_geometry_([A-Za-z0-9_-]+)_chi_", basename(filename))
+    m === nothing && return nothing
+    return _normalize_plot_transverse_geometry(m.captures[1])
+end
+
+function _result_transverse_geometry(filename::AbstractString)
+    filename_geometry = _filename_transverse_geometry(filename)
+    filename_geometry !== nothing && return filename_geometry
+
+    return h5open(filename, "r") do f
+        haskey(f, "transverse_geometry") || return nothing
+        return _normalize_plot_transverse_geometry(read(f, "transverse_geometry"))
+    end
+end
 
 function _result_filename_parameters(filename::AbstractString)
     m = match(r"_L_([0-9]+)_U_([-+0-9.eE]+)_V_([-+0-9.eE]+)_t0_([-+0-9.eE]+)_t_p_([-+0-9.eE]+).*_density_([-+0-9.eE]+)_", basename(filename))
@@ -914,6 +941,7 @@ function _result_filename_parameters(filename::AbstractString)
         t0=parse(Float64, m.captures[4]),
         tp=parse(Float64, m.captures[5]),
         density=parse(Float64, m.captures[6]),
+        transverse_geometry=_filename_transverse_geometry(filename),
     )
 end
 
@@ -2047,7 +2075,8 @@ end
 
 function plot_order_fourier_max_grid(;
     data_dir::AbstractString="stateless_data",
-    suffix::AbstractString="_nodamping.h5",
+    suffix::Union{Nothing,AbstractString}=nothing,
+    transverse_geometry=nothing,
     t0_values=0.8:0.2:1.6,
     t0_min::Real=0.8,
     t0_max::Real=1.6,
@@ -2077,16 +2106,20 @@ function plot_order_fourier_max_grid(;
 
     isdir(data_dir) || throw(ArgumentError("data_dir does not exist: $data_dir"))
     t0_min <= t0_max || throw(ArgumentError("t0_min must be <= t0_max"))
+    geometry = transverse_geometry === nothing ? nothing : _normalize_plot_transverse_geometry(transverse_geometry)
+    effective_suffix = suffix === nothing ? (geometry === nothing ? "_nodamping.h5" : "_gpu.h5") : String(suffix)
     t0_grid_values = t0_values === nothing ? nothing :
         [x for x in _sorted_unique_floats(t0_values) if t0_min - t0_atol <= x <= t0_max + t0_atol]
     t0_values !== nothing && isempty(t0_grid_values) &&
         throw(ArgumentError("t0_values has no entries in [$t0_min, $t0_max]"))
 
-    filenames = sort(filter(fn -> endswith(basename(fn), suffix), readdir(data_dir; join=true)))
+    filenames = sort(filter(fn -> endswith(basename(fn), effective_suffix), readdir(data_dir; join=true)))
     records = []
     for filename in filenames
         params = _result_filename_parameters(filename)
         params === nothing && continue
+        file_geometry = geometry === nothing ? params.transverse_geometry : _result_transverse_geometry(filename)
+        geometry !== nothing && file_geometry != geometry && continue
         t0_min - t0_atol <= params.t0 <= t0_max + t0_atol || continue
         t0_grid = t0_grid_values === nothing ? params.t0 : _nearest_grid_value(params.t0, t0_grid_values; atol=t0_atol)
         t0_grid === nothing && continue
@@ -2100,10 +2133,11 @@ function plot_order_fourier_max_grid(;
             symmetrize_rung=symmetrize_rung,
             trim_boundary_rungs=trim_boundary_rungs)
         maxima = _order_fourier_maxima(fields; value=value, normalize=normalize)
-        push!(records, (filename=filename, params=params, V0=params.V0, t0=t0_grid, maxima=maxima))
+        push!(records, (filename=filename, params=params, transverse_geometry=file_geometry, V0=params.V0, t0=t0_grid, maxima=maxima))
     end
 
-    isempty(records) && throw(ArgumentError("no $suffix files with t0 in [$t0_min, $t0_max] were found in $data_dir"))
+    geometry_description = geometry === nothing ? "" : " for transverse_geometry=$geometry"
+    isempty(records) && throw(ArgumentError("no $effective_suffix files$geometry_description with t0 in [$t0_min, $t0_max] were found in $data_dir"))
 
     t_values = t0_grid_values === nothing ? _sorted_unique_floats([rec.t0 for rec in records]) : t0_grid_values
     v_values = _sorted_unique_floats([rec.V0 for rec in records])
@@ -2259,6 +2293,7 @@ function plot_order_fourier_max_grid(;
         length(Us) == 1 && push!(pieces, _math("U=" * _format_grid_number(Us[1])))
         length(tps) == 1 && push!(pieces, _math("t_\\perp=" * _format_grid_number(tps[1])))
         length(densities) == 1 && push!(pieces, _math("n=" * _format_grid_number(densities[1])))
+        geometry !== nothing && push!(pieces, "geometry=" * replace(string(geometry), "_" => " "))
         ax.set_title(join(pieces, ", "))
     else
         ax.set_title(figure_title)

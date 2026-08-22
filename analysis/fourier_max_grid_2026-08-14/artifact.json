@@ -1,0 +1,1710 @@
+{
+  "surface": "report",
+  "manifest": {
+    "version": 1,
+    "surface": "report",
+    "title": "Fourier-Max Grid Audit: Transverse Geometry, Magnetism, and Pairing",
+    "description": "A source-backed technical audit of all runs selected by plot_order_fourier_max_grid() in three transverse-geometry modes.",
+    "generatedAt": "2026-08-15T00:34:14.434091Z",
+    "cards": [
+      {
+        "id": "selected_card",
+        "dataset": "overview",
+        "sourceId": "run_audit_sql",
+        "metrics": [
+          {
+            "label": "Selected files",
+            "field": "selected_runs",
+            "format": "number"
+          }
+        ]
+      },
+      {
+        "id": "completed_card",
+        "dataset": "overview",
+        "sourceId": "run_audit_sql",
+        "metrics": [
+          {
+            "label": "Marked complete",
+            "field": "completed_runs",
+            "format": "number"
+          }
+        ]
+      },
+      {
+        "id": "checkpoint_card",
+        "dataset": "overview",
+        "sourceId": "run_audit_sql",
+        "metrics": [
+          {
+            "label": "Checkpoint only",
+            "field": "checkpoint_runs",
+            "format": "number"
+          }
+        ]
+      },
+      {
+        "id": "plateau_card",
+        "dataset": "overview",
+        "sourceId": "run_audit_sql",
+        "metrics": [
+          {
+            "label": "Frustrated SC plateaus",
+            "field": "frustrated_pair_plateau_runs",
+            "format": "number"
+          }
+        ]
+      }
+    ],
+    "charts": [
+      {
+        "id": "status_chart",
+        "title": "Run completion by requested geometry mode",
+        "subtitle": "The default no-option plot includes eight checkpoint-only files",
+        "question": "How much of the plotted grid is marked complete?",
+        "rationale": "A stacked bar makes the unequal completion coverage visible before any physics comparison.",
+        "intent": "status",
+        "type": "stackedBar",
+        "dataset": "status_by_selection",
+        "sourceId": "run_audit_sql",
+        "encodings": {
+          "x": {
+            "field": "selection_label",
+            "type": "nominal",
+            "label": "Geometry mode"
+          },
+          "y": {
+            "fields": [
+              "completed",
+              "checkpoint_only"
+            ],
+            "type": "quantitative"
+          }
+        },
+        "xAxisTitle": "Requested plot mode",
+        "yAxisTitle": "Files",
+        "settings": {
+          "groupMode": "stacked",
+          "showValues": true
+        },
+        "layout": "full"
+      },
+      {
+        "id": "legacy_phase_chart",
+        "title": "Completed legacy runs separate into SDW- and d-wave-dominant solutions",
+        "subtitle": "Color is log10(max d-wave Fourier amplitude / max SDW Fourier amplitude); zero marks equal weight",
+        "question": "Where does the cubic-frustrated legacy grid switch its dominant order?",
+        "rationale": "The ratio emphasizes competition without conflating the geometry-weighted alpha and beta prefactors.",
+        "intent": "comparison",
+        "type": "heatmap",
+        "dataset": "legacy_phase_map",
+        "sourceId": "run_audit_sql",
+        "encodings": {
+          "x": {
+            "field": "t0_label",
+            "type": "ordinal",
+            "label": "t0 / t"
+          },
+          "y": {
+            "field": "V",
+            "type": "quantitative",
+            "label": "V / t"
+          },
+          "color": {
+            "field": "log10_dwave_to_sdw",
+            "type": "quantitative",
+            "label": "log10(d / SDW)"
+          },
+          "tooltip": [
+            {
+              "field": "dominant_order",
+              "type": "text",
+              "label": "Dominant"
+            },
+            {
+              "field": "corr_dwave",
+              "type": "quantitative",
+              "label": "d-wave max"
+            },
+            {
+              "field": "corr_sdw",
+              "type": "quantitative",
+              "label": "SDW max"
+            }
+          ]
+        },
+        "palette": {
+          "kind": "diverging",
+          "midpoint": 0
+        },
+        "layout": "full"
+      },
+      {
+        "id": "v0_sdw_chart",
+        "title": "Transverse stacking strongly changes the V=0 SDW response",
+        "subtitle": "Geometry-neutral SDW Fourier maximum; missing bars were not run",
+        "question": "How does the magnetic response compare at common ladder parameters?",
+        "rationale": "Grouped discrete bars are used because the parameter coverage is sparse and not a continuous trend series.",
+        "intent": "comparison",
+        "type": "bar",
+        "dataset": "v0_sdw_by_geometry",
+        "sourceId": "run_audit_sql",
+        "encodings": {
+          "x": {
+            "field": "t0_label",
+            "type": "ordinal",
+            "label": "t0 / t"
+          },
+          "y": {
+            "fields": [
+              "cubic_frustrated",
+              "cubic_unfrustrated",
+              "square"
+            ],
+            "type": "quantitative"
+          }
+        },
+        "settings": {
+          "groupMode": "grouped",
+          "showValues": false
+        },
+        "layout": "full"
+      },
+      {
+        "id": "pair_decay_chart",
+        "title": "Frustrated order plateaus while explicit-geometry pair correlations decay",
+        "subtitle": "log10 of mean absolute rung-singlet pair correlation; representative t0=1.4 runs",
+        "question": "Does the pair-pair correlator approach a nonzero plateau or remain short ranged?",
+        "rationale": "A logarithmic transform distinguishes exponential decay from the long-distance plateau over several decades.",
+        "intent": "trend",
+        "type": "line",
+        "dataset": "pair_decay",
+        "sourceId": "run_audit_sql",
+        "encodings": {
+          "x": {
+            "field": "distance",
+            "type": "quantitative",
+            "label": "Rung separation r"
+          },
+          "y": {
+            "fields": [
+              "frustrated_sc_vminus02_t014",
+              "square_v0_t014",
+              "cubic_unfrustrated_v0_t014"
+            ],
+            "type": "quantitative"
+          }
+        },
+        "xAxisTitle": "Rung separation r",
+        "yAxisTitle": "log10 mean |D(r)|",
+        "settings": {
+          "showPoints": "always"
+        },
+        "layout": "full"
+      }
+    ],
+    "tables": [
+      {
+        "id": "geometry_comparison_table",
+        "title": "Square versus cubic-unfrustrated geometry at common V=0 points",
+        "subtitle": "Geometry-neutral correlations; ratios at r=4 avoid interpreting numerical-floor values at long range",
+        "dataset": "geometry_comparison",
+        "sourceId": "run_audit_sql",
+        "density": "dense",
+        "layout": "full",
+        "defaultSort": {
+          "field": "t0",
+          "direction": "asc"
+        },
+        "columns": [
+          {
+            "field": "t0",
+            "label": "t0 / t",
+            "format": "number"
+          },
+          {
+            "field": "cubic_sdw",
+            "label": "Cubic SDW",
+            "format": "number"
+          },
+          {
+            "field": "square_sdw",
+            "label": "Square SDW",
+            "format": "number"
+          },
+          {
+            "field": "square_sdw_reduction_pct",
+            "label": "SDW reduction (%)",
+            "format": "number"
+          },
+          {
+            "field": "cubic_pair_r4",
+            "label": "Cubic |D(4)|",
+            "format": "number"
+          },
+          {
+            "field": "square_pair_r4",
+            "label": "Square |D(4)|",
+            "format": "number"
+          },
+          {
+            "field": "square_to_cubic_pair_r4_ratio",
+            "label": "Square / cubic D(4)",
+            "format": "number"
+          },
+          {
+            "field": "cubic_pair_xi",
+            "label": "Cubic xi fit",
+            "format": "number"
+          },
+          {
+            "field": "square_pair_xi",
+            "label": "Square xi fit",
+            "format": "number"
+          }
+        ]
+      },
+      {
+        "id": "pair_summary_table",
+        "title": "Representative pair-correlation scales",
+        "subtitle": "The large frustrated correlation length is a plateau diagnostic, not a controlled critical exponent",
+        "dataset": "pair_summary",
+        "sourceId": "run_audit_sql",
+        "density": "dense",
+        "layout": "full",
+        "defaultSort": {
+          "field": "case_label",
+          "direction": "asc"
+        },
+        "columns": [
+          {
+            "field": "case_label",
+            "label": "Case",
+            "type": "text"
+          },
+          {
+            "field": "V",
+            "label": "V / t",
+            "format": "number"
+          },
+          {
+            "field": "t0",
+            "label": "t0 / t",
+            "format": "number"
+          },
+          {
+            "field": "pair_r4",
+            "label": "|D(4)|",
+            "format": "number"
+          },
+          {
+            "field": "pair_r8",
+            "label": "|D(8)|",
+            "format": "number"
+          },
+          {
+            "field": "pair_r24",
+            "label": "|D(24)|",
+            "format": "number"
+          },
+          {
+            "field": "pair_xi",
+            "label": "Exp. xi, r=4..20",
+            "format": "number"
+          },
+          {
+            "field": "dwave_order",
+            "label": "Saved d-wave order",
+            "format": "number"
+          }
+        ]
+      },
+      {
+        "id": "hierarchy_table",
+        "title": "Runs that fail the necessary t_perp < |E_p| hierarchy",
+        "subtitle": "The stronger requirement is t_perp below every single-ladder gap; spin-gap coverage is missing",
+        "dataset": "perturbative_hierarchy_flags",
+        "sourceId": "run_audit_sql",
+        "density": "dense",
+        "layout": "full",
+        "defaultSort": {
+          "field": "tp_over_ep",
+          "direction": "desc"
+        },
+        "columns": [
+          {
+            "field": "geometry",
+            "label": "Geometry",
+            "type": "text"
+          },
+          {
+            "field": "V",
+            "label": "V / t",
+            "format": "number"
+          },
+          {
+            "field": "t0",
+            "label": "t0 / t",
+            "format": "number"
+          },
+          {
+            "field": "local_ep",
+            "label": "|E_p| / t",
+            "format": "number"
+          },
+          {
+            "field": "tp",
+            "label": "t_perp / t",
+            "format": "number"
+          },
+          {
+            "field": "tp_over_ep",
+            "label": "t_perp / |E_p|",
+            "format": "number"
+          }
+        ]
+      },
+      {
+        "id": "publication_table",
+        "title": "Publication-readiness assessment",
+        "subtitle": "Results are ranked by evidential strength, not visual prominence",
+        "dataset": "publication_assessment",
+        "sourceId": "run_audit_sql",
+        "density": "spacious",
+        "layout": "full",
+        "defaultSort": {
+          "field": "finding",
+          "direction": "asc"
+        },
+        "columns": [
+          {
+            "field": "finding",
+            "label": "Finding",
+            "type": "text"
+          },
+          {
+            "field": "evidence",
+            "label": "Evidence",
+            "type": "text"
+          },
+          {
+            "field": "current_status",
+            "label": "Current status",
+            "type": "text"
+          },
+          {
+            "field": "minimum_next_check",
+            "label": "Minimum next check",
+            "type": "text"
+          }
+        ]
+      },
+      {
+        "id": "all_runs_table",
+        "title": "All 28 runs selected by the three plot calls",
+        "subtitle": "Fourier quantities use final geometry-neutral correlation matrices; checkpoint rows are diagnostic only",
+        "dataset": "all_runs",
+        "sourceId": "run_audit_sql",
+        "density": "dense",
+        "layout": "full",
+        "defaultSort": {
+          "field": "geometry",
+          "direction": "asc"
+        },
+        "columns": [
+          {
+            "field": "geometry",
+            "label": "Geometry",
+            "type": "text"
+          },
+          {
+            "field": "V",
+            "label": "V / t",
+            "format": "number"
+          },
+          {
+            "field": "t0",
+            "label": "t0 / t",
+            "format": "number"
+          },
+          {
+            "field": "review_status",
+            "label": "Review status",
+            "type": "text"
+          },
+          {
+            "field": "dominant",
+            "label": "Dominant",
+            "type": "text"
+          },
+          {
+            "field": "corr_sdw",
+            "label": "SDW max",
+            "format": "number"
+          },
+          {
+            "field": "corr_dwave",
+            "label": "d-wave max",
+            "format": "number"
+          },
+          {
+            "field": "corr_cdw",
+            "label": "CDW max",
+            "format": "number"
+          },
+          {
+            "field": "sdw_abs_kx_over_pi",
+            "label": "|kx| / pi",
+            "format": "number"
+          },
+          {
+            "field": "sdw_ky_over_pi",
+            "label": "ky / pi",
+            "format": "number"
+          },
+          {
+            "field": "pair_r8",
+            "label": "|D(8)|",
+            "format": "number"
+          },
+          {
+            "field": "gap",
+            "label": "Orthogonal gap",
+            "format": "number"
+          },
+          {
+            "field": "iterations",
+            "label": "MF iterations",
+            "format": "number"
+          },
+          {
+            "field": "density_error",
+            "label": "|n - target|",
+            "format": "number"
+          },
+          {
+            "field": "tp_over_ep",
+            "label": "t_perp / |E_p|",
+            "format": "number"
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "run_audit_sql",
+        "label": "Reviewed HDF5 run audit and report queries",
+        "path": "analysis/fourier_max_grid_2026-08-14/report_queries.sql",
+        "query": {
+          "engine": "SQLite over reviewed CSV extracts",
+          "sql": "-- dataset: overview\nSELECT\n  COUNT(*) AS selected_runs,\n  SUM(completed) AS completed_runs,\n  SUM(1 - completed) AS checkpoint_runs,\n  SUM(CASE WHEN selection <> 'no_explicit_geometry' THEN 1 ELSE 0 END) AS explicit_geometry_runs,\n  SUM(\n    CASE\n      WHEN selection = 'no_explicit_geometry'\n       AND completed = 1\n       AND V < 0\n       AND t0 >= 1.2\n       AND corr_dwave > corr_sdw\n      THEN 1 ELSE 0\n    END\n  ) AS frustrated_pair_plateau_runs\nFROM runs\n;\n\n-- dataset: status_by_selection\nSELECT\n  CASE selection\n    WHEN 'no_explicit_geometry' THEN 'No option (legacy)'\n    WHEN 'cubic_unfrustrated' THEN 'Cubic unfrustrated'\n    ELSE 'Square'\n  END AS selection_label,\n  SUM(completed) AS completed,\n  SUM(1 - completed) AS checkpoint_only\nFROM runs\nGROUP BY selection\nORDER BY CASE selection\n  WHEN 'no_explicit_geometry' THEN 1\n  WHEN 'cubic_unfrustrated' THEN 2\n  ELSE 3\nEND\n;\n\n-- dataset: legacy_phase_map\nSELECT\n  printf('%.1f', t0) AS t0_label,\n  t0,\n  V,\n  log10((corr_dwave + 1.0e-12) / (corr_sdw + 1.0e-12)) AS log10_dwave_to_sdw,\n  CASE WHEN corr_dwave > corr_sdw THEN 'd-wave dominant' ELSE 'SDW dominant' END AS dominant_order,\n  corr_dwave,\n  corr_sdw\nFROM runs\nWHERE selection = 'no_explicit_geometry' AND completed = 1\nORDER BY V, t0\n;\n\n-- dataset: v0_sdw_by_geometry\nSELECT\n  printf('%.1f', t0) AS t0_label,\n  t0,\n  MAX(CASE WHEN selection = 'no_explicit_geometry' THEN corr_sdw END) AS cubic_frustrated,\n  MAX(CASE WHEN selection = 'cubic_unfrustrated' THEN corr_sdw END) AS cubic_unfrustrated,\n  MAX(CASE WHEN selection = 'square' THEN corr_sdw END) AS square\nFROM runs\nWHERE V = 0 AND completed = 1\nGROUP BY t0\nORDER BY t0\n;\n\n-- dataset: pair_decay\nSELECT\n  distance,\n  MAX(\n    CASE WHEN run_id = 'no_explicit_geometry__V_-0.2__t0_1.4'\n      THEN log10(mean_abs) END\n  ) AS frustrated_sc_vminus02_t014,\n  MAX(\n    CASE WHEN run_id = 'square__V_+0.0__t0_1.4'\n      THEN log10(mean_abs) END\n  ) AS square_v0_t014,\n  MAX(\n    CASE WHEN run_id = 'cubic_unfrustrated__V_+0.0__t0_1.4'\n      THEN log10(mean_abs) END\n  ) AS cubic_unfrustrated_v0_t014\nFROM pair_correlations\nWHERE distance BETWEEN 1 AND 24\nGROUP BY distance\nORDER BY distance\n;\n\n-- dataset: geometry_comparison\nWITH cubic AS (\n  SELECT * FROM runs\n  WHERE selection = 'cubic_unfrustrated' AND V = 0 AND completed = 1\n),\nsquare_runs AS (\n  SELECT * FROM runs\n  WHERE selection = 'square' AND V = 0 AND completed = 1\n)\nSELECT\n  cubic.t0,\n  cubic.corr_sdw AS cubic_sdw,\n  square_runs.corr_sdw AS square_sdw,\n  100.0 * (1.0 - square_runs.corr_sdw / cubic.corr_sdw) AS square_sdw_reduction_pct,\n  cubic.pair_r4 AS cubic_pair_r4,\n  square_runs.pair_r4 AS square_pair_r4,\n  square_runs.pair_r4 / cubic.pair_r4 AS square_to_cubic_pair_r4_ratio,\n  cubic.pair_xi AS cubic_pair_xi,\n  square_runs.pair_xi AS square_pair_xi\nFROM cubic\nJOIN square_runs USING (t0)\nORDER BY cubic.t0\n;\n\n-- dataset: pair_summary\nSELECT\n  CASE run_id\n    WHEN 'no_explicit_geometry__V_-0.2__t0_1.4' THEN 'Cubic frustrated, V=-0.2'\n    WHEN 'square__V_+0.0__t0_1.4' THEN 'Square, V=0'\n    ELSE 'Cubic unfrustrated, V=0'\n  END AS case_label,\n  V,\n  t0,\n  pair_r4,\n  pair_r8,\n  pair_r24,\n  pair_xi,\n  dwave_order\nFROM runs\nWHERE run_id IN (\n  'no_explicit_geometry__V_-0.2__t0_1.4',\n  'square__V_+0.0__t0_1.4',\n  'cubic_unfrustrated__V_+0.0__t0_1.4'\n)\nORDER BY CASE run_id\n  WHEN 'no_explicit_geometry__V_-0.2__t0_1.4' THEN 1\n  WHEN 'square__V_+0.0__t0_1.4' THEN 2\n  ELSE 3\nEND\n;\n\n-- dataset: perturbative_hierarchy_flags\nSELECT\n  run_id,\n  CASE selection\n    WHEN 'no_explicit_geometry' THEN 'Legacy / cubic frustrated'\n    WHEN 'cubic_unfrustrated' THEN 'Cubic unfrustrated'\n    ELSE 'Square'\n  END AS geometry,\n  V,\n  t0,\n  local_ep,\n  tp,\n  tp_over_ep\nFROM runs\nWHERE tp_over_ep >= 1.0\nORDER BY geometry, V, t0\n;\n\n-- dataset: all_runs\nSELECT\n  run_id,\n  CASE selection\n    WHEN 'no_explicit_geometry' THEN 'Legacy / cubic frustrated'\n    WHEN 'cubic_unfrustrated' THEN 'Cubic unfrustrated'\n    ELSE 'Square'\n  END AS geometry,\n  V,\n  t0,\n  CASE\n    WHEN completed = 0 THEN 'Checkpoint only'\n    WHEN selection = 'no_explicit_geometry' AND V = 0 AND t0 IN (0.8, 1.0)\n      THEN 'Complete; recurrent/stale state'\n    WHEN alpha_below_floor = 1 THEN 'Complete; pairing below 5e-3 floor'\n    ELSE 'Complete'\n  END AS review_status,\n  CASE dominant\n    WHEN 'dwave' THEN 'd-wave'\n    WHEN 'sdw' THEN 'SDW'\n    ELSE dominant\n  END AS dominant,\n  corr_sdw,\n  corr_dwave,\n  corr_cdw,\n  sdw_abs_kx_over_pi,\n  sdw_ky_over_pi,\n  pair_r8,\n  gap,\n  iterations,\n  density_error,\n  tp_over_ep\nFROM runs\nORDER BY CASE selection\n  WHEN 'no_explicit_geometry' THEN 1\n  WHEN 'cubic_unfrustrated' THEN 2\n  ELSE 3\nEND, V, t0\n;\n\n-- dataset: publication_assessment\nSELECT\n  finding,\n  evidence,\n  current_status,\n  minimum_next_check\nFROM publication_assessment\nORDER BY priority\n;\n",
+          "executed_at": "2026-08-15T00:34:14.434091Z",
+          "tables_used": [
+            "run_metrics.csv",
+            "pair_correlations.csv"
+          ],
+          "filters": [
+            "Exact plot-order suffix and geometry filters",
+            "t0 in 0.8, 1.0, 1.2, 1.4, 1.6",
+            "Five boundary rungs trimmed for Fourier observables"
+          ],
+          "metric_definitions": [
+            "corr_sdw and corr_dwave are maxima of normalized absolute Fourier spectra reconstructed from the final measured correlation matrices.",
+            "The plot itself uses stored alpha and beta fields; cross-geometry conclusions instead use geometry-neutral correlations.",
+            "Pair D(r) is the mean absolute rung-singlet pair-pair correlation at separation r after excluding eight edge rungs.",
+            "The reported gap is the saved orthogonal-state DMRG gap, not a sector-resolved spin or charge gap."
+          ]
+        }
+      },
+      {
+        "id": "bollmark_2023",
+        "label": "Bollmark et al., Phys. Rev. X 13, 011039 (2023)",
+        "href": "https://doi.org/10.1103/PhysRevX.13.011039"
+      },
+      {
+        "id": "bollmark_2025",
+        "label": "Bollmark, Koehler, and Kantian, Phys. Rev. B 111, 125141 (2025)",
+        "href": "https://doi.org/10.1103/PhysRevB.111.125141"
+      },
+      {
+        "id": "dolfi_2015",
+        "label": "Dolfi et al., Phys. Rev. B 92, 195139 (2015)",
+        "href": "https://doi.org/10.1103/PhysRevB.92.195139"
+      },
+      {
+        "id": "shen_2023",
+        "label": "Shen, Zhang, and Qin, Phys. Rev. B 108, 165113 (2023)",
+        "href": "https://doi.org/10.1103/PhysRevB.108.165113"
+      },
+      {
+        "id": "white_2002",
+        "label": "White, Affleck, and Scalapino, Phys. Rev. B 65, 165122 (2002)",
+        "href": "https://doi.org/10.1103/PhysRevB.65.165122"
+      },
+      {
+        "id": "noack_1997",
+        "label": "Noack et al., Phys. Rev. B 56, 7162 (1997)",
+        "href": "https://doi.org/10.1103/PhysRevB.56.7162"
+      },
+      {
+        "id": "jiang_2018",
+        "label": "Jiang and Devereaux, arXiv:1806.01465",
+        "href": "https://arxiv.org/abs/1806.01465"
+      }
+    ],
+    "blocks": [
+      {
+        "id": "executive_summary",
+        "type": "markdown",
+        "sourceId": "run_audit_sql",
+        "body": "## Executive readout\n\nThe most defensible result is a geometry hierarchy, not a finished phase diagram. The legacy no-option files reconstruct the **cubic-frustrated Appendix-E geometry exactly**. In that geometry, all six completed `V=-0.4,-0.2`, `t0=1.2,1.4,1.6` points are uniform d-wave-dominant solutions and their rung-singlet pair correlator approaches a large long-distance plateau. At `V=0`, the same geometry changes abruptly from a strong SDW solution at `t0=1.0` to a d-wave solution at `t0=1.2`.\n\nThe explicit **cubic-unfrustrated** and **square** runs remain SDW dominated. Square stacking nevertheless suppresses the SDW maximum by 24.5%-46.5% and enhances short/intermediate-distance pair correlations at every common `V=0` point. Its best sampled point, `t0=1.4`, has an exponential pair-fit length `xi=2.81` rungs, versus `0.87` for cubic unfrustrated; neither explicit geometry shows a nonzero pair plateau.\n\nOverall verdict: **share with substantial numerical caveats**. The frustrated pairing plateau and square-versus-cubic contrast are reportable preliminary observations. A transition location, thermodynamic order, positive-`V` behavior, and cross-geometry energies are not yet publication-grade."
+      },
+      {
+        "id": "metric_strip",
+        "type": "metric-strip",
+        "cardIds": [
+          "selected_card",
+          "completed_card",
+          "checkpoint_card",
+          "plateau_card"
+        ]
+      },
+      {
+        "id": "scope",
+        "type": "markdown",
+        "sourceId": "run_audit_sql",
+        "body": "## Scope and observable definitions\n\nThis audit mirrors three calls with their default `source=:mf`, five-rung boundary trim, absolute normalized Fourier transform, and `t0=0.8:0.2:1.6`: no geometry option, `:cubic_unfrustrated`, and `:square`. The exact suffix rules select 18 legacy `_nodamping.h5` files plus five files in each explicit geometry.\n\nThe plotted `alpha` and `beta` fields include geometry-dependent coordination factors, so their colors are not directly comparable across stackings. Cross-geometry conclusions here use the final measured anomalous and normal correlation matrices instead. `D(r)` denotes the distance-averaged absolute rung-singlet pair-pair correlator. The saved gap is only the energy to an orthogonal DMRG state; it is not a symmetry-sector spin or charge gap."
+      },
+      {
+        "id": "status_chart_block",
+        "type": "chart",
+        "chartId": "status_chart"
+      },
+      {
+        "id": "quality_text",
+        "type": "markdown",
+        "sourceId": "run_audit_sql",
+        "body": "### Data-quality verdict\n\nEight legacy files have `completed=false`, yet the plotting function includes them. All six positive-`V` files are in this group. Their latest Fourier magnitudes can sometimes look stable even when the fields have not reached a fixed point, so they are shown only as diagnostics.\n\nTwo completed legacy states (`V=0`, `t0=0.8,1.0`) are recurrent/stale: the stored field used by the plot differs materially from the last measured correlations. Their broad AF-versus-SC placement is stable, but their exact saved amplitudes are not final fixed points. Conversely, every explicit-geometry pairing field lies entirely below the `5e-3` convergence masking scale; relative changes of order unity can therefore be labeled converged when their absolute magnitude is tiny. These runs securely establish SDW dominance, but they do not resolve an infinitesimal superconducting field.\n\nThe inferred denominator `E_p` agrees with the parameter-specific magnitude in `E_p_values.csv` to about `5e-5` relative error or better for every run, a useful provenance check. However, it is not stored in the HDF5 files."
+      },
+      {
+        "id": "hierarchy_table_block",
+        "type": "table",
+        "tableId": "hierarchy_table"
+      },
+      {
+        "id": "hierarchy_note",
+        "type": "markdown",
+        "body": "The perturbative MPS+MF construction requires transverse hopping to be weaker than every gap of the isolated ladder. Six selected files already fail the necessary `t_perp < |E_p|` test. At the baseline `U=8`, `n=0.9375`, `V=0`, `t0=1`, the published isolated-ladder spin gap is about `0.078t`, also below the present `t_perp=0.1t`. Parameter-specific spin gaps are absent for the rest of this grid, so the formal hierarchy is unverified even where `t_perp < |E_p|`."
+      },
+      {
+        "id": "findings_heading",
+        "type": "markdown",
+        "body": "## Main numerical findings\n\nThe following panels use only completed rows unless stated otherwise. Momentum signs related by real-field conjugacy are reported as absolute values."
+      },
+      {
+        "id": "legacy_phase_block",
+        "type": "chart",
+        "chartId": "legacy_phase_chart"
+      },
+      {
+        "id": "legacy_phase_note",
+        "type": "markdown",
+        "sourceId": "run_audit_sql",
+        "body": "For `V=0`, the correlation-based SDW maximum falls from `0.755` at `t0=0.8` and `0.357` at `1.0` to `3.37e-4` at `1.2`, while the d-wave maximum rises from `0.00207` at `1.0` to `0.0816` at `1.2`. The coarse grid and recurrent low-`t0` solutions cannot distinguish a first-order transition from hysteresis or a convergence basin change.\n\nFor attractive nearest-neighbor `V`, all completed `t0 >= 1.2` points are uniformly d-wave dominated at `qx=0`. Their mean `|D(24)|` increases from `0.0118-0.0132` at `t0=1.2` to `0.0205-0.0219` at `1.6`, directly corroborating broken-symmetry pairing within the self-consistent model."
+      },
+      {
+        "id": "v0_sdw_block",
+        "type": "chart",
+        "chartId": "v0_sdw_chart"
+      },
+      {
+        "id": "v0_sdw_note",
+        "type": "markdown",
+        "sourceId": "run_audit_sql",
+        "body": "All ten explicit-geometry runs have their SDW maximum at `|kx|/pi=25/27=0.9259`, `ky/pi=1`, consistent with the nearest available momentum to the doped antiferromagnetic scale `pi*n` for `n=0.9375`. The legacy `V=0,t0=0.8` point is the exception, peaking at `(pi,0)`.\n\nAt common `V=0` points, square stacking lowers the SDW maximum by 24.5%, 27.7%, and 46.5% at `t0=0.8,1.0,1.4`, respectively. This is a robust geometry-neutral contrast, although the two low-`t0` square/cubic comparisons include `t_perp >= |E_p|` at `t0=0.8`."
+      },
+      {
+        "id": "geometry_table_block",
+        "type": "table",
+        "tableId": "geometry_comparison_table"
+      },
+      {
+        "id": "pair_decay_block",
+        "type": "chart",
+        "chartId": "pair_decay_chart"
+      },
+      {
+        "id": "pair_decay_note",
+        "type": "markdown",
+        "sourceId": "run_audit_sql",
+        "body": "The frustrated `V=-0.2,t0=1.4` correlator is nearly flat beyond roughly 12 rungs. Square `V=0,t0=1.4` retains much more pair weight than cubic unfrustrated—`|D(4)|=0.0103` versus `0.00163`—but decays to `1.25e-5` by 24 rungs and is well described by an exponential over `r=4..20`. Thus the square data show enhanced pairing susceptibility/correlation length, not superconducting long-range order at the sampled coupling."
+      },
+      {
+        "id": "pair_table_block",
+        "type": "table",
+        "tableId": "pair_summary_table"
+      },
+      {
+        "id": "symmetry_warning",
+        "type": "markdown",
+        "body": "### A plotting-specific symmetry warning\n\nIn square geometry, the cross-leg `alpha` components are exactly zero by construction. The plot's extended-s and d-wave combinations can therefore become equal (or both be thresholded to zero). That visual equality is **not evidence for a d-wave representation**. Pair symmetry should instead be diagnosed from physical leg/rung pair correlations and their relative signs."
+      },
+      {
+        "id": "literature_context",
+        "type": "markdown",
+        "body": "## Context within the numerical literature\n\nThe closest benchmark is [Bollmark et al., PRX 13, 011039 (2023)](https://doi.org/10.1103/PhysRevX.13.011039). It studies the same plain ladder baseline (`U/t=8`, `n=0.9375`), reports isolated-ladder `Delta E_s≈0.078t` and `Delta E_p≈0.134t`, and uses the Appendix-E self-consistency equations reconstructed here for the legacy files. That work deliberately excluded spatially varying density order and warned that converged MF amplitudes retain non-negligible bond-dimension dependence. Its ladder extrapolations used lengths `80-112` and substantially larger bond dimensions (a representative production ground state used `chi=1000`, `L=96`), whereas this grid is uniformly `L=64`, `chi=200`. The present SDW-versus-SC competition is therefore a scientifically interesting extension of the original single-channel calculation, but currently below its numerical control level.\n\n[Bollmark, Koehler, and Kantian, PRB 111, 125141 (2025)](https://doi.org/10.1103/PhysRevB.111.125141) demonstrates a two-channel MPS+MF treatment of CDW and superconductivity for negative-`U` chain arrays and explicitly frames repulsive doped ladders as the demanding next target. The current grid sits naturally in that program, with SDW added as a further competitor.\n\nFor the isolated repulsive two-leg ladder, [Dolfi et al., PRB 92, 195139 (2015)](https://doi.org/10.1103/PhysRevB.92.195139) found dominant superconducting correlations at the same filling `n=0.9375`, but only after extrapolating bond dimension and reaching `L=192`; their quoted `K_rho≈1.54` implies algebraic pairing in the Luther-Emery regime. [Shen, Zhang, and Qin, PRB 108, 165113 (2023)](https://doi.org/10.1103/PhysRevB.108.165113) likewise stresses that pair exponents are highly sensitive to reference-bond position, open boundaries, finite size, and truncation. The exponential square/cubic-unfrustrated correlations at `L=64,chi=200` therefore should not be read as contradicting isolated-ladder Luther-Emery physics: the self-consistent magnetic field, geometry, and limited numerical control all differ.\n\nThe low-q charge peaks are compatible with boundary-induced density oscillations at a hole scale near `2*pi*delta`, but [White, Affleck, and Scalapino, PRB 65, 165122 (2002)](https://doi.org/10.1103/PhysRevB.65.165122) shows why open-boundary Friedel oscillations can mimic CDW order. A single length cannot establish a stripe/CDW phase. In the broader width-4 Hubbard-cylinder literature, [Jiang and Devereaux (2018)](https://arxiv.org/abs/1806.01465) similarly finds a delicate competition among spin/charge textures and pairing, controlled by band parameters and requiring aggressive truncation and length extrapolations."
+      },
+      {
+        "id": "publication_block",
+        "type": "table",
+        "tableId": "publication_table"
+      },
+      {
+        "id": "directions",
+        "type": "markdown",
+        "body": "## Recommended next directions, in priority order\n\n1. **Resolve the frustrated transition first.** Scan `t0=1.00..1.20` in steps of `0.025` for `V=-0.4,-0.2,0`, using independent AF/SDW and d-wave seeds plus continuation in both directions. Save fixed-point residuals and a recurrence label.\n2. **Do controlled `L` and `chi` scaling.** At minimum use `L=32,48,64,96,128` and `chi=200,400,800,1200+`, extrapolating energy and long-distance correlations against discarded weight. Refit `D(r)` only in a boundary-safe window that grows with `L`.\n3. **Compute the missing isolated-ladder scales at every `(V,t0)`.** Store `E_p`, the spin gap, and the perturbative ratios in each HDF5 file. Reduce `t_perp` where it is not below both gaps, then verify the predicted coupling scaling.\n4. **Make the phase comparison variational.** Add the MF double-counting constants and compare a common energy/free-energy functional across converged SDW, CDW, and SC seeds. The saved effective-Hamiltonian eigenvalue alone is not comparable across geometries or branches.\n5. **Upgrade convergence.** Require a true fixed point for physically large fields; treat period-2 or longer recurrences as separately labeled solutions; use damping/Anderson or Broyden mixing. Do not let a `5e-3` absolute mask certify tiny pairing fields without a separate relative/absolute criterion.\n6. **Turn the square enhancement into a targeted scan.** Extend `t0=1.2..1.8` and vary `t_perp` below the isolated gaps. Track `D(r)`, pair correlation length, and whether the square solution ever develops a plateau before magnetic order disappears.\n7. **Add ladder diagnostics used in controlled DMRG.** Measure sector-resolved spin/charge gaps, pair binding, charge and spin structure factors, `K_rho`, entanglement entropy/central charge, and sign-resolved leg/rung pair correlations. Test whether charge and spin wavevectors track density with `L`.\n8. **Repair provenance and selection.** Store geometry, `E_p`, `r_range`, git commit, seed lineage, convergence reason, and last measured versus applied fields; make plotting exclude `completed=false` by default or visibly hatch those cells."
+      },
+      {
+        "id": "methods",
+        "type": "markdown",
+        "sourceId": "run_audit_sql",
+        "body": "## Methods and reproducibility\n\n`analyze_runs.py` exactly mirrors the three file-selection contracts, reverses HDF5.jl array axes, reproduces the plotting routine's explicit Fourier summation order, infers the transverse geometry and `2*t_perp^2/E_p` prefactor from the final measured correlations, and exports run-, iteration-, spectrum-, and pair-distance-level tables. The reconstructed Fourier maximum was cross-checked against Julia on a representative legacy file.\n\nThe report datasets are materialized by the actual SQLite statements in `report_queries.sql` from the reviewed extracts `run_metrics.csv` and `pair_correlations.csv`. No rows were silently dropped: the detail table below contains all 28 selected files. Missing cells indicate datasets not present in the source HDF5 (not zeros)."
+      },
+      {
+        "id": "all_runs_block",
+        "type": "table",
+        "tableId": "all_runs_table"
+      },
+      {
+        "id": "limitations",
+        "type": "markdown",
+        "body": "### Interpretation boundary\n\nThis analysis establishes reproducible finite-system behavior of the saved self-consistent calculations. It does not establish a thermodynamic phase diagram, a transition temperature, or a sector-resolved excitation spectrum. Mean-field transverse fluctuations are omitted; the no-option low-`t0` states are recurrent; explicit pairing fields are below the current convergence floor; and all production points share one modest `L` and `chi`."
+      }
+    ]
+  },
+  "snapshot": {
+    "version": 1,
+    "generatedAt": "2026-08-15T00:34:14.434091Z",
+    "status": "ready",
+    "datasets": {
+      "overview": [
+        {
+          "selected_runs": 28,
+          "completed_runs": 20,
+          "checkpoint_runs": 8,
+          "explicit_geometry_runs": 10,
+          "frustrated_pair_plateau_runs": 6
+        }
+      ],
+      "status_by_selection": [
+        {
+          "selection_label": "No option (legacy)",
+          "completed": 10,
+          "checkpoint_only": 8
+        },
+        {
+          "selection_label": "Cubic unfrustrated",
+          "completed": 5,
+          "checkpoint_only": 0
+        },
+        {
+          "selection_label": "Square",
+          "completed": 5,
+          "checkpoint_only": 0
+        }
+      ],
+      "legacy_phase_map": [
+        {
+          "t0_label": "1.2",
+          "t0": 1.2,
+          "V": -0.4,
+          "log10_dwave_to_sdw": 3.040002143626842,
+          "dominant_order": "d-wave dominant",
+          "corr_dwave": 0.09128605255278605,
+          "corr_sdw": 8.325345748070395e-05
+        },
+        {
+          "t0_label": "1.4",
+          "t0": 1.4,
+          "V": -0.4,
+          "log10_dwave_to_sdw": 3.5034220254397637,
+          "dominant_order": "d-wave dominant",
+          "corr_dwave": 0.1106972767066826,
+          "corr_sdw": 3.4730808938753556e-05
+        },
+        {
+          "t0_label": "1.6",
+          "t0": 1.6,
+          "V": -0.4,
+          "log10_dwave_to_sdw": 3.6410847828648665,
+          "dominant_order": "d-wave dominant",
+          "corr_dwave": 0.12131287483616339,
+          "corr_sdw": 2.772184277619039e-05
+        },
+        {
+          "t0_label": "1.2",
+          "t0": 1.2,
+          "V": -0.2,
+          "log10_dwave_to_sdw": 2.599583893619099,
+          "dominant_order": "d-wave dominant",
+          "corr_dwave": 0.08644480957471029,
+          "corr_sdw": 0.00021734768876204136
+        },
+        {
+          "t0_label": "1.4",
+          "t0": 1.4,
+          "V": -0.2,
+          "log10_dwave_to_sdw": 3.230015657526494,
+          "dominant_order": "d-wave dominant",
+          "corr_dwave": 0.10743247168166525,
+          "corr_sdw": 6.325864763780255e-05
+        },
+        {
+          "t0_label": "1.6",
+          "t0": 1.6,
+          "V": -0.2,
+          "log10_dwave_to_sdw": 2.166771966846722,
+          "dominant_order": "d-wave dominant",
+          "corr_dwave": 0.12544723781161424,
+          "corr_sdw": 0.0008544548825777725
+        },
+        {
+          "t0_label": "0.8",
+          "t0": 0.8,
+          "V": 0.0,
+          "log10_dwave_to_sdw": -5.771475022571317,
+          "dominant_order": "SDW dominant",
+          "corr_dwave": 1.2770198036013038e-06,
+          "corr_sdw": 0.7545238895700161
+        },
+        {
+          "t0_label": "1.0",
+          "t0": 1.0,
+          "V": 0.0,
+          "log10_dwave_to_sdw": -2.2369257483166556,
+          "dominant_order": "SDW dominant",
+          "corr_dwave": 0.002066793958436342,
+          "corr_sdw": 0.3566341537660594
+        },
+        {
+          "t0_label": "1.2",
+          "t0": 1.2,
+          "V": 0.0,
+          "log10_dwave_to_sdw": 2.3845415537339765,
+          "dominant_order": "d-wave dominant",
+          "corr_dwave": 0.08158778372417941,
+          "corr_sdw": 0.00033657633802469536
+        },
+        {
+          "t0_label": "1.4",
+          "t0": 1.4,
+          "V": 0.0,
+          "log10_dwave_to_sdw": 2.9354036129251955,
+          "dominant_order": "d-wave dominant",
+          "corr_dwave": 0.10669973446231437,
+          "corr_sdw": 0.0001238111399370639
+        }
+      ],
+      "v0_sdw_by_geometry": [
+        {
+          "t0_label": "0.8",
+          "t0": 0.8,
+          "cubic_frustrated": 0.7545238895700161,
+          "cubic_unfrustrated": 0.5180017555187858,
+          "square": 0.3912478808919378
+        },
+        {
+          "t0_label": "1.0",
+          "t0": 1.0,
+          "cubic_frustrated": 0.3566341537660594,
+          "cubic_unfrustrated": 0.47270466594881266,
+          "square": 0.3416976306830219
+        },
+        {
+          "t0_label": "1.2",
+          "t0": 1.2,
+          "cubic_frustrated": 0.00033657633802469536,
+          "cubic_unfrustrated": null,
+          "square": 0.28736416124182346
+        },
+        {
+          "t0_label": "1.4",
+          "t0": 1.4,
+          "cubic_frustrated": 0.0001238111399370639,
+          "cubic_unfrustrated": 0.42864085243359834,
+          "square": 0.22934326395073928
+        }
+      ],
+      "pair_decay": [
+        {
+          "distance": 1,
+          "frustrated_sc_vminus02_t014": -1.214311147966189,
+          "square_v0_t014": -1.2931678751487965,
+          "cubic_unfrustrated_v0_t014": -1.3972903322219081
+        },
+        {
+          "distance": 2,
+          "frustrated_sc_vminus02_t014": -1.5621273294529563,
+          "square_v0_t014": -1.7054155486472584,
+          "cubic_unfrustrated_v0_t014": -1.8775293128415154
+        },
+        {
+          "distance": 3,
+          "frustrated_sc_vminus02_t014": -1.6546094364216306,
+          "square_v0_t014": -1.882304726201814,
+          "cubic_unfrustrated_v0_t014": -2.3493928467952414
+        },
+        {
+          "distance": 4,
+          "frustrated_sc_vminus02_t014": -1.682729650248321,
+          "square_v0_t014": -1.9853333875701984,
+          "cubic_unfrustrated_v0_t014": -2.7868244273314455
+        },
+        {
+          "distance": 5,
+          "frustrated_sc_vminus02_t014": -1.70401627342921,
+          "square_v0_t014": -2.0794870113286006,
+          "cubic_unfrustrated_v0_t014": -3.172778845237936
+        },
+        {
+          "distance": 6,
+          "frustrated_sc_vminus02_t014": -1.7252815483490516,
+          "square_v0_t014": -2.192849575987223,
+          "cubic_unfrustrated_v0_t014": -3.631385964949053
+        },
+        {
+          "distance": 7,
+          "frustrated_sc_vminus02_t014": -1.7421867479990167,
+          "square_v0_t014": -2.323562973103675,
+          "cubic_unfrustrated_v0_t014": -4.1508925957874725
+        },
+        {
+          "distance": 8,
+          "frustrated_sc_vminus02_t014": -1.7542145715455366,
+          "square_v0_t014": -2.469371432831632,
+          "cubic_unfrustrated_v0_t014": -4.710881031909381
+        },
+        {
+          "distance": 9,
+          "frustrated_sc_vminus02_t014": -1.7621955278520278,
+          "square_v0_t014": -2.6298382992018476,
+          "cubic_unfrustrated_v0_t014": -5.3156026565123025
+        },
+        {
+          "distance": 10,
+          "frustrated_sc_vminus02_t014": -1.767178564693866,
+          "square_v0_t014": -2.803457346590826,
+          "cubic_unfrustrated_v0_t014": -5.948490618704419
+        },
+        {
+          "distance": 11,
+          "frustrated_sc_vminus02_t014": -1.770188496121128,
+          "square_v0_t014": -2.986364535562258,
+          "cubic_unfrustrated_v0_t014": -6.5795718884942795
+        },
+        {
+          "distance": 12,
+          "frustrated_sc_vminus02_t014": -1.771987028359206,
+          "square_v0_t014": -3.171638514991126,
+          "cubic_unfrustrated_v0_t014": -7.134727880597788
+        },
+        {
+          "distance": 13,
+          "frustrated_sc_vminus02_t014": -1.773069068590649,
+          "square_v0_t014": -3.3513996814149434,
+          "cubic_unfrustrated_v0_t014": -7.53940020088128
+        },
+        {
+          "distance": 14,
+          "frustrated_sc_vminus02_t014": -1.7737354927752527,
+          "square_v0_t014": -3.5203256075708955,
+          "cubic_unfrustrated_v0_t014": -7.871077939707383
+        },
+        {
+          "distance": 15,
+          "frustrated_sc_vminus02_t014": -1.7741572014713385,
+          "square_v0_t014": -3.675343142425172,
+          "cubic_unfrustrated_v0_t014": -8.232136844486572
+        },
+        {
+          "distance": 16,
+          "frustrated_sc_vminus02_t014": -1.7744307575204348,
+          "square_v0_t014": -3.8156308350756736,
+          "cubic_unfrustrated_v0_t014": -8.64998338061483
+        },
+        {
+          "distance": 17,
+          "frustrated_sc_vminus02_t014": -1.7746116181456553,
+          "square_v0_t014": -3.944289880771636,
+          "cubic_unfrustrated_v0_t014": -9.108330159614622
+        },
+        {
+          "distance": 18,
+          "frustrated_sc_vminus02_t014": -1.7747320498445645,
+          "square_v0_t014": -4.0667084900925365,
+          "cubic_unfrustrated_v0_t014": -9.594830911625671
+        },
+        {
+          "distance": 19,
+          "frustrated_sc_vminus02_t014": -1.774815153149666,
+          "square_v0_t014": -4.188133955110313,
+          "cubic_unfrustrated_v0_t014": -10.114661877933317
+        },
+        {
+          "distance": 20,
+          "frustrated_sc_vminus02_t014": -1.7748776929800063,
+          "square_v0_t014": -4.312734223427544,
+          "cubic_unfrustrated_v0_t014": -10.511659481225157
+        },
+        {
+          "distance": 21,
+          "frustrated_sc_vminus02_t014": -1.7749275959437625,
+          "square_v0_t014": -4.443861467162541,
+          "cubic_unfrustrated_v0_t014": -10.681011002219115
+        },
+        {
+          "distance": 22,
+          "frustrated_sc_vminus02_t014": -1.7749655788315564,
+          "square_v0_t014": -4.584463652528682,
+          "cubic_unfrustrated_v0_t014": -10.67599005459274
+        },
+        {
+          "distance": 23,
+          "frustrated_sc_vminus02_t014": -1.7749988133779038,
+          "square_v0_t014": -4.736928204683756,
+          "cubic_unfrustrated_v0_t014": -10.682226211328524
+        },
+        {
+          "distance": 24,
+          "frustrated_sc_vminus02_t014": -1.7750343426800335,
+          "square_v0_t014": -4.902213015809709,
+          "cubic_unfrustrated_v0_t014": -10.7473031443893
+        }
+      ],
+      "geometry_comparison": [
+        {
+          "t0": 0.8,
+          "cubic_sdw": 0.5180017555187858,
+          "square_sdw": 0.3912478808919378,
+          "square_sdw_reduction_pct": 24.469777037705654,
+          "cubic_pair_r4": 0.0002257918467115926,
+          "square_pair_r4": 0.0016262969721919298,
+          "square_to_cubic_pair_r4_ratio": 7.202638163765159,
+          "cubic_pair_xi": 0.4750272886446066,
+          "square_pair_xi": 0.9834358583042508
+        },
+        {
+          "t0": 1.0,
+          "cubic_sdw": 0.47270466594881266,
+          "square_sdw": 0.3416976306830219,
+          "square_sdw_reduction_pct": 27.714352047453026,
+          "cubic_pair_r4": 0.0008141979833673524,
+          "square_pair_r4": 0.0027932278363779445,
+          "square_to_cubic_pair_r4_ratio": 3.430649416282928,
+          "cubic_pair_xi": 1.1859084456162652,
+          "square_pair_xi": 1.3681384141095678
+        },
+        {
+          "t0": 1.4,
+          "cubic_sdw": 0.42864085243359834,
+          "square_sdw": 0.22934326395073928,
+          "square_sdw_reduction_pct": 46.49523892819635,
+          "cubic_pair_r4": 0.001633712276920579,
+          "square_pair_r4": 0.010343478413537919,
+          "square_to_cubic_pair_r4_ratio": 6.331272990758553,
+          "cubic_pair_xi": 0.8698207516198815,
+          "square_pair_xi": 2.8104838973391937
+        }
+      ],
+      "pair_summary": [
+        {
+          "case_label": "Cubic frustrated, V=-0.2",
+          "V": -0.2,
+          "t0": 1.4,
+          "pair_r4": 0.02076205560092253,
+          "pair_r8": 0.01761105723259376,
+          "pair_r24": 0.016786712686815246,
+          "pair_xi": 97.1262848258875,
+          "dwave_order": -0.10461628455357941
+        },
+        {
+          "case_label": "Square, V=0",
+          "V": 0.0,
+          "t0": 1.4,
+          "pair_r4": 0.010343478413537919,
+          "pair_r8": 0.003393349303159067,
+          "pair_r24": 1.252526676165004e-05,
+          "pair_xi": 2.8104838973391937,
+          "dwave_order": 3.5048509203244966e-05
+        },
+        {
+          "case_label": "Cubic unfrustrated, V=0",
+          "V": 0.0,
+          "t0": 1.4,
+          "pair_r4": 0.001633712276920579,
+          "pair_r8": 1.9458930551834565e-05,
+          "pair_r24": 1.789356419057248e-11,
+          "pair_xi": 0.8698207516198815,
+          "dwave_order": -6.766455533267153e-07
+        }
+      ],
+      "perturbative_hierarchy_flags": [
+        {
+          "run_id": "cubic_unfrustrated__V_+0.0__t0_0.8",
+          "geometry": "Cubic unfrustrated",
+          "V": 0.0,
+          "t0": 0.8,
+          "local_ep": 0.08127700914923253,
+          "tp": 0.1,
+          "tp_over_ep": 1.2303602340532762
+        },
+        {
+          "run_id": "no_explicit_geometry__V_-0.2__t0_1.6",
+          "geometry": "Legacy / cubic frustrated",
+          "V": -0.2,
+          "t0": 1.6,
+          "local_ep": 0.07459279392128337,
+          "tp": 0.1,
+          "tp_over_ep": 1.3406120717978263
+        },
+        {
+          "run_id": "no_explicit_geometry__V_+0.0__t0_0.8",
+          "geometry": "Legacy / cubic frustrated",
+          "V": 0.0,
+          "t0": 0.8,
+          "local_ep": 0.08127700914923253,
+          "tp": 0.1,
+          "tp_over_ep": 1.2303602340532762
+        },
+        {
+          "run_id": "no_explicit_geometry__V_+0.4__t0_1.0",
+          "geometry": "Legacy / cubic frustrated",
+          "V": 0.4,
+          "t0": 1.0,
+          "local_ep": 0.09991495929269512,
+          "tp": 0.1,
+          "tp_over_ep": 1.00085113088077
+        },
+        {
+          "run_id": "no_explicit_geometry__V_+0.4__t0_1.4",
+          "geometry": "Legacy / cubic frustrated",
+          "V": 0.4,
+          "t0": 1.4,
+          "local_ep": 0.08109618148863973,
+          "tp": 0.1,
+          "tp_over_ep": 1.233103682126
+        },
+        {
+          "run_id": "square__V_+0.0__t0_0.8",
+          "geometry": "Square",
+          "V": 0.0,
+          "t0": 0.8,
+          "local_ep": 0.08127700914923253,
+          "tp": 0.1,
+          "tp_over_ep": 1.2303602340532762
+        }
+      ],
+      "all_runs": [
+        {
+          "run_id": "no_explicit_geometry__V_-0.4__t0_1.0",
+          "geometry": "Legacy / cubic frustrated",
+          "V": -0.4,
+          "t0": 1.0,
+          "review_status": "Checkpoint only",
+          "dominant": "SDW",
+          "corr_sdw": 0.3408330378094667,
+          "corr_dwave": 0.00021598806630142336,
+          "corr_cdw": 0.029579646016264716,
+          "sdw_abs_kx_over_pi": 0.9259259259259259,
+          "sdw_ky_over_pi": 1.0,
+          "pair_r8": null,
+          "gap": null,
+          "iterations": 150,
+          "density_error": 5.603997920267112e-06,
+          "tp_over_ep": 0.559198284740769
+        },
+        {
+          "run_id": "no_explicit_geometry__V_-0.4__t0_1.2",
+          "geometry": "Legacy / cubic frustrated",
+          "V": -0.4,
+          "t0": 1.2,
+          "review_status": "Complete",
+          "dominant": "d-wave",
+          "corr_sdw": 8.325345748070395e-05,
+          "corr_dwave": 0.09128605255278605,
+          "corr_cdw": 0.00039322381472458424,
+          "sdw_abs_kx_over_pi": 0.9629629629629629,
+          "sdw_ky_over_pi": 1.0,
+          "pair_r8": 0.014472156785786916,
+          "gap": 0.09051365112588883,
+          "iterations": 6,
+          "density_error": 0.0006575133931054911,
+          "tp_over_ep": 0.3980164696209042
+        },
+        {
+          "run_id": "no_explicit_geometry__V_-0.4__t0_1.4",
+          "geometry": "Legacy / cubic frustrated",
+          "V": -0.4,
+          "t0": 1.4,
+          "review_status": "Complete",
+          "dominant": "d-wave",
+          "corr_sdw": 3.4730808938753556e-05,
+          "corr_dwave": 0.1106972767066826,
+          "corr_cdw": 0.00017000115059301766,
+          "sdw_abs_kx_over_pi": 0.9629629629629629,
+          "sdw_ky_over_pi": 1.0,
+          "pair_r8": 0.01887083141849267,
+          "gap": 0.1597608261013761,
+          "iterations": 6,
+          "density_error": 0.0013248251636842623,
+          "tp_over_ep": 0.40060193034547237
+        },
+        {
+          "run_id": "no_explicit_geometry__V_-0.4__t0_1.6",
+          "geometry": "Legacy / cubic frustrated",
+          "V": -0.4,
+          "t0": 1.6,
+          "review_status": "Complete",
+          "dominant": "d-wave",
+          "corr_sdw": 2.772184277619039e-05,
+          "corr_dwave": 0.12131287483616339,
+          "corr_cdw": 5.25591066482359e-05,
+          "sdw_abs_kx_over_pi": 0.7407407407407407,
+          "sdw_ky_over_pi": 1.0,
+          "pair_r8": 0.020596645768295795,
+          "gap": 0.16689706176964592,
+          "iterations": 9,
+          "density_error": 0.001524819986801429,
+          "tp_over_ep": 0.8948816998365943
+        },
+        {
+          "run_id": "no_explicit_geometry__V_-0.2__t0_1.0",
+          "geometry": "Legacy / cubic frustrated",
+          "V": -0.2,
+          "t0": 1.0,
+          "review_status": "Checkpoint only",
+          "dominant": "SDW",
+          "corr_sdw": 0.3135093906294885,
+          "corr_dwave": 0.002022091386133644,
+          "corr_cdw": 0.025163775120112284,
+          "sdw_abs_kx_over_pi": 0.9259259259259259,
+          "sdw_ky_over_pi": 1.0,
+          "pair_r8": null,
+          "gap": null,
+          "iterations": 92,
+          "density_error": 5.097305918067008e-05,
+          "tp_over_ep": 0.6471988953164574
+        },
+        {
+          "run_id": "no_explicit_geometry__V_-0.2__t0_1.2",
+          "geometry": "Legacy / cubic frustrated",
+          "V": -0.2,
+          "t0": 1.2,
+          "review_status": "Complete",
+          "dominant": "d-wave",
+          "corr_sdw": 0.00021734768876204136,
+          "corr_dwave": 0.08644480957471029,
+          "corr_cdw": 0.0005093554500756849,
+          "sdw_abs_kx_over_pi": 0.9259259259259259,
+          "sdw_ky_over_pi": 1.0,
+          "pair_r8": 0.013015452250620323,
+          "gap": 0.12990181492398278,
+          "iterations": 7,
+          "density_error": 0.0004884820654605937,
+          "tp_over_ep": 0.46612617598984096
+        },
+        {
+          "run_id": "no_explicit_geometry__V_-0.2__t0_1.4",
+          "geometry": "Legacy / cubic frustrated",
+          "V": -0.2,
+          "t0": 1.4,
+          "review_status": "Complete",
+          "dominant": "d-wave",
+          "corr_sdw": 6.325864763780255e-05,
+          "corr_dwave": 0.10743247168166525,
+          "corr_cdw": 0.00025990201373745015,
+          "sdw_abs_kx_over_pi": 0.8518518518518519,
+          "sdw_ky_over_pi": 1.0,
+          "pair_r8": 0.01761105723259376,
+          "gap": 0.1337575056616913,
+          "iterations": 7,
+          "density_error": 0.0006715684234291919,
+          "tp_over_ep": 0.4835583792876438
+        },
+        {
+          "run_id": "no_explicit_geometry__V_-0.2__t0_1.6",
+          "geometry": "Legacy / cubic frustrated",
+          "V": -0.2,
+          "t0": 1.6,
+          "review_status": "Complete",
+          "dominant": "d-wave",
+          "corr_sdw": 0.0008544548825777725,
+          "corr_dwave": 0.12544723781161424,
+          "corr_cdw": 4.465509247910478e-05,
+          "sdw_abs_kx_over_pi": 0.9629629629629629,
+          "sdw_ky_over_pi": 1.0,
+          "pair_r8": 0.02196072608611494,
+          "gap": 0.18993385721142886,
+          "iterations": 11,
+          "density_error": 0.0008100085384593614,
+          "tp_over_ep": 1.3406120717978263
+        },
+        {
+          "run_id": "no_explicit_geometry__V_+0.0__t0_0.8",
+          "geometry": "Legacy / cubic frustrated",
+          "V": 0.0,
+          "t0": 0.8,
+          "review_status": "Complete; recurrent/stale state",
+          "dominant": "SDW",
+          "corr_sdw": 0.7545238895700161,
+          "corr_dwave": 1.2770198036013038e-06,
+          "corr_cdw": 0.03743734082468904,
+          "sdw_abs_kx_over_pi": 1.0,
+          "sdw_ky_over_pi": 0.0,
+          "pair_r8": null,
+          "gap": 0.0483954626052423,
+          "iterations": 42,
+          "density_error": 7.72043384189569e-06,
+          "tp_over_ep": 1.2303602340532762
+        },
+        {
+          "run_id": "no_explicit_geometry__V_+0.0__t0_1.0",
+          "geometry": "Legacy / cubic frustrated",
+          "V": 0.0,
+          "t0": 1.0,
+          "review_status": "Complete; recurrent/stale state",
+          "dominant": "SDW",
+          "corr_sdw": 0.3566341537660594,
+          "corr_dwave": 0.002066793958436342,
+          "corr_cdw": 0.028794850646234677,
+          "sdw_abs_kx_over_pi": 0.9259259259259259,
+          "sdw_ky_over_pi": 1.0,
+          "pair_r8": null,
+          "gap": 0.13363872293612644,
+          "iterations": 243,
+          "density_error": 6.133665526164567e-05,
+          "tp_over_ep": 0.7546187952601487
+        },
+        {
+          "run_id": "no_explicit_geometry__V_+0.0__t0_1.2",
+          "geometry": "Legacy / cubic frustrated",
+          "V": 0.0,
+          "t0": 1.2,
+          "review_status": "Complete",
+          "dominant": "d-wave",
+          "corr_sdw": 0.00033657633802469536,
+          "corr_dwave": 0.08158778372417941,
+          "corr_cdw": 0.0005690060115080923,
+          "sdw_abs_kx_over_pi": 0.8518518518518519,
+          "sdw_ky_over_pi": 1.0,
+          "pair_r8": null,
+          "gap": 0.1267775157162987,
+          "iterations": 8,
+          "density_error": 0.0006070608049204562,
+          "tp_over_ep": 0.5558761185307424
+        },
+        {
+          "run_id": "no_explicit_geometry__V_+0.0__t0_1.4",
+          "geometry": "Legacy / cubic frustrated",
+          "V": 0.0,
+          "t0": 1.4,
+          "review_status": "Complete",
+          "dominant": "d-wave",
+          "corr_sdw": 0.0001238111399370639,
+          "corr_dwave": 0.10669973446231437,
+          "corr_cdw": 0.00029919377400920244,
+          "sdw_abs_kx_over_pi": 1.0,
+          "sdw_ky_over_pi": 1.0,
+          "pair_r8": null,
+          "gap": 0.12271885362986268,
+          "iterations": 7,
+          "density_error": 0.0002582385871590098,
+          "tp_over_ep": 0.6824181005993883
+        },
+        {
+          "run_id": "no_explicit_geometry__V_+0.2__t0_1.0",
+          "geometry": "Legacy / cubic frustrated",
+          "V": 0.2,
+          "t0": 1.0,
+          "review_status": "Checkpoint only",
+          "dominant": "SDW",
+          "corr_sdw": 0.3878241292154542,
+          "corr_dwave": 0.00044425813163356017,
+          "corr_cdw": 0.0364597272920532,
+          "sdw_abs_kx_over_pi": 0.9259259259259259,
+          "sdw_ky_over_pi": 1.0,
+          "pair_r8": null,
+          "gap": null,
+          "iterations": 147,
+          "density_error": 2.7330054763741174e-07,
+          "tp_over_ep": 0.8715506416045783
+        },
+        {
+          "run_id": "no_explicit_geometry__V_+0.2__t0_1.2",
+          "geometry": "Legacy / cubic frustrated",
+          "V": 0.2,
+          "t0": 1.2,
+          "review_status": "Checkpoint only",
+          "dominant": "SDW",
+          "corr_sdw": 0.2571499742549463,
+          "corr_dwave": 0.04000442271768707,
+          "corr_cdw": 0.020292193166700133,
+          "sdw_abs_kx_over_pi": 0.9259259259259259,
+          "sdw_ky_over_pi": 1.0,
+          "pair_r8": null,
+          "gap": null,
+          "iterations": 60,
+          "density_error": 0.0013028989027974447,
+          "tp_over_ep": 0.653284486176709
+        },
+        {
+          "run_id": "no_explicit_geometry__V_+0.2__t0_1.4",
+          "geometry": "Legacy / cubic frustrated",
+          "V": 0.2,
+          "t0": 1.4,
+          "review_status": "Checkpoint only",
+          "dominant": "d-wave",
+          "corr_sdw": 0.09130437525090332,
+          "corr_dwave": 0.10282240024678257,
+          "corr_cdw": 0.0023326929610617705,
+          "sdw_abs_kx_over_pi": 0.9259259259259259,
+          "sdw_ky_over_pi": 1.0,
+          "pair_r8": null,
+          "gap": null,
+          "iterations": 30,
+          "density_error": 0.0016044924212925693,
+          "tp_over_ep": 0.8562906130430354
+        },
+        {
+          "run_id": "no_explicit_geometry__V_+0.4__t0_1.0",
+          "geometry": "Legacy / cubic frustrated",
+          "V": 0.4,
+          "t0": 1.0,
+          "review_status": "Checkpoint only",
+          "dominant": "SDW",
+          "corr_sdw": 0.32297153462629996,
+          "corr_dwave": 0.02650123913625563,
+          "corr_cdw": 0.021926889977748006,
+          "sdw_abs_kx_over_pi": 0.9259259259259259,
+          "sdw_ky_over_pi": 1.0,
+          "pair_r8": null,
+          "gap": null,
+          "iterations": 30,
+          "density_error": 0.0004033276274648667,
+          "tp_over_ep": 1.00085113088077
+        },
+        {
+          "run_id": "no_explicit_geometry__V_+0.4__t0_1.2",
+          "geometry": "Legacy / cubic frustrated",
+          "V": 0.4,
+          "t0": 1.2,
+          "review_status": "Checkpoint only",
+          "dominant": "SDW",
+          "corr_sdw": 0.2659263767849584,
+          "corr_dwave": 0.003417455310794955,
+          "corr_cdw": 0.0285283368844816,
+          "sdw_abs_kx_over_pi": 0.9259259259259259,
+          "sdw_ky_over_pi": 1.0,
+          "pair_r8": null,
+          "gap": null,
+          "iterations": 60,
+          "density_error": 0.0001490208237975299,
+          "tp_over_ep": 0.775096328790495
+        },
+        {
+          "run_id": "no_explicit_geometry__V_+0.4__t0_1.4",
+          "geometry": "Legacy / cubic frustrated",
+          "V": 0.4,
+          "t0": 1.4,
+          "review_status": "Checkpoint only",
+          "dominant": "SDW",
+          "corr_sdw": 0.32891931487315745,
+          "corr_dwave": 0.03970317079296158,
+          "corr_cdw": 0.021388374509445713,
+          "sdw_abs_kx_over_pi": 0.9629629629629629,
+          "sdw_ky_over_pi": 1.0,
+          "pair_r8": null,
+          "gap": null,
+          "iterations": 30,
+          "density_error": 0.0011763838324529985,
+          "tp_over_ep": 1.233103682126
+        },
+        {
+          "run_id": "cubic_unfrustrated__V_-0.4__t0_1.0",
+          "geometry": "Cubic unfrustrated",
+          "V": -0.4,
+          "t0": 1.0,
+          "review_status": "Complete; pairing below 5e-3 floor",
+          "dominant": "SDW",
+          "corr_sdw": 0.4543629291204277,
+          "corr_dwave": 1.4398332735137685e-06,
+          "corr_cdw": 0.04406185672098928,
+          "sdw_abs_kx_over_pi": 0.9259259259259259,
+          "sdw_ky_over_pi": 1.0,
+          "pair_r8": 1.5083961030523154e-05,
+          "gap": 0.23425120048375447,
+          "iterations": 4,
+          "density_error": 5.910072121917409e-06,
+          "tp_over_ep": 0.559198284740769
+        },
+        {
+          "run_id": "cubic_unfrustrated__V_-0.2__t0_1.0",
+          "geometry": "Cubic unfrustrated",
+          "V": -0.2,
+          "t0": 1.0,
+          "review_status": "Complete; pairing below 5e-3 floor",
+          "dominant": "SDW",
+          "corr_sdw": 0.46340663709366836,
+          "corr_dwave": 1.5771342044037663e-06,
+          "corr_cdw": 0.04468242254673072,
+          "sdw_abs_kx_over_pi": 0.9259259259259259,
+          "sdw_ky_over_pi": 1.0,
+          "pair_r8": 5.02786565517272e-06,
+          "gap": 0.23799602034478085,
+          "iterations": 4,
+          "density_error": 7.3497255865806466e-06,
+          "tp_over_ep": 0.6471988953164574
+        },
+        {
+          "run_id": "cubic_unfrustrated__V_+0.0__t0_0.8",
+          "geometry": "Cubic unfrustrated",
+          "V": 0.0,
+          "t0": 0.8,
+          "review_status": "Complete; pairing below 5e-3 floor",
+          "dominant": "SDW",
+          "corr_sdw": 0.5180017555187858,
+          "corr_dwave": 6.986640069609716e-07,
+          "corr_cdw": 0.04999188111151096,
+          "sdw_abs_kx_over_pi": 0.9259259259259259,
+          "sdw_ky_over_pi": 1.0,
+          "pair_r8": 2.4561917936955744e-08,
+          "gap": 0.2772871113425026,
+          "iterations": 6,
+          "density_error": 5.829263334256041e-06,
+          "tp_over_ep": 1.2303602340532762
+        },
+        {
+          "run_id": "cubic_unfrustrated__V_+0.0__t0_1.0",
+          "geometry": "Cubic unfrustrated",
+          "V": 0.0,
+          "t0": 1.0,
+          "review_status": "Complete; pairing below 5e-3 floor",
+          "dominant": "SDW",
+          "corr_sdw": 0.47270466594881266,
+          "corr_dwave": 3.841422704736733e-05,
+          "corr_cdw": 0.04538475218028582,
+          "sdw_abs_kx_over_pi": 0.9259259259259259,
+          "sdw_ky_over_pi": 1.0,
+          "pair_r8": 2.958487873755389e-06,
+          "gap": 0.14613990419064748,
+          "iterations": 16,
+          "density_error": 5.277929566616102e-06,
+          "tp_over_ep": 0.7546187952601487
+        },
+        {
+          "run_id": "cubic_unfrustrated__V_+0.0__t0_1.4",
+          "geometry": "Cubic unfrustrated",
+          "V": 0.0,
+          "t0": 1.4,
+          "review_status": "Complete; pairing below 5e-3 floor",
+          "dominant": "SDW",
+          "corr_sdw": 0.42864085243359834,
+          "corr_dwave": 1.7650974671759644e-06,
+          "corr_cdw": 0.04531676048817008,
+          "sdw_abs_kx_over_pi": 0.9259259259259259,
+          "sdw_ky_over_pi": 1.0,
+          "pair_r8": 1.9458930551834565e-05,
+          "gap": 0.22084236397995483,
+          "iterations": 5,
+          "density_error": 4.014207005353931e-06,
+          "tp_over_ep": 0.6824181005993883
+        },
+        {
+          "run_id": "square__V_-0.2__t0_1.0",
+          "geometry": "Square",
+          "V": -0.2,
+          "t0": 1.0,
+          "review_status": "Complete; pairing below 5e-3 floor",
+          "dominant": "SDW",
+          "corr_sdw": 0.3303647566618772,
+          "corr_dwave": 2.462898722654731e-06,
+          "corr_cdw": 0.026819665273334573,
+          "sdw_abs_kx_over_pi": 0.9259259259259259,
+          "sdw_ky_over_pi": 1.0,
+          "pair_r8": 0.0003922939708442566,
+          "gap": 0.10867513672081941,
+          "iterations": 4,
+          "density_error": 4.53611804962506e-06,
+          "tp_over_ep": 0.6471988953164574
+        },
+        {
+          "run_id": "square__V_+0.0__t0_0.8",
+          "geometry": "Square",
+          "V": 0.0,
+          "t0": 0.8,
+          "review_status": "Complete; pairing below 5e-3 floor",
+          "dominant": "SDW",
+          "corr_sdw": 0.3912478808919378,
+          "corr_dwave": 1.0261638065085673e-06,
+          "corr_cdw": 0.03105675454572763,
+          "sdw_abs_kx_over_pi": 0.9259259259259259,
+          "sdw_ky_over_pi": 1.0,
+          "pair_r8": 3.778064718094542e-05,
+          "gap": 0.1216429267891499,
+          "iterations": 5,
+          "density_error": 2.5456433081494367e-06,
+          "tp_over_ep": 1.2303602340532762
+        },
+        {
+          "run_id": "square__V_+0.0__t0_1.0",
+          "geometry": "Square",
+          "V": 0.0,
+          "t0": 1.0,
+          "review_status": "Complete; pairing below 5e-3 floor",
+          "dominant": "SDW",
+          "corr_sdw": 0.3416976306830219,
+          "corr_dwave": 3.703413352386244e-06,
+          "corr_cdw": 0.027353121009379797,
+          "sdw_abs_kx_over_pi": 0.9259259259259259,
+          "sdw_ky_over_pi": 1.0,
+          "pair_r8": 0.0002461643826179603,
+          "gap": 0.08638658395403809,
+          "iterations": 13,
+          "density_error": 2.717093822823813e-06,
+          "tp_over_ep": 0.7546187952601487
+        },
+        {
+          "run_id": "square__V_+0.0__t0_1.2",
+          "geometry": "Square",
+          "V": 0.0,
+          "t0": 1.2,
+          "review_status": "Complete; pairing below 5e-3 floor",
+          "dominant": "SDW",
+          "corr_sdw": 0.28736416124182346,
+          "corr_dwave": 1.0260196408851456e-05,
+          "corr_cdw": 0.025779192986688817,
+          "sdw_abs_kx_over_pi": 0.9259259259259259,
+          "sdw_ky_over_pi": 1.0,
+          "pair_r8": 0.001235716724476141,
+          "gap": 0.058818206302078124,
+          "iterations": 6,
+          "density_error": 3.6220502981354485e-06,
+          "tp_over_ep": 0.5558761185307424
+        },
+        {
+          "run_id": "square__V_+0.0__t0_1.4",
+          "geometry": "Square",
+          "V": 0.0,
+          "t0": 1.4,
+          "review_status": "Complete; pairing below 5e-3 floor",
+          "dominant": "SDW",
+          "corr_sdw": 0.22934326395073928,
+          "corr_dwave": 3.7587136929586794e-05,
+          "corr_cdw": 0.024985490381976366,
+          "sdw_abs_kx_over_pi": 0.9259259259259259,
+          "sdw_ky_over_pi": 1.0,
+          "pair_r8": 0.003393349303159067,
+          "gap": 0.13657419066845478,
+          "iterations": 16,
+          "density_error": 3.20963718947187e-06,
+          "tp_over_ep": 0.6824181005993883
+        }
+      ],
+      "publication_assessment": [
+        {
+          "finding": "Frustrated stacking stabilizes a uniform d-wave MF solution for attractive V and t0 >= 1.2",
+          "evidence": "Six completed points; mean |D(r=24)| = 0.0118-0.0219 and the qx=0 d-wave Fourier component dominates.",
+          "current_status": "Strong preliminary result; suitable for an internal or methods report, not yet a phase claim.",
+          "minimum_next_check": "Length and bond-dimension scaling, two seeds, continuation in both t0 directions, and corrected MF energy comparison."
+        },
+        {
+          "finding": "Square stacking weakens SDW order and preserves substantially longer rung-pair correlations than cubic unfrustrated stacking",
+          "evidence": "At common V=0 points the SDW maximum is 24.5%-46.5% smaller and |D(4)| is 3.43-7.20 times larger.",
+          "current_status": "Reportable geometry comparison; the sampled square points still show exponential pair decay.",
+          "minimum_next_check": "Extend t0 and transverse hopping scans, then extrapolate correlation length and pair correlations in chi and L."
+        },
+        {
+          "finding": "The legacy frustrated V=0 data switch sharply from SDW to d-wave dominance between t0=1.0 and 1.2",
+          "evidence": "The physical SDW maximum changes from 0.357 at t0=1.0 to 0.000337 at 1.2 while the d-wave maximum rises from 0.00207 to 0.0816.",
+          "current_status": "Candidate first-order or hysteretic transition; low-t0 saved states are recurrent/stale.",
+          "minimum_next_check": "Scan t0 in steps of 0.025 with AF and d-wave seeds, bidirectional continuation, and a properly double-counted MF functional."
+        },
+        {
+          "finding": "The explicit geometries share an incommensurate SDW maximum near the doped antiferromagnetic wavevector",
+          "evidence": "All ten explicit runs peak at |kx|/pi = 25/27 = 0.9259 and ky/pi = 1 after trimming to 54 rungs.",
+          "current_status": "Robust descriptive Fourier observation.",
+          "minimum_next_check": "Repeat at multiple L and density to test whether the peak tracks pi*n rather than the finite momentum grid."
+        },
+        {
+          "finding": "The positive-V legacy sector is unsettled",
+          "evidence": "All six V=0.2 or 0.4 files are checkpoint-only; several recent Fourier histories remain strongly variable.",
+          "current_status": "Not publishable as converged data.",
+          "minimum_next_check": "Restart with improved mixing and fixed-point diagnostics before interpreting the apparent coexistence region."
+        }
+      ]
+    },
+    "accessIssues": []
+  },
+  "sources": [
+    {
+      "id": "run_audit_sql",
+      "label": "Reviewed HDF5 run audit and report queries",
+      "path": "analysis/fourier_max_grid_2026-08-14/report_queries.sql",
+      "query": {
+        "engine": "SQLite over reviewed CSV extracts",
+        "sql": "-- dataset: overview\nSELECT\n  COUNT(*) AS selected_runs,\n  SUM(completed) AS completed_runs,\n  SUM(1 - completed) AS checkpoint_runs,\n  SUM(CASE WHEN selection <> 'no_explicit_geometry' THEN 1 ELSE 0 END) AS explicit_geometry_runs,\n  SUM(\n    CASE\n      WHEN selection = 'no_explicit_geometry'\n       AND completed = 1\n       AND V < 0\n       AND t0 >= 1.2\n       AND corr_dwave > corr_sdw\n      THEN 1 ELSE 0\n    END\n  ) AS frustrated_pair_plateau_runs\nFROM runs\n;\n\n-- dataset: status_by_selection\nSELECT\n  CASE selection\n    WHEN 'no_explicit_geometry' THEN 'No option (legacy)'\n    WHEN 'cubic_unfrustrated' THEN 'Cubic unfrustrated'\n    ELSE 'Square'\n  END AS selection_label,\n  SUM(completed) AS completed,\n  SUM(1 - completed) AS checkpoint_only\nFROM runs\nGROUP BY selection\nORDER BY CASE selection\n  WHEN 'no_explicit_geometry' THEN 1\n  WHEN 'cubic_unfrustrated' THEN 2\n  ELSE 3\nEND\n;\n\n-- dataset: legacy_phase_map\nSELECT\n  printf('%.1f', t0) AS t0_label,\n  t0,\n  V,\n  log10((corr_dwave + 1.0e-12) / (corr_sdw + 1.0e-12)) AS log10_dwave_to_sdw,\n  CASE WHEN corr_dwave > corr_sdw THEN 'd-wave dominant' ELSE 'SDW dominant' END AS dominant_order,\n  corr_dwave,\n  corr_sdw\nFROM runs\nWHERE selection = 'no_explicit_geometry' AND completed = 1\nORDER BY V, t0\n;\n\n-- dataset: v0_sdw_by_geometry\nSELECT\n  printf('%.1f', t0) AS t0_label,\n  t0,\n  MAX(CASE WHEN selection = 'no_explicit_geometry' THEN corr_sdw END) AS cubic_frustrated,\n  MAX(CASE WHEN selection = 'cubic_unfrustrated' THEN corr_sdw END) AS cubic_unfrustrated,\n  MAX(CASE WHEN selection = 'square' THEN corr_sdw END) AS square\nFROM runs\nWHERE V = 0 AND completed = 1\nGROUP BY t0\nORDER BY t0\n;\n\n-- dataset: pair_decay\nSELECT\n  distance,\n  MAX(\n    CASE WHEN run_id = 'no_explicit_geometry__V_-0.2__t0_1.4'\n      THEN log10(mean_abs) END\n  ) AS frustrated_sc_vminus02_t014,\n  MAX(\n    CASE WHEN run_id = 'square__V_+0.0__t0_1.4'\n      THEN log10(mean_abs) END\n  ) AS square_v0_t014,\n  MAX(\n    CASE WHEN run_id = 'cubic_unfrustrated__V_+0.0__t0_1.4'\n      THEN log10(mean_abs) END\n  ) AS cubic_unfrustrated_v0_t014\nFROM pair_correlations\nWHERE distance BETWEEN 1 AND 24\nGROUP BY distance\nORDER BY distance\n;\n\n-- dataset: geometry_comparison\nWITH cubic AS (\n  SELECT * FROM runs\n  WHERE selection = 'cubic_unfrustrated' AND V = 0 AND completed = 1\n),\nsquare_runs AS (\n  SELECT * FROM runs\n  WHERE selection = 'square' AND V = 0 AND completed = 1\n)\nSELECT\n  cubic.t0,\n  cubic.corr_sdw AS cubic_sdw,\n  square_runs.corr_sdw AS square_sdw,\n  100.0 * (1.0 - square_runs.corr_sdw / cubic.corr_sdw) AS square_sdw_reduction_pct,\n  cubic.pair_r4 AS cubic_pair_r4,\n  square_runs.pair_r4 AS square_pair_r4,\n  square_runs.pair_r4 / cubic.pair_r4 AS square_to_cubic_pair_r4_ratio,\n  cubic.pair_xi AS cubic_pair_xi,\n  square_runs.pair_xi AS square_pair_xi\nFROM cubic\nJOIN square_runs USING (t0)\nORDER BY cubic.t0\n;\n\n-- dataset: pair_summary\nSELECT\n  CASE run_id\n    WHEN 'no_explicit_geometry__V_-0.2__t0_1.4' THEN 'Cubic frustrated, V=-0.2'\n    WHEN 'square__V_+0.0__t0_1.4' THEN 'Square, V=0'\n    ELSE 'Cubic unfrustrated, V=0'\n  END AS case_label,\n  V,\n  t0,\n  pair_r4,\n  pair_r8,\n  pair_r24,\n  pair_xi,\n  dwave_order\nFROM runs\nWHERE run_id IN (\n  'no_explicit_geometry__V_-0.2__t0_1.4',\n  'square__V_+0.0__t0_1.4',\n  'cubic_unfrustrated__V_+0.0__t0_1.4'\n)\nORDER BY CASE run_id\n  WHEN 'no_explicit_geometry__V_-0.2__t0_1.4' THEN 1\n  WHEN 'square__V_+0.0__t0_1.4' THEN 2\n  ELSE 3\nEND\n;\n\n-- dataset: perturbative_hierarchy_flags\nSELECT\n  run_id,\n  CASE selection\n    WHEN 'no_explicit_geometry' THEN 'Legacy / cubic frustrated'\n    WHEN 'cubic_unfrustrated' THEN 'Cubic unfrustrated'\n    ELSE 'Square'\n  END AS geometry,\n  V,\n  t0,\n  local_ep,\n  tp,\n  tp_over_ep\nFROM runs\nWHERE tp_over_ep >= 1.0\nORDER BY geometry, V, t0\n;\n\n-- dataset: all_runs\nSELECT\n  run_id,\n  CASE selection\n    WHEN 'no_explicit_geometry' THEN 'Legacy / cubic frustrated'\n    WHEN 'cubic_unfrustrated' THEN 'Cubic unfrustrated'\n    ELSE 'Square'\n  END AS geometry,\n  V,\n  t0,\n  CASE\n    WHEN completed = 0 THEN 'Checkpoint only'\n    WHEN selection = 'no_explicit_geometry' AND V = 0 AND t0 IN (0.8, 1.0)\n      THEN 'Complete; recurrent/stale state'\n    WHEN alpha_below_floor = 1 THEN 'Complete; pairing below 5e-3 floor'\n    ELSE 'Complete'\n  END AS review_status,\n  CASE dominant\n    WHEN 'dwave' THEN 'd-wave'\n    WHEN 'sdw' THEN 'SDW'\n    ELSE dominant\n  END AS dominant,\n  corr_sdw,\n  corr_dwave,\n  corr_cdw,\n  sdw_abs_kx_over_pi,\n  sdw_ky_over_pi,\n  pair_r8,\n  gap,\n  iterations,\n  density_error,\n  tp_over_ep\nFROM runs\nORDER BY CASE selection\n  WHEN 'no_explicit_geometry' THEN 1\n  WHEN 'cubic_unfrustrated' THEN 2\n  ELSE 3\nEND, V, t0\n;\n\n-- dataset: publication_assessment\nSELECT\n  finding,\n  evidence,\n  current_status,\n  minimum_next_check\nFROM publication_assessment\nORDER BY priority\n;\n",
+        "executed_at": "2026-08-15T00:34:14.434091Z",
+        "tables_used": [
+          "run_metrics.csv",
+          "pair_correlations.csv"
+        ],
+        "filters": [
+          "Exact plot-order suffix and geometry filters",
+          "t0 in 0.8, 1.0, 1.2, 1.4, 1.6",
+          "Five boundary rungs trimmed for Fourier observables"
+        ],
+        "metric_definitions": [
+          "corr_sdw and corr_dwave are maxima of normalized absolute Fourier spectra reconstructed from the final measured correlation matrices.",
+          "The plot itself uses stored alpha and beta fields; cross-geometry conclusions instead use geometry-neutral correlations.",
+          "Pair D(r) is the mean absolute rung-singlet pair-pair correlation at separation r after excluding eight edge rungs.",
+          "The reported gap is the saved orthogonal-state DMRG gap, not a sector-resolved spin or charge gap."
+        ]
+      }
+    },
+    {
+      "id": "bollmark_2023",
+      "label": "Bollmark et al., Phys. Rev. X 13, 011039 (2023)",
+      "href": "https://doi.org/10.1103/PhysRevX.13.011039"
+    },
+    {
+      "id": "bollmark_2025",
+      "label": "Bollmark, Koehler, and Kantian, Phys. Rev. B 111, 125141 (2025)",
+      "href": "https://doi.org/10.1103/PhysRevB.111.125141"
+    },
+    {
+      "id": "dolfi_2015",
+      "label": "Dolfi et al., Phys. Rev. B 92, 195139 (2015)",
+      "href": "https://doi.org/10.1103/PhysRevB.92.195139"
+    },
+    {
+      "id": "shen_2023",
+      "label": "Shen, Zhang, and Qin, Phys. Rev. B 108, 165113 (2023)",
+      "href": "https://doi.org/10.1103/PhysRevB.108.165113"
+    },
+    {
+      "id": "white_2002",
+      "label": "White, Affleck, and Scalapino, Phys. Rev. B 65, 165122 (2002)",
+      "href": "https://doi.org/10.1103/PhysRevB.65.165122"
+    },
+    {
+      "id": "noack_1997",
+      "label": "Noack et al., Phys. Rev. B 56, 7162 (1997)",
+      "href": "https://doi.org/10.1103/PhysRevB.56.7162"
+    },
+    {
+      "id": "jiang_2018",
+      "label": "Jiang and Devereaux, arXiv:1806.01465",
+      "href": "https://arxiv.org/abs/1806.01465"
+    }
+  ]
+}
