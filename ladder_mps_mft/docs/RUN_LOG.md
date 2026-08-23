@@ -135,3 +135,27 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   timing-region contract.
 - Perlmutter jobs submitted by this implementation: none. Next action is the
   staged v4 seed preflight followed by the two-candidate matrix.
+
+## 2026-08-22 — completed-seed dependency compatibility fix
+
+- The focused-run seed job `57426788` completed and produced its immutable
+  warm-start artifact. The subsequent staged `submit-matrix` command failed
+  before recording any candidate or report jobs with Slurm's `Job dependency
+  problem` error.
+- Root cause: after verifying the seed's `COMPLETED` accounting state and file,
+  script v1.3.0 still attached `afterok:57426788` to each candidate. Slurm can
+  reject a dependency on a completed job after that job ages out of the
+  controller's active record, even while `sacct` retains its history.
+- Script v1.3.1 omits the redundant dependency in the staged path after the
+  completed-state and artifact checks. The one-shot path retains `afterok`
+  while its seed is pending. No DMRG or scientific calculation changed.
+- Existing v1.3.0 run environments are accepted only by v1.3.1. The completed
+  seed from commit `38697d803a7a15218cd54b9df1507a41fa76587a` may be reused
+  after exact model, config, E_p-registry, seed-file, and recorded seed-lineage
+  checks; the new metrics retain both the seed and payload commits and
+  implementation hashes.
+- Validation: shell/Julia parsing, the guarded plan, and `git diff --check`
+  passed. A mock Slurm submission verified that completed-seed candidates have
+  no seed dependency while the report retains `afterany` on both candidates.
+  The full Julia suite passed all 113 tests, including v1.3.0 run-environment
+  compatibility and expanded seed-lineage checks.

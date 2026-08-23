@@ -19,6 +19,12 @@ settings = load_settings(config_path)
 current_git_commit = LadderMPSMFT._read_git("rev-parse", "HEAD")
 current_implementation_sha256 = LadderMPSMFT.implementation_fingerprint()
 current_ep_source_sha256 = LadderMPSMFT.sha256_file(settings.model.ep_source)
+const COMPATIBLE_PHASE0_SEED_COMMITS = Set([
+    # Phase 0 v1.3.1 changes only staged Slurm dependency handling and seed
+    # lineage recording. Reusing the completed v1.3.0 warm seed is safe after
+    # its model, config, E_p registry, and immutable file hash are verified.
+    "38697d803a7a15218cd54b9df1507a41fa76587a",
+])
 threads = Threads.nthreads()
 runtime = if backend == :blocksparse
     RuntimeSettings(blas_threads=1, strided_threads=1, threaded_blocksparse=true)
@@ -89,12 +95,12 @@ loaded = h5open(seed_path, "r") do file
     String(read(file, "ep_source_sha256")) == current_ep_source_sha256 || error(
         "Phase 0 seed E_p registry fingerprint differs from the payload registry",
     )
-    String(read(file, "git_commit")) == current_git_commit || error(
-        "Phase 0 seed git commit differs from the payload commit",
-    )
-    String(read(file, "implementation_sha256")) == current_implementation_sha256 || error(
-        "Phase 0 seed implementation fingerprint differs from the payload implementation",
-    )
+    seed_git_commit = String(read(file, "git_commit"))
+    seed_implementation_sha256 = String(read(file, "implementation_sha256"))
+    seed_implementation_sha256 == current_implementation_sha256 ||
+        seed_git_commit in COMPATIBLE_PHASE0_SEED_COMMITS || error(
+            "Phase 0 seed implementation fingerprint differs from the payload implementation",
+        )
     benchmark_mu = Float64(read(file, "chemical_potential"))
     isapprox(benchmark_mu, settings.model.mu_initial; atol=1e-12, rtol=0.0) || error(
         "Phase 0 seed mu $benchmark_mu differs from config mu $(settings.model.mu_initial)",
@@ -114,6 +120,8 @@ loaded = h5open(seed_path, "r") do file
         target_density,
         seed_density=Float64(read(file, "density")),
         seed_config_sha256=String(read(file, "config_sha256")),
+        seed_git_commit,
+        seed_implementation_sha256,
     )
 end
 
@@ -196,6 +204,8 @@ metric = Dict{String,Any}(
     "seed_density" => loaded.seed_density,
     "seed_chemical_potential" => loaded.benchmark_mu,
     "seed_config_sha256" => loaded.seed_config_sha256,
+    "seed_git_commit" => loaded.seed_git_commit,
+    "seed_implementation_sha256" => loaded.seed_implementation_sha256,
     "git_commit" => current_git_commit,
     "implementation_sha256" => current_implementation_sha256,
     "hostname" => get(ENV, "HOSTNAME", "unknown"),

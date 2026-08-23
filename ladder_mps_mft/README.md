@@ -17,7 +17,7 @@ backend-equivalence and screening evidence. It shortlisted `serial-t1` and
 `blocksparse-t4`, but its `chi=64` fixed-`mu=0` workload ran at `n=0.5614`
 rather than `n=0.9375`, so it is not the final production-scale timing. The v3
 density-search seed failed and is no longer blocking calibration. Phase 0
-v1.3.0 directly compares the two finalists at fixed `mu=1.8`, `chi=200`, and
+v1.3.1 directly compares the two finalists at fixed `mu=1.8`, `chi=200`, and
 six sweeps. The legacy-GPU comparison remains an estimate until a matched GPU
 timing and `sacct` record are available.
 

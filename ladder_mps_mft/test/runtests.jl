@@ -125,9 +125,23 @@ end
         command = `bash -c 'source "$1" plan >/dev/null; write_environment "$2/run.env"; load_environment "$2"; printf "%s\n" "$PHASE0_RUN_SCRIPT_VERSION"' bash $script $directory`
         loaded_version = read(command, String)
         environment = read(joinpath(directory, "run.env"), String)
-        @test occursin(r"(?m)^PHASE0_RUN_SCRIPT_VERSION=1\.3\.0$", environment)
+        @test occursin(r"(?m)^PHASE0_RUN_SCRIPT_VERSION=1\.3\.1$", environment)
         @test !occursin(r"(?m)^PHASE0_SCRIPT_VERSION=", environment)
-        @test strip(loaded_version) == "1.3.0"
+        @test strip(loaded_version) == "1.3.1"
+
+        compatible_environment = replace(environment,
+            "PHASE0_RUN_SCRIPT_VERSION=1.3.1" => "PHASE0_RUN_SCRIPT_VERSION=1.3.0",
+        )
+        write(joinpath(directory, "run.env"), compatible_environment)
+        compatible_version = read(
+            `bash -c 'source "$1" plan >/dev/null; load_environment "$2"; printf "%s\n" "$PHASE0_RUN_SCRIPT_VERSION"' bash $script $directory`,
+            String,
+        )
+        @test strip(compatible_version) == "1.3.0"
+
+        script_source = read(script, String)
+        @test occursin("submit_matrix_jobs \"\$run_dir\" \"\$seed_id\" pending", script_source)
+        @test occursin("submit_matrix_jobs \"\$run_dir\" \"\$seed_id\" completed", script_source)
     end
 end
 
@@ -180,6 +194,8 @@ end
         @test !metric["compile_warmup_timed"]
         @test metric["seed_chemical_potential"] ≈ seed.chemical_potential
         @test metric["seed_config_sha256"] == metric["config_sha256"]
+        @test metric["seed_git_commit"] == metric["git_commit"]
+        @test metric["seed_implementation_sha256"] == metric["implementation_sha256"]
         @test metric["benchmark_chemical_potential"] ≈ seed.chemical_potential
         @test length(metric["seconds"]) == 1
 

@@ -104,6 +104,8 @@ baseline_ep_sha256 = String(baseline["ep_source_sha256"])
 baseline_model_fingerprint = String(baseline["model_fingerprint"])
 baseline_implementation_sha256 = String(baseline["implementation_sha256"])
 baseline_git_commit = String(baseline["git_commit"])
+baseline_seed_git_commit = String(baseline["seed_git_commit"])
+baseline_seed_implementation_sha256 = String(baseline["seed_implementation_sha256"])
 physical_sites = Int(baseline["physical_sites"])
 
 energy_tolerance_per_site = parse(Float64, get(ENV, "PHASE0_ENERGY_TOL_PER_SITE", "1e-8"))
@@ -165,7 +167,9 @@ for candidate in candidates
         String(metric["ep_source_sha256"]) == baseline_ep_sha256 &&
         String(metric["model_fingerprint"]) == baseline_model_fingerprint &&
         String(metric["implementation_sha256"]) == baseline_implementation_sha256 &&
-        String(metric["git_commit"]) == baseline_git_commit
+        String(metric["git_commit"]) == baseline_git_commit &&
+        String(metric["seed_git_commit"]) == baseline_seed_git_commit &&
+        String(metric["seed_implementation_sha256"]) == baseline_seed_implementation_sha256
     topology_match = topology_matches(metric, candidate)
     rss_kib = maximum_rss_kib(time_path)
     memory_mib = rss_kib > 0 ? recommended_memory_mib(rss_kib) : 0

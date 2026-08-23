@@ -5,7 +5,7 @@ production-scale finite-DMRG solve. The complete v2 matrix is sufficient to
 shortlist `serial-t1` and `blocksparse-t4`. The failed v3 density search is
 preserved as diagnostic evidence but is no longer on the critical path.
 
-The focused script v1.3.0 compares those two candidates at `L=64`, `chi=200`,
+The focused script v1.3.1 compares those two candidates at `L=64`, `chi=200`,
 six sweeps, and fixed `mu=1.8`. It does not time or modify the legacy density
 search.
 
@@ -51,6 +51,11 @@ bash slurm/phase0_calibrate_cpu.sh show 20260822_phase0_cpu_v4
 
 The one-shot `submit RUN_ID` action remains available, but the staged path is
 preferred because it exposes a seed failure before allocating the matrix.
+After `submit-matrix` verifies the seed artifact and its `COMPLETED` accounting
+state, candidate jobs are submitted without a redundant `afterok` dependency.
+This avoids Slurm rejecting a completed dependency after it ages out of the
+controller's active job record. The one-shot path retains `afterok` because its
+seed is still pending at submission time.
 
 The default candidate request is 32 GiB and four hours. The guarded worst-case
 reservation for seed, both candidate jobs, and report is `0.570312500` CPU

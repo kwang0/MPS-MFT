@@ -103,7 +103,7 @@ evaluations with status `maximum_mu_iterations`, reaching density
 `0.9843323116910832` instead of `0.9375`. It created no seed or benchmark data.
 This is a numerical search failure, not a scheduler or resource failure.
 
-Script v1.3.0 therefore leaves the production density-search algorithm
+Script v1.3.1 therefore leaves the production density-search algorithm
 untouched and performs a focused fixed-mu comparison of only `serial-t1` and
 `blocksparse-t4`. It uses `mu=1.8`, `L=64`, `chi=200`, six sweeps, and two
 identical repetitions. Only `run_dmrg_ground` is timed; compilation, MPO

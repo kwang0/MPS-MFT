@@ -10,7 +10,7 @@ wrong physical density, so it is backend screening rather than a final
 production measurement. The v3 seed's density search failed after 16
 evaluations and produced no benchmark data.
 
-Script v1.3.0 removes density targeting from the timed workload and performs
+Script v1.3.1 removes density targeting from the timed workload and performs
 the missing production-scale comparison directly: fixed `mu=1.8`, `L=64`,
 `chi=200`, six sweeps, two repetitions, and only the two shortlisted backends.
 Each timer encloses exactly `run_dmrg_ground`. The fixed-mu warm seed, MPO
