@@ -20,6 +20,7 @@ runtime = RuntimeSettings(
 )
 ensure_backend!(runtime)
 configure_threading!(runtime)
+preflight = gpu_linalg_preflight!()
 model = ModelSettings(
     L=2,
     U=2.0,
@@ -79,6 +80,10 @@ h5open(output_path, "w") do file
     for (key, value) in backend_metadata(runtime)
         device[key] = value
     end
+    linalg = create_group(file, "linalg_preflight")
+    linalg["dimension"] = preflight.dimension
+    linalg["minimum_eigenvalue"] = preflight.minimum_eigenvalue
+    linalg["maximum_eigenvalue"] = preflight.maximum_eigenvalue
 end
 loaded = h5open(output_path, "r") do file
     Bool(read(file, "completed")) || error("GPU smoke completion marker missing")
@@ -88,3 +93,4 @@ length(loaded) == 2 * model.L || error("GPU smoke checkpoint round trip changed 
 println("gpu_smoke_path=$output_path")
 println("energy=$(result.energy)")
 println("density=$density")
+println("linalg_preflight_dimension=$(preflight.dimension)")

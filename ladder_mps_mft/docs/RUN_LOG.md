@@ -206,3 +206,57 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   import were checked locally without a device. No Perlmutter job was
   submitted; the staged smoke job remains the required GPU runtime and HDF5
   round-trip proof.
+
+## 2026-08-23 — Phase 1 v1 CUDA-library collision and v2 isolation fix
+
+- Failed run: immutable run ID `20260822_phase1_gpu_v1`, launcher v1.0.0,
+  submission commit `09d53c3262ef59e9bccc78240f7daabe7b71770c`. Smoke job
+  `57451731` completed, then all nine segment-one branch jobs failed:
+  frustrated pairing/SDW/CDW `57452337`/`57452338`/`57452339`, unfrustrated
+  pairing/SDW/CDW `57452342`/`57452343`/`57452344`, and square pairing/SDW/CDW
+  `57452345`/`57452346`/`57452347`.
+- Failure classification: infrastructure/runtime, before a scientific MF
+  iteration. Every branch log has the same three CUDA.jl system-library
+  warnings followed by signal 11 in the first production DMRG
+  eigendecomposition. The stack combines CUDA 13.2
+  `/opt/nvidia/hpc_sdk/Linux_x86_64/26.5` `libcublasLt.so.13` with CUDA.jl artifact
+  `libcublas.so` and `libcusolver.so`, crashing in `cublasLtLegacyGemmSSS`
+  called from `cusolverDnSsyevd`. The v1 launcher explicitly loaded
+  `cudatoolkit`, contrary to the selected CUDA.jl artifact-runtime model.
+- The completed tiny smoke was a false negative: its log contained the same
+  warnings, but the L=2, maxdim=4 DMRG happened not to segfault. Its artifact
+  SHA-256 is
+  `99bc4fdd8a520e38ef8f0fc3645bf1d6302f8bd7e9da5c8c928d4b68a2f8f49f`;
+  it is environment evidence only, not a scientific result. The prepared GPU
+  manifest SHA-256 is
+  `6e3a094e02d1141e994c8904ea67df930d45c4402a64bc41cb613b55771fdb0d`
+  and the branch manifest SHA-256 is
+  `18369520757a976da0717bf154266f259999dad57036dc57b2e78c3091710b50`.
+- Recoverability audit: `results/` contains zero files across all nine
+  branches, so there is no `state.h5`, checkpoint, accepted fixed point, or
+  periodic orbit to continue or compare. No phase conclusion can be drawn.
+  Preserve v1 unchanged. Launcher v1.0.1 permits read-only status inspection
+  of v1 but refuses further submissions from it.
+- Correction: launcher v1.0.1 no longer loads `cudatoolkit`; it unloads the
+  module, removes inherited NVIDIA-HPC-SDK and local-toolkit paths from
+  `LD_LIBRARY_PATH`, and clears CUDA-root variables. The CUDA extension now
+  requires the pinned artifact toolkit and treats any loaded non-artifact CUDA
+  runtime library as fatal. Both smoke and production entry points run a
+  256-by-256 Float32 GPU GEMM plus Hermitian eigendecomposition before DMRG;
+  the smoke stores the preflight extrema and dimension.
+- Budget: v1 retains its conservative `27.125` requested-node-hour ledger
+  reservation; early failures are not reclaimed. A fresh smoke would raise the
+  total to `27.250`, and its nine-job matrix would raise it to `54.250`, leaving
+  `345.750` under the 400-additional-node-hour project cap. Actual Slurm charge
+  is not inferable from the synced artifacts because `sacct` elapsed/TRES rows
+  were not included.
+- Validation: all Julia sources parse, `bash -n` and `git diff --check` pass,
+  and the full local CPU suite passes all 150 tests. This includes mocked Slurm
+  staging/budget tests, exact sanitization of the observed HPC-SDK path, and
+  unchanged DMRG, density-search, mixing, recurrence, variational-energy,
+  checkpoint, and selection coverage. The CUDA extension imports locally
+  without a device. No local check can validate GPU execution; the corrected
+  Perlmutter smoke is the required runtime proof.
+- Perlmutter jobs submitted by this correction: none. Next action after pushing
+  and pulling is a fresh immutable `20260823_phase1_gpu_v2` smoke. Inspect its
+  log and HDF5 preflight before submitting the nine branches.

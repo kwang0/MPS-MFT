@@ -13,6 +13,10 @@ function ensure_backend!(runtime::RuntimeSettings)
     return _cuda_extension().ensure_cuda!()
 end
 
+function gpu_linalg_preflight!(; dimension::Integer=256)
+    return _cuda_extension().linalg_preflight!(dimension)
+end
+
 function move_to_backend(value, backend::Symbol)
     backend == :cpu && return value
     backend == :gpu || throw(ArgumentError("unknown runtime backend $backend"))

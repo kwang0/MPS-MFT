@@ -19,25 +19,42 @@ bash slurm/phase1_gpu.sh plan
 The committed GPU manifest pins CUDA.jl 5.9.5 together with ITensors 0.9.15 and
 ITensorMPS 0.3.25. Do not import or precompile CUDA on the GPU-less login node:
 the allocated smoke job performs the first CUDA import and is the device proof.
+CUDA.jl is configured to use its pinned artifact toolkit, so do not load the
+Perlmutter `cudatoolkit` module for this workflow. The launcher unloads that
+module, removes inherited NVIDIA-HPC-SDK runtime-library paths, and aborts if a
+non-artifact cuBLAS, cuSOLVER, cuSPARSE, or other CUDA runtime library is loaded.
+This follows [CUDA.jl's recommended artifact-toolkit
+configuration](https://cuda.juliagpu.org/stable/installation/overview/); the
+Perlmutter system toolkit remains appropriate for software compiled against
+it, but must not be mixed into this artifact-based Julia process.
 
 ## Staged submission
 
 Choose a new immutable run ID:
 
 ```bash
-RUN_ID=20260822_phase1_gpu_v1
+RUN_ID=20260823_phase1_gpu_v2
 bash slurm/phase1_gpu.sh submit "$RUN_ID"
 bash slurm/phase1_gpu.sh status "$RUN_ID"
 ```
 
-`submit` prepares all nine configs and submits only a 30-minute tiny-DMRG smoke
-test. It is not a scientific calculation. After `status` reports the smoke job
-as `COMPLETED` and `gpu_smoke.h5` exists, submit the branch matrix:
+`submit` prepares all nine configs and submits only a 30-minute smoke test. It
+is not a scientific calculation. The smoke now requires artifact-only CUDA
+runtime libraries, exercises a 256-by-256 dense GPU matrix multiplication and
+Hermitian eigendecomposition through cuBLAS/cuSOLVER, runs the tiny DMRG, and
+round-trips its MPS through HDF5. After `status` reports the smoke job as
+`COMPLETED` and `gpu_smoke.h5` exists, inspect the smoke log for the recorded
+preflight and submit the branch matrix:
 
 ```bash
+grep -E 'gpu_smoke_path|linalg_preflight_dimension|CUDA runtime library.*system path' \
+  "output/phase1_gpu/$RUN_ID"/logs/smoke-*.out
 bash slurm/phase1_gpu.sh submit-matrix "$RUN_ID"
 bash slurm/phase1_gpu.sh status "$RUN_ID"
 ```
+
+The corrected smoke must print `linalg_preflight_dimension=256` and must not
+print a `system path` CUDA-runtime warning.
 
 The matrix contains pairing, SDW, and CDW seeds for each of
 `cubic_frustrated`, `cubic_unfrustrated`, and `square`. Each job requests one of
@@ -45,6 +62,13 @@ four GPUs for 12 hours in shared QOS, a conservative charge of 3 GPU node-hours.
 The smoke plus matrix reserves 27.125 node-hours. NERSC shared jobs are charged
 by the dominant node fraction; see the [NERSC queue and charge
 policy](https://docs.nersc.gov/jobs/policy/#calculating-charges).
+
+Run `20260822_phase1_gpu_v1` is retained only for audit: its smoke passed despite
+CUDA.jl warnings, but all nine branches then mixed CUDA.jl artifact libraries
+with CUDA 13.2 libraries from the NVIDIA HPC SDK and segfaulted in the first
+DMRG eigendecomposition. It produced no result or checkpoint files. Script
+version 1.0.1 can display its status but refuses new submissions or
+continuations from that run; use a new run ID.
 
 Preparation and matrix submission are restart-safe: a failed smoke submission
 can reuse the validated prepared run, and a partially submitted matrix retries

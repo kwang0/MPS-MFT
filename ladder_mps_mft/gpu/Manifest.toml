@@ -676,7 +676,7 @@ uuid = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 version = "1.4.0"
 
 [[deps.LadderMPSMFT]]
-deps = ["CSV", "Dates", "HDF5", "ITensorMPS", "ITensors", "LinearAlgebra", "Printf", "Random", "SHA", "Statistics", "TOML"]
+deps = ["CSV", "Dates", "HDF5", "ITensorMPS", "ITensors", "Libdl", "LinearAlgebra", "Printf", "Random", "SHA", "Statistics", "TOML"]
 path = ".."
 uuid = "71f34a60-9dd5-47fc-9562-9bbf3447323e"
 version = "0.1.0"

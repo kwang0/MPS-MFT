@@ -2,7 +2,7 @@
 
 julia_version = "1.12.7"
 manifest_format = "2.0"
-project_hash = "7d308822267f42e31ef5d34d084d58beae66bce7"
+project_hash = "f54e5537cd9dcf1eaac961ff9487739e3370891d"
 
 [[deps.Accessors]]
 deps = ["CompositionsBase", "ConstructionBase", "Dates", "InverseFunctions", "MacroTools"]
@@ -467,7 +467,7 @@ weakdeps = ["ChainRulesCore"]
     KrylovKitChainRulesCoreExt = "ChainRulesCore"
 
 [[deps.LadderMPSMFT]]
-deps = ["CSV", "Dates", "HDF5", "ITensorMPS", "ITensors", "LinearAlgebra", "Printf", "Random", "SHA", "Statistics", "TOML"]
+deps = ["CSV", "Dates", "HDF5", "ITensorMPS", "ITensors", "Libdl", "LinearAlgebra", "Printf", "Random", "SHA", "Statistics", "TOML"]
 path = "."
 uuid = "71f34a60-9dd5-47fc-9562-9bbf3447323e"
 version = "0.1.0"

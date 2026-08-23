@@ -72,4 +72,5 @@ in `docs/PHASE0_V2_AUDIT.md`.
 - `canonical_variational_energy` is a zero-temperature energy, not a finite-temperature free energy.
 - Cross-geometry energies describe different Hamiltonians and are not ranked as competing phases by the comparison tool.
 - Production GPU states conserve neither `S_z` nor fermion parity at the tensor-block level. The Hamiltonian still has the corresponding symmetries; disabling QNs changes representation/performance, not its terms. Fixed-sector gap and `E_p` calculations remain separate QN-conserving CPU runs.
+- The pinned CUDA.jl artifact toolkit is the sole CUDA runtime for Phase 1. The guarded launcher unloads Perlmutter's `cudatoolkit` module and the GPU smoke fails if system CUDA runtime libraries are loaded.
 - Fixed bond dimension, enhanced pair fields, long correlation lengths, or favorable finite-size pairing do not by themselves establish superconducting long-range order.

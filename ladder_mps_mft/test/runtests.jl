@@ -205,6 +205,18 @@ end
 
 @testset "Phase 1 guarded GPU launcher" begin
     script = joinpath(ROOT, "slurm", "phase1_gpu.sh")
+    script_source = read(script, String)
+    @test !occursin(r"(?m)^\s*module load cudatoolkit\s*$", script_source)
+    @test occursin("module unload cudatoolkit", script_source)
+    @test occursin("sanitize_cuda_runtime_environment", script_source)
+    @test occursin("require_current_run_version", script_source)
+    @test occursin("gpu_linalg_preflight!", read(joinpath(ROOT, "scripts", "gpu_smoke.jl"), String))
+    @test occursin("gpu_linalg_preflight!", read(joinpath(ROOT, "scripts", "run_scf_gpu.jl"), String))
+    sanitized_environment = read(
+        `bash -c 'source "$1" plan >/dev/null; export CUDA_HOME=/opt/nvidia/hpc_sdk/Linux_x86_64/26.5/cuda/13.2; export LD_LIBRARY_PATH=/safe/one:/opt/nvidia/hpc_sdk/Linux_x86_64/26.5/math_libs/13.2/lib64:/safe/two; sanitize_cuda_runtime_environment; printf "%s|%s|%s\n" "${LD_LIBRARY_PATH-unset}" "${CUDA_HOME-unset}" "${CUDA_PATH-unset}"' bash $script`,
+        String,
+    )
+    @test strip(sanitized_environment) == "/safe/one:/safe/two|unset|unset"
     mock_bin = joinpath(ROOT, "test", "fixtures", "mock_slurm")
     julia_executable = Base.julia_cmd().exec[1]
     mktempdir() do directory
