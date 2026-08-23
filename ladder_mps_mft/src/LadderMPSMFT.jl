@@ -16,6 +16,7 @@ include("Types.jl")
 include("Geometry.jl")
 include("EpRegistry.jl")
 include("Config.jl")
+include("Device.jl")
 include("Mixing.jl")
 include("Convergence.jl")
 include("MeanField.jl")
@@ -50,6 +51,10 @@ export SUPPORTED_GEOMETRIES,
        validate_weak_coupling,
        load_settings,
        validate_settings,
+       ensure_backend!,
+       move_to_backend,
+       move_to_cpu,
+       backend_metadata,
        density_product_state,
        initial_fields,
        calculate_mean_fields,

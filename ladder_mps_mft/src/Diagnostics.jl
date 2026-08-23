@@ -160,8 +160,12 @@ function compute_ladder_diagnostics(psi::MPS, model::ModelSettings; full_pair_co
     spin_correlation = real.(correlation_matrix(psi, "Sz", "Sz"))
     charge_grid = structure_factor_grid(charge_correlation, density, model.L)
     spin_grid = structure_factor_grid(spin_correlation, spin, model.L)
-    entropy = entanglement_profile(psi)
-    pair = full_pair_correlations ? sign_resolved_pair_correlations(psi, model) : nothing
+    # Entanglement extraction indexes singular values element by element, which
+    # is intentionally done on the host. Full pair MPO diagnostics likewise use
+    # a host MPS so a CPU MPO is never contracted with a GPU state.
+    psi_cpu = move_to_cpu(psi)
+    entropy = entanglement_profile(psi_cpu)
+    pair = full_pair_correlations ? sign_resolved_pair_correlations(psi_cpu, model) : nothing
     expected_spin_q = pi * model.density
     spin_peak = dominant_wavevector(spin_grid)
     return (
@@ -276,13 +280,13 @@ function write_sector_gaps(path::AbstractString, gaps; immutable::Bool=false)
     return path
 end
 
-function build_bare_ladder_mpo(sites, model::ModelSettings)
+function build_bare_ladder_mpo(sites, model::ModelSettings; backend::Symbol=:cpu)
     fields = FieldState(
         zeros(Float64, model.L, model.L, 2, 2),
         zeros(Float64, 2, model.L, model.L, 2, 2),
         zeros(Float64, 2, 2 * model.L),
     )
-    return build_mf_mpo(sites, model, fields, 0.0)
+    return build_mf_mpo(sites, model, fields, 0.0; backend)
 end
 
 function sector_energy(model::ModelSettings, dmrg_settings::DMRGSettings, particle_number::Int, twice_sz::Int)

@@ -1,0 +1,22 @@
+#!/bin/bash
+set -euo pipefail
+
+state_dir="${MOCK_SLURM_STATE_DIR:?MOCK_SLURM_STATE_DIR is required}"
+mkdir -p "$state_dir"
+counter="$state_dir/next_job_id"
+if [[ -f "$counter" ]]; then
+  job_id="$(<"$counter")"
+else
+  job_id=700000
+fi
+printf '%s\n' "$((job_id + 1))" >"$counter"
+
+args=("$@")
+for ((index=0; index<${#args[@]}; index++)); do
+  if [[ "${args[index]}" == "_smoke" ]]; then
+    run_index=$((index + 1))
+    mkdir -p "${args[run_index]}"
+    : >"${args[run_index]}/gpu_smoke.h5"
+  fi
+done
+printf '%s\n' "$job_id"

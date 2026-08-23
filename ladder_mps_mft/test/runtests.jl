@@ -95,7 +95,41 @@ end
     @test selection.denominator ≈ 0.13251724
     @test selection.bound_pair
     @test selection.tp_below_pair_binding
+    @test selection.mode == :exact
+    @test selection.lower_record === selection.upper_record
     @test_throws ArgumentError lookup_ep(registry; L=64, U=8, V=0, t0=2, density=0.9375, tp=0.1)
+
+    interpolated = lookup_ep(
+        registry;
+        L=64,
+        U=8,
+        V=-0.2,
+        t0=1.1,
+        density=0.9375,
+        tp=0.1,
+        allow_interpolation=true,
+    )
+    @test interpolated.mode == :linear_t0
+    @test interpolated.interpolation_weight ≈ 0.5
+    @test interpolated.lower_record.t0 ≈ 1.0
+    @test interpolated.upper_record.t0 ≈ 1.2
+    @test interpolated.record.E_p ≈ -0.18452309659153343
+    @test interpolated.denominator ≈ 0.18452309659153343
+    @test_throws ArgumentError lookup_ep(
+        registry;
+        L=64, U=8, V=-0.2, t0=0.9, density=0.9375, tp=0.1,
+        allow_interpolation=true,
+    )
+
+    sign_changing = [
+        EpRecord(4, 2.0, 0.0, 1.0, 1.0, 10, -1.0, -0.1, 1e-6),
+        EpRecord(4, 2.0, 0.0, 1.2, 1.0, 10, -1.1, 0.1, 1e-6),
+    ]
+    @test_throws ArgumentError lookup_ep(
+        sign_changing;
+        L=4, U=2, V=0, t0=1.1, density=1.0, tp=0.01,
+        source_path="synthetic", require_bound=false, allow_interpolation=true,
+    )
 end
 
 @testset "configuration and deterministic seeds" begin
@@ -112,11 +146,35 @@ end
     @test settings.dmrg.mu_max_iterations == 16
     @test settings.dmrg.mu_bracket_step == 0.05
     @test !settings.run.require_accepted_solution
+    gpu_settings = load_settings(joinpath(ROOT, "configs", "phase1_gpu_base.toml"))
+    @test gpu_settings.runtime.backend == :gpu
+    @test !gpu_settings.runtime.conserve_sz
+    @test !gpu_settings.runtime.conserve_nfparity
+    @test gpu_settings.model.ep_mode == :linear_t0
+    @test gpu_settings.model.ep_signed ≈ -0.18452309659153343
+    @test gpu_settings.model.tp^2 / gpu_settings.model.ep ≈ 0.05419375777188662
+    invalid_gpu = ProjectSettings(
+        model=test_model(),
+        runtime=RuntimeSettings(backend=:gpu, threaded_blocksparse=false),
+    )
+    @test_throws ArgumentError validate_settings(invalid_gpu)
+    cpu_fingerprint = LadderMPSMFT.numerical_fingerprint(ProjectSettings(model=test_model()))
+    dense_cpu_fingerprint = LadderMPSMFT.numerical_fingerprint(ProjectSettings(
+        model=test_model(),
+        runtime=RuntimeSettings(threaded_blocksparse=false, conserve_sz=false, conserve_nfparity=false),
+    ))
+    @test cpu_fingerprint != dense_cpu_fingerprint
     first_seed = initial_fields(test_model(); seed=:pairing, rng=MersenneTwister(7))
     second_seed = initial_fields(test_model(); seed=:pairing, rng=MersenneTwister(7))
     @test first_seed.alpha == second_seed.alpha
     @test first_seed.alpha == permutedims(first_seed.alpha, (2, 1, 4, 3))
     @test all(iszero, first_seed.beta)
+    sdw_seed = initial_fields(test_model(); seed=:sdw, amplitude=1.0)
+    @test sdw_seed.mu_cdw[1, :] == [-1.0, 1.0, 1.0, -1.0]
+    @test sdw_seed.mu_cdw[2, :] == -sdw_seed.mu_cdw[1, :]
+    cdw_seed = initial_fields(test_model(); seed=:cdw, amplitude=1.0)
+    @test cdw_seed.mu_cdw[1, :] == [-1.0, -1.0, 1.0, 1.0]
+    @test cdw_seed.mu_cdw[2, :] == cdw_seed.mu_cdw[1, :]
 end
 
 @testset "Phase 0 run environment round trip" begin
@@ -142,6 +200,51 @@ end
         script_source = read(script, String)
         @test occursin("submit_matrix_jobs \"\$run_dir\" \"\$seed_id\" pending", script_source)
         @test occursin("submit_matrix_jobs \"\$run_dir\" \"\$seed_id\" completed", script_source)
+    end
+end
+
+@testset "Phase 1 guarded GPU launcher" begin
+    script = joinpath(ROOT, "slurm", "phase1_gpu.sh")
+    mock_bin = joinpath(ROOT, "test", "fixtures", "mock_slurm")
+    julia_executable = Base.julia_cmd().exec[1]
+    mktempdir() do directory
+        run_root = joinpath(directory, "runs")
+        budget_root = joinpath(directory, "budget")
+        ledger = joinpath(budget_root, "ledger.tsv")
+        environment = (
+            "PATH" => string(mock_bin, ":", ENV["PATH"]),
+            "MOCK_SLURM_STATE_DIR" => joinpath(directory, "slurm"),
+            "PHASE1_RUN_ROOT" => run_root,
+            "PHASE1_BUDGET_ROOT" => budget_root,
+            "PHASE1_LEDGER_PATH" => ledger,
+            "PHASE1_JULIA" => julia_executable,
+        )
+        run(pipeline(
+            addenv(`bash $script submit mock_phase1`, environment...),
+            stdout=devnull,
+        ))
+        run(pipeline(
+            addenv(`bash $script submit-matrix mock_phase1`, environment...),
+            stdout=devnull,
+        ))
+        ledger_rows = readlines(ledger)[2:end]
+        @test length(ledger_rows) == 10
+        @test sum(parse(Float64, split(row, '\t')[7]) for row in ledger_rows) ≈ 27.125
+        @test length(readlines(joinpath(run_root, "mock_phase1", "manifest.tsv"))) == 10
+        @test length(readlines(joinpath(run_root, "mock_phase1", "jobs.tsv"))) == 11
+
+        rejected = run(pipeline(
+            ignorestatus(addenv(
+                `bash $script submit cap_rejection`,
+                environment...,
+                "PHASE1_ADDITIONAL_NODE_HOUR_CAP" => "27.1",
+            )),
+            stdout=devnull,
+            stderr=devnull,
+        ))
+        @test !success(rejected)
+        @test !ispath(joinpath(run_root, "cap_rejection"))
+        @test strip(read(joinpath(directory, "slurm", "next_job_id"), String)) == "700010"
     end
 end
 
@@ -412,6 +515,22 @@ end
         @test checkpoint.chemical_potential ≈ 0.4
         @test checkpoint.restart.mu_cdw[1, 1] ≈ 0.25
         @test_throws ArgumentError write_checkpoint(path; settings, psi, records=[record], diagnostic, immutable=true)
+        gpu_resume_settings = ProjectSettings(
+            model=model,
+            runtime=RuntimeSettings(
+                backend=:gpu,
+                threaded_blocksparse=false,
+                conserve_sz=false,
+                conserve_nfparity=false,
+            ),
+            run=RunSettings(
+                output_directory=directory,
+                resume_checkpoint=path,
+                resume_sha256=LadderMPSMFT.sha256_file(path),
+                quick_diagnostics=false,
+            ),
+        )
+        @test_throws ArgumentError LadderMPSMFT._initial_state(gpu_resume_settings)
         selected = select_completed_runs(directory)
         @test length(selected) == 1
         @test only(selected).path == path

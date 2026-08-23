@@ -1,5 +1,10 @@
-function make_sites(model::ModelSettings)
-    return siteinds("Electron", 2 * model.L; conserve_sz=true, conserve_nfparity=true)
+function make_sites(model::ModelSettings, runtime::RuntimeSettings=RuntimeSettings())
+    return siteinds(
+        "Electron",
+        2 * model.L;
+        conserve_sz=runtime.conserve_sz,
+        conserve_nfparity=runtime.conserve_nfparity,
+    )
 end
 
 function initial_fields(model::ModelSettings; seed::Symbol=:pairing, amplitude::Real=1e-3, rng=MersenneTwister(1))
@@ -18,8 +23,9 @@ function initial_fields(model::ModelSettings; seed::Symbol=:pairing, amplitude::
             end
         end
     elseif seed == :sdw
-        for site in 1:(2 * model.L)
-            phase = isodd(site) ? 1.0 : -1.0
+        for rung in 1:model.L, leg in 0:1
+            site = rung_leg_to_site(rung, leg)
+            phase = isodd(rung + leg) ? -1.0 : 1.0
             mu_cdw[1, site] = amplitude * phase
             mu_cdw[2, site] = -amplitude * phase
         end
@@ -56,7 +62,13 @@ function configure_threading!(runtime::RuntimeSettings)
     return (; julia=Threads.nthreads(), blas=BLAS.get_num_threads(), strided, blocksparse)
 end
 
-function build_mf_mpo(sites, model::ModelSettings, fields::FieldState, chemical_potential::Real)
+function build_mf_mpo(
+    sites,
+    model::ModelSettings,
+    fields::FieldState,
+    chemical_potential::Real;
+    backend::Symbol=:cpu,
+)
     os = OpSum()
     for site in 1:(2 * model.L)
         add!(os, -chemical_potential, "Ntot", site)
@@ -107,7 +119,7 @@ function build_mf_mpo(sites, model::ModelSettings, fields::FieldState, chemical_
             beta_up != 0 && add!(os, beta_up, "Cdagup", site_i, "Cup", site_ip)
         end
     end
-    return MPO(os, sites)
+    return move_to_backend(MPO(os, sites), backend)
 end
 
 function _threshold(value::Real, threshold::Real)

@@ -14,6 +14,8 @@ The `[convergence]` defaults reserve the first 20 iterations for an unmixed raw-
 
 The `[model]` density is particles per physical ladder site, so the target particle number is approximately `2L*density`. `geometry` is one of `cubic_frustrated`, `cubic_unfrustrated`, or `square`.
 
-The `[pair_binding]` registry lookup is exact in `(L,U,V,t0,density)`. If no row exists, the run stops. The selected row uses the largest available chi, then the smallest reported relative difference. The signed value is saved, while `abs(E_p)` is used as the perturbative denominator only when the registry value indicates a bound pair, unless the explicitly unsafe `allow_unbound_ep=true` override is set.
+The `[pair_binding]` registry lookup is exact in `(L,U,V,t0,density)` by default. The selected row uses the largest available chi, then the smallest reported relative difference. Set `allow_interpolation=true` only to linearly interpolate signed `E_p` between the nearest bracketing `t0` values at identical `(L,U,V,density)`; extrapolation and sign-changing brackets are rejected. The mode, endpoints, endpoint chi values, weight, signed result, and `t_perp^2/abs(E_p)` are saved and fingerprinted. `abs(E_p)` is used as the perturbative denominator only for a bound pair unless the explicitly unsafe `allow_unbound_ep=true` override is set.
+
+`phase1_gpu_base.toml` is the representative Phase 1 point. It uses dense CUDA tensors and therefore sets both `conserve_sz=false` and `conserve_nfparity=false`. Do not turn QNs back on in this GPU campaign: that is a materially different, uncalibrated block-sparse CUDA backend.
 
 For a continuation, set `parent_checkpoint` and `parent_sha256`; a nearby model is allowed, and the parent is only a seed. For a same-model restart, set `resume_checkpoint` and `resume_sha256`; the model fingerprint must match. Do not set both.

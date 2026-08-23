@@ -32,7 +32,9 @@ end
 function model_fingerprint(model::ModelSettings)
     payload = join((
         model.L, model.t, model.U, model.V, model.t0, model.tp, model.density, model.mu_initial,
-        model.r_range, model.geometry, model.ep, model.ep_signed,
+        model.r_range, model.geometry, model.ep, model.ep_signed, model.ep_mode,
+        model.ep_t0_lower, model.ep_t0_upper, model.ep_lower_signed, model.ep_upper_signed,
+        model.ep_interpolation_weight, model.ep_lower_chi, model.ep_upper_chi,
     ), "|")
     return bytes2hex(SHA.sha256(payload))
 end
@@ -44,6 +46,17 @@ function numerical_fingerprint(settings::ProjectSettings)
             push!(values, field, getfield(block, field))
         end
     end
+    # Device and symmetry representation can change the numerical trajectory;
+    # CPU thread topology is performance-only and remains ordinary provenance.
+    push!(
+        values,
+        :backend,
+        settings.runtime.backend,
+        :conserve_sz,
+        settings.runtime.conserve_sz,
+        :conserve_nfparity,
+        settings.runtime.conserve_nfparity,
+    )
     return bytes2hex(SHA.sha256(join(values, "|")))
 end
 
@@ -53,6 +66,7 @@ function collect_provenance(settings::ProjectSettings)
         (settings.run.parent_sha256 === nothing ? sha256_file(settings.run.parent_checkpoint) : settings.run.parent_sha256)
     resume_hash = settings.run.resume_checkpoint === nothing ? "" :
         (settings.run.resume_sha256 === nothing ? sha256_file(settings.run.resume_checkpoint) : settings.run.resume_sha256)
+    gpu_manifest = joinpath(PROJECT_ROOT, "gpu", "Manifest.toml")
     return Dict{String,Any}(
         "generated_utc" => string(now(UTC)),
         "schema_version" => 1,
@@ -66,6 +80,20 @@ function collect_provenance(settings::ProjectSettings)
         "config_sha256" => config_hash,
         "ep_source" => settings.model.ep_source,
         "ep_source_sha256" => isfile(settings.model.ep_source) ? sha256_file(settings.model.ep_source) : "",
+        "ep_mode" => String(settings.model.ep_mode),
+        "ep_signed" => settings.model.ep_signed,
+        "ep_denominator" => settings.model.ep,
+        "ep_t0_lower" => settings.model.ep_t0_lower,
+        "ep_t0_upper" => settings.model.ep_t0_upper,
+        "ep_lower_signed" => settings.model.ep_lower_signed,
+        "ep_upper_signed" => settings.model.ep_upper_signed,
+        "ep_interpolation_weight" => settings.model.ep_interpolation_weight,
+        "ep_lower_chi" => settings.model.ep_lower_chi,
+        "ep_upper_chi" => settings.model.ep_upper_chi,
+        "effective_mf_coupling_tp2_over_ep" => settings.model.tp^2 / settings.model.ep,
+        "runtime_backend" => String(settings.runtime.backend),
+        "conserve_sz" => settings.runtime.conserve_sz,
+        "conserve_nfparity" => settings.runtime.conserve_nfparity,
         "parent_checkpoint" => something(settings.run.parent_checkpoint, ""),
         "parent_sha256" => parent_hash,
         "resume_checkpoint" => something(settings.run.resume_checkpoint, ""),
@@ -80,6 +108,8 @@ function collect_provenance(settings::ProjectSettings)
         "julia_version" => string(VERSION),
         "itensors_version" => string(Base.pkgversion(ITensors)),
         "itensormps_version" => string(Base.pkgversion(ITensorMPS)),
+        "gpu_manifest_path" => isfile(gpu_manifest) ? gpu_manifest : "",
+        "gpu_manifest_sha256" => isfile(gpu_manifest) ? sha256_file(gpu_manifest) : "",
         "julia_threads" => Threads.nthreads(),
         "blas_threads" => BLAS.get_num_threads(),
         "hostname" => get(ENV, "HOSTNAME", "unknown"),

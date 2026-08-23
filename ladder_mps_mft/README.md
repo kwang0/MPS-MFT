@@ -1,25 +1,25 @@
 # Ladder MPS+MF refactor
 
-This is an isolated, CPU-first replacement path for the ladder mean-field workflow. It lives entirely under `ladder_mps_mft/`; the legacy scripts and result files outside this directory remain untouched.
+This is an isolated replacement path for the ladder mean-field workflow. It lives entirely under `ladder_mps_mft/`; the legacy scripts and result files outside this directory remain untouched. The scientific solver is device-independent, with a pinned CPU environment and a CUDA overlay for production GPU DMRG.
 
 The implementation currently provides:
 
 - a pinned Julia project and modular ITensorMPS solver;
-- exact lookup of pair-binding data from the copied `data/E_p_values.csv` registry, with no interpolation and a default refusal to use an unbound-pair value;
+- exact lookup of pair-binding data from the copied `data/E_p_values.csv` registry, plus opt-in bracketed linear interpolation in `t0` with saved endpoints and no extrapolation;
 - zero-temperature variational phase comparison with the mean-field double-counting constants and a direct bare-Hamiltonian cross-check;
 - a mixer-independent raw-map probe that accepts physical period-two mean-field solutions, followed only when needed by adaptive linear or Anderson fixed-point acceleration;
 - immutable final HDF5 states, hash-checked parent/restart lineage, model/numerics/implementation fingerprints, and accepted-only selection;
 - charge and spin structure factors, `K_rho`, rung-cut entanglement/central-charge fits, sign-resolved pair correlations, and separate fixed-sector spin/charge/pair-gap calculations;
-- a guarded Perlmutter Phase 0 CPU calibration with exclusive ITensor threading backends, a common immutable fixed-mu warm-start state, exact DMRG-only timing, numerical-equivalence gates, and shared-QOS budget accounting.
+- a dense-CUDA production backend that preserves the refactored SCF, recurrence, variational, checkpoint, and diagnostic logic while explicitly disabling QN block sparsity; and
+- a guarded Perlmutter Phase 1 launcher with a staged GPU smoke test, explicit continuations, optional ledgered CPU `E_p` jobs, and a conservative 400-additional-node-hour cap.
 
-The first complete Perlmutter matrix (`20260821_phase0_cpu_v2`) is retained as
+The first complete Perlmutter CPU matrix (`20260821_phase0_cpu_v2`) is retained as
 backend-equivalence and screening evidence. It shortlisted `serial-t1` and
 `blocksparse-t4`, but its `chi=64` fixed-`mu=0` workload ran at `n=0.5614`
-rather than `n=0.9375`, so it is not the final production-scale timing. The v3
-density-search seed failed and is no longer blocking calibration. Phase 0
-v1.3.1 directly compares the two finalists at fixed `mu=1.8`, `chi=200`, and
-six sweeps. The legacy-GPU comparison remains an estimate until a matched GPU
-timing and `sacct` record are available.
+rather than `n=0.9375`, so it is backend screening only. The available CPU
+timings and legacy-GPU timing evidence indicated roughly a two-order-of-magnitude
+production disadvantage. Phase 0 is therefore closed without promoting a CPU
+production backend; Phase 1 uses the refactored solver on CUDA.
 
 ## Quick start
 
@@ -29,10 +29,17 @@ Instantiate and test from this directory:
 julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.test()'
 ```
 
-Inspect the Phase 0 plan without submitting anything:
+Instantiate the pinned CUDA overlay on Perlmutter:
 
 ```bash
-bash slurm/phase0_calibrate_cpu.sh plan
+JULIA_PKG_PRECOMPILE_AUTO=0 julia --project=gpu \
+  -e 'using Pkg; Pkg.instantiate(; allow_autoprecomp=false)'
+```
+
+Inspect the Phase 1 GPU plan without submitting anything:
+
+```bash
+bash slurm/phase1_gpu.sh plan
 ```
 
 Run a configured SCF branch:
@@ -64,4 +71,5 @@ in `docs/PHASE0_V2_AUDIT.md`.
 - A timing payload is not a converged scientific state.
 - `canonical_variational_energy` is a zero-temperature energy, not a finite-temperature free energy.
 - Cross-geometry energies describe different Hamiltonians and are not ranked as competing phases by the comparison tool.
+- Production GPU states conserve neither `S_z` nor fermion parity at the tensor-block level. The Hamiltonian still has the corresponding symmetries; disabling QNs changes representation/performance, not its terms. Fixed-sector gap and `E_p` calculations remain separate QN-conserving CPU runs.
 - Fixed bond dimension, enhanced pair fields, long correlation lengths, or favorable finite-size pairing do not by themselves establish superconducting long-range order.

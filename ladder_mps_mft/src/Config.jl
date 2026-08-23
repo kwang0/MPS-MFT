@@ -37,6 +37,7 @@ function load_settings(path::AbstractString)
         density,
         tp,
         require_bound=!allow_unbound,
+        allow_interpolation=Bool(_value(ep_raw, "allow_interpolation", false)),
     )
 
     model = ModelSettings(;
@@ -53,6 +54,14 @@ function load_settings(path::AbstractString)
         ep=selection.denominator,
         ep_signed=selection.record.E_p,
         ep_source=selection.source_path,
+        ep_mode=selection.mode,
+        ep_t0_lower=selection.lower_record.t0,
+        ep_t0_upper=selection.upper_record.t0,
+        ep_lower_signed=selection.lower_record.E_p,
+        ep_upper_signed=selection.upper_record.E_p,
+        ep_interpolation_weight=selection.interpolation_weight,
+        ep_lower_chi=selection.lower_record.chi,
+        ep_upper_chi=selection.upper_record.chi,
     )
     dmrg = DMRGSettings(;
         nsweeps=Int(_value(dmrg_raw, "nsweeps", 12)),
@@ -104,6 +113,8 @@ function load_settings(path::AbstractString)
         blas_threads=Int(_value(runtime_raw, "blas_threads", 1)),
         strided_threads=Int(_value(runtime_raw, "strided_threads", 1)),
         threaded_blocksparse=Bool(_value(runtime_raw, "threaded_blocksparse", true)),
+        conserve_sz=Bool(_value(runtime_raw, "conserve_sz", true)),
+        conserve_nfparity=Bool(_value(runtime_raw, "conserve_nfparity", true)),
     )
     run = RunSettings(;
         output_directory=_project_path(String(_value(run_raw, "output_directory", "output"))),
@@ -141,11 +152,21 @@ function validate_settings(settings::ProjectSettings)
     model.r_range >= 0 || throw(ArgumentError("r_range must be nonnegative"))
     model.tp >= 0 || throw(ArgumentError("tp must be nonnegative"))
     model.ep > 0 || throw(ArgumentError("the selected |E_p| must be positive"))
-    settings.runtime.backend == :cpu || throw(ArgumentError(
-        "Phase 0 supports backend=cpu only; GPU support was intentionally not copied",
-    ))
+    settings.runtime.backend in (:cpu, :gpu) || throw(ArgumentError("runtime.backend must be cpu or gpu"))
     settings.runtime.blas_threads >= 1 || throw(ArgumentError("blas_threads must be positive"))
     settings.runtime.strided_threads >= 1 || throw(ArgumentError("strided_threads must be positive"))
+    if settings.runtime.backend == :gpu
+        !settings.runtime.conserve_sz && !settings.runtime.conserve_nfparity || throw(ArgumentError(
+            "the validated GPU DMRG path requires conserve_sz=false and conserve_nfparity=false; " *
+            "QN block-sparse CUDA is not the production backend",
+        ))
+        !settings.runtime.threaded_blocksparse || throw(ArgumentError(
+            "threaded_blocksparse must be false for the dense GPU backend",
+        ))
+        settings.runtime.blas_threads == 1 && settings.runtime.strided_threads == 1 || throw(ArgumentError(
+            "GPU runs require blas_threads=1 and strided_threads=1 to avoid CPU oversubscription",
+        ))
+    end
     settings.dmrg.nsweeps >= 1 || throw(ArgumentError("nsweeps must be positive"))
     settings.dmrg.maxdim >= 1 || throw(ArgumentError("maxdim must be positive"))
     settings.dmrg.mu_density_tol > 0 || throw(ArgumentError("mu_density_tol must be positive"))

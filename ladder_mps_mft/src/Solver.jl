@@ -63,9 +63,11 @@ function run_dmrg_ground(
     psi_init=nothing,
     rng=MersenneTwister(1),
     deadline::Real=Inf,
+    backend::Symbol=:cpu,
 )
     warm_start = psi_init !== nothing
-    psi0 = warm_start ? psi_init : productMPS(sites, density_product_state(length(sites), target_density; rng))
+    psi0_cpu = warm_start ? psi_init : productMPS(sites, density_product_state(length(sites), target_density; rng))
+    psi0 = move_to_backend(psi0_cpu, backend)
     sweeps = Sweeps(settings.nsweeps)
     maxdims = warm_start ? fill(settings.maxdim, settings.nsweeps) :
         _extend_schedule([min(10, settings.maxdim), min(20, settings.maxdim), min(100, settings.maxdim), settings.maxdim], settings.nsweeps)
@@ -97,11 +99,12 @@ function _solve_mu_point(
     fields::FieldState,
     mu::Real,
     settings::DMRGSettings;
+    runtime::RuntimeSettings,
     psi_init,
     rng,
     deadline,
 )
-    hamiltonian = build_mf_mpo(sites, model, fields, mu)
+    hamiltonian = build_mf_mpo(sites, model, fields, mu; backend=runtime.backend)
     result = run_dmrg_ground(
         sites,
         hamiltonian,
@@ -110,6 +113,7 @@ function _solve_mu_point(
         psi_init,
         rng,
         deadline,
+        backend=runtime.backend,
     )
     return (
         mu=Float64(mu),
@@ -130,6 +134,7 @@ function find_mu_for_density(
     fields::FieldState,
     mu_initial::Real,
     settings::DMRGSettings;
+    runtime::RuntimeSettings=RuntimeSettings(),
     psi_init=nothing,
     rng=MersenneTwister(1),
     deadline::Real=Inf,
@@ -142,6 +147,7 @@ function find_mu_for_density(
         fields,
         mu_initial,
         settings;
+        runtime,
         psi_init,
         rng,
         deadline,
@@ -166,6 +172,7 @@ function find_mu_for_density(
             fields,
             candidate_mu,
             settings;
+            runtime,
             psi_init=previous.psi,
             rng,
             deadline,
@@ -207,6 +214,7 @@ function find_mu_for_density(
             fields,
             candidate_mu,
             settings;
+            runtime,
             psi_init=initial,
             rng,
             deadline,
@@ -246,17 +254,27 @@ function _initial_state(settings::ProjectSettings)
                 "resume checkpoint model fingerprint differs from the requested model; use parent_checkpoint for a continuation seed",
             ))
         end
+        checkpoint_sites = siteinds(checkpoint.psi)
+        if settings.runtime.backend == :gpu && any(ITensors.hasqns, checkpoint_sites)
+            throw(ArgumentError(
+                "the dense GPU backend cannot resume a QN block-sparse checkpoint; " *
+                "start from a dense checkpoint or an independent GPU seed",
+            ))
+        end
         return (
-            sites=siteinds(checkpoint.psi),
-            psi=checkpoint.psi,
+            sites=checkpoint_sites,
+            psi=move_to_backend(checkpoint.psi, settings.runtime),
             fields=checkpoint.restart,
             chemical_potential=checkpoint.chemical_potential,
             source=String(settings.run.resume_checkpoint === nothing ? "parent" : "resume"),
         )
     end
     rng = MersenneTwister(settings.run.random_seed)
-    sites = make_sites(model)
-    psi = productMPS(sites, density_product_state(2 * model.L, model.density; rng))
+    sites = make_sites(model, settings.runtime)
+    psi = move_to_backend(
+        productMPS(sites, density_product_state(2 * model.L, model.density; rng)),
+        settings.runtime,
+    )
     fields = initial_fields(
         model;
         seed=settings.run.initial_seed,
@@ -334,6 +352,7 @@ end
 
 function run_scf(settings::ProjectSettings)
     validate_settings(settings)
+    ensure_backend!(settings.runtime)
     threading = configure_threading!(settings.runtime)
     start = _initial_state(settings)
     rng = MersenneTwister(settings.run.random_seed)
@@ -352,7 +371,12 @@ function run_scf(settings::ProjectSettings)
     provenance = collect_provenance(settings)
     provenance["initial_state_source"] = start.source
     provenance["threading"] = Dict(string(key) => value for (key, value) in pairs(threading))
-    bare_hamiltonian = build_bare_ladder_mpo(start.sites, settings.model)
+    provenance["device"] = backend_metadata(settings.runtime)
+    bare_hamiltonian = build_bare_ladder_mpo(
+        start.sites,
+        settings.model;
+        backend=settings.runtime.backend,
+    )
 
     for iteration in 1:settings.run.max_iterations
         iteration_start = time()
@@ -362,6 +386,7 @@ function run_scf(settings::ProjectSettings)
             fields,
             chemical_potential,
             settings.dmrg;
+            runtime=settings.runtime,
             psi_init=psi,
             rng,
             deadline,

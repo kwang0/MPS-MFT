@@ -2,44 +2,20 @@
 
 Status date: 2026-08-22.
 
-## Phase 0 — CPU resource calibration
+## Phase 0 — resource calibration
 
-Status: v2 completed and is sufficient to shortlist `serial-t1` and
-`blocksparse-t4`. Its fixed-`mu=0`, `chi=64`, two-sweep calculation was at the
-wrong physical density, so it is backend screening rather than a final
-production measurement. The v3 seed's density search failed after 16
-evaluations and produced no benchmark data.
+Status: closed. The CPU matrices remain backend-equivalence and diagnostic
+evidence, but the available CPU timings and legacy-GPU timing evidence indicated
+roughly a two-order-of-magnitude wall-time disadvantage for CPU production.
+The refactored solver, not the legacy SCF implementation, is now the production
+path; only its tensor storage and DMRG device move to CUDA.
 
-Script v1.3.1 removes density targeting from the timed workload and performs
-the missing production-scale comparison directly: fixed `mu=1.8`, `L=64`,
-`chi=200`, six sweeps, two repetitions, and only the two shortlisted backends.
-Each timer encloses exactly `run_dmrg_ground`. The fixed-mu warm seed, MPO
-construction, compilation, MPS copying, GC, density measurement, and chemical-
-potential search are excluded.
+The retained CPU script remains available for audit, but it is not a gate for
+Phase 1. CPU states used `S_z` plus fermion-parity QNs; production GPU states
+are dense and use no QNs. This representation difference is explicitly stored
+in the numerical fingerprint.
 
-The guarded worst-case reservation is `0.570312500` Perlmutter CPU node-hours,
-below the three-node-hour cap. Candidates must pass provenance, topology,
-numerical-equivalence, MaxRSS, and timing-stability gates. This matrix is itself
-the production-scale confirmation; no separate validation job follows it.
-
-The pre-run legacy-GPU comparison is an extrapolation, not matched evidence:
-approximately 35--60 s and `0.00243--0.00417` GPU node-hours for a six-sweep
-`chi=200` fixed-mu solve, versus projected CPU times of 44--78 min for
-`blocksparse-t4` and 62--109 min for `serial-t1`. CPU and GPU node-hours belong
-to separate pools, and the CPU uses `S_z` plus fermion-parity conservation while
-the legacy GPU path uses no QNs.
-
-Acceptance evidence:
-
-- seed, candidate, and report job IDs with terminal Slurm states;
-- immutable seed and metric SHA-256 values;
-- `summary.csv`, `recommendation.md`, MaxRSS, and actual `sacct` charge;
-- exact fixed-mu timing-region and thread-topology metadata;
-- numerical equivalence to serial and stable repeated timing; and
-- an entry in `RUN_LOG.md` that distinguishes timing calibration from
-  scientific convergence.
-
-## Phase 1 — controlled fixed-point and periodic branches
+## Phase 1 — refactored GPU fixed-point and periodic branches
 
 Run independent pairing, SDW, and CDW seeds at one representative model point
 for each transverse geometry. Begin with the unmixed period-two probe. Require
@@ -52,6 +28,19 @@ Phase 1 is complete only when accepted immutable fixed points or unmixed
 validated periodic solutions can be ranked by the common zero-temperature
 functional at matched model and numerical fingerprints. Periodic branches use
 phase-resolved artifacts and orbit-averaged energies; fields are never averaged.
+
+The initial point is `L=64`, `U=8`, `V=-0.2`, `t0=1.1`, `t_perp=0.1`,
+`density=0.9375`, and `chi=200`. Its signed `E_p` is linearly interpolated
+between the exact registry entries at `t0=1.0` and `1.2`; all endpoint data are
+stored. A 30-minute GPU smoke test precedes the nine 12-hour shared-GPU branch
+segments. The initial worst-case reservation is `27.125` node-hours, and four
+segments for all nine branches would reserve `108.125`.
+
+The project-wide launcher ledger enforces a conservative cap of 400 additional
+node-hours from the user-reported 277-node-hour baseline. It sums requested CPU
+and GPU upper bounds even though NERSC maintains separate allocation pools and
+does not reclaim unused walltime. Continuations are explicit; no job resubmits
+itself.
 
 ## Phase 2 — transition and hysteresis scans
 
@@ -69,7 +58,10 @@ at every point.
 Use at least L=32,48,64,96,128 where E_p and model coverage permit, and
 chi=200,400,800,1200+ as resources allow. Extrapolate energy and long-distance
 observables against discarded-weight or controlled chi proxies. Recompute or
-extend the E_p registry rather than interpolating it silently.
+extend the `E_p` registry where interpolation uncertainty matters. Bracketed
+`t0` interpolation is permitted for fine transition scans only when its
+endpoints and effective coupling `t_perp^2/|E_p|` are stored; extrapolation is
+forbidden.
 
 Run the fixed-sector diagnostics separately to obtain spin and charge gaps and
 particle/hole pair binding. Check t_perp against all known isolated-ladder

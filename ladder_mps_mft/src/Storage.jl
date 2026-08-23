@@ -53,8 +53,9 @@ function write_checkpoint(
     immutable && ispath(path) && throw(ArgumentError("refusing to overwrite immutable artifact: $path"))
     mkpath(dirname(path))
     temporary = tempname(dirname(path))
+    storage_psi = move_to_cpu(psi)
     h5open(temporary, "w") do file
-        file["schema_version"] = 3
+        file["schema_version"] = 4
         file["artifact_kind"] = "ladder_mps_mft_state"
         file["process_completed"] = diagnostic.status != :iterating
         file["accepted"] = diagnostic.accepted
@@ -77,7 +78,7 @@ function write_checkpoint(
         file["hamiltonian_identity_error_per_site"] = diagnostic.hamiltonian_identity_error_per_site
         file["effective_eigenvalue_error_per_site"] = diagnostic.effective_eigenvalue_error_per_site
         file["best_iteration"] = diagnostic.best_iteration
-        file["psi"] = psi
+        file["psi"] = storage_psi
         model_group = create_group(file, "model")
         _write_dict(model_group, Dict(
             "L" => settings.model.L, "t" => settings.model.t, "U" => settings.model.U,
@@ -86,6 +87,18 @@ function write_checkpoint(
             "r_range" => settings.model.r_range,
             "transverse_geometry" => String(settings.model.geometry), "E_p" => settings.model.ep,
             "E_p_signed" => settings.model.ep_signed, "E_p_source" => settings.model.ep_source,
+            "E_p_mode" => String(settings.model.ep_mode),
+            "E_p_t0_lower" => settings.model.ep_t0_lower,
+            "E_p_t0_upper" => settings.model.ep_t0_upper,
+            "E_p_lower_signed" => settings.model.ep_lower_signed,
+            "E_p_upper_signed" => settings.model.ep_upper_signed,
+            "E_p_interpolation_weight" => settings.model.ep_interpolation_weight,
+            "E_p_lower_chi" => settings.model.ep_lower_chi,
+            "E_p_upper_chi" => settings.model.ep_upper_chi,
+            "effective_mf_coupling_tp2_over_ep" => settings.model.tp^2 / settings.model.ep,
+            "runtime_backend" => String(settings.runtime.backend),
+            "conserve_sz" => settings.runtime.conserve_sz,
+            "conserve_nfparity" => settings.runtime.conserve_nfparity,
         ))
         if !isempty(records)
             last_record = last(records)
@@ -129,7 +142,7 @@ function write_checkpoint(
                     member_group["chemical_potential"] = record.chemical_potential
                     member_group["variational_energy"] = record.variational.canonical_variational_energy
                     if haskey(phase_psis, record.iteration)
-                        member_group["psi"] = phase_psis[record.iteration]
+                        member_group["psi"] = move_to_cpu(phase_psis[record.iteration])
                     end
                 end
             end
@@ -192,6 +205,8 @@ function write_run_summary_markdown(path::AbstractString, settings::ProjectSetti
         println(io, "- Direction: `$(settings.run.direction)`")
         println(io, "- Seed: `$(settings.run.seed_label)` (`$(settings.run.random_seed)`)" )
         println(io, "- Geometry: `$(settings.model.geometry)`")
+        println(io, "- Runtime backend: `$(settings.runtime.backend)`")
+        println(io, "- Conserved S_z / fermion parity: `$(settings.runtime.conserve_sz)` / `$(settings.runtime.conserve_nfparity)`")
         println(io, "- Model fingerprint: `$(model_fingerprint(settings.model))`")
         println(io, "- Numerical fingerprint: `$(numerical_fingerprint(settings))`")
         println(io, "- Implementation SHA-256: `$(implementation_fingerprint())`")
@@ -229,7 +244,10 @@ function write_run_summary_markdown(path::AbstractString, settings::ProjectSetti
         println(io)
         println(io, "- Signed registry E_p: `$(settings.model.ep_signed)`")
         println(io, "- Denominator |E_p|: `$(settings.model.ep)`")
-        println(io, "- t_perp / |E_p|: `$(settings.model.tp / settings.model.ep)`")
+        println(io, "- E_p mode: `$(settings.model.ep_mode)`")
+        println(io, "- E_p t0 bracket: `$(settings.model.ep_t0_lower)` to `$(settings.model.ep_t0_upper)` (weight `$(settings.model.ep_interpolation_weight)`)")
+        println(io, "- E_p endpoint values: `$(settings.model.ep_lower_signed)` to `$(settings.model.ep_upper_signed)`")
+        println(io, "- Effective MF coupling t_perp^2 / |E_p|: `$(settings.model.tp^2 / settings.model.ep)`")
         println(io, "- E_p registry: `$(settings.model.ep_source)`")
         println(io)
         println(io, "This summary is generated evidence. Add collaborator interpretation to `docs/RUN_LOG.md`; do not edit an immutable HDF5 artifact.")

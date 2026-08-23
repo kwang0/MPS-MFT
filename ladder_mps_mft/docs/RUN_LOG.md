@@ -159,3 +159,50 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   no seed dependency while the report retains `afterany` on both candidates.
   The full Julia suite passed all 113 tests, including v1.3.0 run-environment
   compatibility and expanded seed-lineage checks.
+
+## 2026-08-22 — Phase 1 refactored GPU pivot
+
+- Decision: stop CPU production calibration after the observed roughly 100x
+  wall-time disadvantage, but retain the refactored scientific workflow. Only
+  the site-index representation, MPO/MPS storage device, and DMRG execution are
+  moved to dense CUDA; the legacy SCF implementation and self-resubmitting
+  wrapper remain unused and unmodified.
+- GPU runtime: a weak CUDA extension plus a pinned `gpu/Manifest.toml` resolves
+  CUDA.jl 5.9.5 with ITensors 0.9.15 and ITensorMPS 0.3.25. Production GPU
+  configs explicitly disable `S_z` and fermion-parity QNs and record this in
+  numerical fingerprints and HDF5 provenance. GPU MPS artifacts are copied to
+  CPU before HDF5 writes and moved back to GPU on resume.
+- Phase 1 design: nine independent pairing/SDW/CDW branches at `L=64`, `U=8`,
+  `V=-0.2`, `t0=1.1`, `t_perp=0.1`, `density=0.9375`, and `chi=200`, with the
+  refactored unmixed recurrence probe and common-functional acceptance gates.
+  A 30-minute GPU smoke/precompile job must complete before the nine 12-hour
+  jobs can be submitted. Continuations are explicit and limited to four
+  segments per branch by default.
+- `E_p`: exact lookup remains preferred. Opt-in interpolation is linear only in
+  signed `E_p` between bracketing `t0` rows at identical `(L,U,V,density)`;
+  extrapolation and sign-changing brackets are rejected. At the representative
+  point it yields `-0.18452309659153343` and
+  `t_perp^2/|E_p|=0.05419375777188662`. Mode, endpoints, endpoint chi values,
+  weight, registry hash, and effective coupling are saved and fingerprinted.
+- Budget: the guarded launcher starts a shared append-only reservation ledger
+  at zero additional usage relative to the user-reported 277-node-hour
+  baseline. It enforces a hard 400-additional-node-hour ceiling, conservatively
+  summing CPU and GPU requested upper bounds without reclaiming early finishes.
+  The smoke plus first matrix reserves 27.125 node-hours; four segments for
+  every initial branch would reserve 108.125. Optional legacy CPU `E_p` jobs
+  are available only through the same ledger at 12 node-hours each.
+- Validation boundary: all Julia files parse, the launcher passes `bash -n`,
+  the read-only plan reports the expected charges, `git diff --check` passes,
+  and the full CPU suite passes all 143 tests including exact/interpolated
+  `E_p`, sign/extrapolation rejection, GPU config validation, and unchanged
+  CPU DMRG/checkpoint behavior. The SDW seed was corrected from an accidental
+  `(0,pi)` leg-only alternation to the intended `(pi,pi)` rung-and-leg Néel
+  pattern, with the `(pi,0)` CDW pattern tested separately. The final mocked
+  Slurm workflow submitted one smoke plus nine branches, reserved exactly
+  `27.125` node-hours, and rejected a `27.1` cap before allocating another job;
+  matrix selection and reservation are held under one lock. A forced campaign
+  preparation failure allocated zero jobs, and nested final/checkpoint lookup
+  passed for status and continuation. CUDA package resolution and extension
+  import were checked locally without a device. No Perlmutter job was
+  submitted; the staged smoke job remains the required GPU runtime and HDF5
+  round-trip proof.

@@ -14,6 +14,14 @@ Base.@kwdef struct ModelSettings
     ep::Float64 = NaN
     ep_signed::Float64 = NaN
     ep_source::String = ""
+    ep_mode::Symbol = :exact
+    ep_t0_lower::Float64 = NaN
+    ep_t0_upper::Float64 = NaN
+    ep_lower_signed::Float64 = NaN
+    ep_upper_signed::Float64 = NaN
+    ep_interpolation_weight::Float64 = 0.0
+    ep_lower_chi::Int = 0
+    ep_upper_chi::Int = 0
 end
 
 Base.@kwdef struct DMRGSettings
@@ -69,6 +77,8 @@ Base.@kwdef struct RuntimeSettings
     blas_threads::Int = 1
     strided_threads::Int = 1
     threaded_blocksparse::Bool = true
+    conserve_sz::Bool = true
+    conserve_nfparity::Bool = true
 end
 
 Base.@kwdef struct RunSettings
@@ -198,4 +208,8 @@ Base.@kwdef struct EpSelection
     source_path::String
     bound_pair::Bool
     tp_below_pair_binding::Bool
+    mode::Symbol = :exact
+    lower_record::EpRecord = record
+    upper_record::EpRecord = record
+    interpolation_weight::Float64 = 0.0
 end
