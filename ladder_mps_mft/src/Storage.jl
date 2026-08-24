@@ -24,6 +24,34 @@ function _read_fields(group)
     return FieldState(read(group, "alpha"), read(group, "beta"), read(group, "mu_cdw"))
 end
 
+function _stack_field_component(
+    records::AbstractVector{IterationRecord},
+    source::Symbol,
+    component::Symbol,
+)
+    isempty(records) && throw(ArgumentError("cannot stack an empty MF field history"))
+    sample = getfield(getfield(first(records), source), component)
+    history = Array{Float64}(undef, (size(sample)..., length(records)))
+    final_dimension = ndims(history)
+    for (index, record) in enumerate(records)
+        values = getfield(getfield(record, source), component)
+        size(values) == size(sample) || throw(DimensionMismatch(
+            "$source.$component changed shape within one MF history",
+        ))
+        selectdim(history, final_dimension, index) .= values
+    end
+    return history
+end
+
+function _write_field_history(group, records::AbstractVector{IterationRecord})
+    for source in (:applied, :measured)
+        source_group = create_group(group, String(source))
+        for component in (:alpha, :beta, :mu_cdw)
+            source_group[String(component)] = _stack_field_component(records, source, component)
+        end
+    end
+end
+
 function _write_correlations(group, correlations::CorrelationState)
     group["pair"] = correlations.pair
     group["exchange_down"] = correlations.exchange_down
@@ -55,7 +83,7 @@ function write_checkpoint(
     temporary = tempname(dirname(path))
     storage_psi = move_to_cpu(psi)
     h5open(temporary, "w") do file
-        file["schema_version"] = 4
+        file["schema_version"] = 5
         file["artifact_kind"] = "ladder_mps_mft_state"
         file["process_completed"] = diagnostic.status != :iterating
         file["accepted"] = diagnostic.accepted
@@ -104,8 +132,10 @@ function write_checkpoint(
         if !isempty(records)
             last_record = last(records)
             fields_group = create_group(file, "fields")
+            initial_group = create_group(fields_group, "initial")
             applied_group = create_group(fields_group, "applied")
             measured_group = create_group(fields_group, "measured")
+            _write_fields(initial_group, first(records).applied)
             _write_fields(applied_group, last_record.applied)
             _write_fields(measured_group, last_record.measured)
             restart_group = create_group(fields_group, "restart")
@@ -128,6 +158,7 @@ function write_checkpoint(
             history_group["field_abs_residual"] = [record.field_abs_residual for record in records]
             history_group["field_rel_residual"] = [record.field_rel_residual for record in records]
             history_group["wall_seconds"] = [record.wall_seconds for record in records]
+            _write_field_history(create_group(history_group, "fields"), records)
             period = diagnostic.fundamental_period
             if period > 1 && length(records) >= period
                 cycle_group = create_group(file, "cycle_members")
@@ -152,6 +183,73 @@ function write_checkpoint(
     end
     mv(temporary, path; force=!immutable)
     return path
+end
+
+"""
+Read the complete per-iteration mean-field history saved by schema-v5 states.
+
+`source=:applied` returns the fields used to build each effective Hamiltonian;
+`source=:measured` returns the corresponding raw DMRG mean-field map outputs.
+The final array dimension is the MF-history index and matches `iterations`.
+"""
+function read_field_history(path::AbstractString; source::Symbol=:measured)
+    source in (:applied, :measured) || throw(ArgumentError(
+        "field-history source must be :applied or :measured",
+    ))
+    isfile(path) || throw(ArgumentError("state not found: $path"))
+    return h5open(path, "r") do file
+        base = "history/fields/$(String(source))"
+        haskey(file, base) || throw(ArgumentError(
+            "state does not contain a complete $source MF history (requires schema version 5 or newer): $path",
+        ))
+        iterations = Int.(read(file, "history/iteration"))
+        alpha = Float64.(read(file, "$base/alpha"))
+        beta = Float64.(read(file, "$base/beta"))
+        mu_cdw = Float64.(read(file, "$base/mu_cdw"))
+        count = length(iterations)
+        all(array -> size(array, ndims(array)) == count, (alpha, beta, mu_cdw)) ||
+            throw(DimensionMismatch("stored $source MF arrays do not match history/iteration"))
+        return (; iterations, alpha, beta, mu_cdw)
+    end
+end
+
+"""
+Read a field-only warm start from either a refactored state or a legacy ladder
+HDF5 file. No MPS is loaded. Legacy files without `mu_cdw` receive the same
+zero Hartree-field fallback used by the legacy GPU driver.
+"""
+function read_inherited_fields(path::AbstractString)
+    isfile(path) || throw(ArgumentError("inherited field state not found: $path"))
+    return h5open(path, "r") do file
+        if haskey(file, "fields/restart")
+            haskey(file, "chemical_potential") || throw(ArgumentError(
+                "refactored inherit source has no chemical_potential: $path",
+            ))
+            return (
+                fields=_read_fields(file["fields/restart"]),
+                chemical_potential=Float64(read(file, "chemical_potential")),
+                format=:refactored,
+                source_geometry=haskey(file, "model/transverse_geometry") ?
+                    String(read(file, "model/transverse_geometry")) : nothing,
+            )
+        end
+        haskey(file, "alpha") && haskey(file, "beta") || throw(ArgumentError(
+            "inherit_from must be a refactored state with fields/restart or a legacy state with top-level alpha and beta: $path",
+        ))
+        alpha = Float64.(read(file, "alpha"))
+        beta = Float64.(read(file, "beta"))
+        ndims(alpha) == 4 || throw(DimensionMismatch("legacy inherited alpha must be rank 4"))
+        L = size(alpha, 1)
+        mu_cdw = haskey(file, "mu_cdw") ? Float64.(read(file, "mu_cdw")) : zeros(Float64, 2, 2 * L)
+        haskey(file, "mu") || throw(ArgumentError("legacy inherit source has no top-level mu: $path"))
+        return (
+            fields=FieldState(alpha, beta, mu_cdw),
+            chemical_potential=Float64(read(file, "mu")),
+            format=:legacy,
+            source_geometry=haskey(file, "transverse_geometry") ?
+                String(read(file, "transverse_geometry")) : nothing,
+        )
+    end
 end
 
 function read_checkpoint(path::AbstractString)
@@ -213,6 +311,7 @@ function write_run_summary_markdown(path::AbstractString, settings::ProjectSetti
         println(io, "- Numerical fingerprint: `$(numerical_fingerprint(settings))`")
         println(io, "- Implementation SHA-256: `$(implementation_fingerprint())`")
         println(io, "- Configuration SHA-256: `$(isfile(settings.config_path) ? sha256_file(settings.config_path) : "not-file-backed")`")
+        println(io, "- Field-only inherit source: `$(something(settings.run.inherit_from, "none"))`")
         println(io, "- Parent checkpoint: `$(something(settings.run.parent_checkpoint, "none"))`")
         println(io, "- Resume checkpoint: `$(something(settings.run.resume_checkpoint, "none"))`")
         println(io)

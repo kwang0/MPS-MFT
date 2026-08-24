@@ -126,6 +126,8 @@ function load_settings(path::AbstractString)
         random_seed=Int(_value(run_raw, "random_seed", 1)),
         initial_seed=Symbol(lowercase(String(_value(run_raw, "initial_seed", "pairing")))),
         initial_amplitude=Float64(_value(run_raw, "initial_amplitude", 1e-3)),
+        inherit_from=haskey(run_raw, "inherit_from") ? _project_path(String(run_raw["inherit_from"])) : nothing,
+        inherit_sha256=haskey(run_raw, "inherit_sha256") ? lowercase(String(run_raw["inherit_sha256"])) : nothing,
         parent_checkpoint=haskey(run_raw, "parent_checkpoint") ? _project_path(String(run_raw["parent_checkpoint"])) : nothing,
         parent_sha256=haskey(run_raw, "parent_sha256") ? lowercase(String(run_raw["parent_sha256"])) : nothing,
         resume_checkpoint=haskey(run_raw, "resume_checkpoint") ? _project_path(String(run_raw["resume_checkpoint"])) : nothing,
@@ -208,11 +210,25 @@ function validate_settings(settings::ProjectSettings)
     settings.run.initial_seed in (:pairing, :sdw, :cdw, :zero) ||
         throw(ArgumentError("initial_seed must be pairing, sdw, cdw, or zero"))
     settings.run.initial_amplitude >= 0 || throw(ArgumentError("initial_amplitude must be nonnegative"))
-    settings.run.parent_checkpoint !== nothing && settings.run.resume_checkpoint !== nothing &&
-        throw(ArgumentError("set either parent_checkpoint or resume_checkpoint, not both"))
+    lineage_sources = count(source -> source !== nothing, (
+        settings.run.inherit_from,
+        settings.run.parent_checkpoint,
+        settings.run.resume_checkpoint,
+    ))
+    lineage_sources <= 1 || throw(ArgumentError(
+        "set at most one of inherit_from, parent_checkpoint, or resume_checkpoint",
+    ))
+    settings.run.inherit_from !== nothing && settings.run.inherit_sha256 === nothing &&
+        throw(ArgumentError("inherit_sha256 is required with inherit_from"))
+    settings.run.inherit_from === nothing && settings.run.inherit_sha256 !== nothing &&
+        throw(ArgumentError("inherit_from is required with inherit_sha256"))
     settings.run.parent_checkpoint !== nothing && settings.run.parent_sha256 === nothing &&
         throw(ArgumentError("parent_sha256 is required with parent_checkpoint"))
+    settings.run.parent_checkpoint === nothing && settings.run.parent_sha256 !== nothing &&
+        throw(ArgumentError("parent_checkpoint is required with parent_sha256"))
     settings.run.resume_checkpoint !== nothing && settings.run.resume_sha256 === nothing &&
         throw(ArgumentError("resume_sha256 is required with resume_checkpoint"))
+    settings.run.resume_checkpoint === nothing && settings.run.resume_sha256 !== nothing &&
+        throw(ArgumentError("resume_checkpoint is required with resume_sha256"))
     return settings
 end

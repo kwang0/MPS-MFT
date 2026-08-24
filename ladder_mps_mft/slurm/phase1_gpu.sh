@@ -5,7 +5,7 @@
 
 set -euo pipefail
 
-readonly PHASE1_SCRIPT_VERSION="1.1.0"
+readonly PHASE1_SCRIPT_VERSION="1.2.0"
 script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
 project_dir="${PHASE1_PROJECT_DIR:-$(cd "$(dirname "$script_path")/.." && pwd)}"
 repo_root="${PHASE1_REPO_ROOT:-$(cd "$project_dir/.." && pwd)}"
@@ -109,8 +109,12 @@ Submission is staged:
   3. bash $script_path submit-matrix RUN_ID
 
 To recover nine immutable Float32 branch states into the corrected Float64
-solver, replace step 1 with:
-  bash $script_path submit-recovery SOURCE_RUN_ID NEW_RUN_ID
+solver while inspecting the generated controls before allocation:
+  bash $script_path prepare-recovery SOURCE_RUN_ID NEW_RUN_ID
+  bash $script_path submit NEW_RUN_ID
+
+submit-recovery SOURCE_RUN_ID NEW_RUN_ID remains the one-command equivalent
+that prepares the controls and submits only the smoke job.
 
 Before step 1, instantiate CUDA once on a Perlmutter login node:
   JULIA_PKG_PRECOMPILE_AUTO=0 $PHASE1_JULIA --project="$project_dir/gpu" \\
@@ -168,7 +172,7 @@ load_environment() {
   # shellcheck disable=SC1090
   source "$run_dir/run.env"
   case "${PHASE1_RUN_SCRIPT_VERSION:-missing}" in
-    1.0.0|1.0.1|1.1.0) ;;
+    1.0.0|1.0.1|1.1.0|1.2.0) ;;
     *) die "unsupported run script version ${PHASE1_RUN_SCRIPT_VERSION:-missing}; current version is $PHASE1_SCRIPT_VERSION";;
   esac
   project_dir="$PHASE1_PROJECT_DIR"
@@ -509,6 +513,9 @@ Read-only:
   status [RUN_ID]
   show [RUN_ID]
 
+Preparation only (no Slurm submission or budget reservation):
+  prepare-recovery SOURCE_RUN NEW_RUN   Prepare Float64 warm-start controls
+
 Submissions:
   submit RUN_ID                         Prepare campaign and submit GPU smoke only
   submit-recovery SOURCE_RUN NEW_RUN    Prepare Float64 warm-start recovery and submit smoke
@@ -535,6 +542,12 @@ case "$action" in
       run_dir="$(initialize_run "$2")"
     fi
     submit_smoke_job "$run_dir"
+    ;;
+  prepare-recovery)
+    [[ $# == 3 ]] || die "prepare-recovery requires SOURCE_RUN_ID NEW_RUN_ID"
+    source_run_dir="$(resolve_run_dir "$2")"
+    [[ ! -e "$run_root/$3" ]] || die "new recovery run already exists: $run_root/$3"
+    initialize_run "$3" "$source_run_dir"
     ;;
   submit-recovery)
     [[ $# == 3 ]] || die "submit-recovery requires SOURCE_RUN_ID NEW_RUN_ID"

@@ -79,6 +79,13 @@ open(manifest_path, "w") do io
         run["seed_label"] = "$(seed.short)_s1"
         run["random_seed"] = seed.random + geometry.offset
         run["initial_seed"] = seed.initial
+        for key in (
+            "inherit_from", "inherit_sha256",
+            "parent_checkpoint", "parent_sha256",
+            "resume_checkpoint", "resume_sha256",
+        )
+            pop!(run, key, nothing)
+        end
         parent_path = ""
         parent_sha256 = ""
         parent_status = ""

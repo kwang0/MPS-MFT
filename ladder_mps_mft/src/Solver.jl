@@ -242,6 +242,36 @@ end
 
 function _initial_state(settings::ProjectSettings)
     model = settings.model
+    if settings.run.inherit_from !== nothing
+        verify_inherit!(settings)
+        inherited = read_inherited_fields(settings.run.inherit_from)
+        _field_shapes_match(inherited.fields, model) || throw(DimensionMismatch(
+            "inherited fields do not match model.L=$(model.L)",
+        ))
+        if inherited.source_geometry !== nothing
+            source_geometry = normalize_geometry(inherited.source_geometry)
+            source_geometry == model.geometry || @warn(
+                "field-only inheritance crosses transverse geometries",
+                inherited_geometry=source_geometry,
+                requested_geometry=model.geometry,
+            )
+        end
+        rng = MersenneTwister(settings.run.random_seed)
+        sites = make_sites(model, settings.runtime)
+        psi = move_to_backend(
+            productMPS(sites, density_product_state(2 * model.L, model.density; rng)),
+            settings.runtime,
+        )
+        return (
+            sites,
+            psi,
+            fields=inherited.fields,
+            chemical_potential=inherited.chemical_potential,
+            source="field_inherit",
+            inherit_format=String(inherited.format),
+            inherit_source_geometry=something(inherited.source_geometry, ""),
+        )
+    end
     checkpoint_path = settings.run.resume_checkpoint === nothing ?
         settings.run.parent_checkpoint : settings.run.resume_checkpoint
     if checkpoint_path !== nothing
@@ -267,6 +297,8 @@ function _initial_state(settings::ProjectSettings)
             fields=checkpoint.restart,
             chemical_potential=checkpoint.chemical_potential,
             source=String(settings.run.resume_checkpoint === nothing ? "parent" : "resume"),
+            inherit_format="none",
+            inherit_source_geometry="",
         )
     end
     rng = MersenneTwister(settings.run.random_seed)
@@ -281,7 +313,15 @@ function _initial_state(settings::ProjectSettings)
         amplitude=settings.run.initial_amplitude,
         rng,
     )
-    return (; sites, psi, fields, chemical_potential=model.mu_initial, source="independent")
+    return (;
+        sites,
+        psi,
+        fields,
+        chemical_potential=model.mu_initial,
+        source="independent",
+        inherit_format="none",
+        inherit_source_geometry="",
+    )
 end
 
 function _copy_diagnostic(
@@ -415,6 +455,8 @@ function run_scf(settings::ProjectSettings)
     phase_psis = Dict{Int,MPS}()
     provenance = collect_provenance(settings)
     provenance["initial_state_source"] = start.source
+    provenance["inherit_format"] = start.inherit_format
+    provenance["inherit_source_geometry"] = start.inherit_source_geometry
     provenance["threading"] = Dict(string(key) => value for (key, value) in pairs(threading))
     provenance["device"] = backend_metadata(settings.runtime)
     bare_hamiltonian = build_bare_ladder_mpo(

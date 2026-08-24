@@ -84,9 +84,16 @@ Recover v2 without repeating its independent-seed transient:
 ```bash
 SOURCE_RUN_ID=20260823_phase1_gpu_v2
 RUN_ID=20260824_phase1_gpu_v3_float64
-bash slurm/phase1_gpu.sh submit-recovery "$SOURCE_RUN_ID" "$RUN_ID"
+bash slurm/phase1_gpu.sh prepare-recovery "$SOURCE_RUN_ID" "$RUN_ID"
+sed -n '1,12p' "output/phase1_gpu/$RUN_ID/manifest.tsv"
+bash slurm/phase1_gpu.sh submit "$RUN_ID"
 bash slurm/phase1_gpu.sh status "$RUN_ID"
 ```
+
+`prepare-recovery` creates and hashes all nine controls but performs no Slurm
+submission and makes no budget reservation. The older one-command
+`submit-recovery SOURCE_RUN NEW_RUN` interface remains available and is
+equivalent to preparation followed by `submit NEW_RUN`.
 
 The recovery manifest hashes every immutable v2 `state.h5`, records its status,
 numerical fingerprint, and Float32 storage type, and uses it as a parent seed.
@@ -103,6 +110,15 @@ Preparation and matrix submission are restart-safe: a failed smoke submission
 can reuse the validated prepared run, and a partially submitted matrix retries
 only missing labels. Manifest validation happens before GPU allocation, while
 matrix selection and the full budget check share one ledger lock.
+
+Every schema-v5 checkpoint and terminal state saves the exact initial field in
+`fields/initial` and the complete applied and measured MF fields for every
+iteration under `history/fields`. This restores the legacy analysis history
+and additionally distinguishes the field used to construct the effective
+Hamiltonian from the raw field measured after DMRG.
+For field-only initialization from an older run, set `inherit_from` and
+`inherit_sha256`; legacy top-level `alpha`, `beta`, `mu_cdw`, and `mu` are read,
+but the old MPS is deliberately not loaded.
 
 ## Explicit continuations
 

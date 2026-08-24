@@ -64,6 +64,8 @@ end
 
 function collect_provenance(settings::ProjectSettings)
     config_hash = isfile(settings.config_path) ? sha256_file(settings.config_path) : ""
+    inherit_hash = settings.run.inherit_from === nothing ? "" :
+        (settings.run.inherit_sha256 === nothing ? sha256_file(settings.run.inherit_from) : settings.run.inherit_sha256)
     parent_hash = settings.run.parent_checkpoint === nothing ? "" :
         (settings.run.parent_sha256 === nothing ? sha256_file(settings.run.parent_checkpoint) : settings.run.parent_sha256)
     resume_hash = settings.run.resume_checkpoint === nothing ? "" :
@@ -71,7 +73,7 @@ function collect_provenance(settings::ProjectSettings)
     gpu_manifest = joinpath(PROJECT_ROOT, "gpu", "Manifest.toml")
     return Dict{String,Any}(
         "generated_utc" => string(now(UTC)),
-        "schema_version" => 1,
+        "schema_version" => 2,
         "git_commit" => _read_git("rev-parse", "HEAD"),
         "git_branch" => _read_git("branch", "--show-current"),
         "git_dirty" => !isempty(_read_git("status", "--porcelain"; default="")),
@@ -97,6 +99,8 @@ function collect_provenance(settings::ProjectSettings)
         "tensor_scalar_type" => String(settings.runtime.tensor_scalar_type),
         "conserve_sz" => settings.runtime.conserve_sz,
         "conserve_nfparity" => settings.runtime.conserve_nfparity,
+        "inherit_from" => something(settings.run.inherit_from, ""),
+        "inherit_sha256" => inherit_hash,
         "parent_checkpoint" => something(settings.run.parent_checkpoint, ""),
         "parent_sha256" => parent_hash,
         "resume_checkpoint" => something(settings.run.resume_checkpoint, ""),
@@ -119,6 +123,17 @@ function collect_provenance(settings::ProjectSettings)
         "slurm_job_id" => get(ENV, "SLURM_JOB_ID", ""),
         "slurm_cpus_per_task" => get(ENV, "SLURM_CPUS_PER_TASK", ""),
     )
+end
+
+function verify_inherit!(settings::ProjectSettings)
+    source = settings.run.inherit_from
+    source === nothing && return nothing
+    isfile(source) || throw(ArgumentError("inherited field state does not exist: $source"))
+    expected = settings.run.inherit_sha256
+    expected === nothing && throw(ArgumentError("inherit_sha256 is required when inherit_from is set"))
+    actual = sha256_file(source)
+    actual == lowercase(expected) || throw(ArgumentError("inherited field-state SHA-256 mismatch"))
+    return actual
 end
 
 function verify_parent!(settings::ProjectSettings)

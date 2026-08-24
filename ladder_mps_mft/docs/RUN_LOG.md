@@ -331,3 +331,49 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   Its smoke reserves `0.125` node-hours; the nine-job matrix adds `27.0`, taking
   the conservative ledger to `81.375` and leaving `318.625` under the
   400-additional-node-hour cap.
+
+## 2026-08-24 — Complete MF histories, legacy field inheritance, and staged Float64 controls
+
+- Root cause of the missing Phase 1 v2 profile history: `IterationRecord`
+  retained the full applied and measured fields in memory, but checkpoint
+  schema v4 serialized only scalar history arrays and the terminal field
+  snapshots. This was a refactor storage omission; the solver had computed the
+  missing data, but v2 cannot reconstruct it after the fact.
+- Checkpoint schema v5 now stores the exact segment seed under
+  `fields/initial` and both complete maps under `history/fields/applied` and
+  `history/fields/measured`. Each component (`alpha`, `beta`, and `mu_cdw`) has
+  MF-history index as its final dimension, aligned with `history/iteration`.
+  `read_field_history` validates and exposes this contract.
+- `plot_phase1_mf_observables.jl` uses the true schema-v5 history by default,
+  supports either measured or applied fields, and reads the embedded exact
+  seed. Immutable v2 artifacts retain the explicit seed/best/final-orbit
+  saved-snapshot fallback; no continuous history is fabricated for them.
+- A distinct SHA-guarded `inherit_from`/`inherit_sha256` lineage mode restores
+  the legacy field-only behavior. It accepts legacy top-level
+  `alpha`/`beta`/`mu_cdw`/`mu` or refactored `fields/restart`, applies the
+  legacy zero-`mu_cdw` fallback, warns across transverse geometries, and always
+  creates fresh site indices and a fresh product MPS. It is mutually exclusive
+  with MPS-reusing `parent_checkpoint` and same-model `resume_checkpoint`.
+  `scripts/prepare_field_inherit.jl` validates shapes and generates the pinned
+  config without mutating the source artifact.
+- Launcher v1.2.0 adds `prepare-recovery SOURCE_RUN NEW_RUN`. It generates and
+  validates all nine Float64 recovery controls without Slurm submission or a
+  budget reservation; `submit NEW_RUN` then submits only the gated smoke.
+  `submit-recovery` remains the one-command equivalent.
+- Local validation against the nine synchronized v2 states generated nine
+  Float64 configs whose manifest records every Float32 parent and SHA, while
+  leaving `jobs.tsv` at its header only. The legacy helper also successfully
+  read the actual synchronized unfrustrated legacy state with SHA-256
+  `a3a1954517313a1953037f38e21c6b51c91cba2377e5d11a8cfd3c3eb7ce5022`.
+- Rendering validation passed for both one immutable v2 saved-snapshot figure
+  and temporary schema-v5 complete-history/exact-seed figures. Julia parsing,
+  `bash -n`, `git diff --check`, and the full local suite pass; the suite covers
+  182 assertions, including schema-v5 history shapes/values, refactored and
+  legacy field inheritance, SHA rejection, fresh-MPS initialization, launcher
+  staging, DMRG, recurrence, variational energy, and strict selection.
+- Perlmutter jobs submitted by this change: none. The conservative project
+  ledger therefore remains `54.25` node-hours. Prepare
+  `20260824_phase1_gpu_v3_float64_history`, inspect its manifest, and submit its
+  `0.125`-node-hour smoke; after the Float64/runtime gates pass, the nine-job
+  matrix adds `27.0`, for `81.375` total reserved and `318.625` remaining under
+  the 400-node-hour cap.

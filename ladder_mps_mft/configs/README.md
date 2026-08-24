@@ -18,4 +18,27 @@ The `[pair_binding]` registry lookup is exact in `(L,U,V,t0,density)` by default
 
 `phase1_gpu_base.toml` is the representative Phase 1 point. It uses dense CUDA tensors and therefore sets both `conserve_sz=false` and `conserve_nfparity=false`. Do not turn QNs back on in this GPU campaign: that is a materially different, uncalibrated block-sparse CUDA backend.
 
-For a continuation, set `parent_checkpoint` and `parent_sha256`; a nearby model is allowed, and the parent is only a seed. For a same-model restart, set `resume_checkpoint` and `resume_sha256`; the model fingerprint must match. Do not set both.
+There are three mutually exclusive lineage modes:
+
+- `inherit_from` plus `inherit_sha256` reproduces the legacy field-only
+  inheritance contract. It reads `alpha`, `beta`, `mu_cdw` (or zeros when an
+  older legacy file has no `mu_cdw`), and `mu`, but deliberately creates a
+  fresh product MPS and fresh site indices. Both legacy top-level HDF5 files
+  and refactored `fields/restart` states are accepted.
+- `parent_checkpoint` plus `parent_sha256` is a continuation seed that reuses
+  both the MPS and fields; a nearby model is allowed.
+- `resume_checkpoint` plus `resume_sha256` is a same-model restart that reuses
+  both the MPS and fields and requires the model fingerprint to match.
+
+Every SHA is mandatory, and only one mode may be set. New schema-v5 states
+store the exact seed in `fields/initial` plus the full
+`history/fields/applied` and `history/fields/measured` arrays at every SCF
+iteration; the final dimension matches `history/iteration`.
+
+Generate a validated, SHA-pinned field-only inheritance config without editing
+the source artifact:
+
+```bash
+julia --project=. scripts/prepare_field_inherit.jl \
+  /path/to/legacy_state.h5 base_config.toml inherited_run.toml
+```

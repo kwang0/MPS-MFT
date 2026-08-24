@@ -75,9 +75,14 @@ stripe evidence therefore requires accepted states, full correlation-based
    probe. A mixer-dependent recurrence automatically triggers one fresh raw-map
    probe; a failed controlled probe stops for inspection rather than being
    damped away.
-5. `submit-recovery SOURCE_RUN NEW_RUN` creates a new immutable campaign whose
-   manifest hashes and records every v2 parent. It does not mutate or falsely
-   continue the old numerical fingerprint.
+5. `prepare-recovery SOURCE_RUN NEW_RUN` creates a new immutable campaign whose
+   manifest hashes and records every v2 parent without submitting a job;
+   `submit NEW_RUN` then allocates only the gated smoke. The one-command
+   `submit-recovery` alias remains available. Neither path mutates or falsely
+   continues the old numerical fingerprint.
+6. Schema-v5 states retain both the applied and measured full MF fields at
+   every iteration. A SHA-guarded `inherit_from` mode also restores the legacy
+   field-only warm start without importing the legacy MPS.
 
 ## Next allocation step
 
@@ -86,7 +91,8 @@ On Perlmutter, push/pull the correction and run:
 ```bash
 SOURCE_RUN_ID=20260823_phase1_gpu_v2
 RUN_ID=20260824_phase1_gpu_v3_float64
-bash slurm/phase1_gpu.sh submit-recovery "$SOURCE_RUN_ID" "$RUN_ID"
+bash slurm/phase1_gpu.sh prepare-recovery "$SOURCE_RUN_ID" "$RUN_ID"
+bash slurm/phase1_gpu.sh submit "$RUN_ID"
 bash slurm/phase1_gpu.sh status "$RUN_ID"
 grep -E 'gpu_smoke_path|linalg_preflight_dimension|tensor_scalar_type|system path' \
   "output/phase1_gpu/$RUN_ID"/logs/smoke-*.out

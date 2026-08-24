@@ -155,6 +155,16 @@ end
     @test gpu_settings.model.ep_mode == :linear_t0
     @test gpu_settings.model.ep_signed ≈ -0.18452309659153343
     @test gpu_settings.model.tp^2 / gpu_settings.model.ep ≈ 0.05419375777188662
+    conflicting_lineage = ProjectSettings(
+        model=test_model(),
+        run=RunSettings(
+            inherit_from="legacy.h5",
+            inherit_sha256=repeat("0", 64),
+            parent_checkpoint="parent.h5",
+            parent_sha256=repeat("1", 64),
+        ),
+    )
+    @test_throws ArgumentError validate_settings(conflicting_lineage)
     invalid_gpu = ProjectSettings(
         model=test_model(),
         runtime=RuntimeSettings(backend=:gpu, threaded_blocksparse=false),
@@ -217,6 +227,8 @@ end
     @test occursin("module unload cudatoolkit", script_source)
     @test occursin("sanitize_cuda_runtime_environment", script_source)
     @test occursin("require_current_run_version", script_source)
+    @test occursin("PHASE1_SCRIPT_VERSION=\"1.2.0\"", script_source)
+    @test occursin("prepare-recovery)", script_source)
     @test occursin("gpu_linalg_preflight!", read(joinpath(ROOT, "scripts", "gpu_smoke.jl"), String))
     @test occursin("gpu_linalg_preflight!", read(joinpath(ROOT, "scripts", "run_scf_gpu.jl"), String))
     sanitized_environment = read(
@@ -578,7 +590,8 @@ end
             RuntimeSettings(backend=:cpu, tensor_scalar_type=:float64),
         )
         @test all(tensor -> eltype(tensor) == Float64, psi_float64)
-        record = test_record(1, test_fields(0.0), test_fields(0.0))
+        record = test_record(1, test_fields(0.0), test_fields(0.5))
+        history_record = test_record(2, test_fields(0.25), test_fields(0.75))
         diagnostic = ConvergenceDiagnostic(
             status=:fixed_point,
             accepted=true,
@@ -600,13 +613,64 @@ end
         )
         run_directory = joinpath(directory, "nested", "run")
         path = joinpath(run_directory, "state.h5")
-        write_checkpoint(path; settings, psi, records=[record], diagnostic,
+        write_checkpoint(path; settings, psi, records=[record, history_record], diagnostic,
             restart_fields=test_fields(0.25), chemical_potential=0.4, immutable=true)
         checkpoint = read_checkpoint(path)
         @test checkpoint.accepted
         @test checkpoint.chemical_potential ≈ 0.4
         @test checkpoint.restart.mu_cdw[1, 1] ≈ 0.25
+        measured_history = read_field_history(path; source=:measured)
+        applied_history = read_field_history(path; source=:applied)
+        @test measured_history.iterations == [1, 2]
+        @test size(measured_history.alpha) == (2, 2, 2, 2, 2)
+        @test size(measured_history.beta) == (2, 2, 2, 2, 2, 2)
+        @test size(measured_history.mu_cdw) == (2, 4, 2)
+        @test measured_history.mu_cdw[1, 1, :] == [0.5, 0.75]
+        @test applied_history.mu_cdw[1, 1, :] == [0.0, 0.25]
+        refactored_inherit = read_inherited_fields(path)
+        @test refactored_inherit.format == :refactored
+        @test refactored_inherit.fields.mu_cdw[1, 1] == 0.25
+        @test refactored_inherit.chemical_potential == 0.4
+        h5open(path, "r") do file
+            @test Int(read(file, "schema_version")) == 5
+            @test read(file, "fields/initial/mu_cdw")[1, 1] == 0.0
+        end
         @test_throws ArgumentError write_checkpoint(path; settings, psi, records=[record], diagnostic, immutable=true)
+
+        legacy_path = joinpath(directory, "legacy_fields.h5")
+        h5open(legacy_path, "w") do file
+            file["alpha"] = test_fields(0.0).alpha
+            file["beta"] = test_fields(0.0).beta
+            file["mu"] = 1.25
+        end
+        inherited = read_inherited_fields(legacy_path)
+        @test inherited.format == :legacy
+        @test inherited.chemical_potential == 1.25
+        @test size(inherited.fields.mu_cdw) == (2, 4)
+        @test all(iszero, inherited.fields.mu_cdw)
+        inherit_settings = ProjectSettings(
+            model=model,
+            run=RunSettings(
+                output_directory=directory,
+                inherit_from=legacy_path,
+                inherit_sha256=LadderMPSMFT.sha256_file(legacy_path),
+                quick_diagnostics=false,
+            ),
+        )
+        inherited_start = LadderMPSMFT._initial_state(inherit_settings)
+        @test inherited_start.source == "field_inherit"
+        @test inherited_start.inherit_format == "legacy"
+        @test inherited_start.chemical_potential == 1.25
+        @test length(inherited_start.psi) == 4
+        bad_hash_settings = ProjectSettings(
+            model=model,
+            run=RunSettings(
+                inherit_from=legacy_path,
+                inherit_sha256=repeat("0", 64),
+                quick_diagnostics=false,
+            ),
+        )
+        @test_throws ArgumentError LadderMPSMFT._initial_state(bad_hash_settings)
         gpu_resume_settings = ProjectSettings(
             model=model,
             runtime=RuntimeSettings(

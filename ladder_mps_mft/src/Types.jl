@@ -91,6 +91,8 @@ Base.@kwdef struct RunSettings
     random_seed::Int = 1
     initial_seed::Symbol = :pairing
     initial_amplitude::Float64 = 1e-3
+    inherit_from::Union{Nothing,String} = nothing
+    inherit_sha256::Union{Nothing,String} = nothing
     parent_checkpoint::Union{Nothing,String} = nothing
     parent_sha256::Union{Nothing,String} = nothing
     resume_checkpoint::Union{Nothing,String} = nothing
