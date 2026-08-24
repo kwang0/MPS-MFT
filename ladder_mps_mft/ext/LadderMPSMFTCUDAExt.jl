@@ -4,6 +4,8 @@ using CUDA
 using LadderMPSMFT
 using Libdl
 using LinearAlgebra
+using ITensors
+using ITensorMPS
 
 const CUDA_RUNTIME_LIBRARY_MARKERS = (
     "cudart",
@@ -52,7 +54,7 @@ end
 function linalg_preflight!(dimension::Integer)
     dimension >= 2 || throw(ArgumentError("GPU linear-algebra preflight dimension must be at least 2"))
     ensure_cuda!()
-    matrix = CUDA.rand(Float32, dimension, dimension)
+    matrix = CUDA.rand(Float64, dimension, dimension)
     gram = Symmetric(matrix * transpose(matrix))
     values = eigen(gram).values
     CUDA.synchronize()
@@ -61,12 +63,22 @@ function linalg_preflight!(dimension::Integer)
     assert_artifact_runtime_isolation!()
     return (
         dimension=Int(dimension),
+        scalar_type="Float64",
         minimum_eigenvalue=Float64(minimum(values_cpu)),
         maximum_eigenvalue=Float64(maximum(values_cpu)),
     )
 end
 
-to_gpu(value) = CUDA.cu(value)
+function to_gpu(value, tensor_scalar_type::Symbol)
+    converted = LadderMPSMFT.convert_tensor_scalar_type(value, tensor_scalar_type)
+    # NDTensors' CUDA adaptor preserves the requested scalar type. CUDA.cu is
+    # intentionally opinionated and silently converts Float64 tensors to
+    # Float32, which is too coarse for the production energy-identity gates.
+    cu_one = ITensors.NDTensors.CUDAExtensions.cu
+    gpu_one = tensor -> ITensors.NDTensors.iscu(tensor) ? tensor : cu_one(tensor)
+    return converted isa Union{ITensorMPS.MPS,ITensorMPS.MPO} ?
+        map(gpu_one, converted) : gpu_one(converted)
+end
 
 function cuda_metadata()
     ensure_cuda!()

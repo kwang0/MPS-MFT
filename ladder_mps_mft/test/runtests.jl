@@ -148,8 +148,10 @@ end
     @test !settings.run.require_accepted_solution
     gpu_settings = load_settings(joinpath(ROOT, "configs", "phase1_gpu_base.toml"))
     @test gpu_settings.runtime.backend == :gpu
+    @test gpu_settings.runtime.tensor_scalar_type == :float64
     @test !gpu_settings.runtime.conserve_sz
     @test !gpu_settings.runtime.conserve_nfparity
+    @test gpu_settings.convergence.cycle_action == :continue
     @test gpu_settings.model.ep_mode == :linear_t0
     @test gpu_settings.model.ep_signed ≈ -0.18452309659153343
     @test gpu_settings.model.tp^2 / gpu_settings.model.ep ≈ 0.05419375777188662
@@ -164,6 +166,11 @@ end
         runtime=RuntimeSettings(threaded_blocksparse=false, conserve_sz=false, conserve_nfparity=false),
     ))
     @test cpu_fingerprint != dense_cpu_fingerprint
+    float32_fingerprint = LadderMPSMFT.numerical_fingerprint(ProjectSettings(
+        model=test_model(),
+        runtime=RuntimeSettings(tensor_scalar_type=:float32),
+    ))
+    @test cpu_fingerprint != float32_fingerprint
     first_seed = initial_fields(test_model(); seed=:pairing, rng=MersenneTwister(7))
     second_seed = initial_fields(test_model(); seed=:pairing, rng=MersenneTwister(7))
     @test first_seed.alpha == second_seed.alpha
@@ -235,6 +242,22 @@ end
             addenv(`bash $script submit mock_phase1`, environment...),
             stdout=devnull,
         ))
+        smoke_path = joinpath(run_root, "mock_phase1", "gpu_smoke.h5")
+        h5open(smoke_path, "w") do file
+            file["completed"] = true
+            file["energy"] = -1.0
+            file["density"] = 1.0
+            device = create_group(file, "device")
+            device["cuda_runtime_library_isolation"] = "passed"
+            device["tensor_scalar_type"] = "float64"
+            linalg = create_group(file, "linalg_preflight")
+            linalg["dimension"] = 256
+            linalg["scalar_type"] = "Float64"
+            psi_group = create_group(file, "psi")
+            tensor_group = create_group(psi_group, "MPS[1]")
+            storage_group = create_group(tensor_group, "storage")
+            storage_group["data"] = Float64[1.0]
+        end
         run(pipeline(
             addenv(`bash $script submit-matrix mock_phase1`, environment...),
             stdout=devnull,
@@ -459,6 +482,57 @@ end
     @test mixed_cycle.status == :periodic_candidate
     @test !mixed_cycle.accepted
     @test !mixed_cycle.orbit_validated
+
+    raw_candidate = ConvergenceDiagnostic(
+        status=:periodic_candidate,
+        accepted=false,
+        solution_kind=:periodic_orbit,
+        fundamental_period=2,
+        unmixed_probe=true,
+    )
+    continue_settings = ConvergenceSettings(probe_iterations=20, cycle_action=:continue)
+    @test LadderMPSMFT._recurrence_action(
+        raw_candidate,
+        continue_settings;
+        probe_steps=8,
+        probe_origin=:initial,
+        mixer_probe_completed=false,
+    ) == :continue_probe
+    @test LadderMPSMFT._recurrence_action(
+        raw_candidate,
+        continue_settings;
+        probe_steps=20,
+        probe_origin=:initial,
+        mixer_probe_completed=false,
+    ) == :enter_mixing
+    @test LadderMPSMFT._recurrence_action(
+        raw_candidate,
+        continue_settings;
+        probe_steps=20,
+        probe_origin=:mixer_recurrence,
+        mixer_probe_completed=true,
+    ) == :stop_candidate
+    mixed_candidate = ConvergenceDiagnostic(
+        status=:periodic_candidate,
+        accepted=false,
+        solution_kind=:periodic_orbit,
+        fundamental_period=2,
+        unmixed_probe=false,
+    )
+    @test LadderMPSMFT._recurrence_action(
+        mixed_candidate,
+        continue_settings;
+        probe_steps=0,
+        probe_origin=:none,
+        mixer_probe_completed=false,
+    ) == :start_mixer_probe
+    @test LadderMPSMFT._recurrence_action(
+        mixed_candidate,
+        continue_settings;
+        probe_steps=0,
+        probe_origin=:none,
+        mixer_probe_completed=true,
+    ) == :stop_candidate
 end
 
 @testset "mixing" begin
@@ -498,6 +572,12 @@ end
         settings = ProjectSettings(model=model, run=run)
         sites = LadderMPSMFT.make_sites(model)
         psi = productMPS(sites, density_product_state(4, 1.0; rng=MersenneTwister(2)))
+        psi_float32 = LadderMPSMFT.convert_tensor_scalar_type(psi, :float32)
+        psi_float64 = move_to_backend(
+            psi_float32,
+            RuntimeSettings(backend=:cpu, tensor_scalar_type=:float64),
+        )
+        @test all(tensor -> eltype(tensor) == Float64, psi_float64)
         record = test_record(1, test_fields(0.0), test_fields(0.0))
         diagnostic = ConvergenceDiagnostic(
             status=:fixed_point,

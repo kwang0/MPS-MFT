@@ -97,6 +97,7 @@ function write_checkpoint(
             "E_p_upper_chi" => settings.model.ep_upper_chi,
             "effective_mf_coupling_tp2_over_ep" => settings.model.tp^2 / settings.model.ep,
             "runtime_backend" => String(settings.runtime.backend),
+            "tensor_scalar_type" => String(settings.runtime.tensor_scalar_type),
             "conserve_sz" => settings.runtime.conserve_sz,
             "conserve_nfparity" => settings.runtime.conserve_nfparity,
         ))
@@ -206,6 +207,7 @@ function write_run_summary_markdown(path::AbstractString, settings::ProjectSetti
         println(io, "- Seed: `$(settings.run.seed_label)` (`$(settings.run.random_seed)`)" )
         println(io, "- Geometry: `$(settings.model.geometry)`")
         println(io, "- Runtime backend: `$(settings.runtime.backend)`")
+        println(io, "- Tensor scalar type: `$(settings.runtime.tensor_scalar_type)`")
         println(io, "- Conserved S_z / fermion parity: `$(settings.runtime.conserve_sz)` / `$(settings.runtime.conserve_nfparity)`")
         println(io, "- Model fingerprint: `$(model_fingerprint(settings.model))`")
         println(io, "- Numerical fingerprint: `$(numerical_fingerprint(settings))`")

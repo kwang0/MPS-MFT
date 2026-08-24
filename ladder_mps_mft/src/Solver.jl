@@ -63,7 +63,7 @@ function run_dmrg_ground(
     psi_init=nothing,
     rng=MersenneTwister(1),
     deadline::Real=Inf,
-    backend::Symbol=:cpu,
+    backend::Union{Symbol,RuntimeSettings}=:cpu,
 )
     warm_start = psi_init !== nothing
     psi0_cpu = warm_start ? psi_init : productMPS(sites, density_product_state(length(sites), target_density; rng))
@@ -104,7 +104,7 @@ function _solve_mu_point(
     rng,
     deadline,
 )
-    hamiltonian = build_mf_mpo(sites, model, fields, mu; backend=runtime.backend)
+    hamiltonian = build_mf_mpo(sites, model, fields, mu; backend=runtime)
     result = run_dmrg_ground(
         sites,
         hamiltonian,
@@ -113,7 +113,7 @@ function _solve_mu_point(
         psi_init,
         rng,
         deadline,
-        backend=runtime.backend,
+        backend=runtime,
     )
     return (
         mu=Float64(mu),
@@ -320,6 +320,48 @@ function _copy_diagnostic(
     )
 end
 
+function _clear_solution_diagnostic(diagnostic::ConvergenceDiagnostic, reason::String)
+    return _copy_diagnostic(
+        diagnostic;
+        status=:iterating,
+        accepted=false,
+        reason,
+        solution_kind=:none,
+        fundamental_period=0,
+        orbit_validated=false,
+        unmixed_probe=false,
+        solution_canonical_variational_energy=NaN,
+        orbit_energy_spread=NaN,
+        orbit_density_contrast=NaN,
+    )
+end
+
+"""
+Choose how the SCF driver responds to a detected recurrence.
+
+Raw-map candidates are allowed to use the full configured probe before they
+can stop or hand off to mixing. A mixer-dependent recurrence always receives
+one fresh raw-map probe; if that controlled probe remains unaccepted, the run
+stops for inspection instead of repeatedly damping or re-probing the orbit.
+"""
+function _recurrence_action(
+    diagnostic::ConvergenceDiagnostic,
+    settings::ConvergenceSettings;
+    probe_steps::Integer,
+    probe_origin::Symbol,
+    mixer_probe_completed::Bool,
+)
+    diagnostic.status in (:periodic_solution, :periodic_candidate) || return :none
+    diagnostic.accepted && return :accept
+    if diagnostic.unmixed_probe
+        probe_steps < settings.probe_iterations && return :continue_probe
+        probe_origin == :mixer_recurrence && return :stop_candidate
+        return settings.cycle_action == :continue ? :enter_mixing : :stop_candidate
+    end
+    return settings.unmixed_cycle_probe && !mixer_probe_completed ?
+        :start_mixer_probe : :stop_candidate
+end
+
 function _run_directory(settings::ProjectSettings)
     label = join((
         String(settings.model.geometry),
@@ -366,7 +408,10 @@ function run_scf(settings::ProjectSettings)
     diagnostic = ConvergenceDiagnostic()
     best_residual = Inf
     update_mode = :initial
-    probe_disabled = false
+    probe_active = settings.convergence.unmixed_cycle_probe
+    probe_steps = 0
+    probe_origin = probe_active ? :initial : :none
+    mixer_probe_completed = false
     phase_psis = Dict{Int,MPS}()
     provenance = collect_provenance(settings)
     provenance["initial_state_source"] = start.source
@@ -375,7 +420,7 @@ function run_scf(settings::ProjectSettings)
     bare_hamiltonian = build_bare_ladder_mpo(
         start.sites,
         settings.model;
-        backend=settings.runtime.backend,
+        backend=settings.runtime,
     )
 
     for iteration in 1:settings.run.max_iterations
@@ -426,6 +471,7 @@ function run_scf(settings::ProjectSettings)
         )
         push!(records, record)
         if update_mode == :unmixed_probe
+            probe_steps += 1
             phase_psis[iteration] = deepcopy(psi)
             while length(phase_psis) > settings.convergence.probe_max_period
                 delete!(phase_psis, minimum(keys(phase_psis)))
@@ -448,45 +494,91 @@ function run_scf(settings::ProjectSettings)
             :nonfinite,
             :time_limit,
         )
+        force_unmixed_probe = false
+        force_mixing = false
         if diagnostic.status in (:periodic_solution, :periodic_candidate)
-            cycle_path = joinpath(
-                output_directory,
-                @sprintf("orbit_period_%02d_iter_%04d.h5", diagnostic.fundamental_period, iteration),
-            )
-            write_checkpoint(
-                cycle_path;
-                settings,
-                psi,
-                records,
+            recurrence_action = _recurrence_action(
                 diagnostic,
-                restart_fields=measured,
-                chemical_potential,
-                provenance,
-                immutable=true,
-                phase_psis,
+                settings.convergence;
+                probe_steps,
+                probe_origin,
+                mixer_probe_completed,
             )
-            if diagnostic.accepted || settings.convergence.cycle_action == :stop
+            if recurrence_action == :stop_candidate && !diagnostic.unmixed_probe && mixer_probe_completed
+                diagnostic = _copy_diagnostic(
+                    diagnostic;
+                    reason="mixer-dependent recurrence persisted after its controlled raw-map probe; no physical orbit was accepted",
+                )
+            end
+            if recurrence_action != :continue_probe
+                cycle_path = joinpath(
+                    output_directory,
+                    @sprintf("orbit_period_%02d_iter_%04d.h5", diagnostic.fundamental_period, iteration),
+                )
+                write_checkpoint(
+                    cycle_path;
+                    settings,
+                    psi,
+                    records,
+                    diagnostic,
+                    restart_fields=measured,
+                    chemical_potential,
+                    provenance,
+                    immutable=true,
+                    phase_psis,
+                )
+            end
+            if recurrence_action == :accept || recurrence_action == :stop_candidate
                 terminal = true
-            else
-                probe_disabled = true
+            elseif recurrence_action == :continue_probe
+                diagnostic = _clear_solution_diagnostic(
+                    diagnostic,
+                    "raw-map recurrence detected before the probe budget was exhausted; continuing the unmixed probe",
+                )
+            elseif recurrence_action == :enter_mixing
+                probe_active = false
+                probe_origin = :none
+                empty!(phase_psis)
                 empty!(mixing_state.x_history)
                 empty!(mixing_state.f_history)
                 empty!(mixing_state.residual_norms)
                 mixing_state.damping = max(settings.mixing.minimum_damping, 0.5 * mixing_state.damping)
-                diagnostic = _copy_diagnostic(
-                    diagnostic;
-                    status=:iterating,
-                    accepted=false,
-                    reason="unaccepted recurrence archived; entering accelerated mixing with reduced damping",
-                    solution_kind=:none,
-                    fundamental_period=0,
-                    orbit_validated=false,
-                    unmixed_probe=false,
-                    solution_canonical_variational_energy=NaN,
-                    orbit_energy_spread=NaN,
-                    orbit_density_contrast=NaN,
+                force_mixing = true
+                diagnostic = _clear_solution_diagnostic(
+                    diagnostic,
+                    "exhaustive initial raw-map probe archived an unaccepted recurrence; entering accelerated mixing with reduced damping",
+                )
+            elseif recurrence_action == :start_mixer_probe
+                probe_active = true
+                probe_steps = 0
+                probe_origin = :mixer_recurrence
+                mixer_probe_completed = true
+                empty!(phase_psis)
+                empty!(mixing_state.x_history)
+                empty!(mixing_state.f_history)
+                empty!(mixing_state.residual_norms)
+                force_unmixed_probe = true
+                diagnostic = _clear_solution_diagnostic(
+                    diagnostic,
+                    "mixer-dependent recurrence archived; starting a fresh unmixed raw-map probe",
                 )
             end
+        end
+        if !terminal && update_mode == :unmixed_probe && probe_active &&
+                probe_steps >= settings.convergence.probe_iterations &&
+                diagnostic.status == :iterating && !force_mixing
+            completed_origin = probe_origin
+            probe_active = false
+            probe_origin = :none
+            empty!(phase_psis)
+            empty!(mixing_state.x_history)
+            empty!(mixing_state.f_history)
+            empty!(mixing_state.residual_norms)
+            force_mixing = true
+            diagnostic = _clear_solution_diagnostic(
+                diagnostic,
+                "$(completed_origin) unmixed cycle probe completed without an accepted recurrence; entering accelerated mixing",
+            )
         end
         if iteration == settings.run.max_iterations && !terminal
             diagnostic = _copy_diagnostic(
@@ -501,9 +593,7 @@ function run_scf(settings::ProjectSettings)
         next_fields = measured
         next_update_mode = update_mode
         if !terminal
-            probe_continues = settings.convergence.unmixed_cycle_probe &&
-                !probe_disabled && iteration < settings.convergence.probe_iterations
-            if probe_continues
+            if force_unmixed_probe || (probe_active && probe_steps < settings.convergence.probe_iterations)
                 next_fields = measured
                 next_update_mode = :unmixed_probe
             else

@@ -74,6 +74,7 @@ end
 
 Base.@kwdef struct RuntimeSettings
     backend::Symbol = :cpu
+    tensor_scalar_type::Symbol = :float64
     blas_threads::Int = 1
     strided_threads::Int = 1
     threaded_blocksparse::Bool = true

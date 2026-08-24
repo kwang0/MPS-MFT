@@ -67,7 +67,7 @@ function build_mf_mpo(
     model::ModelSettings,
     fields::FieldState,
     chemical_potential::Real;
-    backend::Symbol=:cpu,
+    backend::Union{Symbol,RuntimeSettings}=:cpu,
 )
     os = OpSum()
     for site in 1:(2 * model.L)

@@ -110,6 +110,7 @@ function load_settings(path::AbstractString)
     )
     runtime = RuntimeSettings(;
         backend=Symbol(lowercase(String(_value(runtime_raw, "backend", "cpu")))),
+        tensor_scalar_type=Symbol(lowercase(String(_value(runtime_raw, "tensor_scalar_type", "float64")))),
         blas_threads=Int(_value(runtime_raw, "blas_threads", 1)),
         strided_threads=Int(_value(runtime_raw, "strided_threads", 1)),
         threaded_blocksparse=Bool(_value(runtime_raw, "threaded_blocksparse", true)),
@@ -153,6 +154,9 @@ function validate_settings(settings::ProjectSettings)
     model.tp >= 0 || throw(ArgumentError("tp must be nonnegative"))
     model.ep > 0 || throw(ArgumentError("the selected |E_p| must be positive"))
     settings.runtime.backend in (:cpu, :gpu) || throw(ArgumentError("runtime.backend must be cpu or gpu"))
+    settings.runtime.tensor_scalar_type in (:float32, :float64) || throw(ArgumentError(
+        "runtime.tensor_scalar_type must be float32 or float64",
+    ))
     settings.runtime.blas_threads >= 1 || throw(ArgumentError("blas_threads must be positive"))
     settings.runtime.strided_threads >= 1 || throw(ArgumentError("strided_threads must be positive"))
     if settings.runtime.backend == :gpu

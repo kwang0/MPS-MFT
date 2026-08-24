@@ -5,7 +5,7 @@
 
 set -euo pipefail
 
-readonly PHASE1_SCRIPT_VERSION="1.0.1"
+readonly PHASE1_SCRIPT_VERSION="1.1.0"
 script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
 project_dir="${PHASE1_PROJECT_DIR:-$(cd "$(dirname "$script_path")/.." && pwd)}"
 repo_root="${PHASE1_REPO_ROOT:-$(cd "$project_dir/.." && pwd)}"
@@ -58,6 +58,7 @@ validate_project() {
   [[ -f "$PHASE1_BASE_CONFIG" ]] || die "missing Phase 1 base config: $PHASE1_BASE_CONFIG"
   [[ -f "$project_dir/scripts/run_scf_gpu.jl" ]] || die "missing GPU SCF entry point"
   [[ -f "$project_dir/scripts/gpu_smoke.jl" ]] || die "missing GPU smoke test"
+  [[ -f "$project_dir/scripts/validate_gpu_smoke.jl" ]] || die "missing GPU smoke validator"
   (( PHASE1_MAX_SEGMENTS >= 1 )) || die "PHASE1_MAX_SEGMENTS must be positive"
 }
 
@@ -92,7 +93,7 @@ Ladder MPS+MF Phase 1 refactored GPU campaign
 Representative point: L=64, U=8, V=-0.2, t0=1.1, t_perp=0.1, density=0.9375, chi=200
 Branches:             pairing, SDW, and CDW seeds for all three transverse geometries (9 jobs)
 Physics controls:     unmixed raw-map cycle probe, then Anderson mixing if needed
-Tensor backend:       dense CUDA, with S_z and fermion-parity QNs explicitly disabled
+Tensor backend:       dense Float64 CUDA, with S_z and fermion-parity QNs explicitly disabled
 CUDA runtime:         pinned CUDA.jl artifacts only; system toolkit libraries are rejected
 E_p policy:           exact lookup first; bracketed linear interpolation in t0; no extrapolation
 GPU request:          one of four GPUs, ${PHASE1_GPU_TIME}, ${PHASE1_GPU_CPUS} CPUs, shared QOS
@@ -106,6 +107,10 @@ Submission is staged:
   1. bash $script_path submit RUN_ID
   2. bash $script_path status RUN_ID
   3. bash $script_path submit-matrix RUN_ID
+
+To recover nine immutable Float32 branch states into the corrected Float64
+solver, replace step 1 with:
+  bash $script_path submit-recovery SOURCE_RUN_ID NEW_RUN_ID
 
 Before step 1, instantiate CUDA once on a Perlmutter login node:
   JULIA_PKG_PRECOMPILE_AUTO=0 $PHASE1_JULIA --project="$project_dir/gpu" \\
@@ -163,7 +168,7 @@ load_environment() {
   # shellcheck disable=SC1090
   source "$run_dir/run.env"
   case "${PHASE1_RUN_SCRIPT_VERSION:-missing}" in
-    1.0.0|1.0.1) ;;
+    1.0.0|1.0.1|1.1.0) ;;
     *) die "unsupported run script version ${PHASE1_RUN_SCRIPT_VERSION:-missing}; current version is $PHASE1_SCRIPT_VERSION";;
   esac
   project_dir="$PHASE1_PROJECT_DIR"
@@ -180,7 +185,7 @@ require_current_run_version() {
 }
 
 initialize_run() {
-  local run_id="$1"
+  local run_id="$1" source_run_dir="${2:-}"
   [[ "$run_id" =~ ^[A-Za-z0-9_.-]+$ ]] || die "unsafe run ID: $run_id"
   [[ -f "$project_dir/gpu/Manifest.toml" ]] || die \
     "GPU environment is not instantiated; run the command printed by plan"
@@ -192,8 +197,10 @@ initialize_run() {
   printf 'kind\tlabel\tsegment\tpool\trequested_time\treserved_node_hours\tjob_id\tconfig\n' >"$run_dir/jobs.tsv"
   printf '%s\n' "$PHASE1_DECLARED_ALLOCATION_NODE_HOURS" >"$run_dir/declared_allocation_node_hours.txt"
   printf '%s\n' "$PHASE1_DECLARED_USED_NODE_HOURS" >"$run_dir/declared_used_node_hours.txt"
+  local -a prepare_args=("$PHASE1_BASE_CONFIG" "$run_dir" "$run_id")
+  [[ -n "$source_run_dir" ]] && prepare_args+=("$source_run_dir")
   "$PHASE1_JULIA" --startup-file=no --project="$project_dir" \
-    "$project_dir/scripts/prepare_phase1_gpu.jl" "$PHASE1_BASE_CONFIG" "$run_dir" "$run_id" >&2 || \
+    "$project_dir/scripts/prepare_phase1_gpu.jl" "${prepare_args[@]}" >&2 || \
     die "Phase 1 configuration preparation failed; use a new run ID after correcting the cause"
   cp "$project_dir/gpu/Manifest.toml" "$run_dir/gpu-Manifest.toml" || die "could not copy GPU manifest"
   sha256sum "$run_dir/gpu-Manifest.toml" >"$run_dir/gpu-Manifest.toml.sha256" || \
@@ -314,6 +321,9 @@ require_completed_smoke() {
   state="$(slurm_state "$job_id")"
   [[ "$state" == "COMPLETED" ]] || die "GPU smoke job $job_id is ${state:-unknown}, not COMPLETED"
   [[ -f "$run_dir/gpu_smoke.h5" ]] || die "GPU smoke artifact is missing"
+  "$PHASE1_JULIA" --startup-file=no --project="$project_dir" \
+    "$project_dir/scripts/validate_gpu_smoke.jl" "$run_dir/gpu_smoke.h5" >&2 || die \
+    "GPU smoke artifact failed Float64/runtime/preflight validation"
 }
 
 submit_matrix_jobs() {
@@ -414,7 +424,7 @@ show_status() {
     printf '%-8s %-35s %-7s %-12s %-10s\n' "$kind" "$label" "$segment" "$job_id" "${state:-UNKNOWN}"
   done <"$run_dir/jobs.tsv"
   echo
-  printf 'LATEST STATE\tSTATUS\tACCEPTED\tPERIOD\tENERGY\n'
+  printf 'LATEST STATE\tSTATUS\tACCEPTED\tPERIOD\tENERGY\tSCALAR\n'
   local -a states=()
   local branch
   while IFS= read -r branch; do
@@ -501,6 +511,7 @@ Read-only:
 
 Submissions:
   submit RUN_ID                         Prepare campaign and submit GPU smoke only
+  submit-recovery SOURCE_RUN NEW_RUN    Prepare Float64 warm-start recovery and submit smoke
   submit-matrix RUN_ID                  Submit 9 branches after smoke completes
   continue RUN_ID LABEL                 Submit an explicit same-model continuation
   submit-ep RUN_ID LABEL L U V t0 n ... Submit a guarded legacy CPU E_p calculation
@@ -523,6 +534,15 @@ case "$action" in
       check_reservation "$(gpu_node_hours "$PHASE1_SMOKE_TIME")"
       run_dir="$(initialize_run "$2")"
     fi
+    submit_smoke_job "$run_dir"
+    ;;
+  submit-recovery)
+    [[ $# == 3 ]] || die "submit-recovery requires SOURCE_RUN_ID NEW_RUN_ID"
+    require_command sbatch
+    source_run_dir="$(resolve_run_dir "$2")"
+    [[ ! -e "$run_root/$3" ]] || die "new recovery run already exists: $run_root/$3"
+    check_reservation "$(gpu_node_hours "$PHASE1_SMOKE_TIME")"
+    run_dir="$(initialize_run "$3" "$source_run_dir")"
     submit_smoke_job "$run_dir"
     ;;
   submit-matrix)

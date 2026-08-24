@@ -54,13 +54,14 @@ probe_max_period = 2
 probe_iterations = 20
 accepted_periods = [1, 2]
 orbit_bulk_fraction = 0.5
-cycle_action = "stop"
+cycle_action = "continue"
 stagnation_window = 10
 stagnation_min_relative_improvement = 1.0e-2
 divergence_factor = 8.0
 
 [runtime]
 backend = "gpu"
+tensor_scalar_type = "float64"
 blas_threads = 1
 strided_threads = 1
 threaded_blocksparse = false

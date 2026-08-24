@@ -280,7 +280,11 @@ function write_sector_gaps(path::AbstractString, gaps; immutable::Bool=false)
     return path
 end
 
-function build_bare_ladder_mpo(sites, model::ModelSettings; backend::Symbol=:cpu)
+function build_bare_ladder_mpo(
+    sites,
+    model::ModelSettings;
+    backend::Union{Symbol,RuntimeSettings}=:cpu,
+)
     fields = FieldState(
         zeros(Float64, model.L, model.L, 2, 2),
         zeros(Float64, 2, model.L, model.L, 2, 2),

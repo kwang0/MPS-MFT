@@ -12,6 +12,7 @@ output_path = abspath(ARGS[1])
 ispath(output_path) && error("refusing to overwrite GPU smoke artifact: $output_path")
 runtime = RuntimeSettings(
     backend=:gpu,
+    tensor_scalar_type=:float64,
     blas_threads=1,
     strided_threads=1,
     threaded_blocksparse=false,
@@ -43,7 +44,7 @@ model = ModelSettings(
 sites = LadderMPSMFT.make_sites(model, runtime)
 any(ITensors.hasqns, sites) && error("GPU smoke unexpectedly constructed QN site indices")
 fields = initial_fields(model; seed=:pairing, amplitude=1e-4, rng=MersenneTwister(11))
-hamiltonian = build_mf_mpo(sites, model, fields, 0.0; backend=:gpu)
+hamiltonian = build_mf_mpo(sites, model, fields, 0.0; backend=runtime)
 settings = DMRGSettings(
     nsweeps=1,
     maxdim=4,
@@ -60,9 +61,12 @@ result = run_dmrg_ground(
     settings;
     rng=MersenneTwister(11),
     deadline=time() + 300,
-    backend=:gpu,
+    backend=runtime,
 )
 result.timed_out && error("tiny GPU DMRG timed out")
+all(tensor -> eltype(tensor) == Float64, result.psi) || error(
+    "GPU smoke produced a non-Float64 MPS despite tensor_scalar_type=float64",
+)
 density = LadderMPSMFT.average_density(result.psi)
 measured, correlations = calculate_mean_fields(result.psi, model)
 all(isfinite, measured.alpha) || error("nonfinite GPU mean field")
@@ -82,6 +86,7 @@ h5open(output_path, "w") do file
     end
     linalg = create_group(file, "linalg_preflight")
     linalg["dimension"] = preflight.dimension
+    linalg["scalar_type"] = preflight.scalar_type
     linalg["minimum_eigenvalue"] = preflight.minimum_eigenvalue
     linalg["maximum_eigenvalue"] = preflight.maximum_eigenvalue
 end
@@ -94,3 +99,5 @@ println("gpu_smoke_path=$output_path")
 println("energy=$(result.energy)")
 println("density=$density")
 println("linalg_preflight_dimension=$(preflight.dimension)")
+println("linalg_preflight_scalar_type=$(preflight.scalar_type)")
+println("tensor_scalar_type=$(runtime.tensor_scalar_type)")

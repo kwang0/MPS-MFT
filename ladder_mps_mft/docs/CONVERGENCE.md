@@ -20,7 +20,7 @@ III, Eq. (9), Eq. (14), Fig. 2, and Appendix B.
 
 ## Mixer-independent probe
 
-The production-shaped default begins with 20 raw mean-field iterations:
+The production-shaped default begins with 20 complete raw mean-field updates:
 
 ```text
 x_(k+1) = f(x_k)
@@ -28,8 +28,11 @@ x_(k+1) = f(x_k)
 
 No linear damping or Anderson extrapolation is applied during this probe. The
 default `probe_max_period=2` and `accepted_periods=[1,2]` prioritize the physical
-period-two construction supported by the paper. Anderson mixing starts only if
-the raw probe finds neither an accepted fixed point nor an accepted orbit.
+period-two construction supported by the paper. An early recurrence candidate
+does not truncate those 20 updates: it must either pass every numerical gate or
+remain under observation through the full probe budget. Anderson mixing starts
+only after that exhaustive initial probe finds neither an accepted fixed point
+nor an accepted orbit.
 
 For every stored alpha, beta, and spin-resolved Hartree field, the code records
 
@@ -50,7 +53,12 @@ validated by all of the following:
 With `period_repeats=3`, period two needs four complete cycles, or eight
 contiguous raw-map records. Searching upward reports the smallest passing
 period. A recurrence in Anderson- or linearly mixed history is only a
-`periodic_candidate` and cannot be accepted without a raw probe.
+`periodic_candidate` and cannot be accepted without a raw probe. The driver
+archives that mixer-dependent candidate, clears mixer history, applies the last
+measured field directly, and performs one fresh raw-map probe. Thus damping
+cannot manufacture, suppress, or certify the physical orbit. If the controlled
+probe remains unaccepted, the run stops for inspection instead of repeatedly
+damping and re-probing the same recurrence.
 
 ## Outcomes
 
@@ -66,10 +74,11 @@ the orbit-averaged canonical energy, phase-energy spread, and the Bollmark-style
 density contrast over the central `orbit_bulk_fraction` of rungs (one half by
 default) to reduce open-boundary contamination.
 
-The code never averages orbit phases. For an unaccepted recurrence,
-`cycle_action=stop` terminates after archiving it. With `cycle_action=continue`,
-the candidate is archived, the raw probe is disabled, Anderson history is
-cleared, damping is reduced, and accelerated fixed-point search begins.
+The code never averages orbit phases. `cycle_action` applies only after the
+initial raw probe has exhausted its full budget with an unaccepted recurrence.
+`stop` archives and terminates; `continue` archives it, clears Anderson history,
+reduces damping, and begins accelerated fixed-point search. A recurrence first
+seen through the mixer always triggers the separate raw probe described above.
 
 Acceptance certifies a numerically self-consistent orbit of an explicitly
 enabled period; it does not by itself identify the broken symmetry. Calling a

@@ -260,3 +260,74 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
 - Perlmutter jobs submitted by this correction: none. Next action after pushing
   and pulling is a fresh immutable `20260823_phase1_gpu_v2` smoke. Inspect its
   log and HDF5 preflight before submitting the nine branches.
+
+## 2026-08-24 — Phase 1 v2 audit and Float64 recurrence recovery
+
+- Run `20260823_phase1_gpu_v2` passed the corrected artifact-runtime smoke job
+  `57498404` and completed all nine segment-one branch jobs: frustrated
+  pairing/SDW/CDW `57500137`/`57500138`/`57500139`, unfrustrated
+  pairing/SDW/CDW `57500140`/`57500141`/`57500142`, and square
+  pairing/SDW/CDW `57500143`/`57500144`/`57500145`. Every production log
+  recorded the 256-dimensional preflight without the v1 system-library warning.
+- Scientific outcome: zero of nine states is accepted. There are three raw-map
+  period-two candidates (frustrated pairing/CDW and unfrustrated pairing), five
+  mixer-dependent period-two candidates, and one stagnated square SDW state.
+  Scheduler `COMPLETED` therefore means process completion, not converged
+  physics.
+- Precision root cause: all nine saved MPS tensors are Float32. The refactored
+  CUDA extension used the opinionated `CUDA.cu` adaptor, which silently converts
+  Float64 arrays to Float32. Hamiltonian-identity errors are
+  `1.52e-5`--`2.77e-5` per site and effective-eigenvalue errors are
+  `1.14e-5`--`3.34e-5` per site, so all nine fail the configured `1e-9` and
+  `1e-6` gates. These states must not be rescued by loosening acceptance.
+- Recurrence-control root cause: `cycle_action=stop` truncated raw candidates
+  at the earliest recurrence and also terminated mixer-dependent candidates
+  before the unmixed probe required by their own diagnostic. Frustrated
+  pairing/CDW stopped after nine raw updates while their residuals were growing.
+  They are transient candidates, not validated physical period-two orbits.
+- Screening only: frustrated branches retain `max|alpha|=0.0110`--`0.0112`
+  with very weak bulk spin-Hartree variation. The unfrustrated pairing seed
+  retains a distinct `max|alpha|=0.0193` state approximately `0.5759` total
+  energy above the nearly degenerate non-paired SDW/CDW candidates. All square
+  branches have `max|alpha|<5e-6`; its pairing and SDW energies are unresolved,
+  while the CDW candidate is approximately `0.0591` total higher than pairing.
+  These comparisons are hypotheses only because every state is unaccepted.
+- A central-half one-point Fourier screen finds charge weight near
+  `|q_x|=pi/8` and spin weight near `q_x=pi+/-pi/16`, `q_y=pi`, in several
+  square/unfrustrated branches at hole density `1/16`. This stripe-like relation
+  is grid- and seed-dependent and is not a connected structure factor; require
+  accepted states, correlation-based peaks, bulk-window checks, and `L`/chi
+  scaling before reporting it as physics.
+- Resource evidence: stored MF-iteration time sums to `40.406` GPU-hours, about
+  `10.102` one-of-four-GPU node-hours before compilation/scheduler overhead.
+  Exact actual charge still requires `sacct`; the append-only ledger remains at
+  the user-reported `54.25` conservative reserved node-hours.
+- Correction: runtime tensor scalar type is explicit, fingerprinted, and stored
+  in provenance. Phase 1 configs use Float64. MPS/MPO tensors are converted
+  tensor-by-tensor and transferred with NDTensors' type-preserving CUDA adaptor;
+  Float32 parent checkpoints are promoted. Both smoke and production preflights
+  use Float64, and `submit-matrix` reads the smoke MPS storage and refuses any
+  non-Float64 artifact.
+- Cycle correction: the initial raw probe now runs its full 20 updates unless a
+  solution passes all gates. An exhausted unaccepted initial recurrence is
+  archived before Anderson mixing. A mixer-dependent recurrence is archived
+  and automatically followed by one fresh raw-map probe; a failed controlled
+  probe stops for inspection rather than being damped or re-probed indefinitely.
+- Launcher v1.1.0 adds `submit-recovery SOURCE_RUN NEW_RUN`. It selects and
+  hashes all nine immutable v2 states, verifies their model fingerprints, and
+  records parent status, numerical fingerprint, and Float32 dtype. A local
+  end-to-end mock-Slurm submission against all nine synchronized HDF5 states
+  produced valid Float64 recovery configs, one `0.125` ledger reservation, and
+  one mock smoke job without changing v2.
+- Validation: all Julia files parse, `bash -n`, `git diff --check`, and the
+  reproducible nine-state audit pass. The full local Julia suite passes all 159
+  tests, including tensor-by-tensor Float32-to-Float64 promotion, recurrence
+  action policy, Float64 smoke-artifact validation, budget locking, DMRG,
+  checkpoint, and branch-selection paths. The local GPU overlay is not
+  instantiated, so actual CUDA transfer remains intentionally gated on the new
+  Perlmutter smoke.
+- Perlmutter jobs submitted by this change: none. Next action is
+  `submit-recovery 20260823_phase1_gpu_v2 20260824_phase1_gpu_v3_float64`.
+  Its smoke reserves `0.125` node-hours; the nine-job matrix adds `27.0`, taking
+  the conservative ledger to `81.375` and leaving `318.625` under the
+  400-additional-node-hour cap.

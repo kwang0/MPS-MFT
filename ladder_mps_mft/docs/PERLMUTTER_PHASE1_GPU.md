@@ -1,6 +1,6 @@
 # Perlmutter Phase 1 GPU workflow
 
-This workflow runs the refactored solver on one dense CUDA GPU. It does **not**
+This workflow runs the refactored solver in Float64 on one dense CUDA GPU. It does **not**
 restore the legacy SCF code or its automatic resubmission loop. Convergence,
 unmixed periodic-orbit detection, Anderson fallback, common variational energy,
 portable checkpoints, and provenance all remain those of `LadderMPSMFT`.
@@ -47,14 +47,16 @@ round-trips its MPS through HDF5. After `status` reports the smoke job as
 preflight and submit the branch matrix:
 
 ```bash
-grep -E 'gpu_smoke_path|linalg_preflight_dimension|CUDA runtime library.*system path' \
+grep -E 'gpu_smoke_path|linalg_preflight_dimension|tensor_scalar_type|CUDA runtime library.*system path' \
   "output/phase1_gpu/$RUN_ID"/logs/smoke-*.out
 bash slurm/phase1_gpu.sh submit-matrix "$RUN_ID"
 bash slurm/phase1_gpu.sh status "$RUN_ID"
 ```
 
-The corrected smoke must print `linalg_preflight_dimension=256` and must not
-print a `system path` CUDA-runtime warning.
+The corrected smoke must print `linalg_preflight_dimension=256` and
+`tensor_scalar_type=float64`, must not print a `system path` CUDA-runtime
+warning, and must save a Float64 MPS. `submit-matrix` validates all of these
+properties from `gpu_smoke.h5`; scheduler completion alone is insufficient.
 
 The matrix contains pairing, SDW, and CDW seeds for each of
 `cubic_frustrated`, `cubic_unfrustrated`, and `square`. Each job requests one of
@@ -69,6 +71,33 @@ with CUDA 13.2 libraries from the NVIDIA HPC SDK and segfaulted in the first
 DMRG eigendecomposition. It produced no result or checkpoint files. Script
 version 1.0.1 can display its status but refuses new submissions or
 continuations from that run; use a new run ID.
+
+Run `20260823_phase1_gpu_v2` completed all nine scientific jobs, but its MPS and
+MPO tensors were silently converted to Float32 by the opinionated `CUDA.cu`
+adaptor. All nine states fail the configured Hamiltonian-consistency gates, and
+none is accepted. Preserve v2 unchanged. The corrected device path explicitly
+promotes CPU checkpoints and Hamiltonians to the configured scalar type, then
+uses NDTensors' type-preserving CUDA adaptor.
+
+Recover v2 without repeating its independent-seed transient:
+
+```bash
+SOURCE_RUN_ID=20260823_phase1_gpu_v2
+RUN_ID=20260824_phase1_gpu_v3_float64
+bash slurm/phase1_gpu.sh submit-recovery "$SOURCE_RUN_ID" "$RUN_ID"
+bash slurm/phase1_gpu.sh status "$RUN_ID"
+```
+
+The recovery manifest hashes every immutable v2 `state.h5`, records its status,
+numerical fingerprint, and Float32 storage type, and uses it as a parent seed.
+The new numerical fingerprint is intentionally different because the MPS is
+promoted to Float64. Each branch starts with a fresh raw-map probe, so the v2
+mixer-dependent recurrences are not inherited as physical solutions. After the
+new smoke passes the Float64 gate:
+
+```bash
+bash slurm/phase1_gpu.sh submit-matrix "$RUN_ID"
+```
 
 Preparation and matrix submission are restart-safe: a failed smoke submission
 can reuse the validated prepared run, and a partially submitted matrix retries
