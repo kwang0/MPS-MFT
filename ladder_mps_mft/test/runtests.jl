@@ -222,13 +222,23 @@ end
 
 @testset "Phase 1 guarded GPU launcher" begin
     script = joinpath(ROOT, "slurm", "phase1_gpu.sh")
+    migration_script = joinpath(ROOT, "slurm", "migrate_phase1_to_scratch.sh")
     script_source = read(script, String)
+    migration_source = read(migration_script, String)
     @test !occursin(r"(?m)^\s*module load cudatoolkit\s*$", script_source)
     @test occursin("module unload cudatoolkit", script_source)
     @test occursin("sanitize_cuda_runtime_environment", script_source)
     @test occursin("require_current_run_version", script_source)
-    @test occursin("PHASE1_SCRIPT_VERSION=\"1.2.0\"", script_source)
+    @test occursin("require_worker_compatible_run_version", script_source)
+    @test occursin("PHASE1_SCRIPT_VERSION=\"1.3.0\"", script_source)
     @test occursin("prepare-recovery)", script_source)
+    @test occursin("--licenses=scratch,cfs", script_source)
+    @test occursin("compact_results.jl", script_source)
+    @test occursin(r"mkdir -p \"\$HOME/\.globus\"", migration_source)
+    @test occursin("transfer_files.py -s dtn -t perlmutter", migration_source)
+    @test occursin("sha256sum -c", migration_source)
+    @test occursin("verify_stateless_results.jl", migration_source)
+    @test occursin("--prune-cfs", migration_source)
     @test occursin("gpu_linalg_preflight!", read(joinpath(ROOT, "scripts", "gpu_smoke.jl"), String))
     @test occursin("gpu_linalg_preflight!", read(joinpath(ROOT, "scripts", "run_scf_gpu.jl"), String))
     sanitized_environment = read(
@@ -240,12 +250,14 @@ end
     julia_executable = Base.julia_cmd().exec[1]
     mktempdir() do directory
         run_root = joinpath(directory, "runs")
+        scratch_root = joinpath(directory, "scratch")
         budget_root = joinpath(directory, "budget")
         ledger = joinpath(budget_root, "ledger.tsv")
         environment = (
             "PATH" => string(mock_bin, ":", ENV["PATH"]),
             "MOCK_SLURM_STATE_DIR" => joinpath(directory, "slurm"),
             "PHASE1_RUN_ROOT" => run_root,
+            "PHASE1_SCRATCH_ROOT" => scratch_root,
             "PHASE1_BUDGET_ROOT" => budget_root,
             "PHASE1_LEDGER_PATH" => ledger,
             "PHASE1_JULIA" => julia_executable,
@@ -279,6 +291,18 @@ end
         @test sum(parse(Float64, split(row, '\t')[7]) for row in ledger_rows) ≈ 27.125
         @test length(readlines(joinpath(run_root, "mock_phase1", "manifest.tsv"))) == 10
         @test length(readlines(joinpath(run_root, "mock_phase1", "jobs.tsv"))) == 11
+        @test isdir(joinpath(scratch_root, "mock_phase1", "results"))
+        prepared_config = TOML.parsefile(joinpath(
+            run_root,
+            "mock_phase1",
+            "configs",
+            "frustrated__pairing_s1.segment-001.toml",
+        ))
+        @test startswith(
+            prepared_config["run"]["output_directory"],
+            joinpath(scratch_root, "mock_phase1", "results"),
+        )
+        @test isempty(readdir(joinpath(run_root, "mock_phase1", "results")))
 
         rejected = run(pipeline(
             ignorestatus(addenv(
@@ -764,6 +788,49 @@ end
         @test periodic_checkpoint.fundamental_period == 2
         @test periodic_checkpoint.orbit_validated
         @test length(read_orbit_phase_states(periodic_path)) == 2
+        stateless_path = joinpath(directory, "stateless_periodic.h5")
+        stateless = write_stateless_copy(periodic_path, stateless_path)
+        @test stateless.source_bytes > stateless.compact_bytes
+        h5open(stateless_path, "r") do file
+            @test !haskey(file, "psi")
+            @test !haskey(file, "cycle_members/001/psi")
+            @test !haskey(file, "cycle_members/002/psi")
+            @test haskey(file, "history/fields/applied/alpha")
+            @test Bool(read(file, "analysis_storage/is_stateless_copy"))
+            @test !Bool(read(file, "analysis_storage/restartable"))
+            @test String(read(file, "analysis_storage/full_artifact_sha256")) ==
+                LadderMPSMFT.sha256_file(periodic_path)
+        end
+        @test read_field_history(stateless_path; source=:measured).iterations == [1, 2]
+        @test read_inherited_fields(stateless_path).format == :refactored
+        @test_throws ArgumentError read_checkpoint(stateless_path)
+        @test_throws ArgumentError read_orbit_phase_states(stateless_path)
+
+        full_tree = joinpath(directory, "full_tree")
+        compact_tree = joinpath(directory, "compact_tree")
+        mkpath(joinpath(full_tree, "nested"))
+        cp(periodic_path, joinpath(full_tree, "nested", "artifact.h5"))
+        write(joinpath(full_tree, "nested", "run_summary.md"), "test summary\n")
+        mirror = mirror_stateless_tree(full_tree, compact_tree)
+        @test length(mirror.records) == 2
+        @test isfile(joinpath(compact_tree, "stateless_manifest.tsv"))
+        @test isfile(joinpath(compact_tree, "nested", "run_summary.md"))
+        h5open(joinpath(compact_tree, "nested", "artifact.h5"), "r") do file
+            @test !haskey(file, "psi")
+            @test haskey(file, "history/fields/measured/beta")
+        end
+
+        pair_binding_path = joinpath(directory, "pair_binding.h5")
+        h5open(pair_binding_path, "w") do file
+            file["E_N_120"] = -10.0
+            file["psi_N_120"] = Float64[1, 2, 3]
+        end
+        pair_binding_stateless = joinpath(directory, "pair_binding_stateless.h5")
+        write_stateless_copy(pair_binding_path, pair_binding_stateless)
+        h5open(pair_binding_stateless, "r") do file
+            @test haskey(file, "E_N_120")
+            @test !haskey(file, "psi_N_120")
+        end
         ranking = compare_variational_branches([path, second_path, periodic_path])
         @test first(ranking).path == periodic_path
         @test first(ranking).energy ≈ -0.3

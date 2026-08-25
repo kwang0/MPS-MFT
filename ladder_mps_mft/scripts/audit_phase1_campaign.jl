@@ -61,7 +61,6 @@ function state_row(label::AbstractString, path::AbstractString)
         charge_field = 0.5 .* (mu_field[1, :] .+ mu_field[2, :])
         spin_field = 0.5 .* (mu_field[2, :] .- mu_field[1, :])
         tensor_path = "psi/MPS[1]/storage/data"
-        haskey(file, tensor_path) || error("MPS tensor storage missing in $path")
         status = Symbol(scalar(file, "status"))
         unmixed = Bool(scalar(file, "unmixed_cycle_probe"))
         class = if Bool(scalar(file, "accepted"))
@@ -99,7 +98,17 @@ function state_row(label::AbstractString, path::AbstractString)
             beta_max=maximum(abs, read(file, "fields/measured/beta")),
             charge_field_std=std(charge_field[bulk]),
             spin_field_std=std(spin_field[bulk]),
-            tensor_scalar_type=string(eltype(read(file, tensor_path))),
+            tensor_scalar_type=if haskey(file, tensor_path)
+                string(eltype(read(file, tensor_path)))
+            elseif haskey(file, "model/tensor_scalar_type")
+                String(read(file, "model/tensor_scalar_type"))
+            elseif haskey(file, "provenance/tensor_scalar_type")
+                String(read(file, "provenance/tensor_scalar_type"))
+            else
+                "unknown"
+            end,
+            stateless_copy=haskey(file, "analysis_storage/is_stateless_copy") &&
+                Bool(read(file, "analysis_storage/is_stateless_copy")),
             density_gate=Float64(scalar(file, "density_error")) <= settings.convergence.density_tol,
             energy_gate=Float64(scalar(file, "variational_energy_change")) <= settings.convergence.variational_energy_tol,
             identity_gate=Float64(scalar(file, "hamiltonian_identity_error_per_site")) <= settings.convergence.hamiltonian_identity_tol,
@@ -111,7 +120,10 @@ end
 manifest_path = joinpath(run_directory, "manifest.tsv")
 isfile(manifest_path) || error("manifest not found: $manifest_path")
 labels = [split(line, '\t')[1] for line in readlines(manifest_path)[2:end]]
-rows = [state_row(label, latest_file(joinpath(run_directory, "results", label), "state.h5")) for label in labels]
+migrated_stateless_directory = joinpath(run_directory, "stateless_results")
+results_directory = isdir(migrated_stateless_directory) ? migrated_stateless_directory :
+    joinpath(run_directory, "results")
+rows = [state_row(label, latest_file(joinpath(results_directory, label), "state.h5")) for label in labels]
 
 mkpath(output_directory)
 tsv_path = joinpath(output_directory, "states.tsv")

@@ -17,6 +17,13 @@ Schema v3 additionally records `solution_kind`, raw-orbit validation, the update
 
 Rolling `checkpoint_latest.h5` and `checkpoint_best.h5` may be replaced within one run directory. Final `state.h5`, detected-orbit artifacts, Phase 0 seed, and metric files refuse overwrite.
 
+Production Phase 1 full artifacts are scratch-resident. Their CFS analysis
+mirrors recursively omit all MPS objects and record the full path, full SHA-256,
+full byte count, compact SHA-256, and omitted paths. Compact states remain valid
+inputs to selection, plotting, variational comparison, and field-only
+inheritance. They are explicitly non-restartable; parent and resume lineage
+always resolves a hash-checked full artifact.
+
 `select_completed_runs` recursively selects only final `state.h5` artifacts and, by default, accepts both gated fixed points and unmixed validated periodic solutions. `--include-incomplete` exposes other terminal states with `plot_style=hatched`. Diagnostics HDF5 files and rolling checkpoints are not accidentally treated as final runs.
 
 The comparison tool uses the last-phase energy for a fixed point and the stored phase average for a periodic solution. A mixed-history recurrence cannot enter a ranking. Physical periods beyond two require an explicit `accepted_periods` configuration and a documented mapping of orbit phases to transverse sublattices.

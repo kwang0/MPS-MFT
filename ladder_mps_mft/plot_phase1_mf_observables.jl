@@ -100,7 +100,10 @@ end
 
 """Return the newest `state.h5` for each campaign label."""
 function phase1_campaign_states(run_directory::AbstractString=DEFAULT_PHASE1_RUN_DIRECTORY)
-    results_directory = joinpath(abspath(run_directory), "results")
+    absolute_run_directory = abspath(run_directory)
+    migrated_stateless_directory = joinpath(absolute_run_directory, "stateless_results")
+    results_directory = isdir(migrated_stateless_directory) ? migrated_stateless_directory :
+        joinpath(absolute_run_directory, "results")
     isdir(results_directory) || throw(ArgumentError(
         "Phase 1 results directory does not exist: $results_directory",
     ))

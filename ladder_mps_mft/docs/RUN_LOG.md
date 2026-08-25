@@ -377,3 +377,71 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   `0.125`-node-hour smoke; after the Float64/runtime gates pass, the nine-job
   matrix adds `27.0`, for `81.375` total reserved and `318.625` remaining under
   the 400-node-hour cap.
+
+## 2026-08-24 — Scratch-first full states and automatic stateless mirrors
+
+- Storage regression: the refactor wrote every MPS-bearing Phase 1 state,
+  rolling checkpoint, and orbit artifact directly below the CFS checkout. The
+  completed v2 campaign alone occupies approximately 3.6 GiB locally. This
+  violated both the legacy `copy_data.jl`/`stateless_data` design principle and
+  NERSC's production-I/O guidance.
+- Launcher v1.3.0 separates campaign control from numerical payload. Full
+  branch and guarded `E_p` artifacts are written below
+  `$PSCRATCH/MPS-MFT/ladder_mps_mft/phase1_gpu/RUN_ID`; configs, manifests,
+  logs, ledger entries, and MPS-free HDF5 mirrors remain on CFS. GPU and CPU
+  jobs request the `scratch,cfs` filesystem licenses.
+- The recursive compactor omits top-level and orbit-member `psi` groups plus
+  pair-binding `psi_N_*` sectors. It preserves complete schema-v5 applied and
+  measured MF histories, exact seeds, fields, correlations, energies,
+  diagnostics, attributes, and provenance. Each copy records the full path,
+  SHA-256, size, omitted paths, and a non-restartable marker; a tree manifest
+  records full and compact hashes and sizes.
+- Selection, plotting, status, and the campaign audit accept the stateless
+  files. Field-only `inherit_from` remains valid because all fields and the
+  chemical potential are present. Parent/resume and orbit-MPS readers reject a
+  stateless artifact with an explicit pointer to its full source. Continuation
+  and recovery resolve full scratch states from `run.env` or
+  `full_storage_path.txt`.
+- Existing campaign migration is staged and non-destructive until the final
+  operator step: NERSC Globus moves a quiescent CFS `results` tree to scratch;
+  hashes are checked; `stateless_results` is built and verified; and the old
+  CFS path can be retained as a scratch symlink so recorded absolute parent
+  paths still resolve. The explicit pending-delete CFS directory is removed
+  only after verification. Active v3 files must not be migrated while jobs are
+  writing them.
+- Scratch is not a backup and files unaccessed for eight weeks can be purged.
+  Accepted full states and restart checkpoints that must survive should be
+  archived to HPSS; compact CFS/local files suffice for analysis but not DMRG
+  restart or MPS-level diagnostics.
+- Local validation so far: Julia syntax parsing, `bash -n`, `git diff --check`,
+  and a synthetic nested-orbit HDF5 compaction passed; the synthetic copy
+  shrank from 20,496 to 8,360 bytes while retaining non-MPS data. Full suite
+  status is recorded below after completion. Perlmutter jobs submitted by this
+  storage change: none.
+- Full local validation completed with all 206 assertions passing. The 59
+  checkpoint/selection assertions include recursive orbit-MPS removal,
+  schema-v5 field-history preservation, field-only inheritance from a compact
+  state, `psi_N_*` removal, compact-tree manifests, and explicit rejection of
+  stateless checkpoint/orbit-MPS reads.
+- A real v2 square-SDW `state.h5` also passed the standalone full/compact hash
+  verifier. Omitting its MPS reduced the file from 80,675,908 bytes (about
+  77 MiB) to 1,637,619 bytes (about 1.6 MiB), while retaining the analysis
+  datasets. This is a representative state-file reduction, not a projection of
+  the total schema-v5 campaign size.
+- After adding worker-only compatibility for already-queued launcher-v1.2 jobs,
+  the complete suite was rerun and all 207 assertions passed. A queued v3 job
+  may therefore start from launcher v1.3.0 without being rejected; it retains
+  its prepared v1.2 CFS output path and does not adopt scratch storage midway
+  through the immutable campaign.
+- Added `slurm/migrate_phase1_to_scratch.sh` as the single guarded operator
+  command for completed pre-v1.3 campaigns. It fixes the observed NERSC helper
+  failure by creating mode-700 `~/.globus` before authentication, submits and
+  waits for the documented `dtn`-to-`perlmutter` Globus transfer, checks every
+  scratch file against a quiescent-source SHA-256 inventory, builds and verifies
+  the stateless CFS mirror, and installs the compatibility symlink. Destructive
+  CFS cleanup requires the explicit `--prune-cfs` flag and occurs only after all
+  transfer and mirror gates pass.
+- Validation after adding the one-command migrator: `bash -n` and
+  `git diff --check` pass; the complete local Julia suite passes all 212
+  assertions. No Globus transfer, Perlmutter job, or CFS deletion was performed
+  by this local validation.

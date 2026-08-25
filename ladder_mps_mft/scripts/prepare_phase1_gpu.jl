@@ -4,13 +4,15 @@ using LadderMPSMFT
 using HDF5
 using TOML
 
-(length(ARGS) == 3 || length(ARGS) == 4) || error(
-    "usage: julia --project=. scripts/prepare_phase1_gpu.jl BASE_CONFIG.toml RUN_DIRECTORY RUN_ID [SOURCE_RUN_DIRECTORY]",
+(length(ARGS) == 4 || length(ARGS) == 6) || error(
+    "usage: julia --project=. scripts/prepare_phase1_gpu.jl BASE_CONFIG.toml CONTROL_RUN_DIRECTORY FULL_RUN_DIRECTORY RUN_ID [SOURCE_RUN_DIRECTORY SOURCE_RESULTS_DIRECTORY]",
 )
 base_path = abspath(ARGS[1])
 run_directory = abspath(ARGS[2])
-run_id = ARGS[3]
-source_run_directory = length(ARGS) == 4 ? abspath(ARGS[4]) : nothing
+full_run_directory = abspath(ARGS[3])
+run_id = ARGS[4]
+source_run_directory = length(ARGS) == 6 ? abspath(ARGS[5]) : nothing
+source_results_directory = length(ARGS) == 6 ? abspath(ARGS[6]) : nothing
 isfile(base_path) || error("base configuration not found: $base_path")
 occursin(r"^[A-Za-z0-9_.-]+$", run_id) || error("unsafe run ID: $run_id")
 config_directory = joinpath(run_directory, "configs")
@@ -19,10 +21,11 @@ ispath(config_directory) && !isempty(readdir(config_directory)) && error(
 )
 mkpath(config_directory)
 mkpath(joinpath(run_directory, "results"))
+mkpath(joinpath(full_run_directory, "results"))
 base = TOML.parsefile(base_path)
 
 function latest_source_state(source_directory::AbstractString, label::AbstractString)
-    root = joinpath(source_directory, "results", label)
+    root = joinpath(source_directory, label)
     isdir(root) || error("source campaign has no result directory for $label: $root")
     paths = String[]
     for (directory, _, names) in walkdir(root)
@@ -66,13 +69,16 @@ open(manifest_path, "w") do io
         "ep_lower_signed", "ep_upper_signed", "ep_weight", "tp2_over_ep",
         "parent_checkpoint", "parent_sha256", "parent_status",
         "parent_numerical_fingerprint", "parent_tensor_scalar_type",
+        "full_output_directory", "stateless_output_directory",
     ), '\t'))
     for geometry in geometries, seed in seeds
         label = "$(geometry.short)__$(seed.short)_s1"
         raw = deepcopy(base)
         raw["model"]["geometry"] = geometry.name
         run = raw["run"]
-        run["output_directory"] = joinpath(run_directory, "results", label)
+        full_output_directory = joinpath(full_run_directory, "results", label)
+        stateless_output_directory = joinpath(run_directory, "results", label)
+        run["output_directory"] = full_output_directory
         run["branch_label"] = seed.branch
         run["preparation"] = "independent_seed"
         run["direction"] = "none"
@@ -92,7 +98,7 @@ open(manifest_path, "w") do io
         parent_numerical_fingerprint = ""
         parent_tensor_scalar_type = ""
         if source_run_directory !== nothing
-            parent_path = latest_source_state(source_run_directory, label)
+            parent_path = latest_source_state(source_results_directory, label)
             metadata = source_metadata(parent_path)
             parent_sha256 = LadderMPSMFT.sha256_file(parent_path)
             parent_status = metadata.status
@@ -140,6 +146,8 @@ open(manifest_path, "w") do io
             parent_status,
             parent_numerical_fingerprint,
             parent_tensor_scalar_type,
+            full_output_directory,
+            stateless_output_directory,
         ), '\t'))
     end
 end

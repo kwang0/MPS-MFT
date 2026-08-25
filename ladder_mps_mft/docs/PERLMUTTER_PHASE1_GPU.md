@@ -65,6 +65,14 @@ The smoke plus matrix reserves 27.125 node-hours. NERSC shared jobs are charged
 by the dominant node fraction; see the [NERSC queue and charge
 policy](https://docs.nersc.gov/jobs/policy/#calculating-charges).
 
+Launcher version 1.3.0 writes all MPS-bearing branch artifacts to Perlmutter
+scratch and automatically creates MPS-free analysis mirrors on CFS. The same
+policy applies to guarded CPU `E_p` calculations: `psi_N_*` sectors remain in
+scratch while energies and metadata are mirrored to CFS. Continuation and
+recovery resolve the full scratch files; plotting, audits, and field-only
+inheritance use the lightweight files. See `PERLMUTTER_STORAGE.md` for the
+layout, migration commands, verification, and the scratch-purge boundary.
+
 Run `20260822_phase1_gpu_v1` is retained only for audit: its smoke passed despite
 CUDA.jl warnings, but all nine branches then mixed CUDA.jl artifact libraries
 with CUDA 13.2 libraries from the NVIDIA HPC SDK and segfaulted in the first
@@ -119,6 +127,9 @@ Hamiltonian from the raw field measured after DMRG.
 For field-only initialization from an older run, set `inherit_from` and
 `inherit_sha256`; legacy top-level `alpha`, `beta`, `mu_cdw`, and `mu` are read,
 but the old MPS is deliberately not loaded.
+The stateless mirrors retain all of these fields and histories. They therefore
+support both plotting and field-only `inherit_from`, while deliberately
+rejecting MPS parent/resume use with a pointer to the full scratch artifact.
 
 ## Explicit continuations
 

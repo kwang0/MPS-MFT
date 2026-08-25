@@ -185,6 +185,201 @@ function write_checkpoint(
     return path
 end
 
+const _STATELESS_MPS_BASENAME = r"^psi(?:_N_[0-9]+)?$"
+
+_omit_from_stateless_copy(name::AbstractString) = occursin(_STATELESS_MPS_BASENAME, name)
+
+function _copy_hdf5_attributes!(destination, source)
+    source_attributes = attributes(source)
+    destination_attributes = attributes(destination)
+    for name in keys(source_attributes)
+        destination_attributes[name] = read(source_attributes, name)
+    end
+    return destination
+end
+
+function _copy_hdf5_without_mps!(destination, source, prefix::AbstractString, omitted::Vector{String})
+    _copy_hdf5_attributes!(destination, source)
+    for name in sort!(String.(collect(keys(source))))
+        path = isempty(prefix) ? name : "$prefix/$name"
+        if _omit_from_stateless_copy(name)
+            push!(omitted, path)
+            continue
+        end
+        object = source[name]
+        try
+            if object isa HDF5.Group
+                child = create_group(destination, name)
+                try
+                    _copy_hdf5_without_mps!(child, object, path, omitted)
+                finally
+                    close(child)
+                end
+            else
+                HDF5.copy_object(source, name, destination, name)
+            end
+        finally
+            close(object)
+        end
+    end
+    return destination
+end
+
+"""
+    write_stateless_copy(source, destination; force=false)
+
+Create an analysis-ready HDF5 copy while recursively omitting every MPS-bearing
+`psi` or `psi_N_<sector>` object. The copy preserves all other groups,
+datasets, attributes, mean-field histories, observables, and provenance. It
+also records the absolute full-artifact location and SHA-256 under
+`analysis_storage`; it is intentionally not a restart checkpoint.
+"""
+function write_stateless_copy(
+    source::AbstractString,
+    destination::AbstractString;
+    force::Bool=false,
+)
+    source_path = abspath(source)
+    destination_path = abspath(destination)
+    isfile(source_path) || throw(ArgumentError("source HDF5 artifact not found: $source_path"))
+    source_path == destination_path && throw(ArgumentError("source and stateless destination must differ"))
+    !force && ispath(destination_path) && throw(ArgumentError(
+        "refusing to overwrite stateless artifact: $destination_path",
+    ))
+    mkpath(dirname(destination_path))
+    source_before = stat(source_path)
+    full_sha256 = sha256_file(source_path)
+    temporary = tempname(dirname(destination_path))
+    omitted = String[]
+    try
+        h5open(source_path, "r") do input
+            haskey(input, "analysis_storage/is_stateless_copy") &&
+                Bool(read(input, "analysis_storage/is_stateless_copy")) &&
+                throw(ArgumentError("source is already a stateless analysis copy: $source_path"))
+            h5open(temporary, "w") do output
+                _copy_hdf5_without_mps!(output, input, "", omitted)
+                storage = create_group(output, "analysis_storage")
+                storage["schema_version"] = 1
+                storage["is_stateless_copy"] = true
+                storage["restartable"] = false
+                storage["full_artifact_path"] = source_path
+                storage["full_artifact_sha256"] = full_sha256
+                storage["full_artifact_size_bytes"] = Int64(source_before.size)
+                storage["generated_utc"] = string(now(UTC))
+                storage["omitted_paths"] = join(omitted, "\n")
+                close(storage)
+            end
+        end
+        source_after = stat(source_path)
+        (source_after.size == source_before.size && source_after.mtime == source_before.mtime) ||
+            throw(ArgumentError("source changed while its stateless copy was being made: $source_path"))
+        mv(temporary, destination_path; force=force)
+    catch
+        ispath(temporary) && rm(temporary; force=true)
+        rethrow()
+    end
+    return (
+        source_path,
+        destination_path,
+        full_sha256,
+        compact_sha256=sha256_file(destination_path),
+        source_bytes=source_before.size,
+        compact_bytes=stat(destination_path).size,
+        omitted_paths=copy(omitted),
+    )
+end
+
+const _STATELESS_TEXT_EXTENSIONS = Set((
+    ".csv", ".json", ".md", ".sha256", ".toml", ".tsv", ".txt",
+))
+
+"""
+    mirror_stateless_tree(source_root, destination_root; force=true)
+
+Mirror one result tree for analysis. HDF5 files are copied with all MPS objects
+removed; small text metadata are copied verbatim. A `stateless_manifest.tsv`
+binds every lightweight artifact to the path and SHA-256 of its full source.
+"""
+function mirror_stateless_tree(
+    source_root::AbstractString,
+    destination_root::AbstractString;
+    force::Bool=true,
+)
+    source = abspath(source_root)
+    destination = abspath(destination_root)
+    isdir(source) || throw(ArgumentError("full result directory not found: $source"))
+    source == destination && throw(ArgumentError("full and stateless result directories must differ"))
+    destination_relative_to_source = relpath(destination, source)
+    destination_relative_to_source != ".." &&
+        !startswith(destination_relative_to_source, joinpath("..", "")) && throw(ArgumentError(
+        "stateless destination must not be nested below the full result directory",
+    ))
+    mkpath(destination)
+    records = NamedTuple[]
+    for (directory, subdirectories, names) in walkdir(source)
+        filter!(name -> name != ".snapshots", subdirectories)
+        for name in sort!(names)
+            source_path = joinpath(directory, name)
+            relative_path = relpath(source_path, source)
+            relative_path == "stateless_manifest.tsv" && continue
+            destination_path = joinpath(destination, relative_path)
+            extension = lowercase(splitext(name)[2])
+            if extension in (".h5", ".hdf5")
+                result = write_stateless_copy(source_path, destination_path; force)
+                push!(records, (
+                    relative_path,
+                    kind="stateless_hdf5",
+                    source_path=result.source_path,
+                    source_sha256=result.full_sha256,
+                    source_bytes=result.source_bytes,
+                    compact_path=result.destination_path,
+                    compact_sha256=result.compact_sha256,
+                    compact_bytes=result.compact_bytes,
+                    omitted_paths=join(result.omitted_paths, ","),
+                ))
+            elseif extension in _STATELESS_TEXT_EXTENSIONS
+                mkpath(dirname(destination_path))
+                cp(source_path, destination_path; force)
+                source_hash = sha256_file(source_path)
+                push!(records, (
+                    relative_path,
+                    kind="verbatim_metadata",
+                    source_path=abspath(source_path),
+                    source_sha256=source_hash,
+                    source_bytes=stat(source_path).size,
+                    compact_path=abspath(destination_path),
+                    compact_sha256=sha256_file(destination_path),
+                    compact_bytes=stat(destination_path).size,
+                    omitted_paths="",
+                ))
+            end
+        end
+    end
+    manifest_path = joinpath(destination, "stateless_manifest.tsv")
+    temporary = tempname(destination)
+    open(temporary, "w") do io
+        println(io, join((
+            "relative_path", "kind", "full_path", "full_sha256", "full_bytes",
+            "compact_path", "compact_sha256", "compact_bytes", "omitted_paths",
+        ), '\t'))
+        for record in sort!(records; by=record -> record.relative_path)
+            println(io, join((
+                record.relative_path,
+                record.kind,
+                record.source_path,
+                record.source_sha256,
+                record.source_bytes,
+                record.compact_path,
+                record.compact_sha256,
+                record.compact_bytes,
+                record.omitted_paths,
+            ), '\t'))
+        end
+    end
+    mv(temporary, manifest_path; force=true)
+    return (; source, destination, records, manifest_path)
+end
+
 """
 Read the complete per-iteration mean-field history saved by schema-v5 states.
 
@@ -255,6 +450,12 @@ end
 function read_checkpoint(path::AbstractString)
     isfile(path) || throw(ArgumentError("checkpoint not found: $path"))
     return h5open(path, "r") do file
+        if !haskey(file, "psi") && haskey(file, "analysis_storage/is_stateless_copy")
+            full_path = String(read(file, "analysis_storage/full_artifact_path"))
+            throw(ArgumentError(
+                "stateless analysis copy is not restartable; use its full artifact: $full_path",
+            ))
+        end
         return (
             psi=read(file, "psi", MPS),
             applied=_read_fields(file["fields/applied"]),
@@ -274,6 +475,12 @@ end
 function read_orbit_phase_states(path::AbstractString)
     isfile(path) || throw(ArgumentError("state not found: $path"))
     return h5open(path, "r") do file
+        if haskey(file, "analysis_storage/is_stateless_copy")
+            full_path = String(read(file, "analysis_storage/full_artifact_path"))
+            throw(ArgumentError(
+                "stateless analysis copy has no orbit MPSs; use its full artifact: $full_path",
+            ))
+        end
         haskey(file, "cycle_members") || return NamedTuple[]
         states = NamedTuple[]
         for name in sort(collect(keys(file["cycle_members"])))

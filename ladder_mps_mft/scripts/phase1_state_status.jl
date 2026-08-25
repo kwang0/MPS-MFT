@@ -10,7 +10,15 @@ for raw_path in ARGS
         period = Int(read(file, "fundamental_period"))
         energy = Float64(read(file, "solution_canonical_variational_energy"))
         tensor_path = "psi/MPS[1]/storage/data"
-        tensor_scalar_type = haskey(file, tensor_path) ? string(eltype(read(file, tensor_path))) : "unknown"
+        tensor_scalar_type = if haskey(file, tensor_path)
+            string(eltype(read(file, tensor_path)))
+        elseif haskey(file, "model/tensor_scalar_type")
+            String(read(file, "model/tensor_scalar_type"))
+        elseif haskey(file, "provenance/tensor_scalar_type")
+            String(read(file, "provenance/tensor_scalar_type"))
+        else
+            "unknown"
+        end
         println(join((path, status, string(accepted), string(period), string(energy), tensor_scalar_type), '\t'))
     end
 end

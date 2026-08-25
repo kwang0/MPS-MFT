@@ -11,7 +11,7 @@ The implementation currently provides:
 - immutable final HDF5 states, hash-checked parent/restart lineage, model/numerics/implementation fingerprints, and accepted-only selection;
 - charge and spin structure factors, `K_rho`, rung-cut entanglement/central-charge fits, sign-resolved pair correlations, and separate fixed-sector spin/charge/pair-gap calculations;
 - a dense-CUDA production backend that preserves the refactored SCF, recurrence, variational, checkpoint, and diagnostic logic while explicitly disabling QN block sparsity; and
-- a guarded Perlmutter Phase 1 launcher with a staged GPU smoke test, explicit continuations, optional ledgered CPU `E_p` jobs, and a conservative 400-additional-node-hour cap.
+- a guarded Perlmutter Phase 1 launcher with a staged GPU smoke test, explicit continuations, optional ledgered CPU `E_p` jobs, scratch-resident full MPS artifacts with automatic stateless CFS mirrors, and a conservative 400-additional-node-hour cap.
 
 The first complete Perlmutter CPU matrix (`20260821_phase0_cpu_v2`) is retained as
 backend-equivalence and screening evidence. It shortlisted `serial-t1` and
@@ -61,6 +61,8 @@ julia --project=. scripts/compare_branches.jl /path/to/sc/state.h5 /path/to/sdw/
 ```
 
 See `docs/PHASES_0_TO_4.md` for the staged plan, `docs/LITERATURE_AND_PUBLICATION_GATES.md` for numerical context, and `docs/RUN_LOG.md` for the append-only synchronization record.
+See `docs/PERLMUTTER_STORAGE.md` for the full-state scratch layout, compact
+analysis mirrors, and the one-time migration procedure for older campaigns.
 The v2 data-quality decision and conditional timing observations are recorded
 in `docs/PHASE0_V2_AUDIT.md`.
 
