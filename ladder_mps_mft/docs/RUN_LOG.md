@@ -479,3 +479,36 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   was corrupt. Julia parsing, `bash -n`, `git diff --check`, and the complete
   local suite pass; the suite contains 216 assertions. No campaign artifact was
   changed by local validation.
+
+## 2026-08-25: Float64-history audit and cross-device handoff
+
+- The completed v2 and v3 migrations are represented locally by compact,
+  MPS-free `stateless_results` trees and `full_storage_path.txt` pointers to
+  `/pscratch/sd/k/kwang98/MPS-MFT/ladder_mps_mft/phase1_gpu/RUN_ID`.
+- Compact-only verification passed for all 42 v2 artifacts and all 50 v3
+  artifacts. The manifests represent 3,512,377,436 and 7,385,759,171 full bytes
+  respectively; the compact payloads are 113,990,381 and 666,136,203 bytes.
+  These local checks verified compact hashes, sizes, stateless markers,
+  full-artifact hash links, and MPS removal. They did not verify the full
+  scratch sources because Perlmutter scratch is not mounted on the Mac.
+- A fresh v3 audit generated at `2026-08-25T20:04:31.004` UTC found eight of
+  nine states accepted, one raw-map period-two candidate, zero mixer-dependent
+  candidates, and zero Hamiltonian-identity/effective-energy gate failures.
+  Stored MF-iteration time totals 17.518 GPU-hours, or 4.379 one-of-four-GPU
+  node-hours before scheduler, compilation, and non-iteration overhead.
+- The accepted-state comparator authorized only same-geometry rankings. For
+  cubic frustrated, CDW is below SDW and SC by 0.007368263458 and
+  0.008447412380 total. For cubic unfrustrated, accepted CDW is below accepted
+  SDW by 0.000312604756; the pairing state is excluded because it remains an
+  unaccepted raw-map period-two candidate. For square, SC is below SDW and CDW
+  by 0.001045316109 and 0.058892533574 total. These are finite-system seed
+  comparisons at one point, not thermodynamic or cross-geometry phase claims.
+- `docs/PHASE1_V3_AUDIT.md` records the reproducible numerical result and next
+  scientific gates. `docs/DEVICE_HANDOFF_2026-08-25.md` separates GitHub code
+  and context from ignored numerical data, gives a deterministic lightweight
+  archive/Globus transfer path, and records the exact continuation order.
+  `docs/NEW_DEVICE_CHAT_PROMPT.md` is the copy-ready first prompt for a new
+  Codex desktop task.
+- This handoff made documentation-only tracked changes. It did not submit or
+  cancel a Perlmutter job, alter the project budget ledger, migrate/prune an
+  artifact, modify an immutable state, or verify full scratch files.

@@ -64,7 +64,10 @@ See `docs/PHASES_0_TO_4.md` for the staged plan, `docs/LITERATURE_AND_PUBLICATIO
 See `docs/PERLMUTTER_STORAGE.md` for the full-state scratch layout, compact
 analysis mirrors, and the one-time migration procedure for older campaigns.
 The v2 data-quality decision and conditional timing observations are recorded
-in `docs/PHASE0_V2_AUDIT.md`.
+in `docs/PHASE0_V2_AUDIT.md`. The accepted-state audit of the Float64-history
+campaign is in `docs/PHASE1_V3_AUDIT.md`. For cross-device continuation, begin
+with `docs/DEVICE_HANDOFF_2026-08-25.md` and paste
+`docs/NEW_DEVICE_CHAT_PROMPT.md` into the new Codex task.
 
 ## Important interpretation rules
 
