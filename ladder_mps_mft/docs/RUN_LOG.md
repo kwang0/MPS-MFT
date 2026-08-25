@@ -445,3 +445,23 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   `git diff --check` pass; the complete local Julia suite passes all 212
   assertions. No Globus transfer, Perlmutter job, or CFS deletion was performed
   by this local validation.
+- The first live v2 migration submitted Globus task
+  `d2d6989e-a050-11f1-b669-0afff7074b21`, but both NERSC status helpers returned
+  empty output and the polling loop could not advance. The transfer itself is
+  Globus-managed and was not cancelled. The migrator now supports
+  `--resume-transfer TRANSFER_ID`, prefers the current plural status helper, and
+  independently completes its gate only when the scratch file count and every
+  SHA-256 match the quiescent CFS inventory; blank helper output is reported as
+  `UNKNOWN` rather than as empty lines.
+- Operator correction: CFS and Perlmutter scratch are both mounted and this
+  campaign is only a few GiB, so Globus added unnecessary authentication and
+  status-helper failure modes. The migrator now uses a direct `cp -a` into a
+  scratch staging directory, verifies exact file count and SHA-256, and only
+  then removes the original through the existing explicit cleanup gate. This is
+  the safe cross-filesystem equivalent of `mv`, whose implementation would also
+  be copy-then-delete. The already-submitted v2 Globus task is detected from its
+  log and reused only if its scratch tree passes the same verification; no
+  concurrent local copy is started.
+- Validation after the direct-copy correction: `bash -n`, the help path, and
+  `git diff --check` pass; the complete local Julia suite passes all 213
+  assertions. No local validation moved or deleted any campaign artifact.

@@ -47,11 +47,11 @@ files first, and require every branch to be in a terminal Slurm state. In
 particular, wait for the current Float64-history campaign to finish before
 moving it.
 
-The recommended migration is one command. It creates `~/.globus` if needed,
-submits and waits for the NERSC Globus transfer, verifies every transferred
-file against a SHA-256 inventory, builds and verifies the stateless CFS mirror,
-records the scratch location, and preserves old absolute parent paths with a
-symlink:
+The recommended migration is one command. It copies the mounted CFS tree into
+a scratch staging directory, verifies every file against a SHA-256 inventory,
+atomically installs the verified scratch directory, builds and verifies the
+stateless CFS mirror, records the scratch location, and preserves old absolute
+parent paths with a symlink:
 
 ```bash
 bash slurm/migrate_phase1_to_scratch.sh --prune-cfs 20260823_phase1_gpu_v2
@@ -63,48 +63,32 @@ completed migration and refuses campaigns with pending, running, or unknown
 jobs. The remaining commands in this section document its stages for manual
 recovery only.
 
-Set bounded source and destination paths on Perlmutter:
+For the one v2 migration whose Globus task was already submitted, the script
+detects the recorded task and waits up to ten minutes for its existing scratch
+tree to pass the same exact file-count and SHA-256 gates. It will not start a
+concurrent local copy.
+
+The equivalent bounded manual copy is:
 
 ```bash
 PROJECT=/global/cfs/cdirs/m4863/MPS-MFT/ladder_mps_mft
 RUN_ID=20260823_phase1_gpu_v2                 # repeat for each completed run
 CONTROL_RUN="$PROJECT/output/phase1_gpu/$RUN_ID"
 FULL_RUN="$PSCRATCH/MPS-MFT/ladder_mps_mft/phase1_gpu/$RUN_ID"
-TRANSFER_LIST="$CONTROL_RUN/transfer-to-scratch.txt"
 
 mkdir -p "$FULL_RUN"
-printf '%s\n' "$CONTROL_RUN/results" > "$TRANSFER_LIST"
-```
-
-Use NERSC Globus—not `rsync`, `scp`, or a Perlmutter login node—for the large
-CFS-to-scratch transfer:
-
-```bash
-module load globus-tools
-transfer_files.py -s dtn -t perlmutter -d "$FULL_RUN" -i "$TRANSFER_LIST" -p
-```
-
-Save the printed transfer ID and wait for `SUCCEEDED`:
-
-```bash
-module load globus-tools
-check_transfer.py -i TRANSFER_ID -p
-```
-
-Globus performs transfer integrity checking. For an additional reproducible
-inventory, hash the completed, quiescent source tree and verify it at the
-scratch destination:
-
-```bash
 (
   cd "$CONTROL_RUN/results"
   find . -type f -print0 | sort -z | xargs -0 sha256sum
 ) > "$CONTROL_RUN/full-results.sha256"
 
+COPY_STAGING="$(mktemp -d "$FULL_RUN/.results.copying.XXXXXX")"
+cp -a -- "$CONTROL_RUN/results"/. "$COPY_STAGING"/
 (
-  cd "$FULL_RUN/results"
+  cd "$COPY_STAGING"
   sha256sum -c "$CONTROL_RUN/full-results.sha256"
 )
+mv -- "$COPY_STAGING" "$FULL_RUN/results"
 ```
 
 Create and verify a separate compact staging tree before changing CFS:

@@ -22,7 +22,7 @@ usage() {
 Usage: bash $script_path [--prune-cfs] RUN_ID
 
   RUN_ID       Completed Phase 1 campaign below $run_root
-  --prune-cfs  After transfer, compaction, and hash verification, remove the
+  --prune-cfs  After copying, compaction, and hash verification, remove the
                explicitly quarantined full CFS results directory.
 
 Without --prune-cfs the full CFS directory is retained under a timestamped
@@ -51,7 +51,6 @@ control_run="$run_root/$run_id"
 full_run="$scratch_base/MPS-MFT/ladder_mps_mft/phase1_gpu/$run_id"
 source_results="$control_run/results"
 stateless_results="$control_run/stateless_results"
-transfer_list="$control_run/transfer-to-scratch.txt"
 transfer_log="$control_run/transfer-to-scratch.log"
 source_hash_manifest="$control_run/full-results.sha256"
 
@@ -84,30 +83,32 @@ require_terminal_campaign() {
   (( nonterminal == 0 )) || die "campaign still has nonterminal or unknown jobs"
 }
 
-find_status_tool() {
-  local candidate
-  for candidate in check_transfer.py check_transfers.py; do
-    if command -v "$candidate" >/dev/null 2>&1; then
-      printf '%s\n' "$candidate"
-      return
-    fi
-  done
-  die "globus-tools provides neither check_transfer.py nor check_transfers.py"
+tree_matches_manifest() {
+  local directory="$1" expected_count="$2" actual_count
+  [[ -d "$directory" ]] || return 1
+  actual_count="$(find "$directory" -type f | wc -l | tr -d '[:space:]')"
+  [[ "$actual_count" == "$expected_count" ]] || return 1
+  (cd "$directory" && sha256sum -c "$source_hash_manifest" >/dev/null 2>&1)
 }
 
-wait_for_transfer() {
-  local status_tool="$1" transfer_id="$2" output status
-  while true; do
-    output="$($status_tool -i "$transfer_id" -p)"
-    printf '%s\n' "$output"
-    status="$(printf '%s\n' "$output" | awk -F'|' -v id="$transfer_id" \
-      'index(tolower($1), id) {gsub(/^[[:space:]]+|[[:space:]]+$/, "", $2); print $2}' | tail -1)"
-    case "$status" in
-      SUCCEEDED) return ;;
-      FAILED|CANCELLED) die "Globus transfer $transfer_id ended with $status" ;;
-      *) sleep 20 ;;
-    esac
+wait_for_previous_globus_copy() {
+  local expected_count="$1" attempt actual_count
+  echo "A Globus task was already submitted for this campaign; waiting for its exact scratch copy."
+  for attempt in $(seq 1 30); do
+    if tree_matches_manifest "$full_run/results" "$expected_count"; then
+      echo "existing_scratch_sha256_verified=true"
+      return
+    fi
+    if [[ -d "$full_run/results" ]]; then
+      actual_count="$(find "$full_run/results" -type f | wc -l | tr -d '[:space:]')"
+    else
+      actual_count=0
+    fi
+    printf 'existing_copy_poll=%s/30 destination_files=%s/%s\n' \
+      "$attempt" "$actual_count" "$expected_count"
+    sleep 20
   done
+  die "the previously submitted copy did not verify after 10 minutes; do not start a concurrent copy"
 }
 
 verify_already_migrated() {
@@ -131,50 +132,47 @@ fi
 [[ -d "$source_results" && ! -L "$source_results" ]] || die \
   "expected an unmigrated CFS results directory: $source_results"
 
-# NERSC's globus-tools token adapter does not create its parent directory.
-mkdir -p "$HOME/.globus"
-chmod 700 "$HOME/.globus"
-
-# The module function exists in Perlmutter login shells.
-type module >/dev/null 2>&1 || die "environment modules are unavailable; run from a Perlmutter login shell"
-module load globus-tools
-command -v transfer_files.py >/dev/null 2>&1 || die "transfer_files.py not found after loading globus-tools"
-status_tool="$(find_status_tool)"
-
-printf '%s\n' "$source_results" >"$transfer_list"
-echo "Hashing the quiescent CFS result tree before transfer..."
+echo "Hashing the quiescent CFS result tree before copying..."
 (
   cd "$source_results"
   find . -type f -print0 | LC_ALL=C sort -z | xargs -0 -r sha256sum
 ) >"$source_hash_manifest"
 [[ -s "$source_hash_manifest" ]] || die "CFS result tree contains no files: $source_results"
+source_file_count="$(wc -l <"$source_hash_manifest" | tr -d '[:space:]')"
 echo "source_results=$source_results"
 echo "full_results=$full_run/results"
-echo "Starting NERSC Globus transfer. If prompted, open the URL and paste a NEW one-time code."
 
-set +e
-PYTHONUNBUFFERED=1 transfer_files.py -s dtn -t perlmutter \
-  -d "$full_run" -i "$transfer_list" -p 2>&1 | tee "$transfer_log"
-transfer_status=${PIPESTATUS[0]}
-set -e
-(( transfer_status == 0 )) || die "transfer_files.py failed; see $transfer_log"
+previous_transfer_id="$(grep -Eo '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}' \
+  "$transfer_log" 2>/dev/null | tail -1 | tr 'A-F' 'a-f' || true)"
+if tree_matches_manifest "$full_run/results" "$source_file_count"; then
+  echo "existing_scratch_sha256_verified=true"
+elif [[ -n "$previous_transfer_id" ]]; then
+  echo "previous_globus_transfer_id=$previous_transfer_id"
+  wait_for_previous_globus_copy "$source_file_count"
+elif [[ -e "$full_run/results" ]]; then
+  die "an unverified scratch results path already exists: $full_run/results"
+else
+  copy_staging="$(mktemp -d "$full_run/.results.copying.XXXXXX")"
+  echo "Copying CFS results directly into scratch staging..."
+  cp -a -- "$source_results"/. "$copy_staging"/
+  tree_matches_manifest "$copy_staging" "$source_file_count" || die \
+    "scratch staging copy failed SHA-256 verification and was retained at $copy_staging"
+  mv -- "$copy_staging" "$full_run/results"
+  echo "direct_scratch_copy_sha256_verified=true"
+fi
 
-transfer_id="$(grep -Eo '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}' \
-  "$transfer_log" | tail -1 | tr 'A-F' 'a-f' || true)"
-[[ -n "$transfer_id" ]] || die "could not parse Globus transfer ID from $transfer_log"
-echo "transfer_id=$transfer_id"
-wait_for_transfer "$status_tool" "$transfer_id"
-
-[[ -d "$full_run/results" ]] || die "successful transfer did not create $full_run/results"
-echo "Verifying every transferred file against the CFS SHA-256 inventory..."
+[[ -d "$full_run/results" ]] || die "copy did not create $full_run/results"
+echo "Verifying every scratch file against the CFS SHA-256 inventory..."
 (
   cd "$full_run/results"
   sha256sum -c "$source_hash_manifest"
 )
-source_file_count="$(wc -l <"$source_hash_manifest" | tr -d '[:space:]')"
 destination_file_count="$(find "$full_run/results" -type f | wc -l | tr -d '[:space:]')"
 [[ "$destination_file_count" == "$source_file_count" ]] || die \
   "scratch tree has $destination_file_count files; expected exactly $source_file_count"
+
+# The module function exists in Perlmutter login shells.
+type module >/dev/null 2>&1 || die "environment modules are unavailable; run from a Perlmutter login shell"
 module load julia
 
 staging="$(mktemp -d "$control_run/.stateless_results.staging.XXXXXX")"
