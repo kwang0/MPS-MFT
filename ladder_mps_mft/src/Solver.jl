@@ -276,7 +276,11 @@ function _initial_state(settings::ProjectSettings)
         settings.run.parent_checkpoint : settings.run.resume_checkpoint
     if checkpoint_path !== nothing
         settings.run.resume_checkpoint === nothing ? verify_parent!(settings) : verify_resume!(settings)
-        checkpoint = read_checkpoint(checkpoint_path)
+        checkpoint = read_checkpoint(
+            checkpoint_path;
+            orbit_phase=settings.run.resume_checkpoint === nothing ?
+                settings.run.parent_orbit_phase : nothing,
+        )
         length(checkpoint.psi) == 2 * model.L || throw(DimensionMismatch("checkpoint MPS length does not match model.L"))
         _field_shapes_match(checkpoint.restart, model) || throw(DimensionMismatch("checkpoint fields do not match model.L"))
         if settings.run.resume_checkpoint !== nothing
@@ -296,7 +300,9 @@ function _initial_state(settings::ProjectSettings)
             psi=move_to_backend(checkpoint.psi, settings.runtime),
             fields=checkpoint.restart,
             chemical_potential=checkpoint.chemical_potential,
-            source=String(settings.run.resume_checkpoint === nothing ? "parent" : "resume"),
+            source=settings.run.resume_checkpoint !== nothing ? "resume" :
+                settings.run.parent_orbit_phase === nothing ? "parent" :
+                "parent_orbit_phase_$(lpad(string(settings.run.parent_orbit_phase), 3, '0'))",
             inherit_format="none",
             inherit_source_geometry="",
         )

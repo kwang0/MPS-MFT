@@ -6,6 +6,11 @@ The implementation fingerprint hashes Julia, TOML, CSV, and shell inputs below t
 
 `parent_checkpoint` is a hash-checked continuation seed and may belong to a nearby model point. `resume_checkpoint` is a hash-checked same-model restart and must match the model fingerprint. The restart field stored in HDF5 is the exact next field that would have been applied, not an implicit substitution of the last measured field.
 
+An optional `parent_orbit_phase` selects one phase from a full hash-checked
+orbit parent. Its phase index is stored in provenance, its MPS is loaded from
+`cycle_members/NNN/psi`, and its measured field is used as the next raw-map
+input. The sibling phases remain unchanged in the immutable source artifact.
+
 The HDF5 schema distinguishes:
 
 - `process_completed`: the process reached a terminal numerical status;

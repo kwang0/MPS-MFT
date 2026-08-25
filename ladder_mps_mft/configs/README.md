@@ -18,6 +18,13 @@ The `[pair_binding]` registry lookup is exact in `(L,U,V,t0,density)` by default
 
 `phase1_gpu_base.toml` is the representative Phase 1 point. It uses dense CUDA tensors and therefore sets both `conserve_sz=false` and `conserve_nfparity=false`. Do not turn QNs back on in this GPU campaign: that is a materially different, uncalibrated block-sparse CUDA backend.
 
+`phase1_gpu_recurrence_chi400.toml` is the targeted follow-up for the unresolved
+v3 unfrustrated-pairing candidate. It raises `maxdim` to 400, tightens the DMRG
+and density controls, and makes the 20-update raw probe the whole segment by
+setting `max_iterations=probe_iterations+1` and `cycle_action=stop`. The
+launcher prepares two full-MPS orbit-member parents plus one independent
+pairing seed with one shared numerical fingerprint.
+
 There are three mutually exclusive lineage modes:
 
 - `inherit_from` plus `inherit_sha256` reproduces the legacy field-only
@@ -27,6 +34,9 @@ There are three mutually exclusive lineage modes:
   and refactored `fields/restart` states are accepted.
 - `parent_checkpoint` plus `parent_sha256` is a continuation seed that reuses
   both the MPS and fields; a nearby model is allowed.
+- `parent_orbit_phase` may accompany a full `parent_checkpoint` to select one
+  stored `cycle_members/NNN` MPS. Its measured field is the next raw field;
+  stateless mirrors remain invalid parents.
 - `resume_checkpoint` plus `resume_sha256` is a same-model restart that reuses
   both the MPS and fields and requires the model fingerprint to match.
 

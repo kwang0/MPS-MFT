@@ -447,7 +447,10 @@ function read_inherited_fields(path::AbstractString)
     end
 end
 
-function read_checkpoint(path::AbstractString)
+function read_checkpoint(
+    path::AbstractString;
+    orbit_phase::Union{Nothing,Integer}=nothing,
+)
     isfile(path) || throw(ArgumentError("checkpoint not found: $path"))
     return h5open(path, "r") do file
         if !haskey(file, "psi") && haskey(file, "analysis_storage/is_stateless_copy")
@@ -455,6 +458,34 @@ function read_checkpoint(path::AbstractString)
             throw(ArgumentError(
                 "stateless analysis copy is not restartable; use its full artifact: $full_path",
             ))
+        end
+        if orbit_phase !== nothing
+            orbit_phase >= 1 || throw(ArgumentError("orbit phase must be positive"))
+            phase_name = lpad(string(orbit_phase), 3, '0')
+            phase_path = "cycle_members/$phase_name"
+            haskey(file, phase_path) || throw(ArgumentError(
+                "checkpoint has no stored orbit phase $orbit_phase: $path",
+            ))
+            phase = file[phase_path]
+            for required in ("psi", "applied", "measured", "chemical_potential")
+                haskey(phase, required) || throw(ArgumentError(
+                    "stored orbit phase $orbit_phase has no $required: $path",
+                ))
+            end
+            measured = _read_fields(phase["measured"])
+            return (
+                psi=read(phase, "psi", MPS),
+                applied=_read_fields(phase["applied"]),
+                measured,
+                restart=measured,
+                chemical_potential=Float64(read(phase, "chemical_potential")),
+                accepted=Bool(read(file, "accepted")),
+                status=Symbol(read(file, "status")),
+                solution_kind=haskey(file, "solution_kind") ? Symbol(read(file, "solution_kind")) : :unknown,
+                fundamental_period=haskey(file, "fundamental_period") ? Int(read(file, "fundamental_period")) : 0,
+                orbit_validated=haskey(file, "orbit_validated") && Bool(read(file, "orbit_validated")),
+                model_fingerprint=read(file, "provenance/model_fingerprint"),
+            )
         end
         return (
             psi=read(file, "psi", MPS),
@@ -520,6 +551,7 @@ function write_run_summary_markdown(path::AbstractString, settings::ProjectSetti
         println(io, "- Configuration SHA-256: `$(isfile(settings.config_path) ? sha256_file(settings.config_path) : "not-file-backed")`")
         println(io, "- Field-only inherit source: `$(something(settings.run.inherit_from, "none"))`")
         println(io, "- Parent checkpoint: `$(something(settings.run.parent_checkpoint, "none"))`")
+        println(io, "- Parent orbit phase: `$(something(settings.run.parent_orbit_phase, "none"))`")
         println(io, "- Resume checkpoint: `$(something(settings.run.resume_checkpoint, "none"))`")
         println(io)
         println(io, "## Numerical outcome")

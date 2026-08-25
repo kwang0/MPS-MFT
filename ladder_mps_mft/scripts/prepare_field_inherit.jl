@@ -19,7 +19,7 @@ raw = TOML.parsefile(base_path)
 run = get!(raw, "run", Dict{String,Any}())
 for key in (
     "inherit_from", "inherit_sha256",
-    "parent_checkpoint", "parent_sha256",
+    "parent_checkpoint", "parent_sha256", "parent_orbit_phase",
     "resume_checkpoint", "resume_sha256",
 )
     pop!(run, key, nothing)

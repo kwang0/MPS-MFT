@@ -145,6 +145,48 @@ The launcher hashes the source state, creates a new same-model resume config,
 and records another 3-node-hour reservation. The default ceiling is four
 segments per branch. Accepted branches cannot be continued automatically.
 
+## Targeted unfrustrated-pairing recurrence control
+
+The v3 candidate already contains two complete 20-update raw probes. Its final
+probe has increasing period-two field and energy drift while the chi=200 DMRG
+sweeps remain truncation-limited. Do not force it through the generic unsafe
+continuation path. Prepare the dedicated chi=400 control instead:
+
+```bash
+bash slurm/phase1_gpu.sh plan-recurrence
+RUN_ID=20260825_phase1_unfrustrated_pairing_recurrence_chi400
+bash slurm/phase1_gpu.sh prepare-recurrence \
+  20260824_phase1_gpu_v3_float64_history "$RUN_ID"
+```
+
+Preparation performs no Slurm submission and makes no ledger reservation. It
+requires the source full scratch state to exist, checks its SHA-256 against the
+stateless mirror, cross-checks the full status, fingerprints, Float64 scalar
+type, phase iterations, and raw update modes, verifies that both stored orbit
+members contain full MPSs, and produces three fingerprint-matched controls:
+
+- the full v3 orbit member `001` as a hash-pinned parent;
+- the full v3 orbit member `002` as a separate hash-pinned parent; and
+- a second independent pairing seed, `pairing_s2`.
+
+All three use `chi=400`, 16 DMRG sweeps, `cutoff=1e-11`,
+`energy_tol=1e-9`, and a 20-update unmixed period-one/two probe. The segment
+ends at the probe boundary with `cycle_action=stop`, so Anderson cannot average
+or certify the candidate. Inspect the generated manifest and run the plan again
+against the live ledger before the separately authorized staged submission:
+
+```bash
+sed -n '1,4p' "output/phase1_gpu/$RUN_ID/manifest.tsv"
+bash slurm/phase1_gpu.sh submit "$RUN_ID"          # smoke only
+bash slurm/phase1_gpu.sh status "$RUN_ID"
+bash slurm/phase1_gpu.sh submit-matrix "$RUN_ID"   # only after smoke gates pass
+```
+
+The plan-only upper bound is `0.125 + 3*3 = 9.125` node-hours. Preparation
+never substitutes the stateless mirror for a restartable parent: both phase
+configs reference the same immutable full source SHA plus distinct
+`parent_orbit_phase` values.
+
 ## Pair-binding interpolation and optional calculations
 
 At the representative point, the registry contains

@@ -122,6 +122,14 @@ belong to different Hamiltonians and must never be ranked against one another.
    functional including MF double-counting terms, never a saved effective-MPO
    eigenvalue by itself.
 
+The first recurrence-focused successor is now prepared as a three-branch
+chi=400 control: separate full-MPS parents from v3 orbit members `001` and
+`002`, plus independent pairing seed `s2`. It uses tighter DMRG controls and
+stops at the end of one raw probe before Anderson can act. Run
+`bash slurm/phase1_gpu.sh plan-recurrence` and then the preparation-only
+`prepare-recurrence` action described in `PERLMUTTER_PHASE1_GPU.md`; its
+plan-only reserve is `9.125` node-hours.
+
 Use `plot_phase1_mf_observables.jl` to render the full schema-v5 histories and
 exact seeds. The v2 files have only sparse saved snapshots and cannot be used
 to reconstruct a history that was never stored.

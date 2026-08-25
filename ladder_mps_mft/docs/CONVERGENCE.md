@@ -80,6 +80,12 @@ initial raw probe has exhausted its full budget with an unaccepted recurrence.
 reduces damping, and begins accelerated fixed-point search. A recurrence first
 seen through the mixer always triggers the separate raw probe described above.
 
+For a phase-resolved follow-up, `parent_orbit_phase=NNN` selects the named
+member of a hash-pinned full orbit artifact. The phase MPS is retained as the
+DMRG warm start and that member's measured field becomes the next applied raw
+field. This is a parent lineage, not a same-driver resume, and stateless copies
+cannot supply the omitted phase MPS.
+
 Acceptance certifies a numerically self-consistent orbit of an explicitly
 enabled period; it does not by itself identify the broken symmetry. Calling a
 period-two orbit a CDW additionally requires a nonzero bulk density contrast,

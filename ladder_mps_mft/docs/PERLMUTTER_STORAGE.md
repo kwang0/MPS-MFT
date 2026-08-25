@@ -2,7 +2,7 @@
 
 ## Storage contract
 
-Launcher version 1.3.0 restores the legacy stateless-data design principle and
+Launcher version 1.4.0 retains the legacy stateless-data design principle and
 makes scratch the authoritative location for heavyweight numerical artifacts:
 
 - Full `state.h5`, rolling checkpoints, orbit files, and pair-binding

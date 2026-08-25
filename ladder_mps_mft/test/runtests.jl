@@ -155,6 +155,12 @@ end
     @test gpu_settings.model.ep_mode == :linear_t0
     @test gpu_settings.model.ep_signed ≈ -0.18452309659153343
     @test gpu_settings.model.tp^2 / gpu_settings.model.ep ≈ 0.05419375777188662
+    recurrence_settings = load_settings(joinpath(ROOT, "configs", "phase1_gpu_recurrence_chi400.toml"))
+    @test recurrence_settings.model.geometry == :cubic_unfrustrated
+    @test recurrence_settings.dmrg.maxdim == 400
+    @test recurrence_settings.dmrg.nsweeps == 16
+    @test recurrence_settings.convergence.cycle_action == :stop
+    @test recurrence_settings.run.max_iterations == recurrence_settings.convergence.probe_iterations + 1
     conflicting_lineage = ProjectSettings(
         model=test_model(),
         run=RunSettings(
@@ -165,6 +171,18 @@ end
         ),
     )
     @test_throws ArgumentError validate_settings(conflicting_lineage)
+    @test_throws ArgumentError validate_settings(ProjectSettings(
+        model=test_model(),
+        run=RunSettings(parent_orbit_phase=1),
+    ))
+    @test_throws ArgumentError validate_settings(ProjectSettings(
+        model=test_model(),
+        run=RunSettings(
+            parent_checkpoint="parent.h5",
+            parent_sha256=repeat("0", 64),
+            parent_orbit_phase=0,
+        ),
+    ))
     invalid_gpu = ProjectSettings(
         model=test_model(),
         runtime=RuntimeSettings(backend=:gpu, threaded_blocksparse=false),
@@ -232,8 +250,9 @@ end
     @test occursin("sanitize_cuda_runtime_environment", script_source)
     @test occursin("require_current_run_version", script_source)
     @test occursin("require_worker_compatible_run_version", script_source)
-    @test occursin("PHASE1_SCRIPT_VERSION=\"1.3.0\"", script_source)
+    @test occursin("PHASE1_SCRIPT_VERSION=\"1.4.0\"", script_source)
     @test occursin("prepare-recovery)", script_source)
+    @test occursin("prepare-recurrence)", script_source)
     @test occursin("--licenses=scratch,cfs", script_source)
     @test occursin("compact_results.jl", script_source)
     @test !occursin("transfer_files.py", migration_source)
@@ -247,11 +266,22 @@ end
     @test occursin("--prune-cfs", migration_source)
     @test occursin("gpu_linalg_preflight!", read(joinpath(ROOT, "scripts", "gpu_smoke.jl"), String))
     @test occursin("gpu_linalg_preflight!", read(joinpath(ROOT, "scripts", "run_scf_gpu.jl"), String))
+    bash_executable = something(Sys.which("bash"), "bash")
     sanitized_environment = read(
-        `bash -c 'source "$1" plan >/dev/null; export CUDA_HOME=/opt/nvidia/hpc_sdk/Linux_x86_64/26.5/cuda/13.2; export LD_LIBRARY_PATH=/safe/one:/opt/nvidia/hpc_sdk/Linux_x86_64/26.5/math_libs/13.2/lib64:/safe/two; sanitize_cuda_runtime_environment; printf "%s|%s|%s\n" "${LD_LIBRARY_PATH-unset}" "${CUDA_HOME-unset}" "${CUDA_PATH-unset}"' bash $script`,
+        `$bash_executable -c 'source "$1" plan >/dev/null; export CUDA_HOME=/opt/nvidia/hpc_sdk/Linux_x86_64/26.5/cuda/13.2; export LD_LIBRARY_PATH=/safe/one:/opt/nvidia/hpc_sdk/Linux_x86_64/26.5/math_libs/13.2/lib64:/safe/two; sanitize_cuda_runtime_environment; printf "%s|%s|%s\n" "${LD_LIBRARY_PATH-unset}" "${CUDA_HOME-unset}" "${CUDA_PATH-unset}"' bash $script`,
         String,
     )
     @test strip(sanitized_environment) == "/safe/one:/safe/two|unset|unset"
+    function bash_path(path::AbstractString)
+        normalized = replace(abspath(path), '\\' => '/')
+        match_result = match(r"^([A-Za-z]):/(.*)$", normalized)
+        return match_result === nothing ? normalized :
+            "/$(lowercase(match_result.captures[1]))/$(match_result.captures[2])"
+    end
+    bash_environment_path = strip(read(
+        `$bash_executable -lc 'printf "%s" "${PATH}"'`,
+        String,
+    ))
     mock_bin = joinpath(ROOT, "test", "fixtures", "mock_slurm")
     julia_executable = Base.julia_cmd().exec[1]
     mktempdir() do directory
@@ -260,16 +290,16 @@ end
         budget_root = joinpath(directory, "budget")
         ledger = joinpath(budget_root, "ledger.tsv")
         environment = (
-            "PATH" => string(mock_bin, ":", ENV["PATH"]),
-            "MOCK_SLURM_STATE_DIR" => joinpath(directory, "slurm"),
-            "PHASE1_RUN_ROOT" => run_root,
-            "PHASE1_SCRATCH_ROOT" => scratch_root,
-            "PHASE1_BUDGET_ROOT" => budget_root,
-            "PHASE1_LEDGER_PATH" => ledger,
-            "PHASE1_JULIA" => julia_executable,
+            "PATH" => string(bash_path(mock_bin), ":", bash_environment_path),
+            "MOCK_SLURM_STATE_DIR" => bash_path(joinpath(directory, "slurm")),
+            "PHASE1_RUN_ROOT" => bash_path(run_root),
+            "PHASE1_SCRATCH_ROOT" => bash_path(scratch_root),
+            "PHASE1_BUDGET_ROOT" => bash_path(budget_root),
+            "PHASE1_LEDGER_PATH" => bash_path(ledger),
+            "PHASE1_JULIA" => bash_path(julia_executable),
         )
         run(pipeline(
-            addenv(`bash $script submit mock_phase1`, environment...),
+            addenv(`$bash_executable $script submit mock_phase1`, environment...),
             stdout=devnull,
         ))
         smoke_path = joinpath(run_root, "mock_phase1", "gpu_smoke.h5")
@@ -289,7 +319,7 @@ end
             storage_group["data"] = Float64[1.0]
         end
         run(pipeline(
-            addenv(`bash $script submit-matrix mock_phase1`, environment...),
+            addenv(`$bash_executable $script submit-matrix mock_phase1`, environment...),
             stdout=devnull,
         ))
         ledger_rows = readlines(ledger)[2:end]
@@ -310,9 +340,99 @@ end
         )
         @test isempty(readdir(joinpath(run_root, "mock_phase1", "results")))
 
+        source_run = joinpath(run_root, "source_recurrence")
+        source_full_root = joinpath(scratch_root, "source_recurrence")
+        source_full_state = joinpath(source_full_root, "results", "candidate", "state.h5")
+        recurrence_base = load_settings(joinpath(
+            ROOT,
+            "configs",
+            "phase1_gpu_recurrence_chi400.toml",
+        ))
+        mkpath(dirname(source_full_state))
+        h5open(source_full_state, "w") do file
+            file["status"] = "periodic_candidate"
+            file["accepted"] = false
+            file["fundamental_period"] = 2
+            provenance = create_group(file, "provenance")
+            provenance["model_fingerprint"] = LadderMPSMFT.model_fingerprint(recurrence_base.model)
+            provenance["numerical_fingerprint"] = "source-numerical-fingerprint"
+            provenance["tensor_scalar_type"] = "float64"
+            cycles = create_group(file, "cycle_members")
+            for (index, phase_name) in enumerate(("001", "002"))
+                phase = create_group(cycles, phase_name)
+                phase["psi"] = Float64[parse(Int, phase_name)]
+                create_group(phase, "applied")
+                create_group(phase, "measured")
+                phase["chemical_potential"] = 1.0
+                phase["iteration"] = 47 + index
+                phase["update_mode"] = "unmixed_probe"
+            end
+        end
+        source_compact_state = joinpath(
+            source_run,
+            "stateless_results",
+            "unfrustrated__pairing_s1",
+            "candidate",
+            "state.h5",
+        )
+        mkpath(dirname(source_compact_state))
+        h5open(source_compact_state, "w") do file
+            analysis = create_group(file, "analysis_storage")
+            analysis["is_stateless_copy"] = true
+            analysis["full_artifact_path"] = source_full_state
+            analysis["full_artifact_sha256"] = LadderMPSMFT.sha256_file(source_full_state)
+            file["status"] = "periodic_candidate"
+            file["accepted"] = false
+            file["fundamental_period"] = 2
+            provenance = create_group(file, "provenance")
+            provenance["model_fingerprint"] = LadderMPSMFT.model_fingerprint(recurrence_base.model)
+            provenance["numerical_fingerprint"] = "source-numerical-fingerprint"
+            provenance["tensor_scalar_type"] = "float64"
+            cycles = create_group(file, "cycle_members")
+            for (index, phase_name) in enumerate(("001", "002"))
+                phase = create_group(cycles, phase_name)
+                create_group(phase, "applied")
+                create_group(phase, "measured")
+                phase["iteration"] = 47 + index
+                phase["update_mode"] = "unmixed_probe"
+            end
+        end
+        mkpath(source_run)
+        write(joinpath(source_run, "full_storage_path.txt"), source_full_root * "\n")
+        ledger_before_recurrence = read(ledger, String)
+        recurrence_plan = read(
+            addenv(`$bash_executable $script plan-recurrence`, environment...),
+            String,
+        )
+        @test occursin("9.125000000 node-hours", recurrence_plan)
+        run(pipeline(
+            addenv(
+                `$bash_executable $script prepare-recurrence source_recurrence mock_recurrence`,
+                environment...,
+            ),
+            stdout=devnull,
+        ))
+        @test read(ledger, String) == ledger_before_recurrence
+        recurrence_run = joinpath(run_root, "mock_recurrence")
+        @test strip(read(joinpath(recurrence_run, "branch_count.txt"), String)) == "3"
+        @test length(readlines(joinpath(recurrence_run, "manifest.tsv"))) == 4
+        @test length(filter(
+            name -> endswith(name, ".segment-001.toml"),
+            readdir(joinpath(recurrence_run, "configs")),
+        )) == 3
+        phase_config = TOML.parsefile(joinpath(
+            recurrence_run,
+            "configs",
+            "unfrustrated__pairing_s1_phase001_chi400.segment-001.toml",
+        ))
+        @test phase_config["run"]["parent_orbit_phase"] == 1
+        @test phase_config["run"]["parent_sha256"] == LadderMPSMFT.sha256_file(source_full_state)
+        @test phase_config["dmrg"]["maxdim"] == 400
+        @test phase_config["convergence"]["cycle_action"] == "stop"
+
         rejected = run(pipeline(
             ignorestatus(addenv(
-                `bash $script submit cap_rejection`,
+                `$bash_executable $script submit cap_rejection`,
                 environment...,
                 "PHASE1_ADDITIONAL_NODE_HOUR_CAP" => "27.1",
             )),
@@ -793,6 +913,27 @@ end
         @test periodic_checkpoint.accepted
         @test periodic_checkpoint.fundamental_period == 2
         @test periodic_checkpoint.orbit_validated
+        first_phase = read_checkpoint(periodic_path; orbit_phase=1)
+        second_phase = read_checkpoint(periodic_path; orbit_phase=2)
+        @test first_phase.applied.alpha == test_fields(1.0).alpha
+        @test first_phase.measured.alpha == test_fields(0.0).alpha
+        @test first_phase.restart.alpha == first_phase.measured.alpha
+        @test second_phase.applied.alpha == test_fields(0.0).alpha
+        @test second_phase.measured.alpha == test_fields(1.0).alpha
+        @test_throws ArgumentError read_checkpoint(periodic_path; orbit_phase=3)
+        phase_parent_settings = ProjectSettings(
+            model=model,
+            run=RunSettings(
+                output_directory=directory,
+                parent_checkpoint=periodic_path,
+                parent_sha256=LadderMPSMFT.sha256_file(periodic_path),
+                parent_orbit_phase=1,
+                quick_diagnostics=false,
+            ),
+        )
+        phase_parent_start = LadderMPSMFT._initial_state(phase_parent_settings)
+        @test phase_parent_start.source == "parent_orbit_phase_001"
+        @test phase_parent_start.fields.alpha == test_fields(0.0).alpha
         @test length(read_orbit_phase_states(periodic_path)) == 2
         stateless_path = joinpath(directory, "stateless_periodic.h5")
         stateless = write_stateless_copy(periodic_path, stateless_path)
@@ -810,6 +951,7 @@ end
         @test read_field_history(stateless_path; source=:measured).iterations == [1, 2]
         @test read_inherited_fields(stateless_path).format == :refactored
         @test_throws ArgumentError read_checkpoint(stateless_path)
+        @test_throws ArgumentError read_checkpoint(stateless_path; orbit_phase=1)
         @test_throws ArgumentError read_orbit_phase_states(stateless_path)
 
         full_tree = joinpath(directory, "full_tree")

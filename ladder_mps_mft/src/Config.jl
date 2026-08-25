@@ -130,6 +130,7 @@ function load_settings(path::AbstractString)
         inherit_sha256=haskey(run_raw, "inherit_sha256") ? lowercase(String(run_raw["inherit_sha256"])) : nothing,
         parent_checkpoint=haskey(run_raw, "parent_checkpoint") ? _project_path(String(run_raw["parent_checkpoint"])) : nothing,
         parent_sha256=haskey(run_raw, "parent_sha256") ? lowercase(String(run_raw["parent_sha256"])) : nothing,
+        parent_orbit_phase=haskey(run_raw, "parent_orbit_phase") ? Int(run_raw["parent_orbit_phase"]) : nothing,
         resume_checkpoint=haskey(run_raw, "resume_checkpoint") ? _project_path(String(run_raw["resume_checkpoint"])) : nothing,
         resume_sha256=haskey(run_raw, "resume_sha256") ? lowercase(String(run_raw["resume_sha256"])) : nothing,
         max_iterations=Int(_value(run_raw, "max_iterations", 80)),
@@ -226,6 +227,10 @@ function validate_settings(settings::ProjectSettings)
         throw(ArgumentError("parent_sha256 is required with parent_checkpoint"))
     settings.run.parent_checkpoint === nothing && settings.run.parent_sha256 !== nothing &&
         throw(ArgumentError("parent_checkpoint is required with parent_sha256"))
+    settings.run.parent_orbit_phase !== nothing && settings.run.parent_checkpoint === nothing &&
+        throw(ArgumentError("parent_checkpoint is required with parent_orbit_phase"))
+    settings.run.parent_orbit_phase !== nothing && settings.run.parent_orbit_phase < 1 &&
+        throw(ArgumentError("parent_orbit_phase must be positive"))
     settings.run.resume_checkpoint !== nothing && settings.run.resume_sha256 === nothing &&
         throw(ArgumentError("resume_sha256 is required with resume_checkpoint"))
     settings.run.resume_checkpoint === nothing && settings.run.resume_sha256 !== nothing &&

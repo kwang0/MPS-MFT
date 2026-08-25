@@ -95,6 +95,7 @@ Base.@kwdef struct RunSettings
     inherit_sha256::Union{Nothing,String} = nothing
     parent_checkpoint::Union{Nothing,String} = nothing
     parent_sha256::Union{Nothing,String} = nothing
+    parent_orbit_phase::Union{Nothing,Int} = nothing
     resume_checkpoint::Union{Nothing,String} = nothing
     resume_sha256::Union{Nothing,String} = nothing
     max_iterations::Int = 80

@@ -512,3 +512,48 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
 - This handoff made documentation-only tracked changes. It did not submit or
   cancel a Perlmutter job, alter the project budget ledger, migrate/prune an
   artifact, modify an immutable state, or verify full scratch files.
+
+## 2026-08-25: Phase-resolved chi=400 recurrence submission preparation
+
+- The transferred lightweight payload passed fresh compact-only verification:
+  42 v2 artifacts (`3,512,377,436` represented full bytes; `113,990,381`
+  compact bytes) and 50 v3 artifacts (`7,385,759,171` represented full bytes;
+  `666,136,203` compact bytes). Full scratch files were not mounted or checked.
+- A fresh v3 audit at `2026-08-25T20:22:58.857` UTC reproduced eight accepted
+  states and the one unfrustrated-pairing raw-map candidate in
+  `audit-win-nextprep-20260825`. No energy comparison changed.
+- The candidate has already executed an initial 20-update raw probe, one linear
+  step, seven Anderson steps, and a second 20-update raw probe. In the final
+  raw segment its period-two energy difference grows to `2.671975013e-3`
+  total and its two-step measured-field residual grows to `1.225459946e-3`.
+  The final chi=200 DMRG discarded-weight proxy is about `9.05e-6`. Another
+  identical chi=200 raw extension was therefore rejected as redundant.
+- The next control is three matched `cubic_unfrustrated` pairing branches at
+  the same model point: v3 cycle members `001` and `002` as separate full-MPS
+  parents, plus independent seed `pairing_s2`. All use chi=400, 16 sweeps,
+  cutoff `1e-11`, DMRG energy tolerance `1e-9`, density tolerance `1e-4`, and
+  exactly one 20-update raw period-one/two probe. `cycle_action=stop` and
+  `max_iterations=probe_iterations+1` prevent Anderson from entering.
+- `parent_orbit_phase` now selects `cycle_members/NNN` from one immutable full
+  parent while recording the phase index in provenance. The phase MPS is the
+  warm start and that phase's measured field is the next raw field. The v3 full
+  source is hash-pinned as
+  `ed6381ea7c3e2e654e1600566c827729d1bde894fa4f9a708543dc6627ac6df4`;
+  preparation rechecks this full SHA, full/compact status and fingerprints,
+  Float64 scalar type, raw phase lineage, and both phase MPS groups on
+  Perlmutter.
+- Launcher v1.4.0 adds read-only `plan-recurrence` and preparation-only
+  `prepare-recurrence SOURCE_RUN NEW_RUN`. It generates exactly three configs
+  and refuses missing/unmounted/hash-mismatched full parents. Submission remains
+  the separate smoke/status/matrix sequence.
+- The plan reserves `9.125` node-hours: `0.125` smoke plus three 12-hour,
+  one-of-four-GPU segments at `3.0` each. The synced ledger snapshot is
+  `87.375` reserved (SHA-256
+  `b2757e54c732c5f0364c7f2f1eb6510f91b6dd72fe29d66040ed18c78dce8080`),
+  projecting `96.500` reserved and `303.500` below the project cap. The fresh
+  live Perlmutter ledger and accounting remain authoritative before submission.
+- Local validation passed compact verification, the reproduced campaign audit,
+  `bash -n`, and all 242 Julia assertions, including full orbit-phase parent
+  loading, stateless rejection, SHA propagation, three-branch preparation, and
+  no-ledger-write preparation. No Slurm job was submitted, no ledger row was
+  changed, and no immutable or full HDF5 artifact was modified.

@@ -103,6 +103,7 @@ function collect_provenance(settings::ProjectSettings)
         "inherit_sha256" => inherit_hash,
         "parent_checkpoint" => something(settings.run.parent_checkpoint, ""),
         "parent_sha256" => parent_hash,
+        "parent_orbit_phase" => something(settings.run.parent_orbit_phase, 0),
         "resume_checkpoint" => something(settings.run.resume_checkpoint, ""),
         "resume_sha256" => resume_hash,
         "branch_label" => settings.run.branch_label,
