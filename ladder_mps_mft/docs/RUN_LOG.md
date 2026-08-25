@@ -465,3 +465,17 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
 - Validation after the direct-copy correction: `bash -n`, the help path, and
   `git diff --check` pass; the complete local Julia suite passes all 213
   assertions. No local validation moved or deleted any campaign artifact.
+- The next live compaction exposed a second pre-existing truncated v2 artifact,
+  `frustrated__cdw_s1/.../orbit_period_02_iter_0010.h5`, after the first bad
+  `checkpoint_latest.h5` was removed. Hash equality had correctly established
+  byte-for-byte CFS/scratch agreement but could not establish HDF5 readability.
+  The migrator now offers explicit `--prune-corrupt-auxiliary`: it scans all
+  HDF5 files before hashing, removes unreadable checkpoints/orbit snapshots and
+  named `.corrupt-*` backups from both trees, and aborts without cleanup if any
+  final `state.h5` is unreadable. Failed compaction staging directories are now
+  removed automatically.
+- Validation: the cleaner removed synthetic corrupt checkpoint/backup files
+  from paired roots and preserved both roots when a synthetic final `state.h5`
+  was corrupt. Julia parsing, `bash -n`, `git diff --check`, and the complete
+  local suite pass; the suite contains 216 assertions. No campaign artifact was
+  changed by local validation.

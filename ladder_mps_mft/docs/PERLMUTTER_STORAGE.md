@@ -57,6 +57,16 @@ parent paths with a symlink:
 bash slurm/migrate_phase1_to_scratch.sh --prune-cfs 20260823_phase1_gpu_v2
 ```
 
+If an older campaign contains known truncated auxiliary checkpoints or orbit
+snapshots, add `--prune-corrupt-auxiliary`. The cleaner scans every HDF5 file,
+removes unreadable auxiliary files from both CFS and scratch, and refuses the
+entire cleanup if any final `state.h5` is unreadable:
+
+```bash
+bash slurm/migrate_phase1_to_scratch.sh --prune-cfs \
+  --prune-corrupt-auxiliary 20260823_phase1_gpu_v2
+```
+
 Omit `--prune-cfs` to retain the verified full CFS tree under a timestamped
 `results.full_cfs.pending-delete.*` name. The script is idempotent after a
 completed migration and refuses campaigns with pending, running, or unknown

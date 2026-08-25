@@ -13,17 +13,20 @@ run_root="${PHASE1_RUN_ROOT:-$project_dir/output/phase1_gpu}"
 scratch_base="${PSCRATCH:-${SCRATCH:-}}"
 julia_command="${PHASE1_JULIA:-julia}"
 prune_cfs=0
+prune_corrupt_auxiliary=0
 run_id=""
 
 die() { echo "error: $*" >&2; exit 1; }
 
 usage() {
   cat <<EOF
-Usage: bash $script_path [--prune-cfs] RUN_ID
+Usage: bash $script_path [--prune-cfs] [--prune-corrupt-auxiliary] RUN_ID
 
-  RUN_ID       Completed Phase 1 campaign below $run_root
-  --prune-cfs  After copying, compaction, and hash verification, remove the
-               explicitly quarantined full CFS results directory.
+  RUN_ID                     Completed Phase 1 campaign below $run_root
+  --prune-corrupt-auxiliary  Delete unreadable auxiliary HDF5 checkpoints/orbits
+                             from CFS and scratch; never delete final state.h5.
+  --prune-cfs                After copying, compaction, and hash verification,
+                             remove the quarantined full CFS results directory.
 
 Without --prune-cfs the full CFS directory is retained under a timestamped
 results.full_cfs.pending-delete.* name for manual removal later.
@@ -33,6 +36,7 @@ EOF
 for argument in "$@"; do
   case "$argument" in
     --prune-cfs) prune_cfs=1 ;;
+    --prune-corrupt-auxiliary) prune_corrupt_auxiliary=1 ;;
     -h|--help) usage; exit 0 ;;
     --*) die "unknown option: $argument" ;;
     *)
@@ -58,6 +62,7 @@ source_hash_manifest="$control_run/full-results.sha256"
 [[ -f "$control_run/jobs.tsv" ]] || die "campaign has no jobs.tsv: $control_run"
 [[ -f "$project_dir/scripts/compact_results.jl" ]] || die "missing compact_results.jl"
 [[ -f "$project_dir/scripts/verify_stateless_results.jl" ]] || die "missing stateless verifier"
+[[ -f "$project_dir/scripts/prune_corrupt_auxiliary_hdf5.jl" ]] || die "missing corrupt-HDF5 cleaner"
 command -v sacct >/dev/null 2>&1 || die "sacct is required; run this on Perlmutter"
 
 slurm_state() {
@@ -132,6 +137,15 @@ fi
 [[ -d "$source_results" && ! -L "$source_results" ]] || die \
   "expected an unmigrated CFS results directory: $source_results"
 
+if (( prune_corrupt_auxiliary == 1 )); then
+  type module >/dev/null 2>&1 || die "environment modules are unavailable; run from a Perlmutter login shell"
+  module load julia
+  cleaner_arguments=(--apply "$source_results")
+  [[ -d "$full_run/results" ]] && cleaner_arguments+=("$full_run/results")
+  "$julia_command" --startup-file=no --project="$project_dir" \
+    "$project_dir/scripts/prune_corrupt_auxiliary_hdf5.jl" "${cleaner_arguments[@]}"
+fi
+
 echo "Hashing the quiescent CFS result tree before copying..."
 (
   cd "$source_results"
@@ -176,6 +190,10 @@ type module >/dev/null 2>&1 || die "environment modules are unavailable; run fro
 module load julia
 
 staging="$(mktemp -d "$control_run/.stateless_results.staging.XXXXXX")"
+cleanup_staging() {
+  [[ -z "${staging:-}" || ! -d "$staging" ]] || rm -r -- "$staging"
+}
+trap cleanup_staging EXIT
 echo "Building MPS-free analysis mirror..."
 "$julia_command" --startup-file=no --project="$project_dir" \
   "$project_dir/scripts/compact_results.jl" "$full_run/results" "$staging"
@@ -187,6 +205,8 @@ if [[ -e "$stateless_results" ]]; then
   mv "$stateless_results" "$control_run/stateless_results.previous.$timestamp"
 fi
 mv "$staging" "$stateless_results"
+staging=""
+trap - EXIT
 printf '%s\n' "$full_run" >"$control_run/full_storage_path.txt"
 
 quarantine="$control_run/results.full_cfs.pending-delete.$timestamp"
