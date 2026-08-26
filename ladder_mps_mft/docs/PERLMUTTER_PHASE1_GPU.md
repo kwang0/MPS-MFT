@@ -34,12 +34,16 @@ Choose a new immutable run ID:
 
 ```bash
 RUN_ID=20260823_phase1_gpu_v2
+bash slurm/phase1_gpu.sh prepare-standard "$RUN_ID"
 bash slurm/phase1_gpu.sh submit "$RUN_ID"
 bash slurm/phase1_gpu.sh status "$RUN_ID"
 ```
 
-`submit` prepares all nine configs and submits only a 30-minute smoke test. It
-is not a scientific calculation. The smoke now requires artifact-only CUDA
+`prepare-standard` creates all nine configs without submitting or reserving
+anything. `submit` accepts only an existing prepared campaign and submits only
+a 30-minute smoke test; it can no longer create a default campaign implicitly.
+Literal placeholders such as `RUN_ID` are rejected for submission. The smoke
+is not a scientific calculation. It requires artifact-only CUDA
 runtime libraries, exercises a 256-by-256 dense GPU matrix multiplication and
 Hermitian eigendecomposition through cuBLAS/cuSOLVER, runs the tiny DMRG, and
 round-trips its MPS through HDF5. After `status` reports the smoke job as
@@ -182,10 +186,59 @@ bash slurm/phase1_gpu.sh status "$RUN_ID"
 bash slurm/phase1_gpu.sh submit-matrix "$RUN_ID"   # only after smoke gates pass
 ```
 
-The plan-only upper bound is `0.125 + 3*3 = 9.125` node-hours. Preparation
+The Stage A plan-only upper bound is `0.125 + 3*3 = 9.125` node-hours. Preparation
 never substitutes the stateless mirror for a restartable parent: both phase
 configs reference the same immutable full source SHA plus distinct
 `parent_orbit_phase` values.
+
+Do not launch same-geometry competitors at the same time. First audit all three
+Stage A results. Conditional Stage B is unlocked only if (1) at least one of
+the two phase-parent branches and (2) the independent `pairing_s2` branch are
+accepted solutions with `max|alpha| >= 1e-4`. For an accepted orbit, every
+stored phase must clear that floor separately. An accepted period-two survivor
+must be an unmixed raw-map orbit; its members remain separate. The `1e-4`
+threshold is a numerical screening floor, not a phase or long-range-order
+claim. The preparation command independently rechecks acceptance, geometry,
+Float64 storage, model/numerical/implementation fingerprints, the `E_p`
+registry hash, the hash-linked full scratch artifact, and the current
+implementation before writing an immutable gate record:
+
+```bash
+CONTROL_RUN=20260826_phase1_unfrustrated_competitors_chi400
+bash slurm/phase1_gpu.sh prepare-recurrence-competitors \
+  "$RUN_ID" "$CONTROL_RUN"
+sed -n '1,4p' "output/phase1_gpu/$CONTROL_RUN/conditional_gate.tsv"
+sed -n '1,3p' "output/phase1_gpu/$CONTROL_RUN/manifest.tsv"
+```
+
+This preparation also performs no submission or ledger reservation. It creates
+two fresh-MPS, independent-seed controls, `sdw_s2` and `cdw_s2`, at the same
+model point, `chi=400`, DMRG settings, convergence settings, Float64-CUDA
+representation, and recurrence policy as Stage A. They receive an 80-iteration
+execution ceiling: the first 20 updates are the same unmixed raw-map probe; an
+unaccepted recurrence stops and is preserved, while a recurrence-free path may
+then use Anderson only to accelerate a fixed point. `max_iterations` is run
+provenance rather than part of the numerical fingerprint, so accepted Stage A
+and Stage B results remain eligible for the canonical comparator if all other
+fingerprints match.
+
+Only after inspecting the gate record, stage Stage B through its own smoke:
+
+```bash
+bash slurm/phase1_gpu.sh submit "$CONTROL_RUN"
+bash slurm/phase1_gpu.sh status "$CONTROL_RUN"
+bash slurm/phase1_gpu.sh submit-matrix "$CONTROL_RUN"
+```
+
+Stage B's first-segment bound is `0.125 + 2*3 = 6.125` node-hours. Stage A plus
+conditional Stage B is therefore `15.250` node-hours for first segments. With
+the ledger snapshot of `114.500` after the accidental standard campaign, this
+would project to `123.625` after Stage A or `129.750` after both, leaving
+`276.375` or `270.250` node-hours under the 400-node-hour project cap. The live
+Perlmutter ledger is authoritative. The combined four-segment emergency
+ceiling is `60.250` node-hours, but continuations are not pre-authorized and
+must be justified branch by branch; preserving the remaining budget for
+higher-chi and scaling runs is part of the gate.
 
 ## Pair-binding interpolation and optional calculations
 

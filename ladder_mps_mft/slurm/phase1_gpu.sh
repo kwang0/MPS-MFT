@@ -5,7 +5,7 @@
 
 set -euo pipefail
 
-readonly PHASE1_SCRIPT_VERSION="1.4.0"
+readonly PHASE1_SCRIPT_VERSION="1.5.0"
 script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
 project_dir="${PHASE1_PROJECT_DIR:-$(cd "$(dirname "$script_path")/.." && pwd)}"
 repo_root="${PHASE1_REPO_ROOT:-$(cd "$project_dir/.." && pwd)}"
@@ -31,6 +31,22 @@ PHASE1_RECURRENCE_CONFIG="${PHASE1_RECURRENCE_CONFIG:-$project_dir/configs/phase
 
 die() { echo "error: $*" >&2; exit 1; }
 require_command() { command -v "$1" >/dev/null 2>&1 || die "required command not found: $1"; }
+
+validate_new_run_id() {
+  local run_id="$1" upper
+  [[ "$run_id" =~ ^[A-Za-z0-9_.-]+$ ]] || die "unsafe run ID: $run_id"
+  upper="${run_id^^}"
+  case "$upper" in
+    RUN_ID|NEW_RUN|NEW_RUN_ID|SOURCE_RUN|SOURCE_RUN_ID|YOUR_RUN_ID)
+      die "refusing placeholder run ID: $run_id; choose a dated descriptive run ID"
+      ;;
+  esac
+}
+
+validate_submission_run_id() {
+  local run_id="$1"
+  validate_new_run_id "$run_id"
+}
 
 resolve_scratch_root() {
   if [[ -z "$scratch_root" ]]; then
@@ -73,6 +89,8 @@ validate_project() {
   [[ -f "$project_dir/scripts/run_scf_gpu.jl" ]] || die "missing GPU SCF entry point"
   [[ -f "$project_dir/scripts/prepare_phase1_recurrence.jl" ]] || die \
     "missing recurrence preparation entry point"
+  [[ -f "$project_dir/scripts/prepare_phase1_recurrence_competitors.jl" ]] || die \
+    "missing conditional recurrence-competitor preparation entry point"
   [[ -f "$project_dir/scripts/gpu_smoke.jl" ]] || die "missing GPU smoke test"
   [[ -f "$project_dir/scripts/validate_gpu_smoke.jl" ]] || die "missing GPU smoke validator"
   [[ -f "$project_dir/scripts/compact_results.jl" ]] || die "missing stateless-result compactor"
@@ -81,38 +99,73 @@ validate_project() {
 
 print_recurrence_plan() {
   validate_project
-  local segment smoke targeted maximum
+  local segment smoke recurrence_initial competitors_initial combined_initial
+  local recurrence_ceiling competitors_ceiling combined_ceiling committed
+  local recurrence_projected combined_projected recurrence_remaining combined_remaining
   segment="$(gpu_node_hours "$PHASE1_GPU_TIME")"
   smoke="$(gpu_node_hours "$PHASE1_SMOKE_TIME")"
-  targeted="$(awk -v s="$segment" -v p="$smoke" 'BEGIN {printf "%.9f", 3*s+p}')"
-  maximum="$(awk -v s="$segment" -v p="$smoke" -v m="$PHASE1_MAX_SEGMENTS" \
+  recurrence_initial="$(awk -v s="$segment" -v p="$smoke" 'BEGIN {printf "%.9f", 3*s+p}')"
+  competitors_initial="$(awk -v s="$segment" -v p="$smoke" 'BEGIN {printf "%.9f", 2*s+p}')"
+  combined_initial="$(awk -v a="$recurrence_initial" -v b="$competitors_initial" \
+    'BEGIN {printf "%.9f", a+b}')"
+  recurrence_ceiling="$(awk -v s="$segment" -v p="$smoke" -v m="$PHASE1_MAX_SEGMENTS" \
     'BEGIN {printf "%.9f", 3*m*s+p}')"
+  competitors_ceiling="$(awk -v s="$segment" -v p="$smoke" -v m="$PHASE1_MAX_SEGMENTS" \
+    'BEGIN {printf "%.9f", 2*m*s+p}')"
+  combined_ceiling="$(awk -v a="$recurrence_ceiling" -v b="$competitors_ceiling" \
+    'BEGIN {printf "%.9f", a+b}')"
+  committed="$(ledger_total)"
+  recurrence_projected="$(awk -v c="$committed" -v a="$recurrence_initial" 'BEGIN {printf "%.9f", c+a}')"
+  combined_projected="$(awk -v c="$committed" -v a="$combined_initial" 'BEGIN {printf "%.9f", c+a}')"
+  recurrence_remaining="$(awk -v cap="$PHASE1_ADDITIONAL_NODE_HOUR_CAP" -v p="$recurrence_projected" \
+    'BEGIN {printf "%.9f", cap-p}')"
+  combined_remaining="$(awk -v cap="$PHASE1_ADDITIONAL_NODE_HOUR_CAP" -v p="$combined_projected" \
+    'BEGIN {printf "%.9f", cap-p}')"
   cat <<EOF
-Ladder MPS+MF targeted unfrustrated-pairing recurrence campaign
+Ladder MPS+MF staged chi=400 unfrustrated recurrence campaign
 
 Representative point: L=64, U=8, V=-0.2, t0=1.1, t_perp=0.1, density=0.9375
 Numerical control:    chi=400, 16 sweeps, cutoff=1e-11, energy_tol=1e-9
-Branches:             v3 orbit phases 001 and 002 plus independent pairing seed s2 (3 jobs)
-Physics controls:     20-update unmixed period-1/2 probe; stop before Anderson acceleration
+Stage A branches:     v3 orbit phases 001 and 002 plus independent pairing seed s2 (3 jobs)
+Stage A physics:      20-update unmixed period-1/2 probe; stop before Anderson acceleration
 Parent contract:      full v3 scratch state plus SHA-256 and explicit orbit-member index
+Stage B gate:         at least one accepted pairing-bearing phase-parent result AND
+                      an accepted pairing-bearing independent s2 result, with max|alpha| >= 1e-4
+Stage B branches:     independent SDW s2 and CDW s2 controls (2 jobs), prepared only after the gate
+Stage B physics:      the same raw-map recurrence policy; Anderson may accelerate a fixed point
+                      only after a recurrence-free raw probe
 GPU request:          one of four GPUs, ${PHASE1_GPU_TIME}, ${PHASE1_GPU_CPUS} CPUs, shared QOS
 Per-segment reserve:  ${segment} GPU node-hours
-Smoke-test reserve:   ${smoke} GPU node-hours
-Targeted staged total: ${targeted} node-hours
-Four-segment ceiling: ${maximum} node-hours for these three branches
+Per-campaign smoke:   ${smoke} GPU node-hours
+Stage A first segments: ${recurrence_initial} node-hours
+Conditional Stage B first segments: ${competitors_initial} node-hours
+Combined first-segment envelope: ${combined_initial} node-hours
+Stage A four-segment ceiling: ${recurrence_ceiling} node-hours
+Conditional Stage B four-segment ceiling: ${competitors_ceiling} node-hours
+Combined four-segment ceiling: ${combined_ceiling} node-hours
 Hard project cap:     ${PHASE1_ADDITIONAL_NODE_HOUR_CAP} additional node-hours
+Ledger after Stage A first segments: ${recurrence_projected} reserved; ${recurrence_remaining} unreserved
+Ledger after both first segments:    ${combined_projected} reserved; ${combined_remaining} unreserved
 
-Preparation does not submit or reserve:
-  bash $script_path prepare-recurrence 20260824_phase1_gpu_v3_float64_history RUN_ID
+Stage A preparation does not submit or reserve:
+  RECURRENCE_RUN=20260826_phase1_unfrustrated_pairing_recurrence_chi400
+  bash $script_path prepare-recurrence 20260824_phase1_gpu_v3_float64_history "\$RECURRENCE_RUN"
 
-Submission remains explicitly staged:
-  bash $script_path submit RUN_ID
-  bash $script_path status RUN_ID
-  bash $script_path submit-matrix RUN_ID
+Stage A submission remains explicitly staged:
+  bash $script_path submit "\$RECURRENCE_RUN"
+  bash $script_path status "\$RECURRENCE_RUN"
+  bash $script_path submit-matrix "\$RECURRENCE_RUN"
+
+Only after the recorded gate passes, prepare Stage B without submitting or reserving:
+  CONTROL_RUN=20260826_phase1_unfrustrated_competitors_chi400
+  bash $script_path prepare-recurrence-competitors "\$RECURRENCE_RUN" "\$CONTROL_RUN"
+  bash $script_path submit "\$CONTROL_RUN"
+  bash $script_path status "\$CONTROL_RUN"
+  bash $script_path submit-matrix "\$CONTROL_RUN"
 EOF
   print_budget
-  awk -v current="$(ledger_total)" -v requested="$targeted" -v cap="$PHASE1_ADDITIONAL_NODE_HOUR_CAP" \
-    'BEGIN {exit !((current+requested) > cap)}' && die "targeted recurrence campaign would exceed the hard cap"
+  awk -v current="$committed" -v requested="$combined_initial" -v cap="$PHASE1_ADDITIONAL_NODE_HOUR_CAP" \
+    'BEGIN {exit !((current+requested) > cap)}' && die "staged recurrence envelope would exceed the hard cap"
   return 0
 }
 
@@ -151,8 +204,8 @@ Tensor backend:       dense Float64 CUDA, with S_z and fermion-parity QNs explic
 CUDA runtime:         pinned CUDA.jl artifacts only; system toolkit libraries are rejected
 E_p policy:           exact lookup first; bracketed linear interpolation in t0; no extrapolation
 GPU request:          one of four GPUs, ${PHASE1_GPU_TIME}, ${PHASE1_GPU_CPUS} CPUs, shared QOS
-Full-result storage:  \$PSCRATCH/MPS-MFT/ladder_mps_mft/phase1_gpu/RUN_ID
-CFS/local storage:    MPS-free analysis mirrors under output/phase1_gpu/RUN_ID/results
+Full-result storage:  \$PSCRATCH/MPS-MFT/ladder_mps_mft/phase1_gpu/<run-id>
+CFS/local storage:    MPS-free analysis mirrors under output/phase1_gpu/<run-id>/results
 Per-segment reserve:  ${segment} GPU node-hours
 Smoke-test reserve:   ${smoke} GPU node-hours
 Initial staged total: ${initial} node-hours
@@ -160,9 +213,10 @@ Four-segment ceiling: ${maximum} node-hours for these nine branches
 Hard project cap:     ${PHASE1_ADDITIONAL_NODE_HOUR_CAP} additional node-hours
 
 Submission is staged:
-  1. bash $script_path submit RUN_ID
-  2. bash $script_path status RUN_ID
-  3. bash $script_path submit-matrix RUN_ID
+  1. bash $script_path prepare-standard 20260826_phase1_standard
+  2. bash $script_path submit 20260826_phase1_standard
+  3. bash $script_path status 20260826_phase1_standard
+  4. bash $script_path submit-matrix 20260826_phase1_standard
 
 To recover nine immutable Float32 branch states into the corrected Float64
 solver while inspecting the generated controls before allocation:
@@ -232,7 +286,7 @@ load_environment() {
   # shellcheck disable=SC1090
   source "$run_dir/run.env"
   case "${PHASE1_RUN_SCRIPT_VERSION:-missing}" in
-    1.0.0|1.0.1|1.1.0|1.2.0|1.3.0|1.4.0) ;;
+    1.0.0|1.0.1|1.1.0|1.2.0|1.3.0|1.4.0|1.5.0) ;;
     *) die "unsupported run script version ${PHASE1_RUN_SCRIPT_VERSION:-missing}; current version is $PHASE1_SCRIPT_VERSION";;
   esac
   project_dir="$PHASE1_PROJECT_DIR"
@@ -271,14 +325,14 @@ require_current_run_version() {
 
 require_worker_compatible_run_version() {
   case "${PHASE1_RUN_SCRIPT_VERSION:-missing}" in
-    1.2.0|1.3.0|1.4.0) ;;
+    1.2.0|1.3.0|1.4.0|1.5.0) ;;
     *) die "queued worker cannot execute run script ${PHASE1_RUN_SCRIPT_VERSION:-missing} with launcher $PHASE1_SCRIPT_VERSION";;
   esac
 }
 
 initialize_run() {
   local run_id="$1" source_run_dir="${2:-}" campaign_kind="${3:-standard}"
-  [[ "$run_id" =~ ^[A-Za-z0-9_.-]+$ ]] || die "unsafe run ID: $run_id"
+  validate_new_run_id "$run_id"
   [[ -f "$project_dir/gpu/Manifest.toml" ]] || die \
     "GPU environment is not instantiated; run the command printed by plan"
   require_command sha256sum
@@ -294,6 +348,7 @@ initialize_run() {
   printf 'kind\tlabel\tsegment\tpool\trequested_time\treserved_node_hours\tjob_id\tconfig\n' >"$run_dir/jobs.tsv"
   printf '%s\n' "$PHASE1_DECLARED_ALLOCATION_NODE_HOURS" >"$run_dir/declared_allocation_node_hours.txt"
   printf '%s\n' "$PHASE1_DECLARED_USED_NODE_HOURS" >"$run_dir/declared_used_node_hours.txt"
+  printf '%s\n' "$campaign_kind" >"$run_dir/campaign_kind.txt"
   local -a prepare_args=()
   local prepare_script
   case "$campaign_kind" in
@@ -307,6 +362,11 @@ initialize_run() {
     recurrence)
       [[ -n "$source_run_dir" ]] || die "recurrence preparation requires a source run"
       prepare_script="$project_dir/scripts/prepare_phase1_recurrence.jl"
+      prepare_args=("$PHASE1_RECURRENCE_CONFIG" "$source_run_dir" "$run_dir" "$scratch_run_dir" "$run_id")
+      ;;
+    recurrence_competitors)
+      [[ -n "$source_run_dir" ]] || die "conditional competitor preparation requires a recurrence source run"
+      prepare_script="$project_dir/scripts/prepare_phase1_recurrence_competitors.jl"
       prepare_args=("$PHASE1_RECURRENCE_CONFIG" "$source_run_dir" "$run_dir" "$scratch_run_dir" "$run_id")
       ;;
     *) die "unknown Phase 1 campaign kind: $campaign_kind";;
@@ -325,15 +385,27 @@ initialize_run() {
 }
 
 validate_initialized_run() {
-  local run_dir="$1" manifest_rows config_count expected_count
+  local run_dir="$1" manifest_rows config_count expected_count campaign_kind
   [[ -f "$run_dir/run.env" ]] || die "prepared run is missing run.env"
   [[ -f "$run_dir/jobs.tsv" ]] || die "prepared run is missing jobs.tsv"
   [[ -f "$run_dir/manifest.tsv" ]] || die "prepared run is missing manifest.tsv"
   [[ -f "$run_dir/gpu-Manifest.toml" ]] || die "prepared run is missing its GPU manifest"
   [[ -f "$run_dir/gpu-Manifest.toml.sha256" ]] || die "prepared run is missing its GPU-manifest hash"
-  if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(3|4)\.0$ ]]; then
+  if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(3|4|5)\.0$ ]]; then
     [[ -d "$(full_run_directory_from_control "$run_dir")/results" ]] || die \
       "prepared run is missing its full-result scratch directory"
+  fi
+  if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" == "1.5.0" ]]; then
+    [[ -f "$run_dir/campaign_kind.txt" ]] || die "prepared run is missing campaign_kind.txt"
+    campaign_kind="$(<"$run_dir/campaign_kind.txt")"
+    case "$campaign_kind" in
+      standard|recurrence|recurrence_competitors) ;;
+      *) die "invalid prepared campaign kind: $campaign_kind";;
+    esac
+    if [[ "$campaign_kind" == "recurrence_competitors" ]]; then
+      [[ -f "$run_dir/conditional_gate.tsv" ]] || die \
+        "conditional competitor run is missing its immutable gate record"
+    fi
   fi
   expected_count=9
   [[ ! -f "$run_dir/branch_count.txt" ]] || expected_count="$(<"$run_dir/branch_count.txt")"
@@ -688,16 +760,20 @@ Usage: bash $script_path ACTION [ARGS]
 Read-only:
   plan
   plan-recurrence
+  plan-recurrence-controls
   budget
   status [RUN_ID]
   show [RUN_ID]
 
 Preparation only (no Slurm submission or budget reservation):
+  prepare-standard NEW_RUN              Prepare the standard nine-branch campaign
   prepare-recovery SOURCE_RUN NEW_RUN   Prepare Float64 warm-start controls
   prepare-recurrence SOURCE_RUN NEW_RUN Prepare phase-resolved chi=400 recurrence controls
+  prepare-recurrence-competitors RECURRENCE_RUN NEW_RUN
+                                        Prepare two controls only after the pairing-survival gate
 
 Submissions:
-  submit RUN_ID                         Prepare campaign and submit GPU smoke only
+  submit RUN_ID                         Submit GPU smoke for an existing prepared campaign
   submit-recovery SOURCE_RUN NEW_RUN    Prepare Float64 warm-start recovery and submit smoke
   submit-matrix RUN_ID                  Submit all prepared branches after smoke completes
   continue RUN_ID LABEL                 Submit an explicit same-model continuation
@@ -712,21 +788,24 @@ EOF
 action="${1:-plan}"
 case "$action" in
   plan) print_plan;;
-  plan-recurrence) print_recurrence_plan;;
+  plan-recurrence|plan-recurrence-controls) print_recurrence_plan;;
   budget) print_budget;;
   submit)
     [[ $# == 2 ]] || die "submit requires RUN_ID"
+    validate_submission_run_id "$2"
     require_command sbatch
-    if [[ -d "$run_root/$2" ]]; then
-      run_dir="$(resolve_run_dir "$2")"
-      load_environment "$run_dir"
-      require_current_run_version
-      validate_initialized_run "$run_dir"
-    else
-      check_reservation "$(gpu_node_hours "$PHASE1_SMOKE_TIME")"
-      run_dir="$(initialize_run "$2")"
-    fi
+    [[ -d "$run_root/$2" ]] || die \
+      "run is not prepared: $2; use an explicit prepare-standard, prepare-recovery, prepare-recurrence, or prepare-recurrence-competitors action first"
+    run_dir="$(resolve_run_dir "$2")"
+    load_environment "$run_dir"
+    require_current_run_version
+    validate_initialized_run "$run_dir"
     submit_smoke_job "$run_dir"
+    ;;
+  prepare-standard)
+    [[ $# == 2 ]] || die "prepare-standard requires NEW_RUN_ID"
+    [[ ! -e "$run_root/$2" ]] || die "new standard run already exists: $run_root/$2"
+    initialize_run "$2"
     ;;
   prepare-recovery)
     [[ $# == 3 ]] || die "prepare-recovery requires SOURCE_RUN_ID NEW_RUN_ID"
@@ -740,6 +819,14 @@ case "$action" in
     [[ ! -e "$run_root/$3" ]] || die "new recurrence run already exists: $run_root/$3"
     initialize_run "$3" "$source_run_dir" recurrence
     ;;
+  prepare-recurrence-competitors)
+    [[ $# == 3 ]] || die \
+      "prepare-recurrence-competitors requires RECURRENCE_RUN_ID NEW_RUN_ID"
+    source_run_dir="$(resolve_run_dir "$2")"
+    [[ ! -e "$run_root/$3" ]] || die \
+      "new conditional-control run already exists: $run_root/$3"
+    initialize_run "$3" "$source_run_dir" recurrence_competitors
+    ;;
   submit-recovery)
     [[ $# == 3 ]] || die "submit-recovery requires SOURCE_RUN_ID NEW_RUN_ID"
     require_command sbatch
@@ -751,16 +838,19 @@ case "$action" in
     ;;
   submit-matrix)
     [[ $# == 2 ]] || die "submit-matrix requires RUN_ID"
+    validate_submission_run_id "$2"
     require_command sbatch; require_command sacct
     run_dir="$(resolve_run_dir "$2")"; load_environment "$run_dir"; require_current_run_version; submit_matrix_jobs "$run_dir"
     ;;
   continue)
     [[ $# == 3 ]] || die "continue requires RUN_ID LABEL"
+    validate_submission_run_id "$2"
     require_command sbatch; require_command sacct
     run_dir="$(resolve_run_dir "$2")"; load_environment "$run_dir"; require_current_run_version; continue_branch "$run_dir" "$3"
     ;;
   submit-ep)
     (( $# >= 8 )) || die "submit-ep requires RUN_ID LABEL L U V t0 density [options]"
+    validate_submission_run_id "$2"
     require_command sbatch
     run_dir="$(resolve_run_dir "$2")"; load_environment "$run_dir"
     require_current_run_version

@@ -133,3 +133,33 @@ plan-only reserve is `9.125` node-hours.
 Use `plot_phase1_mf_observables.jl` to render the full schema-v5 histories and
 exact seeds. The v2 files have only sparse saved snapshots and cannot be used
 to reconstruct a history that was never stored.
+
+## Revised chi=400 staging after the independent-seed audit
+
+The later standard campaign accidentally created as literal run `RUN_ID` adds
+useful seed-sensitivity evidence but is not directly rankable with v3 because
+their implementation fingerprints differ. Its unfrustrated independent
+pairing seed converged to a nearly zero-pairing fixed point, its SDW seed was
+accepted at slightly lower canonical energy, and its CDW seed stagnated. This
+does not invalidate the recurrence question, but it does rule out committing a
+larger competitor matrix before testing whether pairing survives at chi=400.
+
+The revised workflow therefore has two separately prepared campaigns:
+
+1. Stage A remains the three-branch, phase-resolved chi=400 recurrence test
+   above. Its first-segment reserve is `9.125` node-hours.
+2. Stage B is conditional. It requires an accepted pairing-bearing result from
+   at least one phase-parent lineage and from the independent `pairing_s2`
+   lineage, each with `max|alpha| >= 1e-4` (in every stored orbit phase when
+   periodic). Only then may two matched chi=400
+   independent controls, `sdw_s2` and `cdw_s2`, be prepared. Their
+   first-segment reserve is `6.125` node-hours.
+
+The combined first-segment envelope is `15.250` node-hours, but Stage B is not
+prepared automatically. Both stages preserve an unaccepted raw-map recurrence
+with `cycle_action=stop`. The Stage B execution ceiling permits Anderson only
+after a recurrence-free 20-update raw probe, solely as fixed-point
+acceleration. Accepted cross-campaign rankings still require identical model,
+numerical, implementation, and registry fingerprints and use the canonical
+variational functional; a period-two survivor contributes its orbit-averaged
+energy, never a single phase or averaged field.

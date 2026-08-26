@@ -557,3 +557,52 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   loading, stateless rejection, SHA propagation, three-branch preparation, and
   no-ledger-write preparation. No Slurm job was submitted, no ledger row was
   changed, and no immutable or full HDF5 artifact was modified.
+
+## 2026-08-26: Seed-aware conditional chi=400 staging
+
+- The accidental standard campaign named literal `RUN_ID` was retained and
+  audited rather than treated as the intended recurrence run. Its independent
+  unfrustrated pairing seed collapsed to a nearly zero-pairing accepted fixed
+  point, the accepted SDW seed was slightly lower within that campaign, and the
+  CDW seed stagnated. Its implementation fingerprint differs from v3, so no
+  cross-run energy ranking was authorized.
+- The chi=400 successor is now two separately prepared campaigns. Stage A is
+  unchanged: v3 orbit phases `001` and `002` remain separate full-MPS parents,
+  accompanied by independent `pairing_s2`, with a 20-update raw probe and no
+  Anderson entry. Its smoke plus first segments reserve at most `9.125`
+  node-hours.
+- Conditional Stage B is unavailable until the Stage A stateless results and
+  hash-linked full scratch artifacts are present and verified. At least one
+  phase-parent lineage and the independent `pairing_s2` lineage must each be an
+  accepted pairing-bearing solution with `max|alpha| >= 1e-4`; every phase of
+  an accepted orbit must clear the floor separately. The gate also requires
+  cubic-unfrustrated geometry, Float64, the current implementation, and exact
+  model, numerical, implementation, and `E_p`-registry fingerprints. It writes
+  the source paths and hashes to `conditional_gate.tsv`.
+- If and only if that gate passes,
+  `prepare-recurrence-competitors RECURRENCE_RUN NEW_RUN` creates independent
+  `sdw_s2` and `cdw_s2` chi=400 controls with random seeds `1203` and `1304`.
+  They share Stage A's numerical fingerprint and raw recurrence policy. Their
+  80-iteration execution ceiling allows Anderson only after a recurrence-free
+  20-update raw probe; an unaccepted raw recurrence still stops and remains
+  phase-resolved. Stage B's smoke plus first segments reserve at most `6.125`
+  node-hours.
+- The combined first-segment envelope is `15.250` node-hours. Against the
+  synced `114.500` ledger snapshot, Stage A projects `123.625` reserved and
+  `276.375` unreserved; both stages project `129.750` reserved and `270.250`
+  unreserved under the 400-node-hour project cap. Their combined four-segment
+  emergency ceiling is `60.250`, but no continuation is pre-authorized. The
+  unused allowance is intentionally retained for higher-bond-dimension and
+  scaling calculations. Live Perlmutter accounting remains authoritative.
+- Launcher v1.5.0 separates preparation from submission. `submit RUN_ID` now
+  requires an existing prepared campaign and cannot silently create the
+  standard nine-branch matrix. `prepare-standard` is explicit, and literal
+  placeholders including `RUN_ID` are rejected for submission actions.
+- Local validation passed Julia syntax parsing, `bash -n`, the read-only
+  `plan-recurrence` ledger calculation, and all 263 Julia assertions. The 62
+  Phase 1 launcher assertions cover the conditional two-lineage gate,
+  phase-by-phase orbit fields, full-artifact hashes, fingerprint equality,
+  two-branch preparation, no-ledger-write preparation, placeholder rejection,
+  no implicit campaign creation, and the hard-cap rejection path. No Slurm job
+  was submitted or cancelled, no ledger row changed, no campaign was prepared
+  against Perlmutter scratch, and no immutable HDF5 artifact was modified.

@@ -250,9 +250,11 @@ end
     @test occursin("sanitize_cuda_runtime_environment", script_source)
     @test occursin("require_current_run_version", script_source)
     @test occursin("require_worker_compatible_run_version", script_source)
-    @test occursin("PHASE1_SCRIPT_VERSION=\"1.4.0\"", script_source)
+    @test occursin("PHASE1_SCRIPT_VERSION=\"1.5.0\"", script_source)
     @test occursin("prepare-recovery)", script_source)
     @test occursin("prepare-recurrence)", script_source)
+    @test occursin("prepare-recurrence-competitors)", script_source)
+    @test occursin("prepare-standard)", script_source)
     @test occursin("--licenses=scratch,cfs", script_source)
     @test occursin("compact_results.jl", script_source)
     @test !occursin("transfer_files.py", migration_source)
@@ -298,6 +300,12 @@ end
             "PHASE1_LEDGER_PATH" => bash_path(ledger),
             "PHASE1_JULIA" => bash_path(julia_executable),
         )
+        run(pipeline(
+            addenv(`$bash_executable $script prepare-standard mock_phase1`, environment...),
+            stdout=devnull,
+        ))
+        @test !isfile(ledger)
+        @test strip(read(joinpath(run_root, "mock_phase1", "campaign_kind.txt"), String)) == "standard"
         run(pipeline(
             addenv(`$bash_executable $script submit mock_phase1`, environment...),
             stdout=devnull,
@@ -429,18 +437,170 @@ end
         @test phase_config["run"]["parent_sha256"] == LadderMPSMFT.sha256_file(source_full_state)
         @test phase_config["dmrg"]["maxdim"] == 400
         @test phase_config["convergence"]["cycle_action"] == "stop"
+        @test strip(read(joinpath(recurrence_run, "campaign_kind.txt"), String)) == "recurrence"
+        # The mock launcher runs through Git Bash while Julia is native Windows;
+        # rewrite the locator in the host-native form used by synthetic HDF5 links.
+        write(
+            joinpath(recurrence_run, "full_storage_path.txt"),
+            joinpath(scratch_root, "mock_recurrence") * "\n",
+        )
 
+        recurrence_numerical = LadderMPSMFT.numerical_fingerprint(recurrence_base)
+        recurrence_implementation = LadderMPSMFT.implementation_fingerprint()
+        recurrence_ep_hash = LadderMPSMFT.sha256_file(recurrence_base.model.ep_source)
+        function write_gate_state(
+            label::AbstractString;
+            accepted::Bool,
+            status::AbstractString,
+            period::Int,
+            unmixed::Bool,
+            alpha_max::Float64,
+        )
+            path = joinpath(recurrence_run, "results", label, "result", "state.h5")
+            full_path = joinpath(
+                scratch_root,
+                "mock_recurrence",
+                "results",
+                label,
+                "result",
+                "state.h5",
+            )
+            mkpath(dirname(path))
+            mkpath(dirname(full_path))
+            h5open(full_path, "w") do file
+                file["synthetic_full_state"] = true
+            end
+            h5open(path, "w") do file
+                file["status"] = status
+                file["accepted"] = accepted
+                file["fundamental_period"] = period
+                file["unmixed_cycle_probe"] = unmixed
+                fields = create_group(file, "fields")
+                measured = create_group(fields, "measured")
+                measured["alpha"] = fill(alpha_max, 2, 4)
+                if status == "periodic_solution"
+                    cycles = create_group(file, "cycle_members")
+                    for (index, phase_name) in enumerate(("001", "002"))
+                        phase = create_group(cycles, phase_name)
+                        phase_measured = create_group(phase, "measured")
+                        phase_measured["alpha"] = fill(alpha_max / index, 2, 4)
+                    end
+                end
+                model = create_group(file, "model")
+                model["transverse_geometry"] = "cubic_unfrustrated"
+                provenance = create_group(file, "provenance")
+                provenance["initial_seed"] = "pairing"
+                provenance["model_fingerprint"] = LadderMPSMFT.model_fingerprint(recurrence_base.model)
+                provenance["numerical_fingerprint"] = recurrence_numerical
+                provenance["implementation_sha256"] = recurrence_implementation
+                provenance["ep_source_sha256"] = recurrence_ep_hash
+                provenance["tensor_scalar_type"] = "float64"
+                analysis = create_group(file, "analysis_storage")
+                analysis["is_stateless_copy"] = true
+                analysis["full_artifact_path"] = full_path
+                analysis["full_artifact_sha256"] = LadderMPSMFT.sha256_file(full_path)
+            end
+            return path
+        end
+        write_gate_state(
+            "unfrustrated__pairing_s1_phase001_chi400";
+            accepted=true,
+            status="periodic_solution",
+            period=2,
+            unmixed=true,
+            alpha_max=1.0e-2,
+        )
+        write_gate_state(
+            "unfrustrated__pairing_s1_phase002_chi400";
+            accepted=false,
+            status="maximum_iterations",
+            period=0,
+            unmixed=true,
+            alpha_max=1.1e-2,
+        )
+        write_gate_state(
+            "unfrustrated__pairing_s2_chi400";
+            accepted=true,
+            status="fixed_point",
+            period=1,
+            unmixed=true,
+            alpha_max=2.0e-3,
+        )
+        controls_plan = read(
+            addenv(`$bash_executable $script plan-recurrence-controls`, environment...),
+            String,
+        )
+        @test occursin("Conditional Stage B first segments: 6.125000000 node-hours", controls_plan)
+        @test occursin("Combined first-segment envelope: 15.250000000 node-hours", controls_plan)
+        ledger_before_controls = read(ledger, String)
+        run(pipeline(
+            addenv(
+                `$bash_executable $script prepare-recurrence-competitors mock_recurrence mock_recurrence_controls`,
+                environment...,
+            ),
+            stdout=devnull,
+        ))
+        @test read(ledger, String) == ledger_before_controls
+        controls_run = joinpath(run_root, "mock_recurrence_controls")
+        @test strip(read(joinpath(controls_run, "campaign_kind.txt"), String)) == "recurrence_competitors"
+        @test strip(read(joinpath(controls_run, "branch_count.txt"), String)) == "2"
+        @test length(readlines(joinpath(controls_run, "manifest.tsv"))) == 3
+        @test length(readlines(joinpath(controls_run, "conditional_gate.tsv"))) == 4
+        sdw_control = TOML.parsefile(joinpath(
+            controls_run,
+            "configs",
+            "unfrustrated__sdw_s2_chi400.segment-001.toml",
+        ))
+        @test sdw_control["run"]["max_iterations"] == 80
+        @test sdw_control["run"]["random_seed"] == 1203
+        @test sdw_control["convergence"]["cycle_action"] == "stop"
+        @test LadderMPSMFT.numerical_fingerprint(load_settings(joinpath(
+            controls_run,
+            "configs",
+            "unfrustrated__sdw_s2_chi400.segment-001.toml",
+        ))) == recurrence_numerical
+
+        placeholder_rejected = run(pipeline(
+            ignorestatus(addenv(
+                `$bash_executable $script prepare-standard RUN_ID`,
+                environment...,
+            )),
+            stdout=devnull,
+            stderr=devnull,
+        ))
+        @test !success(placeholder_rejected)
+        @test !ispath(joinpath(run_root, "RUN_ID"))
+
+        missing_submit_rejected = run(pipeline(
+            ignorestatus(addenv(
+                `$bash_executable $script submit not_prepared`,
+                environment...,
+            )),
+            stdout=devnull,
+            stderr=devnull,
+        ))
+        @test !success(missing_submit_rejected)
+        @test !ispath(joinpath(run_root, "not_prepared"))
+
+        run(pipeline(
+            addenv(
+                `$bash_executable $script prepare-standard cap_rejection`,
+                environment...,
+                "PHASE1_ADDITIONAL_NODE_HOUR_CAP" => "27.1",
+            ),
+            stdout=devnull,
+        ))
         rejected = run(pipeline(
             ignorestatus(addenv(
                 `$bash_executable $script submit cap_rejection`,
                 environment...,
-                "PHASE1_ADDITIONAL_NODE_HOUR_CAP" => "27.1",
             )),
             stdout=devnull,
             stderr=devnull,
         ))
         @test !success(rejected)
-        @test !ispath(joinpath(run_root, "cap_rejection"))
+        @test isdir(joinpath(run_root, "cap_rejection"))
+        @test length(readlines(joinpath(run_root, "cap_rejection", "jobs.tsv"))) == 1
         @test strip(read(joinpath(directory, "slurm", "next_job_id"), String)) == "700010"
     end
 end
