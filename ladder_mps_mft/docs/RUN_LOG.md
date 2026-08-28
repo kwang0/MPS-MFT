@@ -643,3 +643,19 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   assertions after Git Bash was added to the Windows test process path. No job
   was submitted or cancelled, no ledger row was changed, and no immutable HDF5
   file was overwritten.
+
+## 2026-08-27: stateless-pruner Python 3.6 compatibility correction
+
+- The first Perlmutter invocation stopped at parse time because the default
+  `python3` does not recognize `from __future__ import annotations`. Parse-time
+  failure occurred before argument handling, verification, manifest backup, or
+  deletion, so no campaign file could have changed.
+- The optional future import and Python 3.7+/3.9+ annotation dependencies were
+  removed. The utility now uses ordinary classes and `typing` generics that are
+  compatible with Python 3.6.
+- Python 3.6 grammar validation and a complete four-campaign dry run pass. A
+  temporary-copy apply test also passed the Julia stateless verifier before and
+  after pruning. The corrected script SHA-256 is
+  `a9e16279a1af279360fefcfe404dc7b411ae35fe22a345898f104a6798dcc449`.
+- No real campaign artifact was pruned, no full scratch artifact was modified,
+  no job was submitted or cancelled, and no ledger row changed.

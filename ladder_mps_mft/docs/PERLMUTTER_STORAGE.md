@@ -185,6 +185,8 @@ For a disposable workstation copy whose scratch paths are not mounted, replace
 manifest is backed up as `stateless_manifest.before-prune-TIMESTAMP.tsv`; the
 active manifest is rewritten atomically and remains compatible with
 `verify_stateless_results.jl`. Apply mode runs that Julia verifier both before
-and after pruning, in addition to the Python hash and size checks. The removed compact extras can be regenerated
+and after pruning, in addition to the Python hash and size checks. The utility
+is compatible with the older Python 3.6 interpreter available as `python3` on
+some Perlmutter login environments. The removed compact extras can be regenerated
 from the recorded full scratch artifacts. Do not apply the tool to an active
 campaign, and archive irreplaceable full states to HPSS independently.

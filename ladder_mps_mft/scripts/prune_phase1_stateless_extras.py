@@ -13,8 +13,6 @@ and ``orbit_period_*_iter_*.h5`` files with a verified sibling ``state.h5`` are
 eligible for removal.
 """
 
-from __future__ import annotations
-
 import argparse
 import csv
 import hashlib
@@ -23,10 +21,9 @@ import re
 import shutil
 import subprocess
 import sys
-from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
-from typing import Iterable
+from typing import Iterable, List, Set, Tuple
 
 
 MANIFEST_NAME = "stateless_manifest.tsv"
@@ -45,9 +42,9 @@ CHECKPOINT_NAMES = {"checkpoint_best.h5", "checkpoint_latest.h5"}
 ORBIT_NAME = re.compile(r"^orbit_period_[0-9]+_iter_[0-9]+\.h5$")
 
 
-@dataclass(frozen=True)
 class ManifestRow:
-    values: tuple[str, ...]
+    def __init__(self, values: Tuple[str, ...]) -> None:
+        self.values = values
 
     @property
     def relative_path(self) -> str:
@@ -78,14 +75,19 @@ class ManifestRow:
         return int(self.values[7])
 
 
-@dataclass(frozen=True)
 class PrunePlan:
-    manifest: Path
-    rows: tuple[ManifestRow, ...]
-    removable: tuple[ManifestRow, ...]
+    def __init__(
+        self,
+        manifest: Path,
+        rows: Tuple[ManifestRow, ...],
+        removable: Tuple[ManifestRow, ...],
+    ) -> None:
+        self.manifest = manifest
+        self.rows = rows
+        self.removable = removable
 
     @property
-    def retained(self) -> tuple[ManifestRow, ...]:
+    def retained(self) -> Tuple[ManifestRow, ...]:
         removed = {row.relative_path for row in self.removable}
         return tuple(row for row in self.rows if row.relative_path not in removed)
 
@@ -128,7 +130,7 @@ def local_path(manifest: Path, relative_path: str) -> Path:
     return candidate
 
 
-def read_manifest(manifest: Path) -> tuple[ManifestRow, ...]:
+def read_manifest(manifest: Path) -> Tuple[ManifestRow, ...]:
     with manifest.open("r", encoding="utf-8", newline="") as stream:
         reader = csv.reader(stream, delimiter="\t")
         try:
@@ -137,8 +139,8 @@ def read_manifest(manifest: Path) -> tuple[ManifestRow, ...]:
             raise ValueError(f"empty stateless manifest: {manifest}") from error
         if header != EXPECTED_HEADER:
             raise ValueError(f"unexpected stateless manifest header: {manifest}")
-        rows: list[ManifestRow] = []
-        seen: set[str] = set()
+        rows = []  # type: List[ManifestRow]
+        seen = set()  # type: Set[str]
         for line_number, values in enumerate(reader, start=2):
             if len(values) != len(EXPECTED_HEADER):
                 raise ValueError(f"malformed row {line_number} in {manifest}")
@@ -190,7 +192,7 @@ def build_plan(manifest: Path, require_full: bool) -> PrunePlan:
         if require_full:
             verify_full(row)
 
-    removable: list[ManifestRow] = []
+    removable = []  # type: List[ManifestRow]
     for row in rows:
         if not is_prunable(row):
             continue
@@ -305,7 +307,7 @@ def main() -> int:
 
     project_root = Path(__file__).resolve().parent.parent
     runs = [resolve_run(project_root, value) for value in args.runs]
-    manifests: list[Path] = []
+    manifests = []  # type: List[Path]
     for run in runs:
         found = sorted(run.rglob(MANIFEST_NAME))
         if not found:
