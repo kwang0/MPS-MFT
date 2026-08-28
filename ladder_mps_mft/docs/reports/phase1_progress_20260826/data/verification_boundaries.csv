@@ -1,0 +1,6 @@
+boundary,verified,not_verified,authority
+Compact-data integrity,v2: 42 artifacts; v3: 50 artifacts; independent campaign: 48 artifacts (saved audit).,No local full-MPS byte/hash comparison for scratch artifacts.,Compact verifier locally; full verification must run on Perlmutter.
+Hamiltonian and effective-energy identities,v3 and independent campaign: zero failures in nine states each.,v2 fails all nine and is screening-only.,Saved Phase 1 audit tables.
+Scientific convergence,"Finite-L, finite-chi self-consistency for accepted states.","No L extrapolation, chi extrapolation, discarded-weight extrapolation, or thermodynamic phase claim.",Phase 1 acceptance contract and convergence documentation.
+Current allocation control,Latest user-supplied Perlmutter status: 114.625 node-hours conservatively reserved after the Stage A smoke.,The local synced ledger ends at 114.500 and is not the current accounting authority.,Live Perlmutter ledger and accounting output.
+Legacy-grid reproduction in this report,"Saved reviewed artifact, extracts, and query outputs from the 28-file audit were reused exactly.",The original legacy HDF5 grid was not reprocessed during this report build.,Saved 2026-08-14 legacy analysis artifact.

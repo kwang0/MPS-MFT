@@ -1,0 +1,10 @@
+panel_label,campaign,geometry,accepted,raw_map_candidate,mixer_dependent_candidate,excluded,total_branches
+v2 · frustrated,v2 Float32,Frustrated cubic,0,2,1,0,3
+v2 · unfrustrated,v2 Float32,Unfrustrated cubic,0,1,2,0,3
+v2 · square,v2 Float32,Square,0,0,2,1,3
+v3 · frustrated,v3 Float64,Frustrated cubic,3,0,0,0,3
+v3 · unfrustrated,v3 Float64,Unfrustrated cubic,2,1,0,0,3
+v3 · square,v3 Float64,Square,3,0,0,0,3
+independent · frustrated,independent chi=200,Frustrated cubic,3,0,0,0,3
+independent · unfrustrated,independent chi=200,Unfrustrated cubic,2,0,0,1,3
+independent · square,independent chi=200,Square,3,0,0,0,3

@@ -147,3 +147,44 @@ states (and any checkpoint needed for future continuation) to the project's
 HPSS location before relying on scratch as the only full copy. The compact CFS
 and local mirrors are sufficient for analysis and publication figures, but not
 for DMRG restart or MPS-level diagnostics.
+
+## Prune redundant stateless transfer extras
+
+Even MPS-free mirrors can become large because final states, rolling
+checkpoints, and detected-orbit snapshots repeat complete field histories and
+correlations. `scripts/prune_phase1_stateless_extras.py` removes only the
+redundant compact `checkpoint_best.h5`, `checkpoint_latest.h5`, and
+`orbit_period_*_iter_*.h5` files. It retains every final `state.h5`, diagnostic,
+summary, configuration, log, and control manifest. It never changes the full
+scratch tree or any HDF5 file in place.
+
+The default is a read-only, hash-checking plan. It supports both migrated
+campaign-wide `stateless_results` manifests and newer branch-level manifests
+under `results`:
+
+```bash
+python3 scripts/prune_phase1_stateless_extras.py \
+  20260823_phase1_gpu_v2 \
+  20260824_phase1_gpu_v3_float64_history \
+  RUN_ID \
+  20260826_phase1_unfrustrated_pairing_recurrence_chi400
+```
+
+On Perlmutter, verify every recorded full source before applying the plan:
+
+```bash
+python3 scripts/prune_phase1_stateless_extras.py --apply --require-full \
+  20260823_phase1_gpu_v2 \
+  20260824_phase1_gpu_v3_float64_history \
+  RUN_ID \
+  20260826_phase1_unfrustrated_pairing_recurrence_chi400
+```
+
+For a disposable workstation copy whose scratch paths are not mounted, replace
+`--require-full` with the explicit `--local-only` boundary. Each changed
+manifest is backed up as `stateless_manifest.before-prune-TIMESTAMP.tsv`; the
+active manifest is rewritten atomically and remains compatible with
+`verify_stateless_results.jl`. Apply mode runs that Julia verifier both before
+and after pruning, in addition to the Python hash and size checks. The removed compact extras can be regenerated
+from the recorded full scratch artifacts. Do not apply the tool to an active
+campaign, and archive irreplaceable full states to HPSS independently.

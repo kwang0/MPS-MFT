@@ -1,0 +1,17 @@
+{
+  "generated_at": "2026-08-26T20:09:20.324736Z",
+  "branch": "codex/mps-mft-phase0-refactor",
+  "commit": "ec969b3690f2acae05306807c5c9c6195d755f7f",
+  "inputs": [
+    "ladder_mps_mft/output/phase1_gpu/20260823_phase1_gpu_v2/audit-report-20260826/states.tsv",
+    "ladder_mps_mft/output/phase1_gpu/20260824_phase1_gpu_v3_float64_history/audit-win-nextprep-20260825/states.tsv",
+    "ladder_mps_mft/output/phase1_gpu/RUN_ID/audit-local-20260825/states.tsv",
+    "analysis/fourier_max_grid_2026-08-14/artifact.json"
+  ],
+  "current_perlmutter_budget_snapshot": {
+    "reserved": 114.625,
+    "unreserved": 285.375,
+    "hard_cap": 400.0,
+    "basis": "User-supplied phase1_gpu.sh status output after Stage A smoke job 57620629 completed"
+  }
+}

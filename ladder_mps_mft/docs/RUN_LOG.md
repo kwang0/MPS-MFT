@@ -606,3 +606,40 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   no implicit campaign creation, and the hard-cap rejection path. No Slurm job
   was submitted or cancelled, no ledger row changed, no campaign was prepared
   against Perlmutter scratch, and no immutable HDF5 artifact was modified.
+
+## 2026-08-27: chi=400 Stage A audit and stateless-transfer pruning control
+
+- Compact-only verification passed all 14 Stage A branch artifacts. Their
+  manifests represent `11,826,906,884` full bytes and `163,304,236` compact
+  bytes. Full scratch files were not mounted or verified on Windows.
+- A fresh audit in `audit-win-stagea-20260827` found zero accepted states, two
+  raw-map period-two candidates, and one `time_limit` result. Both phase-parent
+  candidates remain pairing-bearing at `max|alpha|` about `0.0187`, pass
+  density and Hamiltonian/effective-energy consistency, and fail only the
+  variational-energy recurrence gate with `dE/site=3.171e-5` and `3.370e-5`.
+  Their phases remain separate and unranked.
+- The independent `pairing_s2` branch reached nine raw records. Its relative
+  residual fell to `7.877e-3` at record 6 and then grew to `3.923e-1` by the
+  time limit, so its destination basin is unresolved. The conditional Stage B
+  gate fails and the SDW/CDW controls must not be prepared.
+- The next exact calculation is one explicit segment-002 continuation of only
+  `unfrustrated__pairing_s2_chi400`. Its plan-only requested cost is `3.000`
+  node-hours, projecting the synced ledger from `123.625` to `126.625` and
+  leaving `273.375` under the 400-additional-node-hour cap. No further segment
+  is pre-authorized.
+- `scripts/prune_phase1_stateless_extras.py` adds a dry-run-first cleanup for
+  redundant compact checkpoints and orbit snapshots while retaining final
+  states, diagnostics, summaries, configs, and logs. The current four-run
+  dry-run projects compact payload reduction from `1715.023` to `501.972` MiB,
+  saving `1213.051` MiB. Applying on Perlmutter requires full-source hash
+  verification; applying to an unmounted workstation mirror requires an
+  explicit local-only boundary. No real campaign file was pruned in this
+  audit.
+- The cleanup utility is Python and documentation-only. The scientific
+  implementation fingerprint remains
+  `bf67d865fcb44e339dc44994fc11a0c703056a0356f3edf6f7432987251130f4`.
+  A temporary-copy apply test passed the Julia stateless verifier both before
+  and after pruning, and the complete local Julia suite passed all 263
+  assertions after Git Bash was added to the Windows test process path. No job
+  was submitted or cancelled, no ledger row was changed, and no immutable HDF5
+  file was overwritten.

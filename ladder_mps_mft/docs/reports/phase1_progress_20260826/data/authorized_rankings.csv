@@ -1,0 +1,7 @@
+campaign,geometry,authorized_order,relative_offsets_total,excluded,interpretation
+v3 Float64 recovery,Frustrated cubic,CDW seed < SDW seed < pairing seed,0; +0.007368263458; +0.008447412380,None,All three accepted; all retain max|alpha| ≈ 0.011.
+v3 Float64 recovery,Unfrustrated cubic,CDW seed < SDW seed,0; +0.000312604756,Pairing seed: unaccepted raw-map period-2 candidate,The accepted splitting is tiny; pairing cannot be ranked.
+v3 Float64 recovery,Square,pairing seed < SDW seed < CDW seed,0; +0.001045316109; +0.058892533574,None,Accepted finite-chi seed-basin ordering only.
+independent chi=200,Frustrated cubic,SDW seed < CDW seed < pairing seed,0; +0.000468121858; +0.002485188371,None,Winner reverses relative to v3; fingerprints differ across campaigns.
+independent chi=200,Unfrustrated cubic,SDW seed < pairing seed,0; +0.000730901361,CDW seed: stagnated,Pairing seed converges with max|alpha| = 6.45e-7.
+independent chi=200,Square,SDW seed < CDW seed < pairing seed,0; +0.058855958961; +0.059173902674,None,Winner reverses relative to v3; no cross-run energy comparison.

@@ -1,0 +1,7 @@
+state_label,campaign,seed,classification,accepted,alpha_max,log10_alpha_max,stage_b_floor,log10_stage_b_floor,iterations,residual_rel,energy_gate,implementation_comparable
+v3 · pairing,v3 parent lineages,pairing,raw_map_candidate,False,0.019249413505784383,-1.7155824981077799,0.0001,-4.0,49,0.0006141454434096095,False,False
+v3 · sdw,v3 parent lineages,sdw,accepted,True,3.540165190844429e-09,-8.450976472494446,0.0001,-4.0,4,0.0008233119223438792,True,False
+v3 · cdw,v3 parent lineages,cdw,accepted,True,2.3184906496569993e-08,-7.634794651249979,0.0001,-4.0,4,0.0010868148683386588,True,False
+independent · pairing,independent chi=200,pairing,accepted,True,6.450061928477241e-07,-6.19043611558693,0.0001,-4.0,18,0.0002453242792277683,True,False
+independent · sdw,independent chi=200,sdw,accepted,True,7.856690294934523e-10,-9.104760366092973,0.0001,-4.0,39,0.0009879776096732463,True,False
+independent · cdw,independent chi=200,cdw,stagnated,False,0.015479332136846383,-1.8102477810910687,0.0001,-4.0,34,0.0008194654884716563,False,False
