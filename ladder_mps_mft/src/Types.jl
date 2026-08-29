@@ -91,6 +91,11 @@ Base.@kwdef struct RunSettings
     random_seed::Int = 1
     initial_seed::Symbol = :pairing
     initial_amplitude::Float64 = 1e-3
+    initial_seed_protocol::Symbol = :legacy
+    initial_mode_number::Int = 0
+    initial_mode_phase_pi::Float64 = 0.0
+    initial_pairing_form_factor::Symbol = :onsite_s
+    initial_leg_parity::Symbol = :auto
     inherit_from::Union{Nothing,String} = nothing
     inherit_sha256::Union{Nothing,String} = nothing
     parent_checkpoint::Union{Nothing,String} = nothing

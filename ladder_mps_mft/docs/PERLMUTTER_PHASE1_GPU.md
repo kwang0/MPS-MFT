@@ -240,6 +240,52 @@ ceiling is `60.250` node-hours, but continuations are not pre-authorized and
 must be justified branch by branch; preserving the remaining budget for
 higher-chi and scaling runs is part of the gate.
 
+## Matched-seed convergence pilot
+
+The next independent-start control is a three-branch chi=400 pilot at the same
+unfrustrated representative point. It tests whether clean, norm-matched source
+fields reduce seed-induced texture and slow drift. The locked branches are:
+
+- pairing: finite-open-ladder mode `n=0`, phase `0`, `d_wave` form factor;
+- SDW: mode `n=58`, phase `0`, odd leg parity; and
+- CDW: mode `n=11`, phase `0`, even leg parity.
+
+Every branch uses field norm `1e-3`, common product-state random seed `1404`,
+Float64 CUDA, chi `400`, 16 sweeps, and the same 20-update raw period-one/two
+probe. `max_iterations=21` and `cycle_action=stop` prevent entry into Anderson
+acceleration. There is no inherited, parent, or resume checkpoint. The three
+different carrier modes are targeted from the observed order-channel profiles;
+this pilot is a convergence/basin test, not an unbiased wavevector survey or a
+thermodynamic phase comparison.
+
+After syncing the reviewed tree to Perlmutter, first run the read-only plan
+against the live authoritative ledger, then prepare the campaign:
+
+```bash
+cd "$CFS/m4863/MPS-MFT/ladder_mps_mft"
+bash slurm/phase1_gpu.sh plan-matched-seed-pilot
+
+MATCHED_RUN=20260828_phase1_unfrustrated_matched_seed_chi400
+bash slurm/phase1_gpu.sh prepare-matched-seed-pilot "$MATCHED_RUN"
+sed -n '1,4p' "output/phase1_gpu/$MATCHED_RUN/manifest.tsv"
+```
+
+Preparation creates configs and scratch directories only; it does not submit
+or reserve. The first-segment upper bound is `0.125 + 3*3 = 9.125` node-hours.
+Only after checking the manifest and live ledger, stage the smoke and matrix:
+
+```bash
+bash slurm/phase1_gpu.sh submit "$MATCHED_RUN"
+bash slurm/phase1_gpu.sh status "$MATCHED_RUN"
+bash slurm/phase1_gpu.sh submit-matrix "$MATCHED_RUN"
+```
+
+The first `submit` reserves only the `0.125`-node-hour smoke. The matrix action
+is unavailable until the smoke is `COMPLETED` and its Float64/runtime/linear-
+algebra artifact passes validation; it then reserves three `3.0`-node-hour
+segments atomically under the ledger lock. No continuation is pre-authorized.
+Reserve later work for higher bond dimension and length convergence.
+
 ## Pair-binding interpolation and optional calculations
 
 At the representative point, the registry contains

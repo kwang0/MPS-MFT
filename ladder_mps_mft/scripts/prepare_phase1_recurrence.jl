@@ -227,6 +227,7 @@ open(manifest_path, "w") do io
         "parent_numerical_fingerprint", "parent_tensor_scalar_type",
         "source_phase_iteration", "source_phase_update_mode",
         "full_output_directory", "stateless_output_directory",
+        "initial_seed_protocol", "initial_seed_fingerprint",
     ), '\t'))
     for branch in branches
         raw = TOML.parsefile(base_path)
@@ -310,6 +311,8 @@ open(manifest_path, "w") do io
             source_phase_update_mode,
             full_output_directory,
             stateless_output_directory,
+            String(settings.run.initial_seed_protocol),
+            initial_seed_fingerprint(settings),
         ), '\t'))
     end
 end

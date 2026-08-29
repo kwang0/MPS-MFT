@@ -318,6 +318,11 @@ function _initial_state(settings::ProjectSettings)
         seed=settings.run.initial_seed,
         amplitude=settings.run.initial_amplitude,
         rng,
+        protocol=settings.run.initial_seed_protocol,
+        mode_number=settings.run.initial_mode_number,
+        mode_phase_pi=settings.run.initial_mode_phase_pi,
+        pairing_form_factor=settings.run.initial_pairing_form_factor,
+        leg_parity=settings.run.initial_leg_parity,
     )
     return (;
         sites,

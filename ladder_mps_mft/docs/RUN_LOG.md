@@ -659,3 +659,129 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   `a9e16279a1af279360fefcfe404dc7b411ae35fe22a345898f104a6798dcc449`.
 - No real campaign artifact was pruned, no full scratch artifact was modified,
   no job was submitted or cancelled, and no ledger row changed.
+
+## 2026-08-28: local spatial phase-defect audit
+
+- Added the read-only `scripts/audit_spatial_phase_defects.py` diagnostic and
+  six synthetic Python tests. The audit reads compact schema-v5 applied and
+  measured field histories, constructs charge/spin leg-parity and pairing
+  form-factor profiles, measures a Hann-weighted central-75% finite-interval
+  spectrum, demodulates the dominant wavevector, and identifies diagnostic
+  amplitude-zero/phase-jump coincidences above an absolute `1e-6` signal floor.
+  The resolved second spectral peak excludes the two bins adjacent to the
+  primary peak.
+- The spatial residual definition respects the recurrence contract. Ordinary
+  fixed-point searches use the rung-resolved raw link `f(x)-x`; period-two
+  candidates use the same-phase two-step field change `x_m-x_(m-2)`, because a
+  one-step difference contains the physical orbit-phase contrast. These maps
+  are diagnostic only and do not replace literal raw-map acceptance or cycle
+  gates.
+- Ran the audit locally on all three chi=400 Stage A states and all nine v3
+  Float64-history states. The ignored output is
+  `output/phase1_gpu/20260826_phase1_unfrustrated_pairing_recurrence_chi400/spatial-defect-audit-20260828`;
+  it contains a Markdown report, 12 figures, source SHA-256 inventory, state
+  and channel summaries, spectral histories, phase-slip candidates, and
+  residual-component histories.
+- Neither phase-parent branch has a final charge, spin, or pairing phase-slip
+  candidate. Their final same-phase period-two changes are `1.891583e-3` and
+  `1.928906e-3`, both peaked at rung 51 and about `90.46%`/`90.50%` Hartree by
+  squared field residual. The hotspot is stationary through nearly the entire
+  raw history rather than traversing the ladder.
+- The independent `pairing_s2` final raw-link residual is `0.392273`, peaks at
+  rung 49 after peaking at rung 62 in records 7--8, and is `95.49%` Hartree by
+  squared residual. Its only resolved phase-slip diagnostic is in the charge
+  envelope, moving from rung 15 at record 8 to rung 12 at record 9; the final
+  charge candidate is 37 rungs from the residual peak. No spin or pairing
+  phase-slip candidate is resolved. These histories therefore do not currently
+  support a moving domain wall as the primary cause of Stage A nonconvergence;
+  open-boundary and multi-wavevector alternatives remain diagnostic questions.
+- Validation: all six Python tests pass, `git diff --check` passes, and the
+  complete Julia suite passes all 263 assertions when launched from a Git Bash
+  login environment. Git emitted sandbox-user safe-directory warnings in
+  provenance subprocesses, but the associated 68 checkpoint/selection
+  assertions passed. Every HDF5 input was opened read-only and compact-SHA
+  hashed. Full Perlmutter scratch artifacts were not mounted or verified.
+- This audit consumed zero node-hours. It submitted or cancelled no job,
+  changed no ledger row, wrote no HDF5 file, changed no acceptance or energy
+  ranking, and made no thermodynamic-phase claim.
+
+## 2026-08-28: opt-in matched-mode independent seeding
+
+- Added an opt-in `matched_mode` independent-seed protocol while preserving
+  the historical random-pairing/staggered-Hartree path as the default
+  `legacy` protocol. Exact regression tests confirm that explicitly selecting
+  `legacy` reproduces the prior pairing, SDW, and CDW field arrays.
+- A matched seed uses one declared finite-ladder cosine mode and phase,
+  mean-controls nonzero modes, maps the profile into pairing, SDW, or CDW, and
+  normalizes the complete stored field vector to
+  `norm(alpha,beta,mu_cdw)/sqrt(2L) = initial_amplitude`. Pairing templates are
+  explicit `onsite_s`, `rung_s`, `leg_s`, `extended_s`, or `d_wave`; Hartree
+  leg parity is explicit or resolves to SDW-odd/CDW-even. Uniform leg-even CDW
+  is rejected as redundant with chemical-potential targeting.
+- Matched branch preparation assigns a common product-state random seed across
+  SC, SDW, and CDW within a geometry. The guarded standard, recurrence, and
+  conditional-control manifests record the seed protocol and a dedicated
+  initial-seed fingerprint. Seed choices deliberately remain outside the
+  numerical fingerprint so independently seeded converged states can still
+  pass the established same-model/numerics/code/E_p comparison gates.
+- `scripts/inspect_initial_seed.jl` provides a no-DMRG, lightweight TSV preview
+  containing charge/spin leg-parity profiles and pairing-form-factor proxies.
+  `docs/SEEDING.md` gives the exact formula and emphasizes that one matched
+  mode controls roughness and source norm but does not remove wavevector or
+  form-factor selection; a predeclared mode/phase bank is still required for
+  basin-accessibility claims.
+- Final local validation passed all 348 Julia assertions, including the legacy
+  regression, matched-channel norm and structure, config/provenance round
+  trips, lightweight inspection, matched branch generation, production
+  common-seed preparation, recurrence manifests, and all existing Slurm,
+  ledger, recurrence, variational, checkpoint, and strict-selection guards.
+  All six spatial-audit Python tests also pass. The final scientific
+  implementation fingerprint is
+  `edb4d230260000b89def6b61c5a0ee861eaa8ed34464e937c7865e9c8de87593`.
+- This implementation and validation were local and consumed zero node-hours.
+  No job was prepared on Perlmutter, submitted, continued, or cancelled; no
+  ledger row or immutable HDF5 artifact changed. Against the last synced
+  `123.625` reserved snapshot, a three-branch first-segment pilot remains a
+  plan-only `9.125` node-hour envelope (`132.750` projected reserved and
+  `267.250` unreserved), subject to authoritative live accounting before any
+  preparation or submission.
+
+## 2026-08-28: matched-seed chi=400 pilot submission preparation
+
+- Added the locked `configs/phase1_gpu_matched_seed_pilot_chi400.toml` and
+  `scripts/prepare_phase1_matched_seed_pilot.jl`. The three independent
+  cubic-unfrustrated branches use one common product-state random seed (`1404`),
+  field norm `1e-3`, phase `0`, and respectively pairing mode `0` with
+  `d_wave` form factor, SDW mode `58` with odd leg parity, and CDW mode `11`
+  with even leg parity. They share the model and numerical fingerprints but
+  retain distinct seed fingerprints.
+- Every branch uses chi `400`, 16 sweeps, cutoff `1e-11`, DMRG energy tolerance
+  `1e-9`, and exactly 20 unmixed raw-map updates. `max_iterations=21` and
+  `cycle_action=stop` prohibit Anderson entry. The modes are a targeted
+  convergence control based on observed finite-run profiles, not an unbiased
+  wavevector survey or a thermodynamic-phase claim.
+- Launcher v1.6.0 adds read-only `plan-matched-seed-pilot` and preparation-only
+  `prepare-matched-seed-pilot NEW_RUN`. Preparation creates exactly three
+  configs plus a seed-resolved manifest, requires independent starts, writes
+  full MPS paths below scratch and stateless destinations below CFS, and does
+  not call Slurm or modify the ledger. Smoke and matrix submission remain
+  separate guarded actions.
+- The first-segment plan is `0.125 + 3*3 = 9.125` requested node-hours; the
+  four-segment `36.125` ceiling is informational and no continuation is
+  pre-authorized. The synced ledger still ends at `123.625`, projecting
+  `132.750` reserved and `267.250` unreserved. The user reports a queued
+  segment-002 `pairing_s2` continuation that is absent from this synced
+  `jobs.tsv` and ledger. If the live guarded ledger contains its expected
+  `3.000` reservation, cancellation does not reclaim it and the authoritative
+  projection is instead `135.750` reserved with `264.250` unreserved.
+- Local validation passes shell syntax, `git diff --check`, all 375 Julia
+  assertions (including 89 launcher assertions), and all six spatial-audit
+  Python tests. The synthetic launcher test verifies exact branch settings,
+  preparation without a ledger write, the `9.125` calculation, smoke gating,
+  atomic matrix reservation, and hard-cap rejection.
+- The resulting scientific implementation fingerprint is
+  `6156bb036632935c691b0b88e2e372a92db91949012a5d74096984eccd067197`.
+- No real campaign directory was prepared on Perlmutter, no job was submitted
+  or cancelled, no ledger row changed, and no HDF5 artifact was written or
+  overwritten. Live Perlmutter job state and accounting must be reconciled
+  before syncing the scientific implementation or submitting the new smoke.

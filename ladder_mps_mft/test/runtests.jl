@@ -137,6 +137,11 @@ end
     @test settings.model.geometry == :cubic_frustrated
     @test settings.model.ep_signed < 0
     @test settings.run.initial_seed == :pairing
+    @test settings.run.initial_seed_protocol == :legacy
+    @test settings.run.initial_mode_number == 0
+    @test settings.run.initial_mode_phase_pi == 0.0
+    @test settings.run.initial_pairing_form_factor == :onsite_s
+    @test settings.run.initial_leg_parity == :auto
     @test settings.runtime.backend == :cpu
     @test settings.convergence.unmixed_cycle_probe
     @test settings.convergence.accepted_periods == [1, 2]
@@ -201,7 +206,14 @@ end
     @test cpu_fingerprint != float32_fingerprint
     first_seed = initial_fields(test_model(); seed=:pairing, rng=MersenneTwister(7))
     second_seed = initial_fields(test_model(); seed=:pairing, rng=MersenneTwister(7))
+    explicit_legacy_seed = initial_fields(
+        test_model();
+        seed=:pairing,
+        rng=MersenneTwister(7),
+        protocol=:legacy,
+    )
     @test first_seed.alpha == second_seed.alpha
+    @test first_seed.alpha == explicit_legacy_seed.alpha
     @test first_seed.alpha == permutedims(first_seed.alpha, (2, 1, 4, 3))
     @test all(iszero, first_seed.beta)
     sdw_seed = initial_fields(test_model(); seed=:sdw, amplitude=1.0)
@@ -210,6 +222,196 @@ end
     cdw_seed = initial_fields(test_model(); seed=:cdw, amplitude=1.0)
     @test cdw_seed.mu_cdw[1, :] == [-1.0, -1.0, 1.0, 1.0]
     @test cdw_seed.mu_cdw[2, :] == cdw_seed.mu_cdw[1, :]
+
+    matched_model = ModelSettings(;
+        L=8,
+        U=2.0,
+        t0=1.0,
+        tp=0.1,
+        density=1.0,
+        r_range=2,
+        geometry=:cubic_frustrated,
+        ep=0.2,
+        ep_signed=-0.2,
+        ep_source="synthetic",
+    )
+    matched_kwargs = (
+        amplitude=2.5e-3,
+        protocol=:matched_mode,
+        mode_number=2,
+        mode_phase_pi=0.25,
+    )
+    pairing_matched = initial_fields(
+        matched_model;
+        seed=:pairing,
+        pairing_form_factor=:d_wave,
+        matched_kwargs...,
+    )
+    pairing_matched_other_rng = initial_fields(
+        matched_model;
+        seed=:pairing,
+        pairing_form_factor=:d_wave,
+        rng=MersenneTwister(999),
+        matched_kwargs...,
+    )
+    extended_matched = initial_fields(
+        matched_model;
+        seed=:pairing,
+        pairing_form_factor=:extended_s,
+        matched_kwargs...,
+    )
+    sdw_matched = initial_fields(matched_model; seed=:sdw, matched_kwargs...)
+    cdw_matched = initial_fields(matched_model; seed=:cdw, matched_kwargs...)
+    for fields in (pairing_matched, sdw_matched, cdw_matched)
+        @test field_l2_per_physical_site(fields, matched_model) ≈ matched_kwargs.amplitude
+        @test all(iszero, fields.beta)
+    end
+    @test pairing_matched.alpha == pairing_matched_other_rng.alpha
+    @test pairing_matched.alpha == permutedims(pairing_matched.alpha, (2, 1, 4, 3))
+    @test all(
+        extended_matched.alpha[rung, rung, 1, 2] ≈ -pairing_matched.alpha[rung, rung, 1, 2]
+        for rung in 1:matched_model.L
+    )
+    @test all(
+        extended_matched.alpha[rung, rung + 1, leg, leg] ≈
+            pairing_matched.alpha[rung, rung + 1, leg, leg]
+        for rung in 1:(matched_model.L - 1), leg in 1:2
+    )
+    @test all(iszero, pairing_matched.mu_cdw)
+    @test any(value -> !iszero(value), pairing_matched.alpha)
+    @test all(iszero, sdw_matched.alpha)
+    @test all(iszero, cdw_matched.alpha)
+    for rung in 1:matched_model.L
+        first_site = rung_leg_to_site(rung, 0)
+        second_site = rung_leg_to_site(rung, 1)
+        @test sdw_matched.mu_cdw[1, second_site] ≈ -sdw_matched.mu_cdw[1, first_site]
+        @test sdw_matched.mu_cdw[2, first_site] ≈ -sdw_matched.mu_cdw[1, first_site]
+        @test cdw_matched.mu_cdw[1, second_site] ≈ cdw_matched.mu_cdw[1, first_site]
+        @test cdw_matched.mu_cdw[2, first_site] ≈ cdw_matched.mu_cdw[1, first_site]
+    end
+    @test sum(matched_mode_profile(
+        matched_model;
+        mode_number=matched_kwargs.mode_number,
+        phase_pi=matched_kwargs.mode_phase_pi,
+    )) ≈ 0 atol=1e-14
+    @test initial_mode_wavevector_pi(matched_model, 2) ≈ 2 / 7
+    @test_throws ArgumentError initial_fields(
+        matched_model;
+        seed=:cdw,
+        protocol=:matched_mode,
+        mode_number=0,
+    )
+
+    matched_settings = ProjectSettings(
+        model=matched_model,
+        run=RunSettings(
+            random_seed=404,
+            initial_seed=:pairing,
+            initial_seed_protocol=:matched_mode,
+            initial_mode_number=2,
+            initial_mode_phase_pi=0.25,
+            initial_pairing_form_factor=:d_wave,
+        ),
+    )
+    validate_settings(matched_settings)
+    @test LadderMPSMFT.numerical_fingerprint(matched_settings) == LadderMPSMFT.numerical_fingerprint(ProjectSettings(
+        model=matched_model,
+        run=RunSettings(random_seed=999, initial_seed=:cdw),
+    ))
+    @test initial_seed_fingerprint(matched_settings) != initial_seed_fingerprint(ProjectSettings(
+        model=matched_model,
+        run=RunSettings(random_seed=999, initial_seed=:cdw),
+    ))
+    @test initial_seed_fingerprint(matched_settings) == initial_seed_fingerprint(ProjectSettings(
+        model=matched_model,
+        run=RunSettings(
+            random_seed=404,
+            initial_seed=:pairing,
+            initial_seed_protocol=:matched_mode,
+            initial_mode_number=2,
+            initial_mode_phase_pi=0.25,
+            initial_pairing_form_factor=:d_wave,
+            initial_leg_parity=:odd,
+        ),
+    ))
+    provenance = collect_provenance(matched_settings)
+    @test provenance["initial_seed_protocol"] == "matched_mode"
+    @test provenance["initial_mode_number"] == 2
+    @test provenance["initial_pairing_form_factor"] == "d_wave"
+    @test provenance["initial_leg_parity_resolved"] == "not_applicable"
+    @test provenance["initial_seed_normalization"] == "full_field_l2_per_sqrt_physical_site"
+    @test provenance["initial_seed_fingerprint"] == initial_seed_fingerprint(matched_settings)
+
+    @test_throws ArgumentError validate_settings(ProjectSettings(
+        model=matched_model,
+        run=RunSettings(
+            initial_seed=:cdw,
+            initial_seed_protocol=:matched_mode,
+            initial_mode_number=0,
+        ),
+    ))
+    @test_throws ArgumentError validate_settings(ProjectSettings(
+        model=matched_model,
+        run=RunSettings(initial_pairing_form_factor=:unsupported),
+    ))
+
+    mktempdir() do directory
+        raw = TOML.parsefile(joinpath(ROOT, "configs", "phase0_timing.toml"))
+        run_raw = raw["run"]
+        run_raw["initial_seed_protocol"] = "matched_mode"
+        run_raw["initial_mode_number"] = 1
+        run_raw["initial_mode_phase_pi"] = 0.25
+        run_raw["initial_pairing_form_factor"] = "extended_s"
+        run_raw["initial_leg_parity"] = "even"
+        path = joinpath(directory, "matched.toml")
+        open(path, "w") do io
+            TOML.print(io, raw; sorted=true)
+        end
+        loaded = load_settings(path)
+        @test loaded.run.initial_seed_protocol == :matched_mode
+        @test loaded.run.initial_mode_number == 1
+        @test loaded.run.initial_mode_phase_pi == 0.25
+        @test loaded.run.initial_pairing_form_factor == :extended_s
+        @test loaded.run.initial_leg_parity == :even
+
+        scan_directory = joinpath(directory, "matched_scan")
+        prepare_script = joinpath(ROOT, "scripts", "prepare_branch_scan.jl")
+        run(`$(Base.julia_cmd()) --startup-file=no --project=$ROOT $prepare_script $path $scan_directory`)
+        generated = [TOML.parsefile(joinpath(scan_directory, "$branch.toml")) for branch in ("sc", "sdw", "cdw")]
+        @test [config["run"]["initial_seed"] for config in generated] == ["pairing", "sdw", "cdw"]
+        @test all(config["run"]["random_seed"] == run_raw["random_seed"] for config in generated)
+        @test all(config["run"]["initial_seed_protocol"] == "matched_mode" for config in generated)
+        @test all(config["run"]["initial_mode_number"] == 1 for config in generated)
+        @test occursin("does not sample wavevector", read(joinpath(
+            scan_directory,
+            "BRANCH_MANIFEST.md",
+        ), String))
+
+        profile_path = joinpath(directory, "seed_profile.tsv")
+        inspect_script = joinpath(ROOT, "scripts", "inspect_initial_seed.jl")
+        inspection = read(
+            `$(Base.julia_cmd()) --startup-file=no --project=$ROOT $inspect_script $(joinpath(scan_directory, "sc.toml")) $profile_path`,
+            String,
+        )
+        @test occursin("field_l2_per_physical_site=0.001", inspection)
+        @test startswith(read(profile_path, String), "rung\tcharge_even\tcharge_odd")
+
+        control_directory = joinpath(directory, "phase1_matched_control")
+        full_directory = joinpath(directory, "phase1_matched_full")
+        phase1_prepare_script = joinpath(ROOT, "scripts", "prepare_phase1_gpu.jl")
+        run(`$(Base.julia_cmd()) --startup-file=no --project=$ROOT $phase1_prepare_script $path $control_directory $full_directory matched_test`)
+        for geometry in ("frustrated", "unfrustrated", "square")
+            configs = [TOML.parsefile(joinpath(
+                control_directory,
+                "configs",
+                "$(geometry)__$(channel)_s1.segment-001.toml",
+            )) for channel in ("pairing", "sdw", "cdw")]
+            @test length(unique([config["run"]["random_seed"] for config in configs])) == 1
+            @test all(config["run"]["initial_seed_protocol"] == "matched_mode" for config in configs)
+        end
+        manifest_header = split(first(readlines(joinpath(control_directory, "manifest.tsv"))), '\t')
+        @test manifest_header[end - 1:end] == ["initial_seed_protocol", "initial_seed_fingerprint"]
+    end
 end
 
 @testset "Phase 0 run environment round trip" begin
@@ -250,10 +452,12 @@ end
     @test occursin("sanitize_cuda_runtime_environment", script_source)
     @test occursin("require_current_run_version", script_source)
     @test occursin("require_worker_compatible_run_version", script_source)
-    @test occursin("PHASE1_SCRIPT_VERSION=\"1.5.0\"", script_source)
+    @test occursin("PHASE1_SCRIPT_VERSION=\"1.6.0\"", script_source)
     @test occursin("prepare-recovery)", script_source)
     @test occursin("prepare-recurrence)", script_source)
     @test occursin("prepare-recurrence-competitors)", script_source)
+    @test occursin("prepare-matched-seed-pilot)", script_source)
+    @test occursin("plan-matched-seed-pilot)", script_source)
     @test occursin("prepare-standard)", script_source)
     @test occursin("--licenses=scratch,cfs", script_source)
     @test occursin("compact_results.jl", script_source)
@@ -559,6 +763,65 @@ end
             "configs",
             "unfrustrated__sdw_s2_chi400.segment-001.toml",
         ))) == recurrence_numerical
+
+        matched_plan = read(
+            addenv(`$bash_executable $script plan-matched-seed-pilot`, environment...),
+            String,
+        )
+        @test occursin("First-segment envelope: 9.125000000 node-hours", matched_plan)
+        @test occursin("mode n=0, d_wave", matched_plan)
+        @test occursin("mode n=58, odd leg parity", matched_plan)
+        @test occursin("mode n=11, even leg parity", matched_plan)
+        ledger_before_matched = read(ledger, String)
+        run(pipeline(
+            addenv(
+                `$bash_executable $script prepare-matched-seed-pilot mock_matched_seed`,
+                environment...,
+            ),
+            stdout=devnull,
+        ))
+        @test read(ledger, String) == ledger_before_matched
+        matched_run = joinpath(run_root, "mock_matched_seed")
+        @test strip(read(joinpath(matched_run, "campaign_kind.txt"), String)) ==
+            "matched_seed_pilot"
+        @test strip(read(joinpath(matched_run, "branch_count.txt"), String)) == "3"
+        @test length(readlines(joinpath(matched_run, "manifest.tsv"))) == 4
+        matched_labels = (
+            "unfrustrated__pairing_matched_m000_chi400",
+            "unfrustrated__sdw_matched_m058_chi400",
+            "unfrustrated__cdw_matched_m011_chi400",
+        )
+        matched_settings = [load_settings(joinpath(
+            matched_run,
+            "configs",
+            "$label.segment-001.toml",
+        )) for label in matched_labels]
+        @test [settings.run.initial_seed for settings in matched_settings] ==
+            [:pairing, :sdw, :cdw]
+        @test [settings.run.initial_mode_number for settings in matched_settings] == [0, 58, 11]
+        @test [settings.run.initial_leg_parity for settings in matched_settings] ==
+            [:auto, :odd, :even]
+        @test matched_settings[1].run.initial_pairing_form_factor == :d_wave
+        @test all(settings.run.initial_seed_protocol == :matched_mode for settings in matched_settings)
+        @test all(settings.run.initial_amplitude == 1.0e-3 for settings in matched_settings)
+        @test all(settings.run.initial_mode_phase_pi == 0.0 for settings in matched_settings)
+        @test all(settings.run.random_seed == 1404 for settings in matched_settings)
+        @test all(settings.dmrg.maxdim == 400 for settings in matched_settings)
+        @test all(settings.run.max_iterations == 21 for settings in matched_settings)
+        @test all(settings.convergence.probe_iterations == 20 for settings in matched_settings)
+        @test all(settings.convergence.cycle_action == :stop for settings in matched_settings)
+        @test length(unique(
+            LadderMPSMFT.numerical_fingerprint(settings) for settings in matched_settings
+        )) == 1
+        @test length(unique(
+            LadderMPSMFT.model_fingerprint(settings.model) for settings in matched_settings
+        )) == 1
+        @test length(unique(
+            LadderMPSMFT.initial_seed_fingerprint(settings) for settings in matched_settings
+        )) == 3
+        matched_header = split(first(readlines(joinpath(matched_run, "manifest.tsv"))), '\t')
+        @test "initial_mode_wavevector_pi" in matched_header
+        @test "initial_seed_normalization" in matched_header
 
         placeholder_rejected = run(pipeline(
             ignorestatus(addenv(

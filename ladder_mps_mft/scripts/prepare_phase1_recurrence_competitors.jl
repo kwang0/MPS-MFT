@@ -177,6 +177,8 @@ base_settings.convergence.probe_iterations == 20 || error(
 base_settings.run.max_iterations == base_settings.convergence.probe_iterations + 1 || error(
     "conditional-control base must retain the raw-only Stage A execution boundary",
 )
+matched_mode = base_settings.run.initial_seed_protocol == :matched_mode
+common_random_seed = base_settings.run.random_seed
 
 manifest_path = joinpath(recurrence_run, "manifest.tsv")
 isfile(manifest_path) || error("recurrence campaign has no manifest: $manifest_path")
@@ -262,6 +264,7 @@ open(output_manifest, "w") do io
         "parent_numerical_fingerprint", "parent_tensor_scalar_type",
         "source_phase_iteration", "source_phase_update_mode",
         "full_output_directory", "stateless_output_directory",
+        "initial_seed_protocol", "initial_seed_fingerprint",
     ), '\t'))
     for branch in branches
         raw = TOML.parsefile(base_path)
@@ -272,8 +275,8 @@ open(output_manifest, "w") do io
         run["branch_label"] = branch.branch
         run["preparation"] = "conditional_independent_seed"
         run["direction"] = "none"
-        run["seed_label"] = branch.seed_label
-        run["random_seed"] = branch.random_seed
+        run["seed_label"] = matched_mode ? "matched_$(branch.seed_label)" : branch.seed_label
+        run["random_seed"] = matched_mode ? common_random_seed : branch.random_seed
         run["initial_seed"] = branch.seed
         run["max_iterations"] = 80
         for key in (
@@ -307,7 +310,7 @@ open(output_manifest, "w") do io
             String(model.geometry),
             branch.branch,
             branch.seed,
-            string(branch.random_seed),
+            string(run["random_seed"]),
             config_path,
             LadderMPSMFT.sha256_file(config_path),
             String(model.ep_mode),
@@ -322,6 +325,8 @@ open(output_manifest, "w") do io
             "", "", "0", "", "", "", "0", "",
             full_output_directory,
             stateless_output_directory,
+            String(settings.run.initial_seed_protocol),
+            initial_seed_fingerprint(settings),
         ), '\t'))
     end
 end

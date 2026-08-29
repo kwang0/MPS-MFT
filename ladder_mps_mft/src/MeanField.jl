@@ -7,7 +7,139 @@ function make_sites(model::ModelSettings, runtime::RuntimeSettings=RuntimeSettin
     )
 end
 
-function initial_fields(model::ModelSettings; seed::Symbol=:pairing, amplitude::Real=1e-3, rng=MersenneTwister(1))
+const MATCHED_PAIRING_FORM_FACTORS = (:onsite_s, :rung_s, :leg_s, :extended_s, :d_wave)
+
+function resolved_initial_leg_parity(seed::Symbol, requested::Symbol)
+    requested in (:auto, :even, :odd) || throw(ArgumentError(
+        "initial leg parity must be auto, even, or odd",
+    ))
+    requested != :auto && return requested
+    return seed == :sdw ? :odd : :even
+end
+
+function initial_mode_wavevector_pi(model::ModelSettings, mode_number::Integer)
+    0 <= mode_number <= model.L - 1 || throw(ArgumentError(
+        "initial mode number must lie between 0 and L-1",
+    ))
+    return Float64(mode_number) / (model.L - 1)
+end
+
+function _matched_mode_offset(model::ModelSettings, mode_number::Integer, phase_pi::Real)
+    mode_number == 0 && return 0.0
+    q_pi = initial_mode_wavevector_pi(model, mode_number)
+    return mean(cospi(q_pi * (rung - 1) + phase_pi) for rung in 1:model.L)
+end
+
+function _matched_mode_value(
+    model::ModelSettings,
+    position::Real,
+    mode_number::Integer,
+    phase_pi::Real,
+    offset::Real,
+)
+    q_pi = initial_mode_wavevector_pi(model, mode_number)
+    return cospi(q_pi * (position - 1) + phase_pi) - offset
+end
+
+"""Return the mean-controlled rung profile used by the opt-in matched-mode seed."""
+function matched_mode_profile(
+    model::ModelSettings;
+    mode_number::Integer=0,
+    phase_pi::Real=0.0,
+)
+    isfinite(phase_pi) || throw(ArgumentError("initial mode phase must be finite"))
+    offset = _matched_mode_offset(model, mode_number, phase_pi)
+    return [
+        _matched_mode_value(model, rung, mode_number, phase_pi, offset)
+        for rung in 1:model.L
+    ]
+end
+
+function _set_symmetric_alpha!(alpha, left::Int, right::Int, leg::Int, other_leg::Int, value::Real)
+    alpha[left, right, leg, other_leg] = value
+    alpha[right, left, other_leg, leg] = value
+    return alpha
+end
+
+function _matched_pairing_template!(
+    alpha,
+    model::ModelSettings,
+    rung_profile,
+    mode_number::Integer,
+    phase_pi::Real,
+    form_factor::Symbol,
+)
+    form_factor in MATCHED_PAIRING_FORM_FACTORS || throw(ArgumentError(
+        "unknown matched pairing form factor '$form_factor'",
+    ))
+    offset = _matched_mode_offset(model, mode_number, phase_pi)
+
+    if form_factor == :onsite_s
+        for rung in 1:model.L, leg in 1:2
+            _set_symmetric_alpha!(alpha, rung, rung, leg, leg, rung_profile[rung])
+        end
+        return alpha
+    elseif form_factor == :rung_s
+        for rung in 1:model.L
+            _set_symmetric_alpha!(alpha, rung, rung, 1, 2, rung_profile[rung])
+        end
+        return alpha
+    end
+
+    model.r_range >= 1 || throw(ArgumentError(
+        "matched pairing form factor '$form_factor' requires model.r_range >= 1",
+    ))
+    for rung in 1:(model.L - 1)
+        bond_value = _matched_mode_value(
+            model,
+            rung + 0.5,
+            mode_number,
+            phase_pi,
+            offset,
+        )
+        for leg in 1:2
+            _set_symmetric_alpha!(alpha, rung, rung + 1, leg, leg, bond_value)
+        end
+    end
+    form_factor == :leg_s && return alpha
+
+    rung_sign = form_factor == :d_wave ? -1.0 : 1.0
+    for rung in 1:model.L
+        _set_symmetric_alpha!(alpha, rung, rung, 1, 2, rung_sign * rung_profile[rung])
+    end
+    return alpha
+end
+
+function field_l2_per_physical_site(fields::FieldState, model::ModelSettings)
+    squared_norm = sum(abs2, fields.alpha) + sum(abs2, fields.beta) + sum(abs2, fields.mu_cdw)
+    return sqrt(squared_norm / (2 * model.L))
+end
+
+function _normalize_matched_seed!(fields::FieldState, model::ModelSettings, amplitude::Real)
+    target = Float64(amplitude)
+    if iszero(target)
+        fill!(fields.alpha, 0.0)
+        fill!(fields.beta, 0.0)
+        fill!(fields.mu_cdw, 0.0)
+        return fields
+    end
+    current = field_l2_per_physical_site(fields, model)
+    current > eps(Float64) || throw(ArgumentError(
+        "the requested matched-mode seed is identically zero; choose another mode or phase",
+    ))
+    scale = target / current
+    fields.alpha .*= scale
+    fields.beta .*= scale
+    fields.mu_cdw .*= scale
+    return fields
+end
+
+function _legacy_initial_fields(
+    model::ModelSettings;
+    seed::Symbol=:pairing,
+    amplitude::Real=1e-3,
+    rng=MersenneTwister(1),
+)
     alpha = zeros(Float64, model.L, model.L, 2, 2)
     beta = zeros(Float64, 2, model.L, model.L, 2, 2)
     mu_cdw = zeros(Float64, 2, 2 * model.L)
@@ -38,6 +170,112 @@ function initial_fields(model::ModelSettings; seed::Symbol=:pairing, amplitude::
         throw(ArgumentError("unknown seed '$seed'"))
     end
     return FieldState(alpha, beta, mu_cdw)
+end
+
+function _matched_mode_initial_fields(
+    model::ModelSettings;
+    seed::Symbol,
+    amplitude::Real,
+    mode_number::Integer,
+    mode_phase_pi::Real,
+    pairing_form_factor::Symbol,
+    leg_parity::Symbol,
+)
+    alpha = zeros(Float64, model.L, model.L, 2, 2)
+    beta = zeros(Float64, 2, model.L, model.L, 2, 2)
+    mu_cdw = zeros(Float64, 2, 2 * model.L)
+    fields = FieldState(alpha, beta, mu_cdw)
+    seed == :zero && return fields
+
+    profile = matched_mode_profile(
+        model;
+        mode_number,
+        phase_pi=mode_phase_pi,
+    )
+    parity = resolved_initial_leg_parity(seed, leg_parity)
+    if seed == :pairing
+        _matched_pairing_template!(
+            alpha,
+            model,
+            profile,
+            mode_number,
+            mode_phase_pi,
+            pairing_form_factor,
+        )
+    elseif seed == :sdw || seed == :cdw
+        seed == :cdw && parity == :even && mode_number == 0 && amplitude > 0 &&
+            throw(ArgumentError(
+                "uniform even-parity matched CDW is redundant with chemical-potential targeting",
+            ))
+        for rung in 1:model.L, leg in 1:2
+            site = rung_leg_to_site(rung, leg - 1)
+            transverse_sign = parity == :odd && leg == 2 ? -1.0 : 1.0
+            value = profile[rung] * transverse_sign
+            if seed == :sdw
+                mu_cdw[1, site] = value
+                mu_cdw[2, site] = -value
+            else
+                mu_cdw[:, site] .= value
+            end
+        end
+    else
+        throw(ArgumentError("unknown seed '$seed'"))
+    end
+    return _normalize_matched_seed!(fields, model, amplitude)
+end
+
+"""
+Construct initial mean fields.
+
+`protocol=:legacy` preserves the historical random-pairing and deterministic
+staggered Hartree seeds exactly. `protocol=:matched_mode` maps one explicit
+finite-ladder cosine profile into a selected order channel and normalizes the
+complete field vector so `field_l2_per_physical_site(fields, model) == amplitude`.
+"""
+function initial_fields(
+    model::ModelSettings;
+    seed::Symbol=:pairing,
+    amplitude::Real=1e-3,
+    rng=MersenneTwister(1),
+    protocol::Symbol=:legacy,
+    mode_number::Integer=0,
+    mode_phase_pi::Real=0.0,
+    pairing_form_factor::Symbol=:onsite_s,
+    leg_parity::Symbol=:auto,
+)
+    isfinite(amplitude) && amplitude >= 0 || throw(ArgumentError(
+        "initial amplitude must be finite and nonnegative",
+    ))
+    protocol == :legacy && return _legacy_initial_fields(model; seed, amplitude, rng)
+    protocol == :matched_mode || throw(ArgumentError("unknown initial seed protocol '$protocol'"))
+    return _matched_mode_initial_fields(
+        model;
+        seed,
+        amplitude,
+        mode_number,
+        mode_phase_pi,
+        pairing_form_factor,
+        leg_parity,
+    )
+end
+
+function initial_seed_metadata(model::ModelSettings, run::RunSettings)
+    matched = run.initial_seed_protocol == :matched_mode
+    resolved_leg_parity = run.initial_seed in (:sdw, :cdw) ?
+        resolved_initial_leg_parity(run.initial_seed, run.initial_leg_parity) : :not_applicable
+    return (
+        protocol=run.initial_seed_protocol,
+        mode_number=run.initial_mode_number,
+        mode_wavevector_pi=initial_mode_wavevector_pi(model, run.initial_mode_number),
+        mode_phase_pi=run.initial_mode_phase_pi,
+        mode_basis=matched ? "mean-controlled finite-open-ladder cosine" : "legacy",
+        pairing_form_factor=run.initial_pairing_form_factor,
+        requested_leg_parity=run.initial_leg_parity,
+        resolved_leg_parity,
+        normalization=matched ? "full_field_l2_per_sqrt_physical_site" : "legacy_per_entry",
+        target_field_l2_per_physical_site=matched && run.initial_seed != :zero ?
+            run.initial_amplitude : NaN,
+    )
 end
 
 function configure_threading!(runtime::RuntimeSettings)

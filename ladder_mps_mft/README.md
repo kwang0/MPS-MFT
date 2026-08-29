@@ -42,6 +42,19 @@ Inspect the Phase 1 GPU plan without submitting anything:
 bash slurm/phase1_gpu.sh plan
 ```
 
+The targeted chi=400 matched-seed convergence pilot has its own read-only plan
+and preparation-only action:
+
+```bash
+bash slurm/phase1_gpu.sh plan-matched-seed-pilot
+bash slurm/phase1_gpu.sh prepare-matched-seed-pilot \
+  20260828_phase1_unfrustrated_matched_seed_chi400
+```
+
+Preparation does not submit a job or reserve node-hours. See
+`docs/PERLMUTTER_PHASE1_GPU.md` before running the separate smoke and matrix
+submission actions.
+
 Run a configured SCF branch:
 
 ```bash
@@ -53,6 +66,10 @@ Generate independent SC, SDW, and CDW configurations from a common base:
 ```bash
 julia --project=. scripts/prepare_branch_scan.jl configs/example_scf.toml output/my_branch_scan
 ```
+
+The default above preserves legacy seed behavior. For an opt-in smooth,
+equal-norm, common-product-state protocol and lightweight seed inspection, see
+`docs/SEEDING.md`.
 
 Accepted fixed points and validated periodic solutions with identical model, numerical, implementation, and E_p-registry fingerprints can be ranked:
 

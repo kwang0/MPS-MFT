@@ -10,6 +10,16 @@ a publishable state.
 
 `example_scf.toml` is a production-shaped template. Copy or generate variants before changing it. The `scripts/prepare_branch_scan.jl` helper makes SC, SDW, and CDW configurations that differ only in run lineage and initial seed.
 
+Independent starts default to the historical `initial_seed_protocol =
+"legacy"`. For channel-matched convergence controls, opt in to
+`"matched_mode"` and declare `initial_mode_number`,
+`initial_mode_phase_pi`, `initial_pairing_form_factor`, and
+`initial_leg_parity`. A matched branch is normalized by the complete field
+vector L2 norm per square root physical site. When the branch-scan helper sees
+a matched-mode base, it also gives all three channels the same product-state
+random seed. See `docs/SEEDING.md` for the exact formula, supported form
+factors, local inspection command, and the required mode/phase-bank caveat.
+
 The `[convergence]` defaults reserve the first 20 iterations for an unmixed raw-map probe, accept periods 1 and 2, and only then enable Anderson mixing. This prevents the mixer from averaging away the physical period-two CDW construction of Bollmark et al. (2025). Raise `probe_max_period` and `probe_iterations` before enabling a higher physical period, and document its transverse-sublattice interpretation.
 
 The `[model]` density is particles per physical ladder site, so the target particle number is approximately `2L*density`. `geometry` is one of `cubic_frustrated`, `cubic_unfrustrated`, or `square`.
@@ -24,6 +34,15 @@ and density controls, and makes the 20-update raw probe the whole segment by
 setting `max_iterations=probe_iterations+1` and `cycle_action=stop`. The
 launcher prepares two full-MPS orbit-member parents plus one independent
 pairing seed with one shared numerical fingerprint.
+
+`phase1_gpu_matched_seed_pilot_chi400.toml` is the locked base for the
+three-branch unfrustrated convergence pilot. Its preparation helper sets
+pairing to mode `0` with `d_wave` form factor, SDW to mode `58` with odd leg
+parity, and CDW to mode `11` with even leg parity. All three use amplitude
+`1e-3`, phase `0`, product-state seed `1404`, chi `400`, and exactly 20 raw-map
+updates with `cycle_action="stop"`. These carrier modes are a targeted
+convergence control selected from the observed finite-run profiles, not an
+unbiased wavevector scan.
 
 There are three mutually exclusive lineage modes:
 

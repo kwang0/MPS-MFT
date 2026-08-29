@@ -5,7 +5,7 @@
 
 set -euo pipefail
 
-readonly PHASE1_SCRIPT_VERSION="1.5.0"
+readonly PHASE1_SCRIPT_VERSION="1.6.0"
 script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
 project_dir="${PHASE1_PROJECT_DIR:-$(cd "$(dirname "$script_path")/.." && pwd)}"
 repo_root="${PHASE1_REPO_ROOT:-$(cd "$project_dir/.." && pwd)}"
@@ -28,6 +28,7 @@ PHASE1_DECLARED_ALLOCATION_NODE_HOURS="${PHASE1_DECLARED_ALLOCATION_NODE_HOURS:-
 PHASE1_DECLARED_USED_NODE_HOURS="${PHASE1_DECLARED_USED_NODE_HOURS:-277}"
 PHASE1_BASE_CONFIG="${PHASE1_BASE_CONFIG:-$project_dir/configs/phase1_gpu_base.toml}"
 PHASE1_RECURRENCE_CONFIG="${PHASE1_RECURRENCE_CONFIG:-$project_dir/configs/phase1_gpu_recurrence_chi400.toml}"
+PHASE1_MATCHED_SEED_CONFIG="${PHASE1_MATCHED_SEED_CONFIG:-$project_dir/configs/phase1_gpu_matched_seed_pilot_chi400.toml}"
 
 die() { echo "error: $*" >&2; exit 1; }
 require_command() { command -v "$1" >/dev/null 2>&1 || die "required command not found: $1"; }
@@ -86,15 +87,67 @@ validate_project() {
   [[ -f "$PHASE1_BASE_CONFIG" ]] || die "missing Phase 1 base config: $PHASE1_BASE_CONFIG"
   [[ -f "$PHASE1_RECURRENCE_CONFIG" ]] || die \
     "missing Phase 1 recurrence config: $PHASE1_RECURRENCE_CONFIG"
+  [[ -f "$PHASE1_MATCHED_SEED_CONFIG" ]] || die \
+    "missing Phase 1 matched-seed pilot config: $PHASE1_MATCHED_SEED_CONFIG"
   [[ -f "$project_dir/scripts/run_scf_gpu.jl" ]] || die "missing GPU SCF entry point"
   [[ -f "$project_dir/scripts/prepare_phase1_recurrence.jl" ]] || die \
     "missing recurrence preparation entry point"
   [[ -f "$project_dir/scripts/prepare_phase1_recurrence_competitors.jl" ]] || die \
     "missing conditional recurrence-competitor preparation entry point"
+  [[ -f "$project_dir/scripts/prepare_phase1_matched_seed_pilot.jl" ]] || die \
+    "missing matched-seed pilot preparation entry point"
   [[ -f "$project_dir/scripts/gpu_smoke.jl" ]] || die "missing GPU smoke test"
   [[ -f "$project_dir/scripts/validate_gpu_smoke.jl" ]] || die "missing GPU smoke validator"
   [[ -f "$project_dir/scripts/compact_results.jl" ]] || die "missing stateless-result compactor"
   (( PHASE1_MAX_SEGMENTS >= 1 )) || die "PHASE1_MAX_SEGMENTS must be positive"
+}
+
+print_matched_seed_pilot_plan() {
+  validate_project
+  local segment smoke initial ceiling committed projected remaining
+  segment="$(gpu_node_hours "$PHASE1_GPU_TIME")"
+  smoke="$(gpu_node_hours "$PHASE1_SMOKE_TIME")"
+  initial="$(awk -v s="$segment" -v p="$smoke" 'BEGIN {printf "%.9f", 3*s+p}')"
+  ceiling="$(awk -v s="$segment" -v p="$smoke" -v m="$PHASE1_MAX_SEGMENTS" \
+    'BEGIN {printf "%.9f", 3*m*s+p}')"
+  committed="$(ledger_total)"
+  projected="$(awk -v c="$committed" -v a="$initial" 'BEGIN {printf "%.9f", c+a}')"
+  remaining="$(awk -v cap="$PHASE1_ADDITIONAL_NODE_HOUR_CAP" -v p="$projected" \
+    'BEGIN {printf "%.9f", cap-p}')"
+  cat <<EOF
+Ladder MPS+MF chi=400 matched-seed convergence pilot
+
+Representative point: L=64, U=8, V=-0.2, t0=1.1, t_perp=0.1, density=0.9375
+Numerical control:    chi=400, 16 sweeps, cutoff=1e-11, energy_tol=1e-9
+Common seed control:  amplitude=1e-3, phase/pi=0, product-state random seed=1404
+Pairing branch:       finite-ladder mode n=0, d_wave form factor
+SDW branch:           finite-ladder mode n=58, odd leg parity
+CDW branch:           finite-ladder mode n=11, even leg parity
+Physics policy:       exactly 20 raw-map updates; stop before Anderson acceleration
+Lineage policy:       three independent starts; no inherited or resumed MPS
+Interpretation:       convergence/basin pilot, not an unbiased wavevector survey
+GPU request:          one of four GPUs, ${PHASE1_GPU_TIME}, ${PHASE1_GPU_CPUS} CPUs, shared QOS
+Per-segment reserve:  ${segment} GPU node-hours
+Per-campaign smoke:   ${smoke} GPU node-hours
+First-segment envelope: ${initial} node-hours
+Four-segment emergency ceiling: ${ceiling} node-hours (not pre-authorized)
+Hard project cap:     ${PHASE1_ADDITIONAL_NODE_HOUR_CAP} additional node-hours
+Ledger after first segments: ${projected} reserved; ${remaining} unreserved
+
+Preparation does not submit or reserve:
+  MATCHED_RUN=20260828_phase1_unfrustrated_matched_seed_chi400
+  bash $script_path prepare-matched-seed-pilot "\$MATCHED_RUN"
+
+Submission remains explicitly staged:
+  bash $script_path submit "\$MATCHED_RUN"
+  bash $script_path status "\$MATCHED_RUN"
+  bash $script_path submit-matrix "\$MATCHED_RUN"
+EOF
+  print_budget
+  awk -v current="$committed" -v requested="$initial" -v cap="$PHASE1_ADDITIONAL_NODE_HOUR_CAP" \
+    'BEGIN {exit !((current+requested) > cap)}' && die \
+    "matched-seed first-segment envelope would exceed the hard cap"
+  return 0
 }
 
 print_recurrence_plan() {
@@ -259,6 +312,7 @@ write_environment() {
     printf 'PHASE1_DECLARED_USED_NODE_HOURS=%q\n' "$PHASE1_DECLARED_USED_NODE_HOURS"
     printf 'PHASE1_BASE_CONFIG=%q\n' "$PHASE1_BASE_CONFIG"
     printf 'PHASE1_RECURRENCE_CONFIG=%q\n' "$PHASE1_RECURRENCE_CONFIG"
+    printf 'PHASE1_MATCHED_SEED_CONFIG=%q\n' "$PHASE1_MATCHED_SEED_CONFIG"
     printf 'PHASE1_RUN_ROOT=%q\n' "$run_root"
     printf 'PHASE1_SCRATCH_ROOT=%q\n' "$scratch_root"
     printf 'PHASE1_RUN_SCRATCH_DIR=%q\n' "$scratch_run_dir"
@@ -286,7 +340,7 @@ load_environment() {
   # shellcheck disable=SC1090
   source "$run_dir/run.env"
   case "${PHASE1_RUN_SCRIPT_VERSION:-missing}" in
-    1.0.0|1.0.1|1.1.0|1.2.0|1.3.0|1.4.0|1.5.0) ;;
+    1.0.0|1.0.1|1.1.0|1.2.0|1.3.0|1.4.0|1.5.0|1.6.0) ;;
     *) die "unsupported run script version ${PHASE1_RUN_SCRIPT_VERSION:-missing}; current version is $PHASE1_SCRIPT_VERSION";;
   esac
   project_dir="$PHASE1_PROJECT_DIR"
@@ -325,7 +379,7 @@ require_current_run_version() {
 
 require_worker_compatible_run_version() {
   case "${PHASE1_RUN_SCRIPT_VERSION:-missing}" in
-    1.2.0|1.3.0|1.4.0|1.5.0) ;;
+    1.2.0|1.3.0|1.4.0|1.5.0|1.6.0) ;;
     *) die "queued worker cannot execute run script ${PHASE1_RUN_SCRIPT_VERSION:-missing} with launcher $PHASE1_SCRIPT_VERSION";;
   esac
 }
@@ -369,6 +423,11 @@ initialize_run() {
       prepare_script="$project_dir/scripts/prepare_phase1_recurrence_competitors.jl"
       prepare_args=("$PHASE1_RECURRENCE_CONFIG" "$source_run_dir" "$run_dir" "$scratch_run_dir" "$run_id")
       ;;
+    matched_seed_pilot)
+      [[ -z "$source_run_dir" ]] || die "matched-seed pilot must use independent starts"
+      prepare_script="$project_dir/scripts/prepare_phase1_matched_seed_pilot.jl"
+      prepare_args=("$PHASE1_MATCHED_SEED_CONFIG" "$run_dir" "$scratch_run_dir" "$run_id")
+      ;;
     *) die "unknown Phase 1 campaign kind: $campaign_kind";;
   esac
   "$PHASE1_JULIA" --startup-file=no --project="$project_dir" \
@@ -391,15 +450,19 @@ validate_initialized_run() {
   [[ -f "$run_dir/manifest.tsv" ]] || die "prepared run is missing manifest.tsv"
   [[ -f "$run_dir/gpu-Manifest.toml" ]] || die "prepared run is missing its GPU manifest"
   [[ -f "$run_dir/gpu-Manifest.toml.sha256" ]] || die "prepared run is missing its GPU-manifest hash"
-  if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(3|4|5)\.0$ ]]; then
+  if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(3|4|5|6)\.0$ ]]; then
     [[ -d "$(full_run_directory_from_control "$run_dir")/results" ]] || die \
       "prepared run is missing its full-result scratch directory"
   fi
-  if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" == "1.5.0" ]]; then
+  if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(5|6)\.0$ ]]; then
     [[ -f "$run_dir/campaign_kind.txt" ]] || die "prepared run is missing campaign_kind.txt"
     campaign_kind="$(<"$run_dir/campaign_kind.txt")"
     case "$campaign_kind" in
       standard|recurrence|recurrence_competitors) ;;
+      matched_seed_pilot)
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" == "1.6.0" ]] || die \
+          "matched-seed pilot requires launcher v1.6.0"
+        ;;
       *) die "invalid prepared campaign kind: $campaign_kind";;
     esac
     if [[ "$campaign_kind" == "recurrence_competitors" ]]; then
@@ -761,6 +824,7 @@ Read-only:
   plan
   plan-recurrence
   plan-recurrence-controls
+  plan-matched-seed-pilot
   budget
   status [RUN_ID]
   show [RUN_ID]
@@ -771,6 +835,7 @@ Preparation only (no Slurm submission or budget reservation):
   prepare-recurrence SOURCE_RUN NEW_RUN Prepare phase-resolved chi=400 recurrence controls
   prepare-recurrence-competitors RECURRENCE_RUN NEW_RUN
                                         Prepare two controls only after the pairing-survival gate
+  prepare-matched-seed-pilot NEW_RUN     Prepare the three-branch chi=400 matched-seed pilot
 
 Submissions:
   submit RUN_ID                         Submit GPU smoke for an existing prepared campaign
@@ -789,13 +854,14 @@ action="${1:-plan}"
 case "$action" in
   plan) print_plan;;
   plan-recurrence|plan-recurrence-controls) print_recurrence_plan;;
+  plan-matched-seed-pilot) print_matched_seed_pilot_plan;;
   budget) print_budget;;
   submit)
     [[ $# == 2 ]] || die "submit requires RUN_ID"
     validate_submission_run_id "$2"
     require_command sbatch
     [[ -d "$run_root/$2" ]] || die \
-      "run is not prepared: $2; use an explicit prepare-standard, prepare-recovery, prepare-recurrence, or prepare-recurrence-competitors action first"
+      "run is not prepared: $2; use an explicit preparation action first"
     run_dir="$(resolve_run_dir "$2")"
     load_environment "$run_dir"
     require_current_run_version
@@ -826,6 +892,12 @@ case "$action" in
     [[ ! -e "$run_root/$3" ]] || die \
       "new conditional-control run already exists: $run_root/$3"
     initialize_run "$3" "$source_run_dir" recurrence_competitors
+    ;;
+  prepare-matched-seed-pilot)
+    [[ $# == 2 ]] || die "prepare-matched-seed-pilot requires NEW_RUN_ID"
+    [[ ! -e "$run_root/$2" ]] || die \
+      "new matched-seed pilot run already exists: $run_root/$2"
+    initialize_run "$2" "" matched_seed_pilot
     ;;
   submit-recovery)
     [[ $# == 3 ]] || die "submit-recovery requires SOURCE_RUN_ID NEW_RUN_ID"

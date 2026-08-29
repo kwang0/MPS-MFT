@@ -23,6 +23,21 @@ mkpath(config_directory)
 mkpath(joinpath(run_directory, "results"))
 mkpath(joinpath(full_run_directory, "results"))
 base = TOML.parsefile(base_path)
+base_run = base["run"]
+seed_protocol = Symbol(lowercase(String(get(base_run, "initial_seed_protocol", "legacy"))))
+seed_protocol in (:legacy, :matched_mode) || error(
+    "initial_seed_protocol must be legacy or matched_mode",
+)
+matched_mode = seed_protocol == :matched_mode
+common_random_seed = Int(get(base_run, "random_seed", 1))
+mode_number = Int(get(base_run, "initial_mode_number", 0))
+amplitude = Float64(get(base_run, "initial_amplitude", 1e-3))
+leg_parity = Symbol(lowercase(String(get(base_run, "initial_leg_parity", "auto"))))
+if matched_mode && amplitude > 0 && mode_number == 0 && leg_parity != :odd
+    error(
+        "a matched standard matrix needs initial_mode_number > 0 unless CDW uses odd leg parity",
+    )
+end
 
 function latest_source_state(source_directory::AbstractString, label::AbstractString)
     root = joinpath(source_directory, label)
@@ -70,6 +85,7 @@ open(manifest_path, "w") do io
         "parent_checkpoint", "parent_sha256", "parent_status",
         "parent_numerical_fingerprint", "parent_tensor_scalar_type",
         "full_output_directory", "stateless_output_directory",
+        "initial_seed_protocol", "initial_seed_fingerprint",
     ), '\t'))
     for geometry in geometries, seed in seeds
         label = "$(geometry.short)__$(seed.short)_s1"
@@ -82,8 +98,9 @@ open(manifest_path, "w") do io
         run["branch_label"] = seed.branch
         run["preparation"] = "independent_seed"
         run["direction"] = "none"
-        run["seed_label"] = "$(seed.short)_s1"
-        run["random_seed"] = seed.random + geometry.offset
+        run["seed_label"] = matched_mode ? "matched_$(seed.short)_s1" : "$(seed.short)_s1"
+        run["random_seed"] = matched_mode ? common_random_seed + geometry.offset :
+            seed.random + geometry.offset
         run["initial_seed"] = seed.initial
         for key in (
             "inherit_from", "inherit_sha256",
@@ -148,6 +165,8 @@ open(manifest_path, "w") do io
             parent_tensor_scalar_type,
             full_output_directory,
             stateless_output_directory,
+            String(settings.run.initial_seed_protocol),
+            initial_seed_fingerprint(settings),
         ), '\t'))
     end
 end

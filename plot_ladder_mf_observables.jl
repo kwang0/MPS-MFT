@@ -44,7 +44,7 @@ end
 #   plot_middle_histories_from_file("stateless_data/results_...h5"; source=:correlations)
 #   plot_order_fourier_heatmaps_from_file("stateless_data/results_...h5"; source=:correlations)
 #   plot_order_fourier_max_grid()
-#   plot_order_fourier_max_grid(transverse_geometry=:square)
+#   plot_order_fourier_max_grid(transverse_geometry=:square)  # defaults to tp=0.1
 #   plot_mf_change_slider_from_file("stateless_data/results_...h5"; field=:alpha)
 #   plot_mf_change_slider_from_file("stateless_data/results_...h5"; field=:beta, spin=:up)
 # The file-based wrappers put the HDF5 basename in the PyPlot figure title.
@@ -2077,6 +2077,8 @@ function plot_order_fourier_max_grid(;
     data_dir::AbstractString="stateless_data",
     suffix::Union{Nothing,AbstractString}=nothing,
     transverse_geometry=nothing,
+    tp::Union{Nothing,Real}=0.1,
+    tp_atol::Real=1e-8,
     t0_values=0.8:0.2:1.6,
     t0_min::Real=0.8,
     t0_max::Real=1.6,
@@ -2106,7 +2108,9 @@ function plot_order_fourier_max_grid(;
 
     isdir(data_dir) || throw(ArgumentError("data_dir does not exist: $data_dir"))
     t0_min <= t0_max || throw(ArgumentError("t0_min must be <= t0_max"))
+    tp_atol >= 0 || throw(ArgumentError("tp_atol must be nonnegative"))
     geometry = transverse_geometry === nothing ? nothing : _normalize_plot_transverse_geometry(transverse_geometry)
+    target_tp = tp === nothing ? nothing : Float64(tp)
     effective_suffix = suffix === nothing ? (geometry === nothing ? "_nodamping.h5" : "_gpu.h5") : String(suffix)
     t0_grid_values = t0_values === nothing ? nothing :
         [x for x in _sorted_unique_floats(t0_values) if t0_min - t0_atol <= x <= t0_max + t0_atol]
@@ -2118,6 +2122,7 @@ function plot_order_fourier_max_grid(;
     for filename in filenames
         params = _result_filename_parameters(filename)
         params === nothing && continue
+        target_tp !== nothing && !isapprox(params.tp, target_tp; atol=tp_atol, rtol=0) && continue
         file_geometry = geometry === nothing ? params.transverse_geometry : _result_transverse_geometry(filename)
         geometry !== nothing && file_geometry != geometry && continue
         t0_min - t0_atol <= params.t0 <= t0_max + t0_atol || continue
@@ -2137,7 +2142,8 @@ function plot_order_fourier_max_grid(;
     end
 
     geometry_description = geometry === nothing ? "" : " for transverse_geometry=$geometry"
-    isempty(records) && throw(ArgumentError("no $effective_suffix files$geometry_description with t0 in [$t0_min, $t0_max] were found in $data_dir"))
+    tp_description = target_tp === nothing ? "" : " with tp=$target_tp"
+    isempty(records) && throw(ArgumentError("no $effective_suffix files$geometry_description$tp_description with t0 in [$t0_min, $t0_max] were found in $data_dir"))
 
     t_values = t0_grid_values === nothing ? _sorted_unique_floats([rec.t0 for rec in records]) : t0_grid_values
     v_values = _sorted_unique_floats([rec.V0 for rec in records])

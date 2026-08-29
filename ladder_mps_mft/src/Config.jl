@@ -126,6 +126,15 @@ function load_settings(path::AbstractString)
         random_seed=Int(_value(run_raw, "random_seed", 1)),
         initial_seed=Symbol(lowercase(String(_value(run_raw, "initial_seed", "pairing")))),
         initial_amplitude=Float64(_value(run_raw, "initial_amplitude", 1e-3)),
+        initial_seed_protocol=Symbol(lowercase(String(_value(run_raw, "initial_seed_protocol", "legacy")))),
+        initial_mode_number=Int(_value(run_raw, "initial_mode_number", 0)),
+        initial_mode_phase_pi=Float64(_value(run_raw, "initial_mode_phase_pi", 0.0)),
+        initial_pairing_form_factor=Symbol(lowercase(String(_value(
+            run_raw,
+            "initial_pairing_form_factor",
+            "onsite_s",
+        )))),
+        initial_leg_parity=Symbol(lowercase(String(_value(run_raw, "initial_leg_parity", "auto")))),
         inherit_from=haskey(run_raw, "inherit_from") ? _project_path(String(run_raw["inherit_from"])) : nothing,
         inherit_sha256=haskey(run_raw, "inherit_sha256") ? lowercase(String(run_raw["inherit_sha256"])) : nothing,
         parent_checkpoint=haskey(run_raw, "parent_checkpoint") ? _project_path(String(run_raw["parent_checkpoint"])) : nothing,
@@ -210,7 +219,41 @@ function validate_settings(settings::ProjectSettings)
     settings.run.save_every >= 1 || throw(ArgumentError("run.save_every must be positive"))
     settings.run.initial_seed in (:pairing, :sdw, :cdw, :zero) ||
         throw(ArgumentError("initial_seed must be pairing, sdw, cdw, or zero"))
-    settings.run.initial_amplitude >= 0 || throw(ArgumentError("initial_amplitude must be nonnegative"))
+    isfinite(settings.run.initial_amplitude) && settings.run.initial_amplitude >= 0 ||
+        throw(ArgumentError("initial_amplitude must be finite and nonnegative"))
+    settings.run.initial_seed_protocol in (:legacy, :matched_mode) || throw(ArgumentError(
+        "initial_seed_protocol must be legacy or matched_mode",
+    ))
+    0 <= settings.run.initial_mode_number <= model.L - 1 || throw(ArgumentError(
+        "initial_mode_number must lie between 0 and L-1",
+    ))
+    isfinite(settings.run.initial_mode_phase_pi) || throw(ArgumentError(
+        "initial_mode_phase_pi must be finite",
+    ))
+    settings.run.initial_pairing_form_factor in (:onsite_s, :rung_s, :leg_s, :extended_s, :d_wave) ||
+        throw(ArgumentError(
+            "initial_pairing_form_factor must be onsite_s, rung_s, leg_s, extended_s, or d_wave",
+        ))
+    settings.run.initial_leg_parity in (:auto, :even, :odd) || throw(ArgumentError(
+        "initial_leg_parity must be auto, even, or odd",
+    ))
+    if settings.run.initial_seed_protocol == :matched_mode
+        resolved_parity = resolved_initial_leg_parity(
+            settings.run.initial_seed,
+            settings.run.initial_leg_parity,
+        )
+        settings.run.initial_seed == :cdw && resolved_parity == :even &&
+            settings.run.initial_mode_number == 0 && settings.run.initial_amplitude > 0 &&
+            throw(ArgumentError(
+                "a matched_mode CDW seed with even leg parity requires a nonzero mode; " *
+                "the uniform even charge source is redundant with chemical-potential targeting",
+            ))
+        settings.run.initial_seed == :pairing &&
+            settings.run.initial_pairing_form_factor in (:leg_s, :extended_s, :d_wave) &&
+            model.r_range < 1 && throw(ArgumentError(
+                "the selected matched pairing form factor requires model.r_range >= 1",
+            ))
+    end
     lineage_sources = count(source -> source !== nothing, (
         settings.run.inherit_from,
         settings.run.parent_checkpoint,

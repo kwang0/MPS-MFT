@@ -62,6 +62,48 @@ function numerical_fingerprint(settings::ProjectSettings)
     return bytes2hex(SHA.sha256(join(values, "|")))
 end
 
+function initial_seed_fingerprint(settings::ProjectSettings)
+    run = settings.run
+    values = Any[
+        :L,
+        settings.model.L,
+        :density,
+        settings.model.density,
+        :r_range,
+        settings.model.r_range,
+        :protocol,
+        run.initial_seed_protocol,
+        :channel,
+        run.initial_seed,
+        :amplitude,
+        run.initial_amplitude,
+        :random_seed,
+        run.random_seed,
+    ]
+    if run.initial_seed_protocol == :matched_mode
+        append!(values, Any[
+            :mode_number,
+            run.initial_mode_number,
+            :mode_phase_pi,
+            run.initial_mode_phase_pi,
+            :normalization,
+            :full_field_l2_per_sqrt_physical_site,
+        ])
+        if run.initial_seed == :pairing
+            append!(values, Any[
+                :pairing_form_factor,
+                run.initial_pairing_form_factor,
+            ])
+        elseif run.initial_seed in (:sdw, :cdw)
+            append!(values, Any[
+                :resolved_leg_parity,
+                resolved_initial_leg_parity(run.initial_seed, run.initial_leg_parity),
+            ])
+        end
+    end
+    return bytes2hex(SHA.sha256(join(values, "|")))
+end
+
 function collect_provenance(settings::ProjectSettings)
     config_hash = isfile(settings.config_path) ? sha256_file(settings.config_path) : ""
     inherit_hash = settings.run.inherit_from === nothing ? "" :
@@ -71,9 +113,10 @@ function collect_provenance(settings::ProjectSettings)
     resume_hash = settings.run.resume_checkpoint === nothing ? "" :
         (settings.run.resume_sha256 === nothing ? sha256_file(settings.run.resume_checkpoint) : settings.run.resume_sha256)
     gpu_manifest = joinpath(PROJECT_ROOT, "gpu", "Manifest.toml")
+    seed_metadata = initial_seed_metadata(settings.model, settings.run)
     return Dict{String,Any}(
         "generated_utc" => string(now(UTC)),
-        "schema_version" => 2,
+        "schema_version" => 3,
         "git_commit" => _read_git("rev-parse", "HEAD"),
         "git_branch" => _read_git("branch", "--show-current"),
         "git_dirty" => !isempty(_read_git("status", "--porcelain"; default="")),
@@ -113,6 +156,17 @@ function collect_provenance(settings::ProjectSettings)
         "initial_seed" => String(settings.run.initial_seed),
         "initial_amplitude" => settings.run.initial_amplitude,
         "random_seed" => settings.run.random_seed,
+        "initial_seed_protocol" => String(seed_metadata.protocol),
+        "initial_seed_fingerprint" => initial_seed_fingerprint(settings),
+        "initial_mode_number" => seed_metadata.mode_number,
+        "initial_mode_wavevector_pi" => seed_metadata.mode_wavevector_pi,
+        "initial_mode_phase_pi" => seed_metadata.mode_phase_pi,
+        "initial_mode_basis" => seed_metadata.mode_basis,
+        "initial_pairing_form_factor" => String(seed_metadata.pairing_form_factor),
+        "initial_leg_parity_requested" => String(seed_metadata.requested_leg_parity),
+        "initial_leg_parity_resolved" => String(seed_metadata.resolved_leg_parity),
+        "initial_seed_normalization" => seed_metadata.normalization,
+        "initial_seed_target_l2_per_physical_site" => seed_metadata.target_field_l2_per_physical_site,
         "julia_version" => string(VERSION),
         "itensors_version" => string(Base.pkgversion(ITensors)),
         "itensormps_version" => string(Base.pkgversion(ITensorMPS)),
