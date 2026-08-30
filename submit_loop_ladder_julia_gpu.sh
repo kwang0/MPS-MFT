@@ -22,8 +22,8 @@
 
 export SLURM_CPU_BIND="cores"
 
+module load cudatoolkit/12.9
 module load julia
-module load cudatoolkit
 module load cray-mpich
 module load libfabric
 module load python
