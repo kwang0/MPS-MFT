@@ -1033,3 +1033,128 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   modified, no cross-geometry energy comparison was made, and no
   thermodynamic-phase claim was made. Live Perlmutter accounting remains the
   submission authority.
+
+## 2026-08-31: square seed/basin pilot compact audit and figures
+
+- Audited the synced campaign
+  `20260830_phase1_square_t014_vm04_seed_chi200_loose`, submitted from commit
+  `30b9a0df407afaf266c26f35b09bfe5ec962615a`. All six branches ended as
+  accepted period-one fixed points after six stored MF records
+  (`initial:1,unmixed_probe:5`). No Anderson update was used, no raw-map
+  period-two candidate was detected, and no branch timed out.
+- Ran compact-only stateless verification separately on all six result
+  directories. All 30 manifest rows passed. The local compact artifacts total
+  `122306340` bytes (`116.64 MiB`) versus `2935558986` recorded full bytes
+  (`2.734 GiB`); the compact HDF5 files omit `psi`. The full scratch artifacts
+  were not mounted or rehashed locally, so their manifest paths, sizes, and
+  SHA-256 values remain provenance rather than a local full-artifact check.
+- The six accepted states share model fingerprint
+  `e93552440b67e1070d005f2b5ed7307fe8a0cc97b707b76916dce39aa0bc0482`,
+  numerical fingerprint
+  `15a04c35cd48f193ecf95e305cd8cff5bb014030a9cbe27148c36836b730c6ce`,
+  implementation fingerprint
+  `e56feef54bf8bf619f2d531af4e474c5532404ca49d2532aa606011f44242ca5`,
+  Float64 tensors, and the exact registered
+  `E_p=-0.24962435880865996` with source SHA-256
+  `2209bd2ca3c1ad02c0e542d1a9d63ecf90fdfa49120ad9cc3af599a5b4bc1f0e`.
+- The canonical selector therefore authorizes this within-campaign numerical
+  order: legacy-like pairing `-149.4625379781576`; stripe `m=4`
+  `-149.4625274080429`; stripe `m=5` `-149.4612599174197`; stripe+d `m=4`
+  `-149.4600424777624`; stripe+d `m=5` `-149.4593696755100`; d-wave seed
+  `-149.4593503931971`. The first two differ by only `8.258e-8` per physical
+  site, below the campaign's `1e-6`-per-site stabilization scale. That scale is
+  a stopping gate, not an error bar, and this loose chi-200 ordering is not a
+  thermodynamic preference.
+- Final relative raw-map residuals span `2.105e-5`--`2.054e-3`; final density
+  errors span `4.504e-4`--`4.959e-4`. Each branch used the identical density
+  search work sequence `3,6,1,1,1,1`, or 13 Hamiltonian evaluations total.
+  Once the chemical potential was bracketed on update two, each later outer
+  update reused it with one evaluation. The six stored branch wall times sum
+  to `2.197` GPU-hours, equivalent to `0.549` one-of-four node-hours before
+  scheduler/compile overhead; Perlmutter accounting remains authoritative.
+- Cross-branch profiles show strong basin collapse at the pilot tolerance.
+  Every start selects the same centered even-charge profile with dominant
+  `q/pi=8/63`; the maximum relative RMS difference from the d-wave-seed charge
+  profile is `1.065e-3`. After aligning the arbitrary global pairing sign, the
+  d-wave proxy profiles differ by at most `1.267e-4` in relative RMS and the
+  selected pairing channel is uniform `q=0`. The remaining seed memory is a
+  weak odd-leg spin field: the stripe families retain `q/pi=59/63` (`m=4`) or
+  `58/63` (`m=5`) with RMS `2.46e-5`--`3.99e-5`; pairing-only controls are
+  below the spatial-audit `1e-6` signal floor.
+- The spatial phase-defect audit found no branch satisfying its combined
+  phase-slip persistence and residual co-localization heuristic. These short
+  histories therefore do not support a moving domain wall as the primary
+  convergence limitation, while open-boundary and multi-q caveats remain.
+  The terminal stripe residuals are still `1.3e-3`--`2.1e-3`, so their
+  acceptance under the deliberately loose `5e-3` relative gate should not be
+  mistaken for tight scientific convergence.
+- Relative to the separately audited legacy `V=-0.4,t0=1.4,chi=200` file, the
+  refactored pilot stores six rather than three outer updates and reaches the
+  density gate rather than ending at error `1.226e-3`. Legacy energy and field
+  amplitude are excluded from the comparison because they do not share the
+  canonical refactored functional and normalization/provenance contract.
+- Generated the established six per-branch field/history figures and six seed
+  figures below `analysis/mf_observables_20260831`, the six spatial diagnostic
+  figures and tables below `analysis/spatial_phase_defects_20260831`, and the
+  cross-branch convergence, terminal-profile, energy/channel figures plus
+  ranked TSVs and report below `analysis/square_seed_comparison_20260831`.
+- The recommended next calculation is a two-parent, common-fingerprint tighter
+  chi-200 continuation of the legacy-like pairing minimum and near-degenerate
+  stripe `m=4` state: 16 sweeps, density and inner-mu tolerance `1e-4`, cutoff
+  `1e-11`, DMRG energy tolerance `1e-9`, variational-energy tolerance `1e-7`,
+  relative field tolerance `1e-4`, and a 20-update raw-map-only probe before
+  any Anderson acceleration. Its plan-only first-segment envelope is
+  `0.125 + 2*3 = 6.125` requested node-hours, projecting `160.000` reserved
+  and `240.000` unreserved. It was not prepared or submitted.
+- The synced conservative ledger now contains `153.875` reserved additional
+  node-hours and `246.125` unreserved under the 400-node-hour hard cap; this
+  campaign contributed `18.125` requested node-hours. This audit submitted or
+  cancelled no job, changed no ledger row, and modified no HDF5 artifact.
+
+## 2026-08-31: six-parent square tight-five campaign prepared in code
+
+- Reclassified the six loose square energies as scientifically unresolved.
+  Their complete spread is `2.490e-5` per physical site, while the leading
+  fixed-density interpolation scale `|mu| |n-n_target|` is approximately
+  `2.5e-4` per site at the observed density errors. The exact stored numerical
+  ordering remains provenance, but the supported result is qualitative basin
+  collapse toward very similar charge and nonzero d-wave-pairing profiles.
+- Added `docs/PHASE1_NUMERICAL_ERROR_BUDGET.md`. Stopping tolerances are not
+  treated as error bars. The documented envelope separates density mismatch,
+  recent SCF energy drift, Hamiltonian/effective-energy identities, a common
+  frozen-correlation small-field scan, E_p sensitivity, DMRG/chi control, and
+  finite-size control. Correlated systematic scales are not combined as an
+  unjustified root-sum-square statistical error.
+- Kept the physical mean-field map unthresholded. Hard zeroing near a floor can
+  create zero/nonzero chatter and changes the numerical map. The new manifest
+  instead declares post-processing floors `0,1e-6,1e-5,1e-4`; plots may use a
+  declared floor and energy sensitivity must recompute the canonical
+  transverse pair, exchange, density, and double-counting terms against stored
+  correlations. The scan is not a new self-consistent solution.
+- Added `scripts/prepare_phase1_square_tight5.jl` and launcher actions
+  `plan-square-tight5` / `prepare-square-tight5`. Preparation requires all six
+  accepted period-one compact states, resolves their six immutable full scratch
+  parents, rehashes the full files, checks Float64/model/numerical/
+  implementation/E_p provenance agreement, and writes fresh parent lineages.
+  A stateless analysis copy can never be used as the restart parent.
+- The common new contract retains `L=64`, square geometry, `U=8`, `V=-0.4`,
+  `t0=1.4`, `t_perp=0.1`, density `0.9375`, and `chi=200`; it raises the DMRG
+  work to 16 sweeps with cutoff `1e-11` and energy tolerance `1e-9`, tightens
+  inner/outer density tolerances to `1e-4`, uses field gates `1e-7` absolute or
+  `1e-4` relative, and uses the `1e-7`-per-site energy-change gate. Every
+  branch has at most five new raw-map MF evaluations and cannot enter Anderson.
+  Five records cannot validate period two under the eight-record complete-
+  history contract; a two-cycle-looking result remains unresolved.
+- The launcher version is now `1.10.0`. Tight-five branches request one of four
+  GPUs for `03:00:00`, or `0.75` node-hours each. The plan-only envelope is
+  `0.125 + 6*0.75 = 4.625` node-hours. From the synced `153.875` ledger it
+  projects to `158.500` reserved and `241.500` unreserved, preserving most of
+  the hard-cap allowance for higher bond dimension and length convergence.
+  Live Perlmutter accounting remains authoritative.
+- The complete local Julia suite passed `544/544` tests, including `204/204`
+  guarded Phase 1 launcher tests with six synthetic hash-linked full/compact
+  accepted parents. Bash syntax and the local plan also passed. No Slurm job
+  was submitted or cancelled, no Perlmutter run directory was prepared, no
+  ledger row changed, and no HDF5 artifact was modified. Actual preparation
+  must occur on Perlmutter after syncing this code because scratch is not
+  mounted locally.

@@ -673,7 +673,7 @@ end
     @test occursin("sanitize_cuda_runtime_environment", script_source)
     @test occursin("require_current_run_version", script_source)
     @test occursin("require_worker_compatible_run_version", script_source)
-    @test occursin("PHASE1_SCRIPT_VERSION=\"1.9.0\"", script_source)
+    @test occursin("PHASE1_SCRIPT_VERSION=\"1.10.0\"", script_source)
     @test occursin("prepare-recovery)", script_source)
     @test occursin("prepare-recurrence)", script_source)
     @test occursin("prepare-recurrence-competitors)", script_source)
@@ -681,6 +681,8 @@ end
     @test occursin("plan-matched-seed-pilot)", script_source)
     @test occursin("prepare-square-seed-pilot)", script_source)
     @test occursin("plan-square-seed-pilot)", script_source)
+    @test occursin("prepare-square-tight5)", script_source)
+    @test occursin("plan-square-tight5)", script_source)
     @test occursin("prepare-standard)", script_source)
     @test occursin("--licenses=scratch,cfs", script_source)
     @test occursin("compact_results.jl", script_source)
@@ -1172,6 +1174,129 @@ end
         @test "stripe_charge_mode_number" in square_header
         @test "stripe_pairing_to_spin_ratio" in square_header
         @test "legacy_pairing_center_of_mass_structure" in square_header
+
+        # Build six synthetic full/compact accepted parents under the prepared
+        # square pilot. The tight-five preparer must rehash the full parents,
+        # retain fresh-history lineage, and leave the budget ledger untouched.
+        write(
+            joinpath(square_run, "full_storage_path.txt"),
+            joinpath(scratch_root, "mock_square_seed") * "\n",
+        )
+        square_model_fingerprint = LadderMPSMFT.model_fingerprint(first(square_settings).model)
+        square_numerical_fingerprint = LadderMPSMFT.numerical_fingerprint(first(square_settings))
+        square_implementation = LadderMPSMFT.implementation_fingerprint()
+        square_ep_hash = LadderMPSMFT.sha256_file(first(square_settings).model.ep_source)
+        square_parent_hashes = Dict{String,String}()
+        for (index, label) in enumerate(square_labels)
+            full_path = joinpath(
+                scratch_root,
+                "mock_square_seed",
+                "results",
+                label,
+                "result",
+                "state.h5",
+            )
+            mkpath(dirname(full_path))
+            h5open(full_path, "w") do file
+                file["psi"] = Float64[1.0]
+                fields = create_group(file, "fields")
+                restart = create_group(fields, "restart")
+                restart["alpha"] = zeros(2, 2)
+                restart["beta"] = zeros(2, 2)
+                restart["mu_cdw"] = zeros(2, 2)
+                file["chemical_potential"] = 0.55
+                file["status"] = "fixed_point"
+                file["accepted"] = true
+                file["solution_kind"] = "fixed_point"
+                file["fundamental_period"] = 1
+                provenance = create_group(file, "provenance")
+                provenance["model_fingerprint"] = square_model_fingerprint
+                provenance["numerical_fingerprint"] = square_numerical_fingerprint
+                provenance["implementation_sha256"] = square_implementation
+                provenance["ep_source_sha256"] = square_ep_hash
+                provenance["tensor_scalar_type"] = "float64"
+            end
+            full_hash = LadderMPSMFT.sha256_file(full_path)
+            square_parent_hashes[label] = full_hash
+            compact_path = joinpath(square_run, "results", label, "result", "state.h5")
+            mkpath(dirname(compact_path))
+            h5open(compact_path, "w") do file
+                analysis = create_group(file, "analysis_storage")
+                analysis["is_stateless_copy"] = true
+                analysis["full_artifact_path"] = full_path
+                analysis["full_artifact_sha256"] = full_hash
+                file["status"] = "fixed_point"
+                file["accepted"] = true
+                file["solution_kind"] = "fixed_point"
+                file["fundamental_period"] = 1
+                file["solution_canonical_variational_energy"] = -149.0 - index / 1000
+                file["fixed_point_rel_residual"] = 1.0e-3 / index
+                file["density_error"] = 5.0e-4
+                history = create_group(file, "history")
+                history["iteration"] = collect(1:6)
+                provenance = create_group(file, "provenance")
+                provenance["model_fingerprint"] = square_model_fingerprint
+                provenance["numerical_fingerprint"] = square_numerical_fingerprint
+                provenance["implementation_sha256"] = square_implementation
+                provenance["ep_source_sha256"] = square_ep_hash
+                provenance["tensor_scalar_type"] = "float64"
+            end
+        end
+        tight_plan = read(
+            addenv(`$bash_executable $script plan-square-tight5`, environment...),
+            String,
+        )
+        @test occursin("First-segment envelope: 4.625000000 node-hours", tight_plan)
+        @test occursin("one of four GPUs, 03:00:00", tight_plan)
+        @test occursin("physical map threshold=0", tight_plan)
+        ledger_before_tight = read(ledger, String)
+        run(pipeline(
+            addenv(
+                `$bash_executable $script prepare-square-tight5 mock_square_seed mock_square_tight5`,
+                environment...,
+            ),
+            stdout=devnull,
+        ))
+        @test read(ledger, String) == ledger_before_tight
+        tight_run = joinpath(run_root, "mock_square_tight5")
+        @test strip(read(joinpath(tight_run, "campaign_kind.txt"), String)) == "square_tight5"
+        @test strip(read(joinpath(tight_run, "branch_count.txt"), String)) == "6"
+        @test occursin("PHASE1_GPU_TIME=03:00:00", read(joinpath(tight_run, "run.env"), String))
+        tight_labels = replace.(collect(square_labels), "_loose" => "_tight5")
+        tight_paths = [joinpath(
+            tight_run,
+            "configs",
+            "$label.segment-001.toml",
+        ) for label in tight_labels]
+        tight_settings = load_settings.(tight_paths)
+        @test all(settings.dmrg.nsweeps == 16 for settings in tight_settings)
+        @test all(settings.dmrg.maxdim == 200 for settings in tight_settings)
+        @test all(settings.dmrg.cutoff == 1.0e-11 for settings in tight_settings)
+        @test all(settings.dmrg.energy_tol == 1.0e-9 for settings in tight_settings)
+        @test all(settings.dmrg.max_time_seconds == 9000.0 for settings in tight_settings)
+        @test all(settings.dmrg.mu_density_tol == 1.0e-4 for settings in tight_settings)
+        @test all(settings.convergence.density_tol == 1.0e-4 for settings in tight_settings)
+        @test all(settings.convergence.field_abs_tol == 1.0e-7 for settings in tight_settings)
+        @test all(settings.convergence.field_rel_tol == 1.0e-4 for settings in tight_settings)
+        @test all(settings.convergence.variational_energy_tol == 1.0e-7 for settings in tight_settings)
+        @test all(settings.convergence.probe_iterations == 9 for settings in tight_settings)
+        @test all(settings.convergence.cycle_action == :stop for settings in tight_settings)
+        @test all(settings.run.max_iterations == 5 for settings in tight_settings)
+        @test all(settings.run.resume_checkpoint === nothing for settings in tight_settings)
+        @test all(settings.run.parent_checkpoint !== nothing for settings in tight_settings)
+        @test [settings.run.parent_sha256 for settings in tight_settings] ==
+            [square_parent_hashes[label] for label in square_labels]
+        @test length(unique(
+            LadderMPSMFT.numerical_fingerprint(settings) for settings in tight_settings
+        )) == 1
+        @test only(unique(
+            LadderMPSMFT.numerical_fingerprint(settings) for settings in tight_settings
+        )) != square_numerical_fingerprint
+        tight_header = split(first(readlines(joinpath(tight_run, "manifest.tsv"))), '\t')
+        @test "map_field_threshold" in tight_header
+        @test "analysis_field_floor_scan" in tight_header
+        @test "parent_implementation_sha256" in tight_header
+        @test "preliminary_energy_only" in tight_header
 
         placeholder_rejected = run(pipeline(
             ignorestatus(addenv(

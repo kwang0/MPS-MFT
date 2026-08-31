@@ -345,6 +345,51 @@ recommended. Gate each point so that chi and length convergence retain
 priority. The evidence and accuracy ladder are recorded in
 `docs/SQUARE_SEED_AND_GRID_PLAN_2026-08-30.md`.
 
+## Six-parent tight-five square probe
+
+The loose square pilot establishes qualitative basin collapse but does not
+resolve its `2.490e-5`-per-site energy spread. Continue all six accepted states
+under one tighter fingerprint for at most five new raw-map evaluations. This is
+a short residual/noise diagnostic, not a grid point or a replacement for later
+bond-dimension and length convergence.
+
+Preparation must run on Perlmutter because it verifies and rehashes every full
+scratch parent. It does not submit or reserve:
+
+```bash
+bash slurm/phase1_gpu.sh plan-square-tight5
+
+SOURCE_RUN=20260830_phase1_square_t014_vm04_seed_chi200_loose
+TIGHT_RUN=20260831_phase1_square_t014_vm04_chi200_tight5
+bash slurm/phase1_gpu.sh prepare-square-tight5 "$SOURCE_RUN" "$TIGHT_RUN"
+sed -n '1,7p' "output/phase1_gpu/$TIGHT_RUN/manifest.tsv"
+bash slurm/phase1_gpu.sh budget
+```
+
+The prepared run pins all six accepted period-one full states and their
+SHA-256 values, starts fresh histories, retains `chi=200`, and uses 16 sweeps,
+cutoff `1e-11`, DMRG energy tolerance `1e-9`, inner/outer density tolerance
+`1e-4`, field gates `1e-7` absolute or `1e-4` relative, and energy-change gate
+`1e-7` per site. The raw physical map has threshold zero. The manifest declares
+a post-processing floor scan of `0,1e-6,1e-5,1e-4`; see
+`docs/PHASE1_NUMERICAL_ERROR_BUDGET.md`.
+
+Each branch requests one of four GPUs for three hours, or `0.75` node-hours.
+The complete first-segment envelope is therefore `0.125 + 6*0.75 = 4.625`
+node-hours. From the synced `153.875` ledger this would project to `158.500`
+reserved and `241.500` unreserved. Recheck the live Perlmutter ledger before
+the separately staged submission:
+
+```bash
+bash slurm/phase1_gpu.sh submit "$TIGHT_RUN"          # smoke only
+bash slurm/phase1_gpu.sh status "$TIGHT_RUN"
+bash slurm/phase1_gpu.sh submit-matrix "$TIGHT_RUN"   # after smoke passes
+```
+
+Five records are insufficient for complete period-two validation. Any apparent
+two-cycle remains unresolved and its raw phases must remain separate. Anderson
+is disabled throughout this probe.
+
 ## Pair-binding interpolation and optional calculations
 
 At the representative point, the registry contains
