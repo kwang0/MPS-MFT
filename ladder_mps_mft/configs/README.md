@@ -44,6 +44,26 @@ updates with `cycle_action="stop"`. These carrier modes are a targeted
 convergence control selected from the observed finite-run profiles, not an
 unbiased wavevector scan.
 
+`phase1_gpu_square_seed_pilot_chi200_loose.toml` is a deliberately exploratory
+square-geometry base at `t0=1.4,V=-0.4`. Its preparer creates independent
+pure d-wave, legacy-like translation-invariant random relative-bond pairing,
+combined-stripe, and stripe+d-wave starts with one matched total amplitude,
+phase, and product-state random seed. The legacy-like branch follows the
+actual old fresh-run structure (`beta=mu_cdw=0`, with one Gaussian `alpha`
+coefficient per relative bond/leg class copied along the ladder) while using
+the common matched norm. The stripe bank uses envelope
+modes `m=4,5`, which at `L=64` lock the antiferromagnetic spin modes to `59,58`
+and charge second harmonics to `8,10`. Pure stripe and pairing branches are
+symmetry-subspace controls; the two mixed starts permit coexistence. It uses
+chi `200`, 12 sweeps, cutoff
+`1e-10`, DMRG and variational-energy tolerances `1e-6`, inner and outer density
+tolerances `1e-3`, chemical-potential step `0.01`, and bracket growth `3`.
+After 20 unmixed raw-map updates it may enter Anderson mixing and can run to 80
+MF updates. The exact `E_p` registry row is mandatory. This config is for
+targeted basin reconnaissance and preliminary within-fingerprint ranking, not
+an unbiased seed survey or a production scientific comparison. See
+`docs/SQUARE_SEED_AND_GRID_PLAN_2026-08-30.md`.
+
 There are three mutually exclusive lineage modes:
 
 - `inherit_from` plus `inherit_sha256` reproduces the legacy field-only

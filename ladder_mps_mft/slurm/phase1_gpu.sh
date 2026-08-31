@@ -5,7 +5,7 @@
 
 set -euo pipefail
 
-readonly PHASE1_SCRIPT_VERSION="1.6.0"
+readonly PHASE1_SCRIPT_VERSION="1.9.0"
 script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
 project_dir="${PHASE1_PROJECT_DIR:-$(cd "$(dirname "$script_path")/.." && pwd)}"
 repo_root="${PHASE1_REPO_ROOT:-$(cd "$project_dir/.." && pwd)}"
@@ -29,6 +29,7 @@ PHASE1_DECLARED_USED_NODE_HOURS="${PHASE1_DECLARED_USED_NODE_HOURS:-277}"
 PHASE1_BASE_CONFIG="${PHASE1_BASE_CONFIG:-$project_dir/configs/phase1_gpu_base.toml}"
 PHASE1_RECURRENCE_CONFIG="${PHASE1_RECURRENCE_CONFIG:-$project_dir/configs/phase1_gpu_recurrence_chi400.toml}"
 PHASE1_MATCHED_SEED_CONFIG="${PHASE1_MATCHED_SEED_CONFIG:-$project_dir/configs/phase1_gpu_matched_seed_pilot_chi400.toml}"
+PHASE1_SQUARE_SEED_CONFIG="${PHASE1_SQUARE_SEED_CONFIG:-$project_dir/configs/phase1_gpu_square_seed_pilot_chi200_loose.toml}"
 
 die() { echo "error: $*" >&2; exit 1; }
 require_command() { command -v "$1" >/dev/null 2>&1 || die "required command not found: $1"; }
@@ -89,6 +90,8 @@ validate_project() {
     "missing Phase 1 recurrence config: $PHASE1_RECURRENCE_CONFIG"
   [[ -f "$PHASE1_MATCHED_SEED_CONFIG" ]] || die \
     "missing Phase 1 matched-seed pilot config: $PHASE1_MATCHED_SEED_CONFIG"
+  [[ -f "$PHASE1_SQUARE_SEED_CONFIG" ]] || die \
+    "missing Phase 1 square seed-pilot config: $PHASE1_SQUARE_SEED_CONFIG"
   [[ -f "$project_dir/scripts/run_scf_gpu.jl" ]] || die "missing GPU SCF entry point"
   [[ -f "$project_dir/scripts/prepare_phase1_recurrence.jl" ]] || die \
     "missing recurrence preparation entry point"
@@ -96,6 +99,8 @@ validate_project() {
     "missing conditional recurrence-competitor preparation entry point"
   [[ -f "$project_dir/scripts/prepare_phase1_matched_seed_pilot.jl" ]] || die \
     "missing matched-seed pilot preparation entry point"
+  [[ -f "$project_dir/scripts/prepare_phase1_square_seed_pilot.jl" ]] || die \
+    "missing square seed-pilot preparation entry point"
   [[ -f "$project_dir/scripts/gpu_smoke.jl" ]] || die "missing GPU smoke test"
   [[ -f "$project_dir/scripts/validate_gpu_smoke.jl" ]] || die "missing GPU smoke validator"
   [[ -f "$project_dir/scripts/compact_results.jl" ]] || die "missing stateless-result compactor"
@@ -147,6 +152,79 @@ EOF
   awk -v current="$committed" -v requested="$initial" -v cap="$PHASE1_ADDITIONAL_NODE_HOUR_CAP" \
     'BEGIN {exit !((current+requested) > cap)}' && die \
     "matched-seed first-segment envelope would exceed the hard cap"
+  return 0
+}
+
+print_square_seed_pilot_plan() {
+  validate_project
+  local segment smoke initial ceiling committed projected remaining
+  local future_grid staged_grid grid_projected grid_remaining
+  local full_bank_grid full_bank_projected full_bank_remaining
+  segment="$(gpu_node_hours "$PHASE1_GPU_TIME")"
+  smoke="$(gpu_node_hours "$PHASE1_SMOKE_TIME")"
+  initial="$(awk -v s="$segment" -v p="$smoke" 'BEGIN {printf "%.9f", 6*s+p}')"
+  ceiling="$(awk -v s="$segment" -v p="$smoke" -v m="$PHASE1_MAX_SEGMENTS" \
+    'BEGIN {printf "%.9f", 6*m*s+p}')"
+  future_grid="$(awk -v s="$segment" -v p="$smoke" 'BEGIN {printf "%.9f", 8*(3*s+p)}')"
+  staged_grid="$(awk -v a="$initial" -v f="$future_grid" 'BEGIN {printf "%.9f", a+f}')"
+  full_bank_grid="$(awk -v a="$initial" 'BEGIN {printf "%.9f", 9*a}')"
+  committed="$(ledger_total)"
+  projected="$(awk -v c="$committed" -v a="$initial" 'BEGIN {printf "%.9f", c+a}')"
+  remaining="$(awk -v cap="$PHASE1_ADDITIONAL_NODE_HOUR_CAP" -v p="$projected" \
+    'BEGIN {printf "%.9f", cap-p}')"
+  grid_projected="$(awk -v c="$committed" -v a="$staged_grid" 'BEGIN {printf "%.9f", c+a}')"
+  grid_remaining="$(awk -v cap="$PHASE1_ADDITIONAL_NODE_HOUR_CAP" -v p="$grid_projected" \
+    'BEGIN {printf "%.9f", cap-p}')"
+  full_bank_projected="$(awk -v c="$committed" -v a="$full_bank_grid" 'BEGIN {printf "%.9f", c+a}')"
+  full_bank_remaining="$(awk -v cap="$PHASE1_ADDITIONAL_NODE_HOUR_CAP" -v p="$full_bank_projected" \
+    'BEGIN {printf "%.9f", cap-p}')"
+  cat <<EOF
+Ladder MPS+MF square chi=200 exploratory seed/basin pilot
+
+Representative point: L=64, U=8, V=-0.4, t0=1.4, t_perp=0.1, density=0.9375
+Numerical control:    chi=200, 12 sweeps, cutoff=1e-10, DMRG energy_tol=1e-6
+Density control:      inner and outer tolerances=1e-3; mu step=0.01; growth=3
+Common seed control:  amplitude=1e-3, phase/pi=0, product-state random seed=1404
+Pairing control:      uniform d_wave source; Hartree source exactly zero
+Legacy-like control:  random relative-bond alpha, constant along rungs; beta=mu_cdw=0
+Legacy field RNG:     dedicated reproducible stream keyed by seed 1404
+Primary stripe:       envelope m=4 -> AF spin n=59 and charge harmonic n=8
+Neighbor stripe:      envelope m=5 -> AF spin n=58 and charge harmonic n=10
+Stripe source ratio:  separately normalized charge:spin=0.2
+Coexistence starts:   both stripe modes plus uniform d_wave; pairing:spin=1
+Branch bank:          d_wave, legacy-like pairing, stripe m4/m5, stripe+d_wave m4/m5 (6 jobs)
+Physics policy:       20 raw-map updates first; preserve any raw recurrence before mixing
+Convergence policy:   up to 80 MF updates; Anderson follows the raw probe when needed
+Lineage policy:       six independent starts; no inherited or resumed field/MPS state
+Interpretation:       controls plus predeclared two-mode coexistence bank; preliminary energies only
+GPU request:          one of four GPUs, ${PHASE1_GPU_TIME}, ${PHASE1_GPU_CPUS} CPUs, shared QOS
+Per-segment reserve:  ${segment} GPU node-hours
+Per-campaign smoke:   ${smoke} GPU node-hours
+First-segment envelope: ${initial} node-hours
+Four-segment emergency ceiling: ${ceiling} node-hours (not pre-authorized)
+Hard project cap:     ${PHASE1_ADDITIONAL_NODE_HOUR_CAP} additional node-hours
+Ledger after first segments: ${projected} reserved; ${remaining} unreserved
+
+Plan-only 3x3 square grid (t0=1.0,1.2,1.4; V=0,-0.2,-0.4):
+  representative six-branch bank plus eight later three-branch points:  ${staged_grid} node-hours
+  eight later points only (conditional, seed bank not yet locked):       ${future_grid} node-hours
+  ledger under that staged envelope:                                    ${grid_projected} reserved; ${grid_remaining} unreserved
+  repeating all six branches at all nine points is not recommended:     ${full_bank_grid} node-hours
+  ledger under that larger envelope:                                    ${full_bank_projected} reserved; ${full_bank_remaining} unreserved
+
+Preparation does not submit or reserve:
+  SQUARE_RUN=20260830_phase1_square_t014_vm04_seed_chi200_loose
+  bash $script_path prepare-square-seed-pilot "\$SQUARE_RUN"
+
+Submission remains explicitly staged:
+  bash $script_path submit "\$SQUARE_RUN"
+  bash $script_path status "\$SQUARE_RUN"
+  bash $script_path submit-matrix "\$SQUARE_RUN"
+EOF
+  print_budget
+  awk -v current="$committed" -v requested="$initial" -v cap="$PHASE1_ADDITIONAL_NODE_HOUR_CAP" \
+    'BEGIN {exit !((current+requested) > cap)}' && die \
+    "square seed-pilot first-segment envelope would exceed the hard cap"
   return 0
 }
 
@@ -313,6 +391,7 @@ write_environment() {
     printf 'PHASE1_BASE_CONFIG=%q\n' "$PHASE1_BASE_CONFIG"
     printf 'PHASE1_RECURRENCE_CONFIG=%q\n' "$PHASE1_RECURRENCE_CONFIG"
     printf 'PHASE1_MATCHED_SEED_CONFIG=%q\n' "$PHASE1_MATCHED_SEED_CONFIG"
+    printf 'PHASE1_SQUARE_SEED_CONFIG=%q\n' "$PHASE1_SQUARE_SEED_CONFIG"
     printf 'PHASE1_RUN_ROOT=%q\n' "$run_root"
     printf 'PHASE1_SCRATCH_ROOT=%q\n' "$scratch_root"
     printf 'PHASE1_RUN_SCRATCH_DIR=%q\n' "$scratch_run_dir"
@@ -340,7 +419,7 @@ load_environment() {
   # shellcheck disable=SC1090
   source "$run_dir/run.env"
   case "${PHASE1_RUN_SCRIPT_VERSION:-missing}" in
-    1.0.0|1.0.1|1.1.0|1.2.0|1.3.0|1.4.0|1.5.0|1.6.0) ;;
+    1.0.0|1.0.1|1.1.0|1.2.0|1.3.0|1.4.0|1.5.0|1.6.0|1.7.0|1.8.0|1.9.0) ;;
     *) die "unsupported run script version ${PHASE1_RUN_SCRIPT_VERSION:-missing}; current version is $PHASE1_SCRIPT_VERSION";;
   esac
   project_dir="$PHASE1_PROJECT_DIR"
@@ -379,7 +458,7 @@ require_current_run_version() {
 
 require_worker_compatible_run_version() {
   case "${PHASE1_RUN_SCRIPT_VERSION:-missing}" in
-    1.2.0|1.3.0|1.4.0|1.5.0|1.6.0) ;;
+    1.2.0|1.3.0|1.4.0|1.5.0|1.6.0|1.7.0|1.8.0|1.9.0) ;;
     *) die "queued worker cannot execute run script ${PHASE1_RUN_SCRIPT_VERSION:-missing} with launcher $PHASE1_SCRIPT_VERSION";;
   esac
 }
@@ -428,6 +507,11 @@ initialize_run() {
       prepare_script="$project_dir/scripts/prepare_phase1_matched_seed_pilot.jl"
       prepare_args=("$PHASE1_MATCHED_SEED_CONFIG" "$run_dir" "$scratch_run_dir" "$run_id")
       ;;
+    square_seed_pilot)
+      [[ -z "$source_run_dir" ]] || die "square seed pilot must use independent starts"
+      prepare_script="$project_dir/scripts/prepare_phase1_square_seed_pilot.jl"
+      prepare_args=("$PHASE1_SQUARE_SEED_CONFIG" "$run_dir" "$scratch_run_dir" "$run_id")
+      ;;
     *) die "unknown Phase 1 campaign kind: $campaign_kind";;
   esac
   "$PHASE1_JULIA" --startup-file=no --project="$project_dir" \
@@ -450,18 +534,22 @@ validate_initialized_run() {
   [[ -f "$run_dir/manifest.tsv" ]] || die "prepared run is missing manifest.tsv"
   [[ -f "$run_dir/gpu-Manifest.toml" ]] || die "prepared run is missing its GPU manifest"
   [[ -f "$run_dir/gpu-Manifest.toml.sha256" ]] || die "prepared run is missing its GPU-manifest hash"
-  if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(3|4|5|6)\.0$ ]]; then
+  if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(3|4|5|6|7|8|9)\.0$ ]]; then
     [[ -d "$(full_run_directory_from_control "$run_dir")/results" ]] || die \
       "prepared run is missing its full-result scratch directory"
   fi
-  if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(5|6)\.0$ ]]; then
+  if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(5|6|7|8|9)\.0$ ]]; then
     [[ -f "$run_dir/campaign_kind.txt" ]] || die "prepared run is missing campaign_kind.txt"
     campaign_kind="$(<"$run_dir/campaign_kind.txt")"
     case "$campaign_kind" in
       standard|recurrence|recurrence_competitors) ;;
       matched_seed_pilot)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" == "1.6.0" ]] || die \
-          "matched-seed pilot requires launcher v1.6.0"
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(6|7|8|9)\.0$ ]] || die \
+          "matched-seed pilot requires launcher v1.6.0 through v1.9.0"
+        ;;
+      square_seed_pilot)
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(7|8|9)\.0$ ]] || die \
+          "square seed pilot requires launcher v1.7.0 through v1.9.0"
         ;;
       *) die "invalid prepared campaign kind: $campaign_kind";;
     esac
@@ -825,6 +913,7 @@ Read-only:
   plan-recurrence
   plan-recurrence-controls
   plan-matched-seed-pilot
+  plan-square-seed-pilot
   budget
   status [RUN_ID]
   show [RUN_ID]
@@ -836,6 +925,7 @@ Preparation only (no Slurm submission or budget reservation):
   prepare-recurrence-competitors RECURRENCE_RUN NEW_RUN
                                         Prepare two controls only after the pairing-survival gate
   prepare-matched-seed-pilot NEW_RUN     Prepare the three-branch chi=400 matched-seed pilot
+  prepare-square-seed-pilot NEW_RUN      Prepare the six-branch square stripe/pairing pilot
 
 Submissions:
   submit RUN_ID                         Submit GPU smoke for an existing prepared campaign
@@ -855,6 +945,7 @@ case "$action" in
   plan) print_plan;;
   plan-recurrence|plan-recurrence-controls) print_recurrence_plan;;
   plan-matched-seed-pilot) print_matched_seed_pilot_plan;;
+  plan-square-seed-pilot) print_square_seed_pilot_plan;;
   budget) print_budget;;
   submit)
     [[ $# == 2 ]] || die "submit requires RUN_ID"
@@ -898,6 +989,12 @@ case "$action" in
     [[ ! -e "$run_root/$2" ]] || die \
       "new matched-seed pilot run already exists: $run_root/$2"
     initialize_run "$2" "" matched_seed_pilot
+    ;;
+  prepare-square-seed-pilot)
+    [[ $# == 2 ]] || die "prepare-square-seed-pilot requires NEW_RUN_ID"
+    [[ ! -e "$run_root/$2" ]] || die \
+      "new square seed-pilot run already exists: $run_root/$2"
+    initialize_run "$2" "" square_seed_pilot
     ;;
   submit-recovery)
     [[ $# == 3 ]] || die "submit-recovery requires SOURCE_RUN_ID NEW_RUN_ID"

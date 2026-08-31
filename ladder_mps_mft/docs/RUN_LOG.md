@@ -785,3 +785,251 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   or cancelled, no ledger row changed, and no HDF5 artifact was written or
   overwritten. Live Perlmutter job state and accounting must be reconciled
   before syncing the scientific implementation or submitting the new smoke.
+
+## 2026-08-29: matched-seed chi=400 pilot result audit
+
+- Audited the locally synced
+  `20260828_phase1_unfrustrated_matched_seed_chi400` campaign. The pairing,
+  SDW, and CDW segment-001 jobs each consumed about `11.49` recorded branch
+  wall-hours and ended at the configured `41,400`-second internal solver
+  deadline, before the 12-hour Slurm limit, with `status=time_limit`,
+  `accepted=false`, and `fundamental_period=0`. They completed 12, 9, and 12
+  mean-field updates, respectively; none completed the configured 20-update
+  raw recurrence probe.
+- Pairing reached its minimum raw-map relative residual
+  `5.847670840e-3` at update 6, then expanded and ended at
+  `1.432878371e-1`. CDW similarly reached `7.456334661e-3` at update 6 and
+  ended at `1.232033467e-1`. Their final density searches were interrupted at
+  absolute density errors `2.665144918e-2` and `8.460002088e-3`, so the final
+  records are diagnostics rather than candidate solutions.
+- Matched SDW followed a different trajectory: after nonmonotonic early
+  updates it contracted to `1.130148161e-3` at update 8 and ended at
+  `1.176246562e-3` at update 9. Its final density error is
+  `2.242561055e-4`. This is close enough to justify a continuation, but it is
+  not accepted and does not yet distinguish a period-one fixed point from a
+  longer raw recurrence.
+- The closest pairing seed contrast is the prior chi=400 independent
+  broadband `pairing_s2` state. At each of the first nine matched update
+  indices the new residual is no larger. Its minimum is `25.76%` lower
+  (`5.848e-3` versus `7.877e-3`), while the update-9 residual is only `6.95%`
+  lower (`0.3650` versus `0.3923`). Both histories turn upward after update 6.
+  The fairer seed therefore improves early efficiency modestly but does not
+  resolve pairing convergence. This is one trajectory per protocol and the
+  implementation fingerprints differ (`1d75bb1735b9...` versus
+  `9e34457163a0...`), so it is not a replicated causal estimate or an energy
+  comparison.
+- Re-ran the recurrence-aware spatial audit over the matched campaign, the
+  prior chi=400 recurrence campaign, and v3. Matched pairing and matched SDW
+  have no resolved final phase-slip candidates. The clean CDW mode develops
+  three persistent spin-envelope candidates near rungs 14, 34, and 52;
+  candidate coverage is `0.83`, and the nearest is three rungs from the final
+  residual peak. Broadband seed disorder is therefore not the sole source of
+  spatial defects: the raw dynamics can nucleate or retain them from a single
+  smooth input mode. The heuristic still cannot distinguish a mobile wall
+  from open-boundary or multi-wavevector beating without continuation.
+- All three new terminal profiles are spin-dominant by the one-point field
+  diagnostic. Pairing and SDW end with dominant spin wavevector
+  `q/pi=0.920635`; CDW ends at `0.952381`. They qualitatively approach the
+  spin-rich unfrustrated manifold seen in prior runs, but are not demonstrated
+  to be one fixed point because none is accepted and their residual/defect
+  structures differ. One-point fields are not thermodynamic order parameters.
+- Regenerated the established six mean-field figures below
+  `output/phase1_gpu/20260828_phase1_unfrustrated_matched_seed_chi400/plots/mf_profiles`
+  and created read-only comparison outputs below `analysis/matched_seed_comparison`
+  and `analysis/spatial_defect_audit_matched_vs_prior`. The reusable extractor
+  is `scripts/compare_phase1_matched_seed.py`; it deliberately omits energy
+  ranking. No new state is eligible for canonical variational comparison, and
+  no energy is compared across numerical or implementation fingerprints.
+- Compact-only stateless verification passed independently for all three
+  branch mirrors: four manifest artifacts per branch, matching compact hashes
+  and sizes, explicit stateless markers, linked full hashes, and no MPS
+  tensors. Combined compact bytes are `86,338,383`; recorded full scratch
+  bytes are `5,617,104,580`. The full Perlmutter artifacts are not mounted and
+  were not hash-verified locally (`full_artifacts_verified=false`).
+- The synced conservative ledger now sums to `135.750` reserved node-hours and
+  `264.250` unreserved under the 400-additional-node-hour cap. The recommended
+  next calculation is one matched-SDW continuation segment under the same
+  raw-map/no-Anderson policy, plan-only `3.000` node-hours, projecting
+  `138.750` reserved and `261.250` unreserved subject to authoritative
+  Perlmutter rechecking. This preserves the larger reserve for later bond-
+  dimension and length convergence.
+- This audit submitted or cancelled no job, changed no ledger row, modified no
+  immutable HDF5 artifact, and made no thermodynamic-phase claim.
+
+## 2026-08-29: chi=400 density-cost and SDW-node pairing audit
+
+- Added the read-only local analyzer
+  `scripts/analyze_phase1_density_and_node_lock.py`. It parses saved Slurm
+  logs and compact schema-v5 histories, selects the last density-converged
+  measurement rather than an interrupted terminal search, and writes bounded
+  TSV outputs below the matched campaign's
+  `analysis/density_and_node_lock` directory. It does not modify HDF5,
+  scheduler state, or the budget ledger.
+- The three matched chi=400 first segments performed much more nested work
+  than their 9--12 displayed outer updates suggest: `233` separate
+  density-targeted DMRG solves and `1,871` printed DMRG sweeps. Relative to
+  the earlier unfrustrated independent chi=200 trio, logged DMRG sweep time
+  per completed outer update is `9.99` times larger on aggregate. The
+  chi=400 campaign simultaneously changes maxdim `200 -> 400`, the sweep cap
+  `12 -> 16`, DMRG energy tolerance `1e-8 -> 1e-9`, and density tolerance
+  `2e-4 -> 1e-4`, while retaining the same `41,400`-second internal deadline.
+- The measured multiplication is two-stage: matched chi=400 used `7.06`
+  chemical-potential evaluations per outer update versus `3.05` at chi=200,
+  and each chemical-potential evaluation used about `4.3` times as much
+  logged DMRG sweep time on aggregate. The current safeguarded search starts
+  a fixed `0.05` chemical-potential bracket step after any initial density
+  miss. Individual trial `(mu,density,sweeps,time)` values are not logged, so
+  the saved evidence cannot yet separate fixed-step overshoot from a density
+  plateau or noisy finite-DMRG compressibility.
+- At the last density-valid records, matched SDW is at update 8 with relative
+  field residual `1.130148161e-3`: its field and density gates pass, but its
+  canonical variational-energy change is `1.225969556e-4` per site, above the
+  `1e-7` gate. Pairing and CDW are selected at update 11 and fail both field
+  and energy gates. All three therefore require additional raw-map evidence;
+  none is accepted.
+- Defined a descriptive node-lock statistic as the central-bulk Pearson
+  correlation between `abs(pair_d)` and the negative demodulated
+  `spin_odd`-envelope magnitude. At the last density-valid measurement,
+  matched pairing and SDW give `0.923` and `0.942` with best lag zero; their
+  pairing amplitude is respectively about `19.1` and `66.4` times larger in
+  the lowest SDW-envelope quartile than in the highest. Matched CDW is a
+  counterexample at `-0.106` and enrichment `0.85`.
+- The node locking emerges under the unmixed raw map: matched SDW reaches
+  `0.919` by update 3 and stays near `0.94`, while matched pairing rises from
+  `0.210` at update 8 to `0.778` at update 9 and `0.937` at update 10.
+  Anderson therefore did not create this texture. The v3 unfrustrated pairing
+  candidate and both chi=400 phase-parent candidates also give approximately
+  `0.91`, whereas accepted v3 unfrustrated SDW/CDW states have no resolved
+  d-wave field. The original legacy spatial artifacts were not reprocessed in
+  this scoped audit.
+- The pattern is consistent with an amplitude-modulated, approximately
+  constant-phase d-wave anomalous field concentrated near SDW envelope nodes.
+  It is not by itself a sign-changing pair-density wave, a connected pairing
+  correlator, or a thermodynamic d-wave-order claim. Open boundaries,
+  finite-length beating, incomplete raw-map convergence, and moving domain
+  walls remain alternative explanations.
+- Validated and rendered the report `Why the chi=400 Runs Produced Few Outer
+  Iterations—and What the SDW-Node Pairing Texture Means` with native runtime,
+  convergence-gate, and node-lock figures. The latest synced ledger remains
+  `135.750` reserved and `264.250` unreserved. A same-code matched-SDW
+  continuation remains the first compute priority at a plan-only `3.000`
+  node-hours; detailed per-mu logging and any adaptive-bracket change should
+  be validated separately before changing the implementation fingerprint of
+  a scientific continuation.
+- No job was submitted or cancelled, no ledger row changed, no immutable HDF5
+  file was modified, and no cross-geometry energy comparison was made.
+
+## 2026-08-30: exploratory square seed/basin campaign preparation
+
+- Audited two newly synced, independently initialized legacy square artifacts
+  at `L=64,U=8,t0=1.4,t_perp=0.1,density=0.9375,chi=200`. Their SHA-256
+  hashes are `761a14d5248507abc4bc7092f3960302dc915866ce5c602c77bfe787a3c05be`
+  for `V=-0.2` and
+  `3100916863023c01ead6ae3edd77beda60a7a2c1e2b9991a2d1dad27ee7b75b0`
+  for `V=-0.4`. Neither records inherited, parent, or resume lineage.
+- The legacy `V=-0.2` and `V=-0.4` files contain only four and three outer MF
+  updates, end at absolute density errors `1.143e-3` and `1.226e-3`, and have
+  stored d-wave proxies of magnitude `0.0795` and `0.0865`. Correlation-based
+  dominant d-wave magnitudes are `0.0840` and `0.0885`. This supports an
+  initialization-sensitive basin hypothesis but does not establish refactored
+  convergence, a canonical energy ranking, or thermodynamic d-wave order.
+- Added the locked exploratory base
+  `configs/phase1_gpu_square_seed_pilot_chi200_loose.toml` and preparer
+  `scripts/prepare_phase1_square_seed_pilot.jl` for the representative
+  `t0=1.4,V=-0.4` point. The three independent starts use a common field norm
+  `1e-3`, phase zero, and product-state random seed `1404`: d-wave pairing mode
+  `0`, odd-leg SDW mode `51`, and even-leg CDW mode `5`. These post-hoc modes
+  are targeted basin reconnaissance, not an unbiased wave-vector bank.
+- The exploratory fingerprint uses chi `200`, 12 sweeps, cutoff `1e-10`, DMRG
+  energy tolerance `1e-6`, inner and outer density tolerances `1e-3`, initial
+  chemical-potential bracket step `0.01`, growth factor `3`, variational-energy
+  tolerance `1e-6`, and at most 80 MF updates. The initial `mu=0.55` is shared
+  without importing legacy fields or MPS data. The exact registry row
+  `E_p=-0.24962435880865996` is mandatory and interpolation is disabled.
+- The first 20 updates remain the unmixed physical map. An accepted raw
+  period-one/two orbit can terminate there; otherwise an unaccepted raw
+  recurrence is archived separately before Anderson acceleration, and a
+  mixer-dependent recurrence receives its own fresh raw-map probe. Anderson
+  fixed-point acceleration does not redefine the raw-map orbit physics.
+- Launcher v1.7.0 adds read-only `plan-square-seed-pilot` and preparation-only
+  `prepare-square-seed-pilot NEW_RUN`. Preparation emits three configs with
+  one model fingerprint, one numerical fingerprint, three distinct seed
+  fingerprints, full MPS destinations below scratch, and stateless CFS
+  destinations. It refuses lineage, interpolation, unsafe run IDs, and
+  overwrite of an existing run; it neither submits nor reserves.
+- The live synced plan uses the `135.750` reserved / `264.250` unreserved
+  ledger snapshot. One smoke plus three first segments costs a conservative
+  `9.125` requested node-hours, projecting `144.875` reserved and `255.125`
+  unreserved. Nine separately gated three-branch first segments for the later
+  square `t0={1.0,1.2,1.4}` by `V={0,-0.2,-0.4}` grid would cost a plan-only
+  `82.125`, project to `217.875`, and leave `182.125`. The other eight points
+  are not prepared or authorized, and no continuation is pre-authorized.
+- Any energy comparison is limited to accepted states sharing the square
+  geometry and complete model/numerical/implementation/`E_p` fingerprints,
+  evaluated with the canonical variational functional including
+  double-counting terms. Loose-chi results are preliminary and cannot be
+  ranked against legacy energies, another grid point, another transverse
+  geometry, or tighter/higher-chi states. The accuracy ladder retains later
+  tighter chi `200`, chi `400`, chi `800`, and length controls.
+- Direct synthetic preparation passed, Bash syntax passed, the read-only plan
+  reproduced every cost, and all 429 Julia assertions passed, including 143
+  guarded Phase 1 launcher assertions. `git diff --check` is run separately at
+  handoff. Detailed rationale and commands are in
+  `docs/SQUARE_SEED_AND_GRID_PLAN_2026-08-30.md`.
+- The resulting local scientific implementation fingerprint is
+  `6052d87b4b821ffd8b6b16ee68434f1d029a033638d3d1cb8992f3fee715bb8e`.
+- No Slurm job was submitted or cancelled, no ledger row changed, no campaign
+  directory was prepared on Perlmutter, and no HDF5 artifact was modified or
+  overwritten. Perlmutter scheduler state and accounting remain authoritative.
+
+## 2026-08-30: six-branch harmonic-stripe and legacy-like seed revision
+
+- This append supersedes the three-branch square plan above without rewriting
+  its historical record. The supplied clean legacy square profile motivated a
+  combined SDW/CDW construction rather than independent SDW and CDW sources.
+  At `L=64`, the primary slow signed spin-envelope mode is `m=4`, giving the
+  antiferromagnetic spin mode `n_s=59` and locked charge second harmonic
+  `n_c=8`. The adjacent predeclared control is `m=5`, giving `(58,10)`.
+- Added `stripe` and `stripe_pairing` matched seeds. Both use odd transverse
+  spin parity, even charge parity, phase zero, and separately normalized
+  `charge:spin=0.2`; the mixed branches add uniform d-wave pairing at
+  `pairing:spin=1`. Pure stripe remains an `alpha=0` symmetry-subspace control,
+  while stripe+pairing allows coexistence without forcing pairing to survive.
+- Read-only inspection of the actual legacy fresh-run block corrected the
+  recollection that both alpha and beta began randomly. It set `beta=0` and
+  `mu_cdw=0`; for alpha it drew one Gaussian coefficient per relative rung
+  offset and leg-pair class and copied it along all rungs. Added the separately
+  labeled `legacy_pairing` matched seed with that center-of-mass-constant
+  structure, a dedicated reproducible field RNG stream keyed by `1404`, and
+  the common total norm `1e-3`. It is structurally legacy-like but deliberately
+  does not reproduce the legacy per-coefficient amplitude convention.
+- The representative square bank now has six independent starts: uniform
+  d-wave, legacy-like mixed-relative-bond pairing, pure stripes `m=4,5`, and
+  stripe+d-wave starts `m=4,5`. All share one product-state seed, model
+  fingerprint `e93552440b67e1070d005f2b5ed7307fe8a0cc97b707b76916dce39aa0bc0482`,
+  and numerical fingerprint
+  `15a04c35cd48f193ecf95e305cd8cff5bb014030a9cbe27148c36836b730c6ce`;
+  all six seed fingerprints are distinct.
+- Lightweight construction checks reproduced total field norm `1e-3` for all
+  six seeds. The legacy-like branch has `max|alpha|=5.03369689215e-4` and exact
+  zero beta and Hartree fields. The pure stripe branches have exact zero alpha;
+  the mixed branches have nonzero alpha and the declared stripe harmonics.
+- Launcher v1.9.0 prepares six configs but still submits nothing during
+  preparation. From the synced `135.750` reserved ledger, one smoke plus six
+  first segments has a plan-only envelope `18.125`, projecting `153.875`
+  reserved and `246.125` unreserved. The conditional representative-six plus
+  eight later three-branch grid envelope is `91.125`, projecting `226.875`
+  reserved and leaving `173.125`. Repeating all six branches at all nine points
+  would cost `163.125` and leave only `101.125`; it is not recommended because
+  higher-chi and length convergence remain mandatory.
+- Direct synthetic preparation produced six branches, the read-only launcher
+  plan reproduced every cost, `bash -n` passed, `git diff --check` reported no
+  whitespace errors, and the complete local suite passed all `513` assertions
+  (`177` configuration/seed and `173` guarded-launcher assertions included).
+  The resulting implementation fingerprint is
+  `8e19b55d67a1460938b1070d0e35a9d2075fe147409070a77d125b6ec663df15`.
+- No Slurm job was submitted or cancelled, no ledger row changed, no
+  Perlmutter campaign directory was prepared, no immutable HDF5 artifact was
+  modified, no cross-geometry energy comparison was made, and no
+  thermodynamic-phase claim was made. Live Perlmutter accounting remains the
+  submission authority.

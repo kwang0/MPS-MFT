@@ -94,10 +94,45 @@ function initial_seed_fingerprint(settings::ProjectSettings)
                 :pairing_form_factor,
                 run.initial_pairing_form_factor,
             ])
+        elseif run.initial_seed == :legacy_pairing
+            append!(values, Any[
+                :legacy_pairing_definition_version,
+                1,
+                :coefficient_distribution,
+                :standard_normal,
+                :center_of_mass_structure,
+                :constant_by_relative_offset_and_leg_pair,
+                :beta_initialization,
+                :zero,
+                :mu_cdw_initialization,
+                :zero,
+            ])
         elseif run.initial_seed in (:sdw, :cdw)
             append!(values, Any[
                 :resolved_leg_parity,
                 resolved_initial_leg_parity(run.initial_seed, run.initial_leg_parity),
+            ])
+        elseif run.initial_seed in (:stripe, :stripe_pairing)
+            append!(values, Any[
+                :stripe_harmonic_definition_version,
+                1,
+                :stripe_spin_mode_number,
+                settings.model.L - 1 - run.initial_mode_number,
+                :stripe_charge_mode_number,
+                2 * run.initial_mode_number,
+                :stripe_charge_to_spin_ratio,
+                run.initial_stripe_charge_to_spin_ratio,
+                :stripe_pairing_to_spin_ratio,
+                run.initial_seed == :stripe_pairing ?
+                    run.initial_stripe_pairing_to_spin_ratio : 0.0,
+                :resolved_leg_parity,
+                resolved_initial_leg_parity(run.initial_seed, run.initial_leg_parity),
+            ])
+            run.initial_seed == :stripe_pairing && append!(values, Any[
+                :pairing_mode_number,
+                0,
+                :pairing_form_factor,
+                run.initial_pairing_form_factor,
             ])
         end
     end
@@ -167,6 +202,20 @@ function collect_provenance(settings::ProjectSettings)
         "initial_leg_parity_resolved" => String(seed_metadata.resolved_leg_parity),
         "initial_seed_normalization" => seed_metadata.normalization,
         "initial_seed_target_l2_per_physical_site" => seed_metadata.target_field_l2_per_physical_site,
+        "initial_stripe_envelope_mode_number" => seed_metadata.stripe_envelope_mode_number,
+        "initial_stripe_spin_mode_number" => seed_metadata.stripe_spin_mode_number,
+        "initial_stripe_spin_wavevector_pi" => seed_metadata.stripe_spin_wavevector_pi,
+        "initial_stripe_charge_mode_number" => seed_metadata.stripe_charge_mode_number,
+        "initial_stripe_charge_wavevector_pi" => seed_metadata.stripe_charge_wavevector_pi,
+        "initial_stripe_charge_to_spin_ratio" => seed_metadata.stripe_charge_to_spin_ratio,
+        "initial_stripe_pairing_to_spin_ratio" => seed_metadata.stripe_pairing_to_spin_ratio,
+        "initial_legacy_pairing_random_seed" => seed_metadata.legacy_pairing_random_seed,
+        "initial_legacy_pairing_center_of_mass_structure" =>
+            seed_metadata.legacy_pairing_center_of_mass_structure,
+        "initial_legacy_pairing_beta_initialization" =>
+            seed_metadata.legacy_pairing_beta_initialization,
+        "initial_legacy_pairing_mu_cdw_initialization" =>
+            seed_metadata.legacy_pairing_mu_cdw_initialization,
         "julia_version" => string(VERSION),
         "itensors_version" => string(Base.pkgversion(ITensors)),
         "itensormps_version" => string(Base.pkgversion(ITensorMPS)),

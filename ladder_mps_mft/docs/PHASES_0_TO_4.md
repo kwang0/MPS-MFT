@@ -1,6 +1,6 @@
 # Phases 0 to 4
 
-Status date: 2026-08-22.
+Status date: 2026-08-30.
 
 ## Phase 0 — resource calibration
 
@@ -42,6 +42,19 @@ and GPU upper bounds even though NERSC maintains separate allocation pools and
 does not reclaim unused walltime. Continuations are explicit; no job resubmits
 itself.
 
+An exploratory square-geometry seed/basin reconnaissance at
+`t0=1.4,V=-0.4` now precedes any grid expansion. It uses six independent,
+matched-amplitude starts at chi `200`: pure pairing and normal-stripe
+symmetry-subspace controls, a legacy-like translation-invariant random
+relative-bond pairing control, plus stripe+d-wave starts at two predeclared,
+harmonically locked SDW/CDW wavevectors. Its purpose is to measure basin
+accessibility, coexistence access, finite-wavevector sensitivity, and
+MF-iteration throughput after new independent legacy square runs exposed
+strong initialization sensitivity. Even accepted states at this loose
+fingerprint provide only preliminary within-campaign energy rankings. Surviving
+basins must be repeated with common tighter controls and then higher chi before
+they can satisfy the Phase 1 scientific gate.
+
 ## Phase 2 — transition and hysteresis scans
 
 For the frustrated geometry, resolve the candidate transition near t0=1.0--1.2
@@ -49,9 +62,13 @@ with spacing 0.025 for V=-0.4,-0.2,0. Use independent seeds plus forward and
 reverse continuations. Preserve every branch and its parent SHA; do not replace
 a metastable continuation merely because another state has lower energy.
 
-Apply a targeted square-geometry scan in t0 and t_perp only after Phase 1
-establishes reliable branch controls. Record recurrence and convergence status
-at every point.
+Apply a targeted square-geometry scan over
+`t0={1.0,1.2,1.4}` and `V={0,-0.2,-0.4}` only after the representative
+reconnaissance establishes reliable branch controls. Record recurrence and
+convergence status at every point, gate the grid point by point, and retain
+enough ledger capacity for bond-dimension and length checks. A later
+cubic-unfrustrated scan is a separate transverse geometry; its energies must
+never be ranked against square states.
 
 ## Phase 3 — finite-size, bond-dimension, and isolated-ladder controls
 

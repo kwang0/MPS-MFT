@@ -135,6 +135,16 @@ function load_settings(path::AbstractString)
             "onsite_s",
         )))),
         initial_leg_parity=Symbol(lowercase(String(_value(run_raw, "initial_leg_parity", "auto")))),
+        initial_stripe_charge_to_spin_ratio=Float64(_value(
+            run_raw,
+            "initial_stripe_charge_to_spin_ratio",
+            0.2,
+        )),
+        initial_stripe_pairing_to_spin_ratio=Float64(_value(
+            run_raw,
+            "initial_stripe_pairing_to_spin_ratio",
+            1.0,
+        )),
         inherit_from=haskey(run_raw, "inherit_from") ? _project_path(String(run_raw["inherit_from"])) : nothing,
         inherit_sha256=haskey(run_raw, "inherit_sha256") ? lowercase(String(run_raw["inherit_sha256"])) : nothing,
         parent_checkpoint=haskey(run_raw, "parent_checkpoint") ? _project_path(String(run_raw["parent_checkpoint"])) : nothing,
@@ -217,8 +227,19 @@ function validate_settings(settings::ProjectSettings)
     settings.convergence.cycle_action in (:stop, :continue) || throw(ArgumentError("cycle_action must be stop or continue"))
     settings.run.max_iterations >= 1 || throw(ArgumentError("run.max_iterations must be positive"))
     settings.run.save_every >= 1 || throw(ArgumentError("run.save_every must be positive"))
-    settings.run.initial_seed in (:pairing, :sdw, :cdw, :zero) ||
-        throw(ArgumentError("initial_seed must be pairing, sdw, cdw, or zero"))
+    settings.run.initial_seed in (
+        :pairing,
+        :legacy_pairing,
+        :sdw,
+        :cdw,
+        :stripe,
+        :stripe_pairing,
+        :zero,
+    ) ||
+        throw(ArgumentError(
+            "initial_seed must be pairing, legacy_pairing, sdw, cdw, stripe, " *
+            "stripe_pairing, or zero",
+        ))
     isfinite(settings.run.initial_amplitude) && settings.run.initial_amplitude >= 0 ||
         throw(ArgumentError("initial_amplitude must be finite and nonnegative"))
     settings.run.initial_seed_protocol in (:legacy, :matched_mode) || throw(ArgumentError(
@@ -237,6 +258,52 @@ function validate_settings(settings::ProjectSettings)
     settings.run.initial_leg_parity in (:auto, :even, :odd) || throw(ArgumentError(
         "initial_leg_parity must be auto, even, or odd",
     ))
+    isfinite(settings.run.initial_stripe_charge_to_spin_ratio) &&
+        settings.run.initial_stripe_charge_to_spin_ratio > 0 || throw(ArgumentError(
+            "initial_stripe_charge_to_spin_ratio must be finite and positive",
+        ))
+    isfinite(settings.run.initial_stripe_pairing_to_spin_ratio) &&
+        settings.run.initial_stripe_pairing_to_spin_ratio >= 0 || throw(ArgumentError(
+            "initial_stripe_pairing_to_spin_ratio must be finite and nonnegative",
+        ))
+    stripe_seed = settings.run.initial_seed in (:stripe, :stripe_pairing)
+    legacy_pairing_seed = settings.run.initial_seed == :legacy_pairing
+    legacy_pairing_seed && settings.run.initial_seed_protocol != :matched_mode &&
+        throw(ArgumentError(
+            "legacy_pairing requires initial_seed_protocol=matched_mode so its complete " *
+            "field norm is matched to the other pilot seeds",
+        ))
+    if legacy_pairing_seed
+        settings.run.initial_mode_number == 0 || throw(ArgumentError(
+            "legacy_pairing is translation-invariant in the center-of-mass coordinate; " *
+            "use initial_mode_number=0",
+        ))
+        settings.run.initial_leg_parity == :auto || throw(ArgumentError(
+            "legacy_pairing draws all relative leg-pair classes; use initial_leg_parity=auto",
+        ))
+        settings.run.initial_pairing_form_factor == :onsite_s || throw(ArgumentError(
+            "legacy_pairing draws a mixed relative-bond pairing form factor; leave " *
+            "initial_pairing_form_factor=onsite_s as the unused sentinel",
+        ))
+    end
+    stripe_seed && settings.run.initial_seed_protocol != :matched_mode && throw(ArgumentError(
+        "stripe and stripe_pairing seeds require initial_seed_protocol=matched_mode",
+    ))
+    if stripe_seed
+        settings.run.initial_leg_parity == :auto || throw(ArgumentError(
+            "stripe seeds fix odd spin and even charge leg parity; use initial_leg_parity=auto",
+        ))
+        1 <= settings.run.initial_mode_number || throw(ArgumentError(
+            "stripe envelope mode must be positive",
+        ))
+        2 * settings.run.initial_mode_number <= model.L - 1 || throw(ArgumentError(
+            "stripe charge harmonic 2m must not exceed L-1",
+        ))
+        settings.run.initial_seed == :stripe_pairing &&
+            settings.run.initial_stripe_pairing_to_spin_ratio <= 0 && throw(ArgumentError(
+                "stripe_pairing requires a positive pairing-to-spin ratio",
+            ))
+    end
     if settings.run.initial_seed_protocol == :matched_mode
         resolved_parity = resolved_initial_leg_parity(
             settings.run.initial_seed,
@@ -248,7 +315,7 @@ function validate_settings(settings::ProjectSettings)
                 "a matched_mode CDW seed with even leg parity requires a nonzero mode; " *
                 "the uniform even charge source is redundant with chemical-potential targeting",
             ))
-        settings.run.initial_seed == :pairing &&
+        settings.run.initial_seed in (:pairing, :stripe_pairing) &&
             settings.run.initial_pairing_form_factor in (:leg_s, :extended_s, :d_wave) &&
             model.r_range < 1 && throw(ArgumentError(
                 "the selected matched pairing form factor requires model.r_range >= 1",

@@ -323,6 +323,9 @@ function _initial_state(settings::ProjectSettings)
         mode_phase_pi=settings.run.initial_mode_phase_pi,
         pairing_form_factor=settings.run.initial_pairing_form_factor,
         leg_parity=settings.run.initial_leg_parity,
+        stripe_charge_to_spin_ratio=settings.run.initial_stripe_charge_to_spin_ratio,
+        stripe_pairing_to_spin_ratio=settings.run.initial_stripe_pairing_to_spin_ratio,
+        random_seed=settings.run.random_seed,
     )
     return (;
         sites,

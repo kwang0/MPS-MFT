@@ -14,6 +14,7 @@ function resolved_initial_leg_parity(seed::Symbol, requested::Symbol)
         "initial leg parity must be auto, even, or odd",
     ))
     requested != :auto && return requested
+    seed in (:stripe, :stripe_pairing) && return :mixed_even_charge_odd_spin
     return seed == :sdw ? :odd : :even
 end
 
@@ -134,6 +135,121 @@ function _normalize_matched_seed!(fields::FieldState, model::ModelSettings, ampl
     return fields
 end
 
+function _normalize_component_per_site!(component, model::ModelSettings)
+    current = sqrt(sum(abs2, component) / (2 * model.L))
+    current > eps(Float64) || throw(ArgumentError(
+        "the requested stripe component is identically zero",
+    ))
+    component ./= current
+    return component
+end
+
+"""
+Construct a harmonically locked ladder stripe source.
+
+`mode_number=m` is the slow signed SDW-envelope mode. The physical spin source
+has longitudinal and transverse antiferromagnetic staggering, so its dominant
+high wavevector is `(L-1-m)/(L-1) * pi`. The leg-even charge source uses the
+second harmonic `2m`, placing charge maxima at maxima of the absolute spin
+envelope and charge minima at its antiphase nodes. Spin, charge, and optional
+uniform pairing templates are normalized separately before their declared
+ratios are applied; the complete field is normalized once more by the caller.
+"""
+function _matched_stripe_template!(
+    fields::FieldState,
+    model::ModelSettings;
+    mode_number::Integer,
+    mode_phase_pi::Real,
+    charge_to_spin_ratio::Real,
+    pairing_to_spin_ratio::Real,
+    pairing_form_factor::Symbol,
+)
+    1 <= mode_number || throw(ArgumentError("stripe envelope mode must be positive"))
+    2 * mode_number <= model.L - 1 || throw(ArgumentError(
+        "stripe charge harmonic 2m must not exceed L-1",
+    ))
+    charge_to_spin_ratio > 0 || throw(ArgumentError(
+        "stripe charge-to-spin ratio must be positive",
+    ))
+    pairing_to_spin_ratio >= 0 || throw(ArgumentError(
+        "stripe pairing-to-spin ratio must be nonnegative",
+    ))
+
+    spin_profile = matched_mode_profile(
+        model;
+        mode_number,
+        phase_pi=mode_phase_pi,
+    )
+    charge_profile = matched_mode_profile(
+        model;
+        mode_number=2 * mode_number,
+        phase_pi=2 * mode_phase_pi,
+    )
+    spin_mu = zeros(Float64, size(fields.mu_cdw))
+    charge_mu = zeros(Float64, size(fields.mu_cdw))
+    for rung in 1:model.L, leg in 1:2
+        site = rung_leg_to_site(rung, leg - 1)
+        longitudinal_sign = isodd(rung - 1) ? -1.0 : 1.0
+        transverse_sign = leg == 2 ? -1.0 : 1.0
+        spin_value = spin_profile[rung] * longitudinal_sign * transverse_sign
+        charge_value = charge_profile[rung]
+        spin_mu[1, site] = spin_value
+        spin_mu[2, site] = -spin_value
+        charge_mu[:, site] .= charge_value
+    end
+    _normalize_component_per_site!(spin_mu, model)
+    _normalize_component_per_site!(charge_mu, model)
+    fields.mu_cdw .= spin_mu .+ charge_to_spin_ratio .* charge_mu
+
+    if pairing_to_spin_ratio > 0
+        uniform_profile = matched_mode_profile(model; mode_number=0, phase_pi=0.0)
+        _matched_pairing_template!(
+            fields.alpha,
+            model,
+            uniform_profile,
+            0,
+            0.0,
+            pairing_form_factor,
+        )
+        _normalize_component_per_site!(fields.alpha, model)
+        fields.alpha .*= pairing_to_spin_ratio
+    end
+    return fields
+end
+
+"""
+Reconstruct the spatial structure of the legacy fresh-run pairing source.
+
+The legacy script drew one Gaussian coefficient for each relative rung offset
+and ordered leg-pair class, then copied that coefficient along every allowed
+center-of-mass position. Thus the source is random across relative pairing
+form factors but already maximally smoothed (translation-invariant away from
+open-boundary truncation) along the ladder. The refactored control uses a
+dedicated RNG stream and the common matched full-field normalization.
+"""
+function _legacy_pairing_template!(
+    alpha,
+    model::ModelSettings,
+    random_seed::Integer,
+)
+    rng = MersenneTwister(random_seed)
+    for offset in 0:model.r_range, leg in 1:2, other_leg in 1:2
+        offset == 0 && other_leg < leg && continue
+        coefficient = randn(rng)
+        for rung in 1:(model.L - offset)
+            _set_symmetric_alpha!(
+                alpha,
+                rung,
+                rung + offset,
+                leg,
+                other_leg,
+                coefficient,
+            )
+        end
+    end
+    return alpha
+end
+
 function _legacy_initial_fields(
     model::ModelSettings;
     seed::Symbol=:pairing,
@@ -180,6 +296,9 @@ function _matched_mode_initial_fields(
     mode_phase_pi::Real,
     pairing_form_factor::Symbol,
     leg_parity::Symbol,
+    stripe_charge_to_spin_ratio::Real,
+    stripe_pairing_to_spin_ratio::Real,
+    random_seed::Integer,
 )
     alpha = zeros(Float64, model.L, model.L, 2, 2)
     beta = zeros(Float64, 2, model.L, model.L, 2, 2)
@@ -202,6 +321,14 @@ function _matched_mode_initial_fields(
             mode_phase_pi,
             pairing_form_factor,
         )
+    elseif seed == :legacy_pairing
+        mode_number == 0 || throw(ArgumentError(
+            "legacy_pairing requires mode_number=0",
+        ))
+        leg_parity == :auto || throw(ArgumentError(
+            "legacy_pairing draws all leg-pair classes; use auto leg parity",
+        ))
+        _legacy_pairing_template!(alpha, model, random_seed)
     elseif seed == :sdw || seed == :cdw
         seed == :cdw && parity == :even && mode_number == 0 && amplitude > 0 &&
             throw(ArgumentError(
@@ -218,6 +345,20 @@ function _matched_mode_initial_fields(
                 mu_cdw[:, site] .= value
             end
         end
+    elseif seed in (:stripe, :stripe_pairing)
+        leg_parity == :auto || throw(ArgumentError(
+            "stripe seeds fix odd spin and even charge leg parity; use auto",
+        ))
+        _matched_stripe_template!(
+            fields,
+            model;
+            mode_number,
+            mode_phase_pi,
+            charge_to_spin_ratio=stripe_charge_to_spin_ratio,
+            pairing_to_spin_ratio=seed == :stripe_pairing ?
+                stripe_pairing_to_spin_ratio : 0.0,
+            pairing_form_factor,
+        )
     else
         throw(ArgumentError("unknown seed '$seed'"))
     end
@@ -227,10 +368,14 @@ end
 """
 Construct initial mean fields.
 
-`protocol=:legacy` preserves the historical random-pairing and deterministic
-staggered Hartree seeds exactly. `protocol=:matched_mode` maps one explicit
-finite-ladder cosine profile into a selected order channel and normalizes the
-complete field vector so `field_l2_per_physical_site(fields, model) == amplitude`.
+`protocol=:legacy` retains the refactor's pre-existing random-pairing and
+deterministic staggered-Hartree behavior. Under `protocol=:matched_mode`, the
+special `legacy_pairing` channel reconstructs the actual legacy fresh-run
+structure (one random coefficient per relative bond/leg class, constant along
+the ladder). Other matched channels map explicit finite-ladder templates into
+a selected channel or harmonically locked stripe/stripe-pairing field. Every
+nonzero matched seed is normalized so
+`field_l2_per_physical_site(fields, model) == amplitude`.
 """
 function initial_fields(
     model::ModelSettings;
@@ -242,6 +387,9 @@ function initial_fields(
     mode_phase_pi::Real=0.0,
     pairing_form_factor::Symbol=:onsite_s,
     leg_parity::Symbol=:auto,
+    stripe_charge_to_spin_ratio::Real=0.2,
+    stripe_pairing_to_spin_ratio::Real=1.0,
+    random_seed::Integer=1,
 )
     isfinite(amplitude) && amplitude >= 0 || throw(ArgumentError(
         "initial amplitude must be finite and nonnegative",
@@ -256,25 +404,51 @@ function initial_fields(
         mode_phase_pi,
         pairing_form_factor,
         leg_parity,
+        stripe_charge_to_spin_ratio,
+        stripe_pairing_to_spin_ratio,
+        random_seed,
     )
 end
 
 function initial_seed_metadata(model::ModelSettings, run::RunSettings)
     matched = run.initial_seed_protocol == :matched_mode
-    resolved_leg_parity = run.initial_seed in (:sdw, :cdw) ?
+    stripe = run.initial_seed in (:stripe, :stripe_pairing)
+    legacy_pairing = run.initial_seed == :legacy_pairing
+    resolved_leg_parity = run.initial_seed in (:sdw, :cdw, :stripe, :stripe_pairing) ?
         resolved_initial_leg_parity(run.initial_seed, run.initial_leg_parity) : :not_applicable
+    stripe_envelope_mode = stripe ? run.initial_mode_number : 0
+    stripe_spin_mode = stripe ? model.L - 1 - stripe_envelope_mode : 0
+    stripe_charge_mode = stripe ? 2 * stripe_envelope_mode : 0
     return (
         protocol=run.initial_seed_protocol,
         mode_number=run.initial_mode_number,
         mode_wavevector_pi=initial_mode_wavevector_pi(model, run.initial_mode_number),
         mode_phase_pi=run.initial_mode_phase_pi,
-        mode_basis=matched ? "mean-controlled finite-open-ladder cosine" : "legacy",
-        pairing_form_factor=run.initial_pairing_form_factor,
+        mode_basis=stripe ?
+            "antiferromagnetic stripe with mean-controlled envelope and charge second harmonic" :
+            (legacy_pairing ?
+                "legacy translation-invariant random relative-bond pairing mixture" :
+                (matched ? "mean-controlled finite-open-ladder cosine" : "legacy")),
+        pairing_form_factor=legacy_pairing ?
+            :mixed_relative_bond_classes : run.initial_pairing_form_factor,
         requested_leg_parity=run.initial_leg_parity,
         resolved_leg_parity,
         normalization=matched ? "full_field_l2_per_sqrt_physical_site" : "legacy_per_entry",
         target_field_l2_per_physical_site=matched && run.initial_seed != :zero ?
             run.initial_amplitude : NaN,
+        stripe_envelope_mode_number=stripe_envelope_mode,
+        stripe_spin_mode_number=stripe_spin_mode,
+        stripe_spin_wavevector_pi=stripe ? initial_mode_wavevector_pi(model, stripe_spin_mode) : NaN,
+        stripe_charge_mode_number=stripe_charge_mode,
+        stripe_charge_wavevector_pi=stripe ? initial_mode_wavevector_pi(model, stripe_charge_mode) : NaN,
+        stripe_charge_to_spin_ratio=stripe ? run.initial_stripe_charge_to_spin_ratio : NaN,
+        stripe_pairing_to_spin_ratio=run.initial_seed == :stripe_pairing ?
+            run.initial_stripe_pairing_to_spin_ratio : 0.0,
+        legacy_pairing_random_seed=legacy_pairing ? run.random_seed : 0,
+        legacy_pairing_center_of_mass_structure=legacy_pairing ?
+            "constant_by_relative_offset_and_leg_pair" : "not_applicable",
+        legacy_pairing_beta_initialization=legacy_pairing ? "zero" : "not_applicable",
+        legacy_pairing_mu_cdw_initialization=legacy_pairing ? "zero" : "not_applicable",
     )
 end
 

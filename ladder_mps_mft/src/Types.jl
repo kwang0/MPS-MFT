@@ -96,6 +96,8 @@ Base.@kwdef struct RunSettings
     initial_mode_phase_pi::Float64 = 0.0
     initial_pairing_form_factor::Symbol = :onsite_s
     initial_leg_parity::Symbol = :auto
+    initial_stripe_charge_to_spin_ratio::Float64 = 0.2
+    initial_stripe_pairing_to_spin_ratio::Float64 = 1.0
     inherit_from::Union{Nothing,String} = nothing
     inherit_sha256::Union{Nothing,String} = nothing
     parent_checkpoint::Union{Nothing,String} = nothing

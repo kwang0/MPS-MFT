@@ -546,6 +546,16 @@ function write_run_summary_markdown(path::AbstractString, settings::ProjectSetti
         println(io, "- Initial seed fingerprint: `$(initial_seed_fingerprint(settings))`")
         println(io, "- Initial mode number / q over pi / phase over pi: `$(seed_metadata.mode_number)` / `$(seed_metadata.mode_wavevector_pi)` / `$(seed_metadata.mode_phase_pi)`")
         println(io, "- Pairing form factor / leg parity: `$(seed_metadata.pairing_form_factor)` / `$(seed_metadata.resolved_leg_parity)`")
+        if settings.run.initial_seed in (:stripe, :stripe_pairing)
+            println(io, "- Stripe envelope / spin / charge modes: `$(seed_metadata.stripe_envelope_mode_number)` / `$(seed_metadata.stripe_spin_mode_number)` / `$(seed_metadata.stripe_charge_mode_number)`")
+            println(io, "- Stripe spin / charge q over pi: `$(seed_metadata.stripe_spin_wavevector_pi)` / `$(seed_metadata.stripe_charge_wavevector_pi)`")
+            println(io, "- Stripe charge:spin / pairing:spin source ratios: `$(seed_metadata.stripe_charge_to_spin_ratio)` / `$(seed_metadata.stripe_pairing_to_spin_ratio)`")
+        end
+        if settings.run.initial_seed == :legacy_pairing
+            println(io, "- Legacy-like pairing field RNG seed: `$(seed_metadata.legacy_pairing_random_seed)`")
+            println(io, "- Legacy-like pairing center-of-mass structure: `$(seed_metadata.legacy_pairing_center_of_mass_structure)`")
+            println(io, "- Legacy-like beta / mu_cdw initialization: `$(seed_metadata.legacy_pairing_beta_initialization)` / `$(seed_metadata.legacy_pairing_mu_cdw_initialization)`")
+        end
         println(io, "- Initial seed normalization: `$(seed_metadata.normalization)`")
         println(io, "- Geometry: `$(settings.model.geometry)`")
         println(io, "- Runtime backend: `$(settings.runtime.backend)`")

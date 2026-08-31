@@ -25,6 +25,9 @@ fields = initial_fields(
     mode_phase_pi=run.initial_mode_phase_pi,
     pairing_form_factor=run.initial_pairing_form_factor,
     leg_parity=run.initial_leg_parity,
+    stripe_charge_to_spin_ratio=run.initial_stripe_charge_to_spin_ratio,
+    stripe_pairing_to_spin_ratio=run.initial_stripe_pairing_to_spin_ratio,
+    random_seed=run.random_seed,
 )
 metadata = initial_seed_metadata(settings.model, run)
 L = settings.model.L
@@ -67,6 +70,21 @@ end
 @printf("mode_phase_pi=%.12g\n", metadata.mode_phase_pi)
 @printf("pairing_form_factor=%s\n", metadata.pairing_form_factor)
 @printf("leg_parity=%s\n", metadata.resolved_leg_parity)
+if run.initial_seed in (:stripe, :stripe_pairing)
+    @printf("stripe_envelope_mode_number=%d\n", metadata.stripe_envelope_mode_number)
+    @printf("stripe_spin_mode_number=%d\n", metadata.stripe_spin_mode_number)
+    @printf("stripe_spin_wavevector_pi=%.12g\n", metadata.stripe_spin_wavevector_pi)
+    @printf("stripe_charge_mode_number=%d\n", metadata.stripe_charge_mode_number)
+    @printf("stripe_charge_wavevector_pi=%.12g\n", metadata.stripe_charge_wavevector_pi)
+    @printf("stripe_charge_to_spin_ratio=%.12g\n", metadata.stripe_charge_to_spin_ratio)
+    @printf("stripe_pairing_to_spin_ratio=%.12g\n", metadata.stripe_pairing_to_spin_ratio)
+end
+if run.initial_seed == :legacy_pairing
+    @printf("legacy_pairing_random_seed=%d\n", metadata.legacy_pairing_random_seed)
+    @printf("legacy_pairing_center_of_mass_structure=%s\n", metadata.legacy_pairing_center_of_mass_structure)
+    @printf("legacy_pairing_beta_initialization=%s\n", metadata.legacy_pairing_beta_initialization)
+    @printf("legacy_pairing_mu_cdw_initialization=%s\n", metadata.legacy_pairing_mu_cdw_initialization)
+end
 @printf("field_l2_per_physical_site=%.12g\n", field_l2_per_physical_site(fields, settings.model))
 @printf("max_abs_alpha=%.12g\n", maximum(abs, fields.alpha))
 @printf("max_abs_beta=%.12g\n", maximum(abs, fields.beta))

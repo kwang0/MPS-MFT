@@ -302,6 +302,223 @@ end
         mode_number=0,
     )
 
+    legacy_pairing_matched = initial_fields(
+        matched_model;
+        seed=:legacy_pairing,
+        amplitude=2.5e-3,
+        protocol=:matched_mode,
+        mode_number=0,
+        random_seed=77,
+    )
+    legacy_pairing_matched_repeat = initial_fields(
+        matched_model;
+        seed=:legacy_pairing,
+        amplitude=2.5e-3,
+        protocol=:matched_mode,
+        mode_number=0,
+        random_seed=77,
+    )
+    legacy_pairing_matched_other_seed = initial_fields(
+        matched_model;
+        seed=:legacy_pairing,
+        amplitude=2.5e-3,
+        protocol=:matched_mode,
+        mode_number=0,
+        random_seed=78,
+    )
+    @test legacy_pairing_matched.alpha == legacy_pairing_matched_repeat.alpha
+    @test legacy_pairing_matched.alpha != legacy_pairing_matched_other_seed.alpha
+    @test legacy_pairing_matched.alpha ==
+        permutedims(legacy_pairing_matched.alpha, (2, 1, 4, 3))
+    @test field_l2_per_physical_site(legacy_pairing_matched, matched_model) ≈ 2.5e-3
+    @test all(iszero, legacy_pairing_matched.beta)
+    @test all(iszero, legacy_pairing_matched.mu_cdw)
+    legacy_coefficients = Float64[]
+    for offset in 0:matched_model.r_range, leg in 1:2, other_leg in 1:2
+        offset == 0 && other_leg < leg && continue
+        values = [
+            legacy_pairing_matched.alpha[rung, rung + offset, leg, other_leg]
+            for rung in 1:(matched_model.L - offset)
+        ]
+        @test all(value -> value == first(values), values)
+        push!(legacy_coefficients, first(values))
+    end
+    @test length(unique(legacy_coefficients)) > 1
+
+    stripe_matched = initial_fields(
+        matched_model;
+        seed=:stripe,
+        protocol=:matched_mode,
+        mode_number=2,
+        mode_phase_pi=0.0,
+        amplitude=2.5e-3,
+        stripe_charge_to_spin_ratio=0.2,
+        stripe_pairing_to_spin_ratio=0.0,
+    )
+    stripe_pairing_matched = initial_fields(
+        matched_model;
+        seed=:stripe_pairing,
+        protocol=:matched_mode,
+        mode_number=2,
+        mode_phase_pi=0.0,
+        amplitude=2.5e-3,
+        pairing_form_factor=:d_wave,
+        stripe_charge_to_spin_ratio=0.2,
+        stripe_pairing_to_spin_ratio=1.0,
+    )
+    for fields in (stripe_matched, stripe_pairing_matched)
+        @test field_l2_per_physical_site(fields, matched_model) ≈ 2.5e-3
+        @test all(iszero, fields.beta)
+    end
+    @test all(iszero, stripe_matched.alpha)
+    @test any(value -> !iszero(value), stripe_pairing_matched.alpha)
+    function stripe_components(fields)
+        charge = Float64[]
+        spin_demodulated = Float64[]
+        charge_mu = zeros(size(fields.mu_cdw))
+        spin_mu = zeros(size(fields.mu_cdw))
+        for rung in 1:matched_model.L, leg in 1:2
+            site = rung_leg_to_site(rung, leg - 1)
+            down = fields.mu_cdw[1, site]
+            up = fields.mu_cdw[2, site]
+            charge_value = (down + up) / 2
+            spin_value = (down - up) / 2
+            charge_mu[:, site] .= charge_value
+            spin_mu[1, site] = spin_value
+            spin_mu[2, site] = -spin_value
+            if leg == 1
+                push!(charge, charge_value)
+                push!(spin_demodulated, spin_value * (isodd(rung - 1) ? -1 : 1))
+            end
+        end
+        return (; charge, spin_demodulated, charge_mu, spin_mu)
+    end
+    stripe_components_only = stripe_components(stripe_matched)
+    spin_profile = matched_mode_profile(matched_model; mode_number=2, phase_pi=0.0)
+    charge_profile = matched_mode_profile(matched_model; mode_number=4, phase_pi=0.0)
+    spin_scale = dot(stripe_components_only.spin_demodulated, spin_profile) / dot(spin_profile, spin_profile)
+    charge_scale = dot(stripe_components_only.charge, charge_profile) / dot(charge_profile, charge_profile)
+    @test stripe_components_only.spin_demodulated ≈ spin_scale .* spin_profile
+    @test stripe_components_only.charge ≈ charge_scale .* charge_profile
+    stripe_charge_norm = sqrt(sum(abs2, stripe_components_only.charge_mu) / (2 * matched_model.L))
+    stripe_spin_norm = sqrt(sum(abs2, stripe_components_only.spin_mu) / (2 * matched_model.L))
+    @test stripe_charge_norm / stripe_spin_norm ≈ 0.2
+    mixed_components = stripe_components(stripe_pairing_matched)
+    mixed_spin_norm = sqrt(sum(abs2, mixed_components.spin_mu) / (2 * matched_model.L))
+    mixed_pairing_norm = sqrt(sum(abs2, stripe_pairing_matched.alpha) / (2 * matched_model.L))
+    @test mixed_pairing_norm / mixed_spin_norm ≈ 1.0
+
+    stripe_settings = ProjectSettings(
+        model=matched_model,
+        run=RunSettings(
+            random_seed=404,
+            initial_seed=:stripe,
+            initial_seed_protocol=:matched_mode,
+            initial_mode_number=2,
+            initial_mode_phase_pi=0.0,
+            initial_stripe_charge_to_spin_ratio=0.2,
+            initial_stripe_pairing_to_spin_ratio=0.0,
+        ),
+    )
+    validate_settings(stripe_settings)
+    stripe_metadata = initial_seed_metadata(matched_model, stripe_settings.run)
+    @test stripe_metadata.stripe_envelope_mode_number == 2
+    @test stripe_metadata.stripe_spin_mode_number == 5
+    @test stripe_metadata.stripe_charge_mode_number == 4
+    @test stripe_metadata.stripe_spin_wavevector_pi ≈ 5 / 7
+    @test stripe_metadata.stripe_charge_wavevector_pi ≈ 4 / 7
+    @test stripe_metadata.resolved_leg_parity == :mixed_even_charge_odd_spin
+    stripe_provenance = collect_provenance(stripe_settings)
+    @test stripe_provenance["initial_stripe_spin_mode_number"] == 5
+    @test stripe_provenance["initial_stripe_charge_mode_number"] == 4
+    @test stripe_provenance["initial_stripe_charge_to_spin_ratio"] == 0.2
+    @test initial_seed_fingerprint(stripe_settings) != initial_seed_fingerprint(ProjectSettings(
+        model=matched_model,
+        run=RunSettings(
+            random_seed=404,
+            initial_seed=:stripe_pairing,
+            initial_seed_protocol=:matched_mode,
+            initial_mode_number=2,
+            initial_pairing_form_factor=:d_wave,
+            initial_stripe_charge_to_spin_ratio=0.2,
+            initial_stripe_pairing_to_spin_ratio=1.0,
+        ),
+    ))
+    legacy_pairing_settings = ProjectSettings(
+        model=matched_model,
+        run=RunSettings(
+            random_seed=77,
+            initial_seed=:legacy_pairing,
+            initial_seed_protocol=:matched_mode,
+            initial_mode_number=0,
+            initial_pairing_form_factor=:onsite_s,
+        ),
+    )
+    validate_settings(legacy_pairing_settings)
+    legacy_pairing_metadata = initial_seed_metadata(
+        matched_model,
+        legacy_pairing_settings.run,
+    )
+    @test legacy_pairing_metadata.pairing_form_factor == :mixed_relative_bond_classes
+    @test legacy_pairing_metadata.resolved_leg_parity == :not_applicable
+    @test legacy_pairing_metadata.legacy_pairing_random_seed == 77
+    @test legacy_pairing_metadata.legacy_pairing_center_of_mass_structure ==
+        "constant_by_relative_offset_and_leg_pair"
+    legacy_pairing_provenance = collect_provenance(legacy_pairing_settings)
+    @test legacy_pairing_provenance["initial_legacy_pairing_random_seed"] == 77
+    @test legacy_pairing_provenance["initial_legacy_pairing_beta_initialization"] == "zero"
+    @test initial_seed_fingerprint(legacy_pairing_settings) != initial_seed_fingerprint(
+        ProjectSettings(
+            model=matched_model,
+            run=RunSettings(
+                random_seed=78,
+                initial_seed=:legacy_pairing,
+                initial_seed_protocol=:matched_mode,
+            ),
+        ),
+    )
+    @test_throws ArgumentError validate_settings(ProjectSettings(
+        model=matched_model,
+        run=RunSettings(initial_seed=:legacy_pairing, initial_seed_protocol=:legacy),
+    ))
+    @test_throws ArgumentError validate_settings(ProjectSettings(
+        model=matched_model,
+        run=RunSettings(
+            initial_seed=:legacy_pairing,
+            initial_seed_protocol=:matched_mode,
+            initial_mode_number=1,
+        ),
+    ))
+    @test_throws ArgumentError validate_settings(ProjectSettings(
+        model=matched_model,
+        run=RunSettings(
+            initial_seed=:legacy_pairing,
+            initial_seed_protocol=:matched_mode,
+            initial_pairing_form_factor=:d_wave,
+        ),
+    ))
+    @test_throws ArgumentError validate_settings(ProjectSettings(
+        model=matched_model,
+        run=RunSettings(initial_seed=:stripe, initial_seed_protocol=:legacy, initial_mode_number=2),
+    ))
+    @test_throws ArgumentError validate_settings(ProjectSettings(
+        model=matched_model,
+        run=RunSettings(initial_seed=:stripe, initial_seed_protocol=:matched_mode, initial_mode_number=0),
+    ))
+    @test_throws ArgumentError validate_settings(ProjectSettings(
+        model=matched_model,
+        run=RunSettings(initial_seed=:stripe, initial_seed_protocol=:matched_mode, initial_mode_number=4),
+    ))
+    @test_throws ArgumentError validate_settings(ProjectSettings(
+        model=matched_model,
+        run=RunSettings(
+            initial_seed=:stripe_pairing,
+            initial_seed_protocol=:matched_mode,
+            initial_mode_number=2,
+            initial_stripe_pairing_to_spin_ratio=0.0,
+        ),
+    ))
+
     matched_settings = ProjectSettings(
         model=matched_model,
         run=RunSettings(
@@ -363,6 +580,8 @@ end
         run_raw["initial_mode_phase_pi"] = 0.25
         run_raw["initial_pairing_form_factor"] = "extended_s"
         run_raw["initial_leg_parity"] = "even"
+        run_raw["initial_stripe_charge_to_spin_ratio"] = 0.25
+        run_raw["initial_stripe_pairing_to_spin_ratio"] = 0.75
         path = joinpath(directory, "matched.toml")
         open(path, "w") do io
             TOML.print(io, raw; sorted=true)
@@ -373,6 +592,8 @@ end
         @test loaded.run.initial_mode_phase_pi == 0.25
         @test loaded.run.initial_pairing_form_factor == :extended_s
         @test loaded.run.initial_leg_parity == :even
+        @test loaded.run.initial_stripe_charge_to_spin_ratio == 0.25
+        @test loaded.run.initial_stripe_pairing_to_spin_ratio == 0.75
 
         scan_directory = joinpath(directory, "matched_scan")
         prepare_script = joinpath(ROOT, "scripts", "prepare_branch_scan.jl")
@@ -452,12 +673,14 @@ end
     @test occursin("sanitize_cuda_runtime_environment", script_source)
     @test occursin("require_current_run_version", script_source)
     @test occursin("require_worker_compatible_run_version", script_source)
-    @test occursin("PHASE1_SCRIPT_VERSION=\"1.6.0\"", script_source)
+    @test occursin("PHASE1_SCRIPT_VERSION=\"1.9.0\"", script_source)
     @test occursin("prepare-recovery)", script_source)
     @test occursin("prepare-recurrence)", script_source)
     @test occursin("prepare-recurrence-competitors)", script_source)
     @test occursin("prepare-matched-seed-pilot)", script_source)
     @test occursin("plan-matched-seed-pilot)", script_source)
+    @test occursin("prepare-square-seed-pilot)", script_source)
+    @test occursin("plan-square-seed-pilot)", script_source)
     @test occursin("prepare-standard)", script_source)
     @test occursin("--licenses=scratch,cfs", script_source)
     @test occursin("compact_results.jl", script_source)
@@ -822,6 +1045,133 @@ end
         matched_header = split(first(readlines(joinpath(matched_run, "manifest.tsv"))), '\t')
         @test "initial_mode_wavevector_pi" in matched_header
         @test "initial_seed_normalization" in matched_header
+
+        square_plan = read(
+            addenv(`$bash_executable $script plan-square-seed-pilot`, environment...),
+            String,
+        )
+        @test occursin("First-segment envelope: 18.125000000 node-hours", square_plan)
+        @test occursin("envelope m=4 -> AF spin n=59 and charge harmonic n=8", square_plan)
+        @test occursin("envelope m=5 -> AF spin n=58 and charge harmonic n=10", square_plan)
+        @test occursin("representative six-branch bank plus eight later three-branch points:  91.125000000", square_plan)
+        @test occursin("eight later points only (conditional, seed bank not yet locked):       73.000000000", square_plan)
+        @test occursin("repeating all six branches at all nine points is not recommended:     163.125000000", square_plan)
+        ledger_before_square = read(ledger, String)
+        run(pipeline(
+            addenv(
+                `$bash_executable $script prepare-square-seed-pilot mock_square_seed`,
+                environment...,
+            ),
+            stdout=devnull,
+        ))
+        @test read(ledger, String) == ledger_before_square
+        square_run = joinpath(run_root, "mock_square_seed")
+        @test strip(read(joinpath(square_run, "campaign_kind.txt"), String)) ==
+            "square_seed_pilot"
+        @test strip(read(joinpath(square_run, "branch_count.txt"), String)) == "6"
+        @test length(readlines(joinpath(square_run, "manifest.tsv"))) == 7
+        square_labels = (
+            "square__pairing_dwave_m000_chi200_loose",
+            "square__legacy_pairing_mixed_chi200_loose",
+            "square__stripe_m004_chi200_loose",
+            "square__stripe_m005_chi200_loose",
+            "square__stripe_pairing_m004_chi200_loose",
+            "square__stripe_pairing_m005_chi200_loose",
+        )
+        square_paths = [joinpath(
+            square_run,
+            "configs",
+            "$label.segment-001.toml",
+        ) for label in square_labels]
+        square_settings = load_settings.(square_paths)
+        @test [settings.run.initial_seed for settings in square_settings] ==
+            [:pairing, :legacy_pairing, :stripe, :stripe, :stripe_pairing, :stripe_pairing]
+        @test [settings.run.initial_mode_number for settings in square_settings] == [0, 0, 4, 5, 4, 5]
+        @test all(settings.run.initial_leg_parity == :auto for settings in square_settings)
+        @test square_settings[1].run.initial_pairing_form_factor == :d_wave
+        @test [settings.run.initial_pairing_form_factor for settings in square_settings] ==
+            [:d_wave, :onsite_s, :onsite_s, :onsite_s, :d_wave, :d_wave]
+        @test all(settings.model.geometry == :square for settings in square_settings)
+        @test all(settings.model.V == -0.4 for settings in square_settings)
+        @test all(settings.model.t0 == 1.4 for settings in square_settings)
+        @test all(settings.model.mu_initial == 0.55 for settings in square_settings)
+        @test all(settings.model.ep_mode == :exact for settings in square_settings)
+        @test all(settings.model.ep_signed == -0.24962435880865996 for settings in square_settings)
+        @test all(settings.run.initial_seed_protocol == :matched_mode for settings in square_settings)
+        @test all(settings.run.initial_amplitude == 1.0e-3 for settings in square_settings)
+        @test all(settings.run.initial_mode_phase_pi == 0.0 for settings in square_settings)
+        @test all(settings.run.random_seed == 1404 for settings in square_settings)
+        @test all(settings.run.initial_stripe_charge_to_spin_ratio == 0.2 for settings in square_settings)
+        @test [settings.run.initial_stripe_pairing_to_spin_ratio for settings in square_settings] ==
+            [0.0, 0.0, 0.0, 0.0, 1.0, 1.0]
+        square_seed_fields = [initial_fields(
+            settings.model;
+            seed=settings.run.initial_seed,
+            amplitude=settings.run.initial_amplitude,
+            protocol=settings.run.initial_seed_protocol,
+            mode_number=settings.run.initial_mode_number,
+            mode_phase_pi=settings.run.initial_mode_phase_pi,
+            pairing_form_factor=settings.run.initial_pairing_form_factor,
+            leg_parity=settings.run.initial_leg_parity,
+            stripe_charge_to_spin_ratio=settings.run.initial_stripe_charge_to_spin_ratio,
+            stripe_pairing_to_spin_ratio=settings.run.initial_stripe_pairing_to_spin_ratio,
+            random_seed=settings.run.random_seed,
+        ) for settings in square_settings]
+        @test all(field_l2_per_physical_site(fields, square_settings[1].model) ≈ 1.0e-3 for fields in square_seed_fields)
+        @test any(value -> !iszero(value), square_seed_fields[1].alpha)
+        @test all(iszero, square_seed_fields[1].mu_cdw)
+        @test any(value -> !iszero(value), square_seed_fields[2].alpha)
+        @test all(iszero, square_seed_fields[2].beta)
+        @test all(iszero, square_seed_fields[2].mu_cdw)
+        @test all(iszero, square_seed_fields[3].alpha)
+        @test all(iszero, square_seed_fields[4].alpha)
+        @test all(any(value -> !iszero(value), fields.mu_cdw) for fields in square_seed_fields[3:6])
+        @test all(any(value -> !iszero(value), fields.alpha) for fields in square_seed_fields[5:6])
+        square_seed_metadata = [initial_seed_metadata(settings.model, settings.run) for settings in square_settings]
+        @test [metadata.stripe_spin_mode_number for metadata in square_seed_metadata] == [0, 0, 59, 58, 59, 58]
+        @test [metadata.stripe_charge_mode_number for metadata in square_seed_metadata] == [0, 0, 8, 10, 8, 10]
+        @test square_seed_metadata[2].legacy_pairing_random_seed == 1404
+        @test square_seed_metadata[2].legacy_pairing_center_of_mass_structure ==
+            "constant_by_relative_offset_and_leg_pair"
+        @test all(settings.dmrg.nsweeps == 12 for settings in square_settings)
+        @test all(settings.dmrg.maxdim == 200 for settings in square_settings)
+        @test all(settings.dmrg.cutoff == 1.0e-10 for settings in square_settings)
+        @test all(settings.dmrg.energy_tol == 1.0e-6 for settings in square_settings)
+        @test all(settings.dmrg.mu_density_tol == 1.0e-3 for settings in square_settings)
+        @test all(settings.dmrg.mu_bracket_step == 0.01 for settings in square_settings)
+        @test all(settings.dmrg.mu_bracket_growth == 3.0 for settings in square_settings)
+        @test all(settings.convergence.density_tol == 1.0e-3 for settings in square_settings)
+        @test all(settings.convergence.variational_energy_tol == 1.0e-6 for settings in square_settings)
+        @test all(settings.convergence.probe_iterations == 20 for settings in square_settings)
+        @test all(settings.convergence.cycle_action == :continue for settings in square_settings)
+        @test all(settings.run.max_iterations == 80 for settings in square_settings)
+        @test all(startswith(
+            settings.run.output_directory,
+            joinpath(scratch_root, "mock_square_seed", "results"),
+        ) for settings in square_settings)
+        @test length(unique(
+            LadderMPSMFT.numerical_fingerprint(settings) for settings in square_settings
+        )) == 1
+        @test length(unique(
+            LadderMPSMFT.model_fingerprint(settings.model) for settings in square_settings
+        )) == 1
+        @test length(unique(
+            LadderMPSMFT.initial_seed_fingerprint(settings) for settings in square_settings
+        )) == 6
+        for path in square_paths
+            raw = TOML.parsefile(path)["run"]
+            @test !haskey(raw, "inherit_from")
+            @test !haskey(raw, "parent_checkpoint")
+            @test !haskey(raw, "resume_checkpoint")
+        end
+        square_header = split(first(readlines(joinpath(square_run, "manifest.tsv"))), '\t')
+        @test "analysis_role" in square_header
+        @test "preliminary_energy_only" in square_header
+        @test "mu_bracket_growth" in square_header
+        @test "stripe_spin_mode_number" in square_header
+        @test "stripe_charge_mode_number" in square_header
+        @test "stripe_pairing_to_spin_ratio" in square_header
+        @test "legacy_pairing_center_of_mass_structure" in square_header
 
         placeholder_rejected = run(pipeline(
             ignorestatus(addenv(

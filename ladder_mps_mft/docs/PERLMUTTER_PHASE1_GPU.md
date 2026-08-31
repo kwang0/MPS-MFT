@@ -286,6 +286,65 @@ algebra artifact passes validation; it then reserves three `3.0`-node-hour
 segments atomically under the ledger lock. No continuation is pre-authorized.
 Reserve later work for higher bond dimension and length convergence.
 
+## Exploratory square seed/basin pilot
+
+The next square reconnaissance point is `L=64,U=8,V=-0.4,t0=1.4`,
+`t_perp=0.1`, density `0.9375`, and chi `200`. It uses six independent
+matched-amplitude starts: a pure d-wave control, a legacy-like random
+relative-bond pairing control that is constant along the ladder, normal
+combined SDW/CDW stripe controls at envelope modes `m=4,5`, and stripe+d-wave
+starts at both modes. The legacy-like control follows the actual old fresh-run
+structure: `beta=mu_cdw=0`; its `alpha` randomness is already spatially smooth.
+At
+`L=64`, the stripe harmonics are locked to spin/charge modes `(59,8)` and
+`(58,10)`. The charge:spin source-norm ratio is `0.2`; mixed starts use
+pairing:spin ratio `1`. The first mode is inspired by the supplied converged
+profile and its neighbor is predeclared before inspecting new energies.
+
+Pure pairing and normal-stripe starts are symmetry-subspace controls. The
+stripe+d-wave branches are the unrestricted basin test: a nonzero anomalous
+source prevents an exactly number-conserving `alpha=0` initialization from
+excluding coexistence by construction, while pairing remains free to decay.
+
+The deliberately loose exploratory controls are 12 sweeps, cutoff `1e-10`,
+DMRG energy tolerance `1e-6`, inner and outer density tolerances `1e-3`,
+chemical-potential bracket step `0.01`, bracket growth `3`, and at most 80 MF
+updates. The first 20 are an unmixed raw-map period-one/two probe. Anderson may
+follow, while any raw orbit remains separately archived and physically
+classified. No branch inherits or resumes fields or an MPS. Energies are at
+most a preliminary canonical ranking among accepted branches sharing this one
+fingerprint and square geometry.
+
+```bash
+cd "$CFS/m4863/MPS-MFT/ladder_mps_mft"
+bash slurm/phase1_gpu.sh plan-square-seed-pilot
+
+SQUARE_RUN=20260830_phase1_square_t014_vm04_seed_chi200_loose
+bash slurm/phase1_gpu.sh prepare-square-seed-pilot "$SQUARE_RUN"
+sed -n '1,7p' "output/phase1_gpu/$SQUARE_RUN/manifest.tsv"
+bash slurm/phase1_gpu.sh budget
+```
+
+Preparation does not reserve or submit. The first-segment envelope is
+`0.125 + 6*3 = 18.125` node-hours. With the synced `135.750` ledger snapshot,
+submission would project to `153.875` reserved and `246.125` unreserved; the
+live Perlmutter ledger is authoritative. Submit only after inspection:
+
+```bash
+bash slurm/phase1_gpu.sh submit "$SQUARE_RUN"
+bash slurm/phase1_gpu.sh status "$SQUARE_RUN"
+bash slurm/phase1_gpu.sh submit-matrix "$SQUARE_RUN"
+```
+
+The full `t0={1.0,1.2,1.4}` by `V={0,-0.2,-0.4}` square grid remains
+conditional and plan-only. This six-branch representative bank plus
+provisional three-branch banks at the other eight points would reserve
+`91.125` node-hours total, leaving `173.125` from the current synced ledger.
+Repeating all six branches everywhere would leave only `101.125` and is not
+recommended. Gate each point so that chi and length convergence retain
+priority. The evidence and accuracy ladder are recorded in
+`docs/SQUARE_SEED_AND_GRID_PLAN_2026-08-30.md`.
+
 ## Pair-binding interpolation and optional calculations
 
 At the representative point, the registry contains
