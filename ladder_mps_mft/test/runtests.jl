@@ -716,7 +716,7 @@ end
     @test occursin("sanitize_cuda_runtime_environment", script_source)
     @test occursin("require_current_run_version", script_source)
     @test occursin("require_worker_compatible_run_version", script_source)
-    @test occursin("PHASE1_SCRIPT_VERSION=\"1.13.0\"", script_source)
+    @test occursin("PHASE1_SCRIPT_VERSION=\"1.13.1\"", script_source)
     @test occursin("reconcile)", script_source)
     @test occursin("additional_node_hours_reconciliations.tsv", script_source)
     @test occursin("prepare-recovery)", script_source)
@@ -792,7 +792,7 @@ end
             run_environment_path,
             replace(
                 read(run_environment_path, String),
-                "PHASE1_RUN_SCRIPT_VERSION=1.13.0" => "PHASE1_RUN_SCRIPT_VERSION=1.12.0",
+                "PHASE1_RUN_SCRIPT_VERSION=1.13.1" => "PHASE1_RUN_SCRIPT_VERSION=1.12.0",
             ),
         )
         run(pipeline(
@@ -807,6 +807,12 @@ end
         @test !occursin("hbm80g", submission_arguments)
         @test length(readlines(joinpath(run_root, "mock_phase1", "manifest.tsv"))) == 10
         @test length(readlines(joinpath(run_root, "mock_phase1", "jobs.tsv"))) == 10
+        status_output = read(
+            addenv(`$bash_executable $script status mock_phase1`, environment...),
+            String,
+        )
+        @test occursin("frustrated__pairing_s1", status_output)
+        @test occursin("COMPLETED", status_output)
         @test isdir(joinpath(scratch_root, "mock_phase1", "results"))
         prepared_config = TOML.parsefile(joinpath(
             run_root,
@@ -1286,6 +1292,16 @@ end
         point_index = findfirst(==("point_id"), square_v0_header)
         @test all(row[v0_index] == "0.0" for row in square_v0_rows)
         @test all(row[point_index] == "square_t014_v000" for row in square_v0_rows)
+        parsed_submission_rows = split(chomp(read(
+            addenv(
+                `$bash_executable -c 'source "$1" budget >/dev/null; manifest_submission_rows "$2"' bash $script $(joinpath(square_v0_run, "manifest.tsv"))`,
+                environment...,
+            ),
+            String,
+        )), '\n')
+        @test length(parsed_submission_rows) == 6
+        @test Set(last(split(row, '\t'; limit=2)) for row in parsed_submission_rows) ==
+            Set(square_v0_paths)
 
         # Build six synthetic full/compact accepted parents under the prepared
         # square pilot. The tight-five preparer must rehash the full parents,

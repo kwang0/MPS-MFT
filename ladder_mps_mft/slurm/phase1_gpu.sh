@@ -5,7 +5,7 @@
 
 set -euo pipefail
 
-readonly PHASE1_SCRIPT_VERSION="1.13.0"
+readonly PHASE1_SCRIPT_VERSION="1.13.1"
 script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
 project_dir="${PHASE1_PROJECT_DIR:-$(cd "$(dirname "$script_path")/.." && pwd)}"
 repo_root="${PHASE1_REPO_ROOT:-$(cd "$project_dir/.." && pwd)}"
@@ -571,7 +571,7 @@ load_environment() {
   # shellcheck disable=SC1090
   source "$run_dir/run.env"
   case "${PHASE1_RUN_SCRIPT_VERSION:-missing}" in
-    1.0.0|1.0.1|1.1.0|1.2.0|1.3.0|1.4.0|1.5.0|1.6.0|1.7.0|1.8.0|1.9.0|1.10.0|1.11.0|1.12.0|1.13.0) ;;
+    1.0.0|1.0.1|1.1.0|1.2.0|1.3.0|1.4.0|1.5.0|1.6.0|1.7.0|1.8.0|1.9.0|1.10.0|1.11.0|1.12.0|1.13.0|1.13.1) ;;
     *) die "unsupported run script version ${PHASE1_RUN_SCRIPT_VERSION:-missing}; current version is $PHASE1_SCRIPT_VERSION";;
   esac
   project_dir="$PHASE1_PROJECT_DIR"
@@ -611,18 +611,18 @@ require_current_run_version() {
 
 require_direct_submission_compatible_run_version() {
   case "${PHASE1_RUN_SCRIPT_VERSION:-missing}" in
-    1.12.0)
-      echo "warning: directly submitting a launcher-v1.12.0 campaign with v${PHASE1_SCRIPT_VERSION}; the standalone smoke gate has been retired" >&2
+    1.12.0|1.13.0)
+      echo "warning: directly submitting a launcher-v${PHASE1_RUN_SCRIPT_VERSION} campaign with v${PHASE1_SCRIPT_VERSION}; the standalone smoke gate has been retired" >&2
       ;;
-    1.13.0) ;;
+    1.13.1) ;;
     *) die \
-      "direct submission requires a run prepared by launcher v1.12.0 or v1.13.0; found ${PHASE1_RUN_SCRIPT_VERSION:-missing}";;
+      "direct submission requires a run prepared by launcher v1.12.0 through v1.13.1; found ${PHASE1_RUN_SCRIPT_VERSION:-missing}";;
   esac
 }
 
 require_worker_compatible_run_version() {
   case "${PHASE1_RUN_SCRIPT_VERSION:-missing}" in
-    1.2.0|1.3.0|1.4.0|1.5.0|1.6.0|1.7.0|1.8.0|1.9.0|1.10.0|1.11.0|1.12.0|1.13.0) ;;
+    1.2.0|1.3.0|1.4.0|1.5.0|1.6.0|1.7.0|1.8.0|1.9.0|1.10.0|1.11.0|1.12.0|1.13.0|1.13.1) ;;
     *) die "queued worker cannot execute run script ${PHASE1_RUN_SCRIPT_VERSION:-missing} with launcher $PHASE1_SCRIPT_VERSION";;
   esac
 }
@@ -706,32 +706,48 @@ validate_initialized_run() {
   [[ -f "$run_dir/run.env" ]] || die "prepared run is missing run.env"
   [[ -f "$run_dir/jobs.tsv" ]] || die "prepared run is missing jobs.tsv"
   [[ -f "$run_dir/manifest.tsv" ]] || die "prepared run is missing manifest.tsv"
+  awk -F'\t' '
+    NR == 1 {
+      for (field_index=1; field_index<=NF; field_index++) {
+        found_label=found_label || $field_index == "label"
+        found_config=found_config || $field_index == "config"
+      }
+      exit !(found_label && found_config)
+    }
+  ' "$run_dir/manifest.tsv" || die \
+    "prepared manifest must contain named label and config columns"
   [[ -f "$run_dir/gpu-Manifest.toml" ]] || die "prepared run is missing its GPU manifest"
   [[ -f "$run_dir/gpu-Manifest.toml.sha256" ]] || die "prepared run is missing its GPU-manifest hash"
-  if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(3|4|5|6|7|8|9|10|11|12|13)\.0$ ]]; then
+  if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(3|4|5|6|7|8|9|10|11|12|13)\.0$ ||
+        "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" == "1.13.1" ]]; then
     [[ -d "$(full_run_directory_from_control "$run_dir")/results" ]] || die \
       "prepared run is missing its full-result scratch directory"
   fi
-  if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(5|6|7|8|9|10|11|12|13)\.0$ ]]; then
+  if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(5|6|7|8|9|10|11|12|13)\.0$ ||
+        "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" == "1.13.1" ]]; then
     [[ -f "$run_dir/campaign_kind.txt" ]] || die "prepared run is missing campaign_kind.txt"
     campaign_kind="$(<"$run_dir/campaign_kind.txt")"
     case "$campaign_kind" in
       standard|recurrence|recurrence_competitors) ;;
       matched_seed_pilot)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(6|7|8|9|10|11|12|13)\.0$ ]] || die \
-          "matched-seed pilot requires launcher v1.6.0 through v1.13.0"
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(6|7|8|9|10|11|12|13)\.0$ ||
+          "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" == "1.13.1" ]] || die \
+          "matched-seed pilot requires launcher v1.6.0 through v1.13.1"
         ;;
       square_seed_pilot)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(7|8|9|10|11|12|13)\.0$ ]] || die \
-          "square seed pilot requires launcher v1.7.0 through v1.13.0"
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(7|8|9|10|11|12|13)\.0$ ||
+          "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" == "1.13.1" ]] || die \
+          "square seed pilot requires launcher v1.7.0 through v1.13.1"
         ;;
       square_seed_pilot_v0)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(11|12|13)\.0$ ]] || die \
-          "square V=0 seed pilots require launcher v1.11.0 through v1.13.0"
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(11|12|13)\.0$ ||
+          "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" == "1.13.1" ]] || die \
+          "square V=0 seed pilots require launcher v1.11.0 through v1.13.1"
         ;;
       square_tight5)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(10|11|12|13)\.0$ ]] || die \
-          "square tight-five runs require launcher v1.10.0 through v1.13.0"
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(10|11|12|13)\.0$ ||
+          "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" == "1.13.1" ]] || die \
+          "square tight-five runs require launcher v1.10.0 through v1.13.1"
         ;;
       *) die "invalid prepared campaign kind: $campaign_kind";;
     esac
@@ -905,6 +921,31 @@ submit_gpu_job() {
   printf '%s\n' "$job_id"
 }
 
+slurm_state() {
+  local job_id="$1"
+  sacct -n -X -j "$job_id" --format=State -P 2>/dev/null | \
+    awk -F'|' 'NF {gsub(/[ +].*/, "", $1); print $1; exit}'
+}
+
+manifest_submission_rows() {
+  local manifest="$1"
+  [[ -f "$manifest" ]] || die "missing prepared manifest: $manifest"
+  awk -F'\t' '
+    NR == 1 {
+      for (field_index=1; field_index<=NF; field_index++) {
+        if ($field_index == "label") label_column=field_index
+        if ($field_index == "config") config_column=field_index
+      }
+      if (!label_column || !config_column) {
+        print "error: prepared manifest must contain label and config columns" > "/dev/stderr"
+        exit 2
+      }
+      next
+    }
+    {print $label_column "\t" $config_column}
+  ' "$manifest"
+}
+
 submit_matrix_jobs() {
   local run_dir="$1"
   local label config matrix_reservation index
@@ -912,15 +953,17 @@ submit_matrix_jobs() {
   acquire_budget_lock
   trap release_budget_lock EXIT
   ensure_ledger
-  while IFS=$'\t' read -r label _ _ _ _ config _; do
-    [[ "$label" == "label" ]] && continue
+  while IFS=$'\t' read -r label config; do
     if ! awk -F'\t' -v wanted="$label" \
       '$1 == "branch" && $2 == wanted {found=1} END {exit !found}' "$run_dir/jobs.tsv"; then
       pending_labels+=("$label")
       pending_configs+=("$config")
     fi
-  done <"$run_dir/manifest.tsv"
+  done < <(manifest_submission_rows "$run_dir/manifest.tsv")
   (( ${#pending_labels[@]} > 0 )) || die "all prepared Phase 1 branches are already submitted"
+  for config in "${pending_configs[@]}"; do
+    gpu_constraint_for_config "$config" >/dev/null
+  done
   matrix_reservation="$(awk \
     -v segment="$(gpu_node_hours "$PHASE1_GPU_TIME")" \
     -v count="${#pending_labels[@]}" \

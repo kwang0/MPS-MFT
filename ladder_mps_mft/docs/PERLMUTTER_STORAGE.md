@@ -203,7 +203,7 @@ SQUARE_V0_RUN=20260901_phase1_square_t014_v000_seed_chi200_loose
 bash slurm/phase1_gpu.sh prepare-square-v0-seed-pilot "$SQUARE_V0_RUN"
 ```
 
-Neither command submits or reserves. Under launcher v1.13.0, the plan-only
+Neither command submits or reserves. Under launcher v1.13.1, the plan-only
 first-segment envelope is `18.000` node-hours (six `3.000` branch
 reservations). Recheck the live Perlmutter ledger before direct submission.
 If a smoke was already submitted from the v1.12.0-prepared campaign, its

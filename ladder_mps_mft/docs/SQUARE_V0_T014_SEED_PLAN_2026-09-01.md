@@ -70,7 +70,7 @@ HDF5 status or acceptance field was edited. See
 ## Ledger and staged Perlmutter commands
 
 Each 12-hour shared-GPU branch reserves `3.000` GPU node-hours, so launcher
-v1.13.0's direct first-segment envelope is `18.000` node-hours. Perlmutter
+v1.13.1's direct first-segment envelope is `18.000` node-hours. Perlmutter
 measurement and the live ledger remain authoritative. The four-segment
 emergency ceiling is `72.000` and is not pre-authorized. For this already-
 prepared v1.12.0 campaign, any smoke reservation recorded before the launcher

@@ -1374,3 +1374,21 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
 - No real job was submitted or cancelled and no Perlmutter ledger was changed
   locally. Live `sacct` measurements and Perlmutter accounting remain
   authoritative.
+
+## 2026-09-01: direct-submission launcher hotfix
+
+- The first real v1.13.0 direct attempt exposed two launcher regressions before
+  any scientific branch was submitted: the branch selector assumed `config`
+  was manifest column six, but the current square V=0 manifest places it after
+  the newly recorded point coordinates; `status` also still called the
+  accidentally removed `slurm_state` helper.
+- Launcher v1.13.1 resolves manifest fields by the named `label` and `config`
+  headers, validates every pending config and its DMRG max dimension before
+  allocating any branch, and restores the read-only Slurm status helper.
+  V1.12.0- and v1.13.0-prepared campaigns remain direct-submission compatible.
+- Regression coverage now parses the actual extended square V=0 manifest and
+  executes launcher `status` after mock direct submission. The failed real
+  attempt recorded no branch job or branch reservation; the user's existing
+  smoke remains a separate historical row subject to terminal reconciliation.
+- Bash syntax passed and the complete local Julia suite passed `646/646`
+  assertions, including `256/256` guarded Phase 1 launcher assertions.

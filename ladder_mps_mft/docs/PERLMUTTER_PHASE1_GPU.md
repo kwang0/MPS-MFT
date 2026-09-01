@@ -45,7 +45,7 @@ anything. `submit` accepts only an existing prepared campaign and directly
 submits every still-pending scientific branch; it cannot create a default
 campaign implicitly. Literal placeholders such as `RUN_ID` are rejected.
 `submit-matrix` is retained only as a backward-compatible alias for the same
-direct action. There is no standalone smoke gate in launcher v1.13.0.
+direct action. There is no standalone smoke gate in launcher v1.13.1.
 
 Every branch requires artifact-only CUDA runtime libraries and runs the
 256-by-256 dense matrix-multiplication/eigendecomposition preflight through
@@ -59,13 +59,13 @@ The nine branches reserve 27.000 node-hours. NERSC shared jobs are charged
 by the dominant node fraction; see the [NERSC queue and charge
 policy](https://docs.nersc.gov/jobs/policy/#calculating-charges).
 
-Launcher version 1.13.0 requests the general `gpu` constraint for branch
+Launcher version 1.13.1 requests the general `gpu` constraint for branch
 configs with `dmrg.maxdim < 1200`. Configs at `chi >= 1200` retain
 `gpu&hbm80g`. This broadens the eligible GPU pool for the current chi-200 and
 chi-400 work without weakening the explicit memory guard for the planned
 large-bond-dimension campaign.
 
-Launcher version 1.13.0 writes all MPS-bearing branch artifacts to Perlmutter
+Launcher version 1.13.1 writes all MPS-bearing branch artifacts to Perlmutter
 scratch and automatically creates MPS-free analysis mirrors on CFS. The same
 policy applies to guarded CPU `E_p` calculations: `psi_N_*` sectors remain in
 scratch while energies and metadata are mirrored to CFS. Continuation and
@@ -394,7 +394,7 @@ sed -n '1,7p' "output/phase1_gpu/$SQUARE_V0_RUN/manifest.tsv"
 bash slurm/phase1_gpu.sh budget
 ```
 
-Preparation does not submit or reserve. Launcher v1.13.0 directly reserves
+Preparation does not submit or reserve. Launcher v1.13.1 directly reserves
 `6*3 = 18.000` node-hours for the scientific branches. The already-prepared
 v1.12.0 campaign is explicitly compatible: `submit` ignores an existing smoke
 row and submits only pending branches. If that smoke is cancelled, wait until
