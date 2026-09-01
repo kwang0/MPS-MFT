@@ -1913,19 +1913,27 @@ end
         @test checkpoint.restart.mu_cdw[1, 1] ≈ 0.25
         measured_history = read_field_history(path; source=:measured)
         applied_history = read_field_history(path; source=:applied)
+        measured_with_seed = read_field_history(path; source=:measured, include_seed=true)
         @test measured_history.iterations == [1, 2]
         @test size(measured_history.alpha) == (2, 2, 2, 2, 2)
         @test size(measured_history.beta) == (2, 2, 2, 2, 2, 2)
         @test size(measured_history.mu_cdw) == (2, 4, 2)
         @test measured_history.mu_cdw[1, 1, :] == [0.5, 0.75]
         @test applied_history.mu_cdw[1, 1, :] == [0.0, 0.25]
+        @test measured_with_seed.iterations == [0, 1, 2]
+        @test size(measured_with_seed.alpha) == (2, 2, 2, 2, 3)
+        @test size(measured_with_seed.beta) == (2, 2, 2, 2, 2, 3)
+        @test size(measured_with_seed.mu_cdw) == (2, 4, 3)
+        @test measured_with_seed.mu_cdw[1, 1, :] == [0.0, 0.5, 0.75]
         refactored_inherit = read_inherited_fields(path)
         @test refactored_inherit.format == :refactored
         @test refactored_inherit.fields.mu_cdw[1, 1] == 0.25
         @test refactored_inherit.chemical_potential == 0.4
         h5open(path, "r") do file
-            @test Int(read(file, "schema_version")) == 6
+            @test Int(read(file, "schema_version")) == 7
             @test read(file, "fields/initial/mu_cdw")[1, 1] == 0.0
+            @test Int(read(file, "history/fields/seed_iteration")) == 0
+            @test read(file, "history/fields/seed/mu_cdw")[1, 1] == 0.0
             @test haskey(file, "solution_target_density_corrected_variational_energy")
             @test haskey(file, "fixed_point_extrapolated_rel_residual")
             @test haskey(file, "history/mu_density_slope")
@@ -2092,12 +2100,18 @@ end
             @test !haskey(file, "cycle_members/001/psi")
             @test !haskey(file, "cycle_members/002/psi")
             @test haskey(file, "history/fields/applied/alpha")
+            @test haskey(file, "history/fields/seed/alpha")
             @test Bool(read(file, "analysis_storage/is_stateless_copy"))
             @test !Bool(read(file, "analysis_storage/restartable"))
             @test String(read(file, "analysis_storage/full_artifact_sha256")) ==
                 LadderMPSMFT.sha256_file(periodic_path)
         end
         @test read_field_history(stateless_path; source=:measured).iterations == [1, 2]
+        @test read_field_history(
+            stateless_path;
+            source=:measured,
+            include_seed=true,
+        ).iterations == [0, 1, 2]
         @test read_inherited_fields(stateless_path).format == :refactored
         @test_throws ArgumentError read_checkpoint(stateless_path)
         @test_throws ArgumentError read_checkpoint(stateless_path; orbit_phase=1)

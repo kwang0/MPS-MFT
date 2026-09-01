@@ -1334,3 +1334,18 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
 - No real reconciliation was run locally, no existing reservation row changed,
   and no job was submitted or cancelled. CPU-pool routing beyond the already
   guarded `E_p` path remains a separate future scheduler change.
+
+## 2026-09-01: explicit time-zero MF seed history
+
+- State schema v7 now stores the exact initial field inside the history at
+  `history/fields/seed` with `seed_iteration=0`, in addition to the established
+  `fields/initial` copy. Applied and measured update arrays retain their
+  existing one-through-N alignment; density, energy, residual, and DMRG data
+  still start at update 1 because no such measurements exist for the seed.
+- `read_field_history(...; include_seed=true)` and complete-history plots can
+  prepend time zero. The plotting adapter now honors its existing
+  `include_seed` option for schema-v5-and-newer histories and falls back to
+  `fields/initial` for schema-v5/v6 files, so already-synced artifacts also gain
+  a seed point when replotted without rewriting them.
+- The complete local Julia suite passed `642/642` assertions, including schema
+  v7 seed identity, time-zero reader alignment, and stateless-mirror retention.

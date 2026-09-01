@@ -131,7 +131,11 @@ matrix selection and the full budget check share one ledger lock.
 
 Every schema-v5-and-newer checkpoint and terminal state saves the exact initial field in
 `fields/initial` and the complete applied and measured MF fields for every
-iteration under `history/fields`. This restores the legacy analysis history
+iteration under `history/fields`. Schema v7 also records the same seed
+explicitly as `history/fields/seed` with `seed_iteration=0`, so complete-history
+plots begin at the actual starting field. Density, energy, residual, and DMRG
+histories still begin at completed update 1 because they are undefined for the
+unevaluated seed. This restores the legacy analysis history
 and additionally distinguishes the field used to construct the effective
 Hamiltonian from the raw field measured after DMRG.
 For field-only initialization from an older run, set `inherit_from` and

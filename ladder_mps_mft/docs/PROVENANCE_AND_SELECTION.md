@@ -24,10 +24,12 @@ The HDF5 schema distinguishes:
 - `completed`: an alias for accepted, retained for conservative plot selection;
 - `status` and `fundamental_period`: the actual outcome.
 
-State schema v6 additionally records the slow-mode and period-two-oscillation
+State schema v6 and newer records the slow-mode and period-two-oscillation
 diagnostics, target-density-corrected energies, carried compressibility slope,
 and per-MF-update DMRG sweep energy, maximum discarded weight, and maximum link
-dimension. Every phase of an accepted orbit contains its fields, correlators,
+dimension. Schema v7 additionally records the exact time-zero field seed under
+`history/fields/seed` while retaining `fields/initial`. Every phase of an
+accepted orbit contains its fields, correlators,
 energy decomposition, chemical potential, density, and MPS. Sector-gap schema
 v2 stores the same DMRG convergence evidence for every fixed-N, fixed-Sz
 sector.

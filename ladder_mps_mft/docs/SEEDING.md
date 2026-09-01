@@ -167,4 +167,7 @@ comparison.
 
 Parent, resume, and field-inheritance configurations reuse their declared
 lineage state rather than constructing an independent seed. Their exact applied
-initial fields remain stored in `fields/initial`.
+initial fields remain stored in `fields/initial`. Schema-v7 artifacts also
+store that exact field under `history/fields/seed` with
+`history/fields/seed_iteration=0`; the complete-history plotting adapter
+prepends it by default.

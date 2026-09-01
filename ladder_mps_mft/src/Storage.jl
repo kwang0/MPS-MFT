@@ -44,6 +44,9 @@ function _stack_field_component(
 end
 
 function _write_field_history(group, records::AbstractVector{IterationRecord})
+    isempty(records) && throw(ArgumentError("cannot write an empty MF field history"))
+    group["seed_iteration"] = 0
+    _write_fields(create_group(group, "seed"), first(records).applied)
     for source in (:applied, :measured)
         source_group = create_group(group, String(source))
         for component in (:alpha, :beta, :mu_cdw)
@@ -95,7 +98,7 @@ function write_checkpoint(
     temporary = tempname(dirname(path))
     storage_psi = move_to_cpu(psi)
     h5open(temporary, "w") do file
-        file["schema_version"] = 6
+        file["schema_version"] = 7
         file["artifact_kind"] = "ladder_mps_mft_state"
         file["process_completed"] = diagnostic.status != :iterating
         file["accepted"] = diagnostic.accepted
@@ -423,9 +426,16 @@ Read the complete per-iteration mean-field history saved by schema-v5-and-newer 
 
 `source=:applied` returns the fields used to build each effective Hamiltonian;
 `source=:measured` returns the corresponding raw DMRG mean-field map outputs.
-The final array dimension is the MF-history index and matches `iterations`.
+With `include_seed=true`, prepend the exact initial field at iteration zero.
+Schema-v7 states store that seed under `history/fields/seed`; schema-v5/v6
+states fall back to their equivalent `fields/initial` record. The final array
+dimension is the MF-history index and matches `iterations`.
 """
-function read_field_history(path::AbstractString; source::Symbol=:measured)
+function read_field_history(
+    path::AbstractString;
+    source::Symbol=:measured,
+    include_seed::Bool=false,
+)
     source in (:applied, :measured) || throw(ArgumentError(
         "field-history source must be :applied or :measured",
     ))
@@ -442,6 +452,23 @@ function read_field_history(path::AbstractString; source::Symbol=:measured)
         count = length(iterations)
         all(array -> size(array, ndims(array)) == count, (alpha, beta, mu_cdw)) ||
             throw(DimensionMismatch("stored $source MF arrays do not match history/iteration"))
+        if include_seed
+            seed_base = haskey(file, "history/fields/seed") ?
+                "history/fields/seed" : "fields/initial"
+            haskey(file, seed_base) || throw(ArgumentError(
+                "state has no saved time-zero MF seed: $path",
+            ))
+            seed_iteration = haskey(file, "history/fields/seed_iteration") ?
+                Int(read(file, "history/fields/seed_iteration")) : 0
+            seed_iteration == 0 || throw(ArgumentError(
+                "stored MF seed iteration must be zero; got $seed_iteration in $path",
+            ))
+            seed = _read_fields(file[seed_base])
+            alpha = cat(seed.alpha, alpha; dims=ndims(alpha))
+            beta = cat(seed.beta, beta; dims=ndims(beta))
+            mu_cdw = cat(seed.mu_cdw, mu_cdw; dims=ndims(mu_cdw))
+            iterations = [seed_iteration; iterations]
+        end
         return (; iterations, alpha, beta, mu_cdw)
     end
 end

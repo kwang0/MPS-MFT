@@ -16,8 +16,9 @@ Interactive use from the MPS-MFT checkout:
     plot_phase1_seed_profiles(state)
     plot_phase1_mf_profiles_from_file(state; source=:applied)
 
-Schema-v5 files contain the complete applied and measured mean fields at every
-iteration. For older v2 files, the adapter falls back to the saved seed, best
+Schema-v7 files additionally store the exact time-zero seed inside the field
+history; schema-v5/v6 files use their equivalent `fields/initial` record.
+For older v2 files, the adapter falls back to the saved seed, best
 checkpoint, and final/orbit snapshots and explicitly labels them as sparse
 saved snapshots rather than a continuous MF history.
 
@@ -269,19 +270,46 @@ function _p1_legacy_beta_history(beta, mu_cdw)
     return mapped
 end
 
-function _p1_complete_history(state_file::AbstractString, source::Symbol)
+function _p1_prepend_history_sample(sample, history)
+    size(sample) == size(history)[1:(end - 1)] || throw(DimensionMismatch(
+        "time-zero MF seed shape does not match the stored field history",
+    ))
+    return cat(sample, history; dims=ndims(history))
+end
+
+function _p1_complete_history(
+    state_file::AbstractString,
+    source::Symbol;
+    include_seed::Bool=true,
+)
     source in (:applied, :measured) || throw(ArgumentError(
         "history_source must be :applied or :measured",
     ))
     return h5open(state_file, "r") do file
         base = "history/fields/$(String(source))"
         haskey(file, base) || return nothing
-        return (
-            iterations=Int.(read(file, "history/iteration")),
-            alpha=Float64.(read(file, "$base/alpha")),
-            beta=Float64.(read(file, "$base/beta")),
-            mu_cdw=Float64.(read(file, "$base/mu_cdw")),
-        )
+        iterations = Int.(read(file, "history/iteration"))
+        alpha = Float64.(read(file, "$base/alpha"))
+        beta = Float64.(read(file, "$base/beta"))
+        mu_cdw = Float64.(read(file, "$base/mu_cdw"))
+        if include_seed
+            seed_base = haskey(file, "history/fields/seed") ?
+                "history/fields/seed" : "fields/initial"
+            haskey(file, seed_base) || throw(ArgumentError(
+                "complete MF history has no saved time-zero seed: $state_file",
+            ))
+            seed_iteration = haskey(file, "history/fields/seed_iteration") ?
+                Int(read(file, "history/fields/seed_iteration")) : 0
+            seed_iteration == 0 || throw(ArgumentError(
+                "stored MF seed iteration must be zero; got $seed_iteration",
+            ))
+            seed = _p1_read_fields(file, seed_base)
+            alpha = _p1_prepend_history_sample(seed.alpha, alpha)
+            beta = _p1_prepend_history_sample(seed.beta, beta)
+            mu_cdw = _p1_prepend_history_sample(seed.mu_cdw, mu_cdw)
+            iterations = [seed_iteration; iterations]
+        end
+        return (; iterations, alpha, beta, mu_cdw)
     end
 end
 
@@ -524,6 +552,11 @@ function _p1_relabel_complete_histories!(fig, iterations, source::Symbol)
     history_axes = [axes[2], axes[4], axes[6], axes[8], axes[10]]
     for ax in history_axes
         ax.set_xlabel("")
+        for line in ax.lines
+            length(line.get_xdata()) == length(iterations) && line.set_xdata(iterations)
+        end
+        ax.relim()
+        ax.autoscale_view()
     end
     history_axes[end].set_xlabel("MF iteration ($(String(source)) fields)")
     return fig
@@ -546,11 +579,14 @@ function plot_phase1_mf_profiles_and_middle_histories(
     kwargs...,
 )
     state_file = abspath(state_file)
-    complete_history = _p1_complete_history(state_file, history_source)
+    complete_history = _p1_complete_history(state_file, history_source; include_seed)
     if complete_history !== nothing
         selected = _p1_history_index(snapshot, complete_history.iterations)
         beta_list = _p1_legacy_beta_history(complete_history.beta, complete_history.mu_cdw)
-        detail = "complete $(history_source) MF history: $(length(complete_history.iterations)) iterations"
+        update_count = count(!=(0), complete_history.iterations)
+        detail = include_seed ?
+            "complete $(history_source) MF history: time-zero seed plus $update_count updates" :
+            "complete $(history_source) MF history: $update_count updates"
         title = something(figure_title, _p1_figure_title(state_file, detail))
         fig = plot_mf_profiles_and_middle_histories(
             complete_history.alpha,
