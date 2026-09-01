@@ -1,0 +1,636 @@
+% Living methods notes for the ladder MPS+MF project.
+% Keep this file synchronized with the modular implementation under ../src/.
+% Scientific run logs and campaign decisions belong in RUN_LOG.md, not here.
+% Compile from this directory with: pdflatex METHODS_NOTES.tex (twice).
+
+\documentclass[11pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,bm}
+\usepackage{booktabs}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{tabularx}
+\usepackage{xcolor}
+
+\geometry{margin=1in}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!55!black,
+  urlcolor=blue!55!black,
+  citecolor=blue!55!black
+}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.55em}
+\renewcommand{\arraystretch}{1.15}
+\setcounter{tocdepth}{2}
+
+\newcommand{\Hlad}{H_{\mathrm{lad}}}
+\newcommand{\Heff}{H_{\mathrm{eff}}}
+\newcommand{\Ep}{E_{\mathrm p}}
+\newcommand{\tp}{t_{\perp}}
+\newcommand{\Evar}{E_{\mathrm{var}}}
+\newcommand{\mean}[1]{\left\langle #1\right\rangle}
+\newcommand{\dd}{\mathrm d}
+\newcommand{\hc}{\mathrm{H.c.}}
+
+\title{Ladder MPS+Mean-Field Project: Living Methods Notes}
+\author{Kevin Wang and contributors}
+\date{Initialized 1 September 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+These notes summarize the methods currently implemented in the modular
+\texttt{ladder\_mps\_mft} workflow.  The calculation combines finite-system
+matrix-product-state (MPS) ground states for an interacting two-leg ladder with
+a perturbative transverse mean-field (MF) map, explicit density targeting,
+fixed-point and physical-orbit validation, and a zero-temperature variational
+energy comparison.  This is an implementation-oriented living document, not a
+claim of thermodynamic convergence.  Unless stated otherwise, ``accepted''
+means numerically self-consistent at the simulated length and bond dimension.
+\end{abstract}
+
+\tableofcontents
+
+\section{Scope and notation}
+
+The authoritative implementation is the Julia package in
+\path{ladder_mps_mft/src}.  The monolithic scripts at the repository root are
+retained for legacy provenance but are not the definition of the current
+method.
+
+The simulated object is one open two-leg ladder with \(L\) rungs and \(2L\)
+physical sites.  A site is denoted \(a=(i,\ell)\), with rung
+\(i=1,\ldots,L\), leg \(\ell\in\{0,1\}\), and spin
+\(\sigma\in\{\uparrow,\downarrow\}\).  The MPS ordering is rung-major,
+\((1,0),(1,1),(2,0),(2,1),\ldots\).  The stored density is per physical site,
+\begin{equation}
+  n = \frac{N}{2L}, \qquad N_{\star}=2L n_{\star}.
+\end{equation}
+All present MF fields and measured correlators are restricted to their real
+parts.
+
+\section{Isolated-ladder Hamiltonian}
+
+The bare ladder Hamiltonian is the extended Hubbard model
+\begin{align}
+\Hlad={}&-t\sum_{i=1}^{L-1}\sum_{\ell,\sigma}
+ \left(c^{\dagger}_{i\ell\sigma}c_{i+1,\ell\sigma}+\hc\right)
+ -t_0\sum_{i=1}^{L}\sum_{\sigma}
+ \left(c^{\dagger}_{i0\sigma}c_{i1\sigma}+\hc\right) \nonumber\\
+&+U\sum_{i,\ell}n_{i\ell\uparrow}n_{i\ell\downarrow}
+ +V\sum_{\langle a,b\rangle_{\mathrm{lad}}}n_a n_b .
+\label{eq:bare-hamiltonian}
+\end{align}
+Here \(t\) is the leg hopping, \(t_0\) the rung hopping, and the \(V\) sum
+contains nearest-neighbor leg and rung bonds.  Open boundary conditions are
+used along the ladder.  The inter-ladder hopping \(\tp\) is not inserted as an
+explicit third spatial direction; it enters the effective MF map at second
+order through \(\tp^2/|\Ep|\).
+
+\subsection{Pair-binding scale and registry}
+
+The hole pair-binding convention used by the registry is
+\begin{equation}
+ \Ep^{(h)}=E(N-2,2S_z=0)+E(N,2S_z=0)
+             -2E(N-1,2S_z=1).
+\label{eq:pair-binding}
+\end{equation}
+A negative value denotes a bound pair.  The MF denominator is positive,
+\begin{equation}
+  g=\frac{\tp^2}{|\Ep|}, \qquad p=2g.
+\label{eq:g-definition}
+\end{equation}
+By default the code refuses an unbound or zero \(\Ep\).  It first seeks an
+exact registry match in \((L,U,V,t_0,n)\), choosing the largest available bond
+dimension and then the smallest recorded relative discrepancy.  Optional
+interpolation is linear in the \emph{signed} \(\Ep\), only between bracketing
+\(t_0\) values with identical \((L,U,V,n)\).  Extrapolation and interpolation
+across a sign change are forbidden.  The selected row, endpoints, weights,
+and registry hash are stored with every result.
+
+The inexpensive check \(\tp<|\Ep|\) is necessary but not a complete
+weak-coupling test.  Where available, \(\tp\) is also compared with the
+isolated-ladder spin and charge gaps defined in Sec.~\ref{sec:diagnostics}.
+
+\section{Transverse mean-field construction}
+\label{sec:mean-field}
+
+\subsection{Fields, correlators, and effective Hamiltonian}
+
+At SCF step \(k\), collect the applied fields into
+\(x_k=(\alpha,\beta,\nu)_k\):
+\begin{itemize}
+  \item \(\alpha_{ii'}^{\ell\ell'}\): anomalous singlet-pair field;
+  \item \(\beta_{\sigma,ii'}^{\ell\ell'}\): spin-resolved normal exchange
+        field, with the on-site entry removed; and
+  \item \(\nu_{\sigma,i\ell}\): spin-resolved Hartree field, stored in code as
+        \texttt{mu\_cdw} and distinct from the global chemical potential.
+\end{itemize}
+Only pairs with \(|i-i'|\le r_{\mathrm{range}}\) are retained.  Define the real
+correlators
+\begin{align}
+ F_{i'\ell',i\ell}&=\operatorname{Re}
+   \mean{c_{i'\ell'\uparrow}c_{i\ell\downarrow}},\\
+ X^{\sigma}_{a,b}&=\operatorname{Re}
+   \mean{c^{\dagger}_{a\sigma}c_{b\sigma}},
+ \qquad n^{\sigma}_{a}=\mean{n_{a\sigma}}.
+\end{align}
+The effective single-ladder problem is
+\begin{equation}
+  \Heff[x_k,\mu_k]=\Hlad-\mu_k N+H_{\mathrm{lin}}[x_k],
+\label{eq:effective-hamiltonian}
+\end{equation}
+with
+\begin{align}
+H_{\mathrm{lin}}={}&
+-\sum_{ii'\ell\ell'}\alpha_{ii'}^{\ell\ell'}
+ \left(c_{i'\ell'\uparrow}c_{i\ell\downarrow}
+       +c^{\dagger}_{i\ell\downarrow}c^{\dagger}_{i'\ell'\uparrow}\right)
+\nonumber\\
+&+\sum_{ii'\ell\ell'\sigma}\beta_{\sigma,ii'}^{\ell\ell'}
+ c^{\dagger}_{i\ell\sigma}c_{i'\ell'\sigma}
+ +\sum_{i\ell\sigma}\nu_{\sigma,i\ell}n_{i\ell\sigma}.
+\label{eq:linear-fields}
+\end{align}
+
+\subsection{Geometry-dependent map}
+
+Solving Eq.~\eqref{eq:effective-hamiltonian} and measuring \(F,X,n\) defines
+the raw map
+\begin{equation}
+  y_k=f(x_k), \qquad x_{k+1}=y_k
+\label{eq:raw-map}
+\end{equation}
+during an unmixed probe.  The geometry labels are
+\texttt{cubic\_frustrated}, \texttt{cubic\_unfrustrated}, and
+\texttt{square}.  For the same-leg anomalous fields, let
+\(\bm F=(F_{i'0,i0},F_{i'1,i1})^{\mathsf T}\).  Their exact implemented map is
+\begin{equation}
+ \begin{pmatrix}\alpha^{00}_{ii'}\\\alpha^{11}_{ii'}\end{pmatrix}
+ =p M_G\bm F,
+\end{equation}
+where
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Geometry \(G\) & \(M_G\) & Cross-leg anomalous output
+\\ \midrule
+frustrated cubic
+& \(\left(\begin{smallmatrix}2&1\\1&2\end{smallmatrix}\right)\)
+& \((\alpha^{10},\alpha^{01})=2p(F_{i'0,i1},F_{i'1,i0})\)
+\\
+unfrustrated cubic
+& \(\left(\begin{smallmatrix}0&3\\3&0\end{smallmatrix}\right)\)
+& \((\alpha^{10},\alpha^{01})=2p(F_{i'1,i0},F_{i'0,i1})\)
+\\
+square
+& \(\left(\begin{smallmatrix}0&1\\1&0\end{smallmatrix}\right)\)
+& \((\alpha^{10},\alpha^{01})=(0,0)\)
+\\ \bottomrule
+\end{tabular}
+\end{center}
+The normal fields \(\beta_\sigma\) use the same integer coefficient pattern
+with \(F\) replaced by the corresponding \(X^\sigma\) entries and the normal
+operator orientation in Eq.~\eqref{eq:linear-fields}; their diagonal on-site
+entries are set to zero.  This component-level map is implemented in
+\path{src/MeanField.jl}; changes to it require a simultaneous audit of the
+variational constants in Sec.~\ref{sec:variational}.
+
+For each rung and spin, the Hartree update is
+\begin{equation}
+ \begin{pmatrix}\nu_{\sigma,i0}\\\nu_{\sigma,i1}\end{pmatrix}
+ =K_G\left[
+ \begin{pmatrix}n^\sigma_{i0}\\n^\sigma_{i1}\end{pmatrix}
+ -\frac12\begin{pmatrix}1\\1\end{pmatrix}\right],
+\label{eq:density-kernel}
+\end{equation}
+with
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+Geometry \(G\) & \(K_G\) & leg-even / leg-odd eigenvalues \\
+\midrule
+frustrated cubic
+& \(2g\left(\begin{smallmatrix}2&1\\1&2\end{smallmatrix}\right)\)
+& \(6g,\;2g\) \\
+unfrustrated cubic
+& \(6g\left(\begin{smallmatrix}0&1\\1&0\end{smallmatrix}\right)\)
+& \(6g,\;-6g\) \\
+square
+& \(2g\left(\begin{smallmatrix}0&1\\1&0\end{smallmatrix}\right)\)
+& \(2g,\;-2g\) \\
+\bottomrule
+\end{tabular}
+\end{center}
+Negative map eigenvalues naturally motivate a two-sublattice transverse
+interpretation and can appear in the one-ladder iteration as a period-two
+orbit.  Numerical recurrence alone, however, does not identify its physical
+order parameter.
+
+\section{MPS ground-state solve and density targeting}
+
+\subsection{Finite-system DMRG}
+
+For fixed \(x_k\) and \(\mu\), the ground state of \(\Heff\) is approximated by
+finite-system DMRG using ITensorMPS.  A cold start uses a randomized product
+state with particle count nearest \(2Ln_\star\); subsequent MF and chemical
+potential solves warm-start from the previous MPS.  The observer records each
+sweep energy, maximum discarded weight, and maximum link dimension.  It may
+terminate only after reaching the final configured bond dimension with zero
+noise and satisfying the sweep-energy tolerance, or when the wall-time
+deadline is reached.
+
+Production GPU calculations use dense tensors in Float64, with \(S_z\) and
+fermion-parity quantum-number block structure disabled for performance.  This
+changes the tensor representation, not the Hamiltonian.  Separate fixed-sector
+gap calculations use QN-conserving CPU MPS states.
+
+\subsection{Safeguarded chemical-potential search}
+
+Each MF update contains an inner solve of
+\begin{equation}
+  h(\mu)=n(\mu;x_k)-n_\star=0.
+\end{equation}
+The algorithm first evaluates the previous \(\mu\).  If a positive carried
+slope \(\kappa\simeq\dd n/\dd\mu\) is available, it tries a bounded Newton
+predictor.  Otherwise, or if that predictor does not bracket the target, it
+expands a bracket geometrically in the density-correct direction.  Within a
+bracket it uses a safeguarded secant step, rejecting points within ten percent
+of either endpoint in favor of bisection.  Every trial reuses the nearest MPS
+and a small warm-start noise schedule.  The best-density state is returned on
+an iteration limit, but it cannot pass final acceptance unless the configured
+density gate is met.
+
+\section{Self-consistency, mixing, and recurrence}
+\label{sec:scf}
+
+One outer iteration is:
+\begin{enumerate}
+  \item solve \(\Heff[x_k,\mu_k]\) by density-targeted DMRG;
+  \item measure \(y_k=f(x_k)\) and the associated correlators;
+  \item evaluate field residuals and the variational-energy identities;
+  \item classify the recent history as a fixed point, physical orbit,
+        candidate, or incomplete numerical trajectory; and
+  \item if nonterminal, choose \(x_{k+1}\) by the raw map or an accelerator.
+\end{enumerate}
+
+The field residuals use the complete stored field vector,
+\begin{equation}
+ \epsilon_{\infty}=\max_j|(y_k-x_k)_j|,\qquad
+ \epsilon_2=\frac{\|y_k-x_k\|_2}
+ {\max(\|y_k\|_2,\|x_k\|_2,\epsilon_{\mathrm{mach}})}.
+\label{eq:field-residuals}
+\end{equation}
+
+\subsection{Unmixed probe and physical orbits}
+
+The production-shaped workflow begins with complete raw updates
+\(x_{k+1}=f(x_k)\), before damping or Anderson acceleration.  A period-\(q\)
+recurrence requires every phase to close over the configured number of repeat
+links.  With three repeat links, a period-two test needs eight contiguous raw
+records.  Acceptance additionally requires:
+\begin{itemize}
+  \item raw-map closure \(x_k\simeq y_{k-1}\) for every stored link;
+  \item target density and per-phase energy recurrence;
+  \item the Hamiltonian and effective-eigenvalue consistency checks in
+        Sec.~\ref{sec:variational}; and
+  \item explicit inclusion of \(q\) in the configured accepted-period list.
+\end{itemize}
+For \(q=2\), successive step vectors must reverse direction: the worst recent
+cosine must be below its negative threshold, and
+\(\|y_k-y_{k-2}\|/\|y_k-y_{k-1}\|\) must remain below its configured bound.
+This rejects a slowly drifting trajectory that happens to be close at lag two.
+
+A mixer-dependent recurrence is only a candidate.  It is archived, mixer
+history is cleared, and a fresh raw-map probe is required before it may be
+accepted.  Orbit phases are stored separately and never replaced by their
+field average.  The physical period-two construction follows the logic of
+Ref.~\cite{bollmark2025}; naming an accepted orbit ``CDW'' still requires a
+nonzero bulk density contrast, the expected spatial pattern, and stability
+with \(L\), bond dimension, and bulk window.  The stored contrast is the mean
+absolute density difference between neighboring orbit phases over a centered
+bulk fraction of the ladder (one half by default).
+
+\subsection{Fixed-point gate and slow modes}
+
+A period-one solution must satisfy both the raw residual gate in
+Eq.~\eqref{eq:field-residuals} and a slow-mode extrapolation.  For residual
+vectors \(r_k=y_k-x_k\),
+\begin{equation}
+ \lambda_k=\frac{r_k\cdot r_{k-1}}{\|r_{k-1}\|_2^2}.
+\end{equation}
+When consecutive residuals are sufficiently parallel, the gated residual is
+inflated by
+\begin{equation}
+  s_k=\max\left(1,\frac{1}{1-\lambda_k}\right).
+\end{equation}
+If \(\lambda_k\ge1\), the factor is infinite.  This prevents a nearly marginal
+mode from being accepted merely because its instantaneous residual crosses a
+local threshold.  The recent stability window must also pass the density gate;
+the latest target-density-corrected energy change and the current energy
+identities must pass their respective gates.
+
+\subsection{Linear and Anderson acceleration}
+
+If the initial raw probe finds no accepted solution, the code uses adaptive
+linear or Anderson mixing.  Linear mixing is
+\begin{equation}
+ x_{k+1}=x_k+\eta_k\bigl[f(x_k)-x_k\bigr].
+\end{equation}
+For Anderson mixing, recent residuals \(r_j=f_j-x_j\) are combined with
+coefficients \(c_j\), constrained by \(\sum_jc_j=1\), by solving the regularized
+Gram/KKT system.  The update is
+\begin{equation}
+ x_{k+1}=(1-\eta_k)\sum_jc_jx_j+\eta_k\sum_jc_jf_j.
+\end{equation}
+The damping is halved after substantial residual growth and increased
+conservatively after improvement, within configured minimum and maximum
+bounds.  Mixing accelerates a fixed-point search; it does not certify a
+physical orbit.
+
+\subsection{Initial-condition protocol}
+
+Independent branches deliberately sample multiple basins.  The currently
+implemented seed families are summarized below.
+\begin{center}
+\begin{tabularx}{\textwidth}{p{0.34\textwidth}X}
+\toprule
+Seed family & Purpose and construction \\
+\midrule
+Legacy pairing/SDW/CDW
+& Compatibility protocol: random retained real \(\alpha\), or deterministic
+  staggered Hartree fields.  The channels do not have equal seed norms. \\
+Matched mode
+& Uses a declared rung profile
+  \(g_m(i)=\cos\{\pi[m(i-1)/(L-1)+\phi_\pi]\}\), mean-controlled for nonzero \(m\),
+  and normalizes the complete field vector so
+  \(\|x\|_2/\sqrt{2L}=A_{\mathrm{seed}}\). \\
+Pairing form factors
+& On-site \(s\), rung \(s\), leg \(s\), extended \(s\), and \(d\)-wave
+  templates, optionally with a declared longitudinal mode. \\
+Stripe
+& Combines a longitudinally and transversely staggered SDW envelope \(m\)
+  with a leg-even charge second harmonic \(2m\). \\
+Stripe+pairing
+& Adds a separately normalized pairing component to test unrestricted
+  coexistence; a pure stripe can remain trapped in the invariant
+  \(\alpha=0\) subspace. \\
+Legacy-like pairing
+& Translation-invariant random relative-bond \(\alpha\) coefficients, with
+  \(\beta=\nu=0\), reproducing the geometry of the old fresh-run source at the
+  matched total norm. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+Different seeds are initial conditions, not phase labels.  All accepted
+distinct basins are retained for the variational comparison.
+
+\section{Zero-temperature variational functional}
+\label{sec:variational}
+
+The DMRG eigenvalue \(E_{\mathrm{eig}}\) of \(\Heff\) is not directly
+comparable between MF branches: it includes \(-\mu N\) and only the linearized
+transverse terms.  Let \(L_{\mathrm{lin}}=\mean{H_{\mathrm{lin}}}\).  Channel
+by channel,
+\begin{align}
+ L_{\mathrm{pair}}&=-2\sum_a\alpha_a F_a,
+ &E_{\perp,\mathrm{pair}}&=\tfrac12L_{\mathrm{pair}},\\
+ L_{\mathrm{ex}}&=\sum_a\beta_a X_a,
+ &E_{\perp,\mathrm{ex}}&=\tfrac12L_{\mathrm{ex}},\\
+ L_{\mathrm{dens}}&=\sum_a\nu_a n_a,
+ &E_{\perp,\mathrm{dens}}&=\tfrac12\sum_a\nu_a(n_a-\tfrac12).
+\end{align}
+The applied partner fields are used in these contractions.  At a fixed point
+they equal the outgoing fields; on an orbit they belong to the preceding
+phase and must remain distinct.
+
+With \(E_\perp\) the sum of the three quadratic MF contributions, the
+double-counting constant is
+\begin{equation}
+ C_{\mathrm{dc}}=E_\perp-L_{\mathrm{lin}}.
+\end{equation}
+The reconstructed canonical functional is
+ \begin{equation}
+ E_{\mathrm{var}}^{\mathrm{rec}}
+ =\mean{\Heff}+\mu\mean N+C_{\mathrm{dc}},
+\end{equation}
+and the independently evaluated direct form is
+\begin{equation}
+ E_{\mathrm{var}}^{\mathrm{dir}}=\mean{\Hlad}+E_\perp.
+\label{eq:direct-functional}
+\end{equation}
+The code stores Eq.~\eqref{eq:direct-functional} as the canonical variational
+energy and requires agreement with the reconstructed form.  It also checks
+\begin{equation}
+ \mean{\Hlad}=\mean{\Heff}+\mu\mean N-L_{\mathrm{lin}}
+\label{eq:hamiltonian-identity}
+\end{equation}
+and separately compares \(E_{\mathrm{eig}}\) with \(\mean{\Heff}\).
+
+Small residual density errors are placed on the common target-\(N\) tangent
+plane using
+\begin{equation}
+ E_{N_\star}=E_{\mathrm{var}}^{\mathrm{dir}}
+              +\mu\bigl(N_\star-\mean N\bigr).
+\label{eq:density-correction}
+\end{equation}
+This leading correction is used for energy-stability gates and branch ranking;
+it is not a substitute for tighter density convergence.  For a physical
+orbit, canonical and corrected energies are computed phase by phase with the
+correct partner field, then averaged arithmetically.
+
+Only accepted fixed points or validated unmixed orbits may be ranked.  The
+model, geometry, numerical settings, implementation, and \(\Ep\)-registry
+fingerprints must match.  Cross-geometry energies are not ranked because the
+geometries define different effective Hamiltonians, and a possible
+field-independent perturbative offset has not been restored.
+
+\section{Observables and validation diagnostics}
+\label{sec:diagnostics}
+
+\subsection{Structure factors and \(K_\rho\)}
+
+For \(O_i=n_i\) or \(S_i^z\), the connected structure factor is
+\begin{equation}
+ S_O(q_x,q_y)=\frac{1}{2L}\sum_{a,b}
+ e^{\mathrm{i}[q_x(i_a-i_b)+q_y(\ell_a-\ell_b)]}
+ \left(\mean{O_aO_b}-\mean{O_a}\mean{O_b}\right),
+\end{equation}
+with \(q_x=2\pi m/L\) and \(q_y\in\{0,\pi\}\).  The dominant charge and spin
+wavevectors are stored.  The reference \(q_x=\pi n\) is a tracking diagnostic,
+not a universal two-leg-ladder phase criterion.
+
+The first up to three nonzero \(q_y=0\) charge modes are fit through the origin
+to obtain \(s=\dd S_c/\dd q\).  Both normalizations are reported,
+\begin{equation}
+ K_{\rho,\mathrm{site}}=\pi s,
+ \qquad K_{\rho,\mathrm{rung}}=2\pi s.
+\end{equation}
+
+\subsection{Entanglement and pair correlations}
+
+For every MPS bond, Schmidt probabilities \(p_a\) give
+\begin{equation}
+ S=-\sum_ap_a\log p_a,
+ \qquad S_2=-\log\sum_ap_a^2.
+\end{equation}
+The central-charge diagnostic uses inter-rung cuts away from the open edges and
+fits
+\begin{equation}
+ S(\ell)=\frac{c}{6}\log\left[\frac{2L}{\pi}
+              \sin\left(\frac{\pi\ell}{L}\right)\right]+s_0.
+\end{equation}
+The fit window, number of points, and \(R^2\) are stored.  Finite-size,
+finite-entanglement, and parity effects can make this estimate unreliable.
+
+Optional full pair diagnostics use the unnormalized singlet operator
+\begin{equation}
+ \Delta_{ab}=c_{a\uparrow}c_{b\downarrow}
+             -c_{a\downarrow}c_{b\uparrow}
+\end{equation}
+and retain sign-resolved matrices for rung, leg-0, and leg-1 bonds.  Spatial
+decay and sign structure must be reported; a large local value or finite-MPS
+pair field alone does not establish superconducting long-range order.
+
+\subsection{Fixed-sector gaps}
+
+Separate QN-conserving DMRG calculations evaluate
+\begin{align}
+ \Delta_s &= E(N,2)-E(N,0),\\
+ \Delta_c &= \tfrac12\left[E(N+2,0)+E(N-2,0)-2E(N,0)\right],\\
+ \Ep^{(h)} &= E(N-2,0)+E(N,0)-2E(N-1,1),\\
+ \Ep^{(p)} &= E(N+2,0)+E(N,0)-2E(N+1,1),
+\end{align}
+where the second argument is \(2S_z\).  The present implementation assumes an
+even reference \(N\) and an \(S_z=0\) reference sector.  Per-sector sweep
+energies, discarded weights, and maximum link dimensions are stored as
+convergence evidence.
+
+\section{Numerical acceptance and representative controls}
+
+The following values describe the checked-in Phase-1 base configuration and
+are not universal constants.  Every run stores its actual values.
+\begin{center}
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+Control & Representative value / rule \\
+\midrule
+DMRG & 12 sweeps, \(\chi=200\), cutoff \(10^{-10}\), sweep-energy tolerance
+  \(10^{-8}\), Krylov dimension 8. \\
+Density search & \(|n-n_\star|\le2\times10^{-4}\), at most 16 evaluations,
+  initial bracket step \(0.05\), growth factor 2. \\
+Fixed-point fields & \(\epsilon_\infty\le10^{-6}\) or
+  \(\epsilon_2\le5\times10^{-3}\), including the slow-mode extrapolation, for
+  two stable iterations. \\
+Energy and identities & corrected energy change per site \(\le10^{-7}\),
+  bare-Hamiltonian identity error per site \(\le10^{-9}\), and effective
+  eigenvalue error per site \(\le10^{-6}\). \\
+Raw orbit probe & 20 raw updates; inspect periods through 2 in the probe;
+  periods 1 and 2 enabled; three recurrence links per phase; recurrence
+  distance \(\le2\times10^{-6}\) absolute or \(\le10^{-2}\) relative. \\
+Period-two shape & worst step cosine \(\le-0.5\) and worst two-step/one-step
+  ratio \(\le0.5\). \\
+Anderson mixing & memory 5, regularization \(10^{-10}\), initial damping 0.5,
+  adaptive range 0.05--0.8. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+An accepted solution is therefore a finite-\(L\), finite-\(\chi\) numerical
+object.  Phase claims require, at minimum, bond-dimension and length scaling,
+boundary/bulk-window checks, consistent order diagnostics, sector gaps, and
+seed/basin robustness.  The implementation currently excludes complex fields
+and flux order.
+
+\section{Artifacts, provenance, and branch selection}
+
+Each HDF5 state records the complete configuration, applied and measured field
+history, correlators and energy decomposition, DMRG sweep evidence, model and
+numerical fingerprints, implementation and registry hashes, software/device
+metadata, random seed, branch labels, and hash-pinned parent or resume lineage.
+Rolling latest/best checkpoints are replaceable; final states and orbit
+artifacts are immutable.
+
+Full production states, including MPS objects, live in scratch storage.
+Compact stateless mirrors omit MPS tensors but retain the analysis and
+selection data plus hashes and the full-artifact location.  A compact state may
+be plotted, compared, or used for field-only inheritance, but cannot be used as
+an MPS restart.
+
+The comparison tool admits only accepted period-one states or explicitly
+enabled, raw-map-validated orbits with matching fingerprints.  For scans, keep
+independent, forward, reverse, and metastable continuations as distinct
+lineages rather than overwriting a higher-energy basin.
+
+\section{Code map and maintenance}
+
+\begin{center}
+\begin{tabularx}{\textwidth}{p{0.34\textwidth}X}
+\toprule
+File & Responsibility \\
+\midrule
+\path{src/MeanField.jl} & site ordering, seeds, bare/MF MPO, correlators, and
+  geometry-dependent raw field map \\
+\path{src/Geometry.jl} & site/rung indexing, supported transverse geometries,
+  and spin-resolved density kernels \\
+\path{src/Solver.jl} & DMRG schedules, density targeting, SCF driver, and
+  checkpoint/diagnostic orchestration \\
+\path{src/Convergence.jl} & fixed-point, slow-mode, recurrence, orbit, and
+  failure-status gates \\
+\path{src/Mixing.jl} & field vectorization, residual metric, linear mixing,
+  and Anderson acceleration \\
+\path{src/Variational.jl} & channel constants, direct/reconstructed canonical
+  energy, and consistency identities \\
+\path{src/Diagnostics.jl} & structure factors, \(K_\rho\), entanglement,
+  central charge, pair matrices, and fixed-sector gaps \\
+\path{src/EpRegistry.jl} & exact/interpolated pair-binding selection and
+  weak-coupling checks \\
+\path{src/Storage.jl}, \path{src/Provenance.jl}, \path{src/Selection.jl}
+  & immutable artifacts, fingerprints, lineage, compact mirrors, and accepted
+  branch ranking \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+When the scientific map changes, update this file together with the relevant
+source and tests.  In particular, any change to the \(\alpha/\beta/\nu\) map
+must be reconciled with \(E_\perp\), the double-counting correction, and the
+Hamiltonian-identity tests.  Campaign outcomes and command histories remain in
+\path{docs/RUN_LOG.md}; these notes should contain only durable methods and
+clearly labeled representative settings.
+
+\section*{Revision log}
+\addcontentsline{toc}{section}{Revision log}
+
+\begin{tabularx}{\textwidth}{llX}
+\toprule
+Date & Revision & Summary \\
+\midrule
+2026-09-01 & 0.1 & Initial synthesis of the modular model, SCF/DMRG method,
+variational functional, convergence gates, diagnostics, and provenance rules.\\
+\bottomrule
+\end{tabularx}
+
+\begin{thebibliography}{9}
+
+\bibitem{bollmark2025}
+D. Bollmark, N. Kohler, and A. Kantian,
+\emph{Phys. Rev. B} \textbf{111}, 125141 (2025),
+\href{https://doi.org/10.1103/PhysRevB.111.125141}
+{doi:10.1103/PhysRevB.111.125141}.
+
+\bibitem{anderson1965}
+D. G. Anderson, ``Iterative procedures for nonlinear integral equations,''
+\emph{J. ACM} \textbf{12}, 547--560 (1965).
+
+\bibitem{calabrese2004}
+P. Calabrese and J. Cardy, ``Entanglement entropy and quantum field theory,''
+\emph{J. Stat. Mech.} P06002 (2004).
+
+\end{thebibliography}
+
+\end{document}

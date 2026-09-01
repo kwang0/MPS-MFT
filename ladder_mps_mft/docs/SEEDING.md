@@ -144,8 +144,8 @@ within each transverse geometry, `scripts/prepare_phase1_gpu.jl` assigns all
 three channels the same product-state seed and records the protocol plus seed
 fingerprint in `manifest.tsv`. The checked-in Phase 1 base remains legacy, so
 existing plans and prepared campaigns do not change implicitly. Preparation is
-still separate from smoke and matrix submission, and all ledger checks remain
-authoritative on Perlmutter.
+still separate from direct scientific-branch submission, and all ledger checks
+remain authoritative on Perlmutter.
 
 ## What “fair” does and does not mean
 

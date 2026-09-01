@@ -203,8 +203,8 @@ SQUARE_V0_RUN=20260901_phase1_square_t014_v000_seed_chi200_loose
 bash slurm/phase1_gpu.sh prepare-square-v0-seed-pilot "$SQUARE_V0_RUN"
 ```
 
-Neither command submits or reserves. The plan-only first-segment envelope is
-`18.125` node-hours (`0.125` smoke plus six `3.000` branch reservations),
-projecting the synced conservative ledger from `158.500` to `176.625` and
-leaving `223.375` under the project cap. Recheck the live Perlmutter ledger
-before the separately staged smoke and matrix submissions.
+Neither command submits or reserves. Under launcher v1.13.0, the plan-only
+first-segment envelope is `18.000` node-hours (six `3.000` branch
+reservations). Recheck the live Perlmutter ledger before direct submission.
+If a smoke was already submitted from the v1.12.0-prepared campaign, its
+existing reservation remains visible until the terminal job is reconciled.

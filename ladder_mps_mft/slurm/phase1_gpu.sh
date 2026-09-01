@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # Guarded Perlmutter GPU launcher for refactored Phase 1 MPS+MF branches.
-# The default action is read-only. Scientific jobs are staged after a GPU smoke test.
+# The default action is read-only. Prepared scientific branches submit directly.
 
 set -euo pipefail
 
-readonly PHASE1_SCRIPT_VERSION="1.12.0"
+readonly PHASE1_SCRIPT_VERSION="1.13.0"
 script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
 project_dir="${PHASE1_PROJECT_DIR:-$(cd "$(dirname "$script_path")/.." && pwd)}"
 repo_root="${PHASE1_REPO_ROOT:-$(cd "$project_dir/.." && pwd)}"
@@ -159,12 +159,11 @@ validate_project() {
 
 print_matched_seed_pilot_plan() {
   validate_project
-  local segment smoke initial ceiling committed projected remaining
+  local segment initial ceiling committed projected remaining
   segment="$(gpu_node_hours "$PHASE1_GPU_TIME")"
-  smoke="$(gpu_node_hours "$PHASE1_SMOKE_TIME")"
-  initial="$(awk -v s="$segment" -v p="$smoke" 'BEGIN {printf "%.9f", 3*s+p}')"
-  ceiling="$(awk -v s="$segment" -v p="$smoke" -v m="$PHASE1_MAX_SEGMENTS" \
-    'BEGIN {printf "%.9f", 3*m*s+p}')"
+  initial="$(awk -v s="$segment" 'BEGIN {printf "%.9f", 3*s}')"
+  ceiling="$(awk -v s="$segment" -v m="$PHASE1_MAX_SEGMENTS" \
+    'BEGIN {printf "%.9f", 3*m*s}')"
   committed="$(ledger_total)"
   projected="$(awk -v c="$committed" -v a="$initial" 'BEGIN {printf "%.9f", c+a}')"
   remaining="$(awk -v cap="$PHASE1_ADDITIONAL_NODE_HOUR_CAP" -v p="$projected" \
@@ -183,7 +182,6 @@ Lineage policy:       three independent starts; no inherited or resumed MPS
 Interpretation:       convergence/basin pilot, not an unbiased wavevector survey
 GPU request:          one of four GPUs, ${PHASE1_GPU_TIME}, ${PHASE1_GPU_CPUS} CPUs, shared QOS
 Per-segment reserve:  ${segment} GPU node-hours
-Per-campaign smoke:   ${smoke} GPU node-hours
 First-segment envelope: ${initial} node-hours
 Four-segment emergency ceiling: ${ceiling} node-hours (not pre-authorized)
 Hard project cap:     ${PHASE1_ADDITIONAL_NODE_HOUR_CAP} additional node-hours
@@ -193,10 +191,9 @@ Preparation does not submit or reserve:
   MATCHED_RUN=20260828_phase1_unfrustrated_matched_seed_chi400
   bash $script_path prepare-matched-seed-pilot "\$MATCHED_RUN"
 
-Submission remains explicitly staged:
+Direct scientific submission:
   bash $script_path submit "\$MATCHED_RUN"
   bash $script_path status "\$MATCHED_RUN"
-  bash $script_path submit-matrix "\$MATCHED_RUN"
 EOF
   print_budget
   awk -v current="$committed" -v requested="$initial" -v cap="$PHASE1_ADDITIONAL_NODE_HOUR_CAP" \
@@ -207,15 +204,14 @@ EOF
 
 print_square_seed_pilot_plan() {
   validate_project
-  local segment smoke initial ceiling committed projected remaining
+  local segment initial ceiling committed projected remaining
   local future_grid staged_grid grid_projected grid_remaining
   local full_bank_grid full_bank_projected full_bank_remaining
   segment="$(gpu_node_hours "$PHASE1_GPU_TIME")"
-  smoke="$(gpu_node_hours "$PHASE1_SMOKE_TIME")"
-  initial="$(awk -v s="$segment" -v p="$smoke" 'BEGIN {printf "%.9f", 6*s+p}')"
-  ceiling="$(awk -v s="$segment" -v p="$smoke" -v m="$PHASE1_MAX_SEGMENTS" \
-    'BEGIN {printf "%.9f", 6*m*s+p}')"
-  future_grid="$(awk -v s="$segment" -v p="$smoke" 'BEGIN {printf "%.9f", 8*(3*s+p)}')"
+  initial="$(awk -v s="$segment" 'BEGIN {printf "%.9f", 6*s}')"
+  ceiling="$(awk -v s="$segment" -v m="$PHASE1_MAX_SEGMENTS" \
+    'BEGIN {printf "%.9f", 6*m*s}')"
+  future_grid="$(awk -v s="$segment" 'BEGIN {printf "%.9f", 8*3*s}')"
   staged_grid="$(awk -v a="$initial" -v f="$future_grid" 'BEGIN {printf "%.9f", a+f}')"
   full_bank_grid="$(awk -v a="$initial" 'BEGIN {printf "%.9f", 9*a}')"
   committed="$(ledger_total)"
@@ -251,7 +247,6 @@ Lineage policy:       six independent starts; no inherited or resumed field/MPS 
 Interpretation:       controls plus predeclared two-mode coexistence bank; preliminary energies only
 GPU request:          one of four GPUs, ${PHASE1_GPU_TIME}, ${PHASE1_GPU_CPUS} CPUs, shared QOS
 Per-segment reserve:  ${segment} GPU node-hours
-Per-campaign smoke:   ${smoke} GPU node-hours
 First-segment envelope: ${initial} node-hours
 Four-segment emergency ceiling: ${ceiling} node-hours (not pre-authorized)
 Hard project cap:     ${PHASE1_ADDITIONAL_NODE_HOUR_CAP} additional node-hours
@@ -268,10 +263,9 @@ Preparation does not submit or reserve:
   SQUARE_RUN=20260830_phase1_square_t014_vm04_seed_chi200_loose
   bash $script_path prepare-square-seed-pilot "\$SQUARE_RUN"
 
-Submission remains explicitly staged:
+Direct scientific submission:
   bash $script_path submit "\$SQUARE_RUN"
   bash $script_path status "\$SQUARE_RUN"
-  bash $script_path submit-matrix "\$SQUARE_RUN"
 EOF
   print_budget
   awk -v current="$committed" -v requested="$initial" -v cap="$PHASE1_ADDITIONAL_NODE_HOUR_CAP" \
@@ -282,12 +276,11 @@ EOF
 
 print_square_v0_seed_pilot_plan() {
   validate_project
-  local segment smoke initial ceiling committed projected remaining
+  local segment initial ceiling committed projected remaining
   segment="$(gpu_node_hours "$PHASE1_GPU_TIME")"
-  smoke="$(gpu_node_hours "$PHASE1_SMOKE_TIME")"
-  initial="$(awk -v s="$segment" -v p="$smoke" 'BEGIN {printf "%.9f", 6*s+p}')"
-  ceiling="$(awk -v s="$segment" -v p="$smoke" -v m="$PHASE1_MAX_SEGMENTS" \
-    'BEGIN {printf "%.9f", 6*m*s+p}')"
+  initial="$(awk -v s="$segment" 'BEGIN {printf "%.9f", 6*s}')"
+  ceiling="$(awk -v s="$segment" -v m="$PHASE1_MAX_SEGMENTS" \
+    'BEGIN {printf "%.9f", 6*m*s}')"
   committed="$(ledger_total)"
   projected="$(awk -v c="$committed" -v a="$initial" 'BEGIN {printf "%.9f", c+a}')"
   remaining="$(awk -v cap="$PHASE1_ADDITIONAL_NODE_HOUR_CAP" -v p="$projected" \
@@ -318,7 +311,6 @@ Lineage policy:       six independent starts; no inherited or resumed field/MPS 
 Interpretation:       competing-basin reconnaissance; preliminary within-fingerprint energies only
 GPU request:          one of four GPUs, ${PHASE1_GPU_TIME}, ${PHASE1_GPU_CPUS} CPUs, shared QOS
 Per-segment reserve:  ${segment} GPU node-hours
-Per-campaign smoke:   ${smoke} GPU node-hours
 First-segment envelope: ${initial} node-hours
 Four-segment emergency ceiling: ${ceiling} node-hours (not pre-authorized)
 Hard project cap:     ${PHASE1_ADDITIONAL_NODE_HOUR_CAP} additional node-hours
@@ -328,10 +320,9 @@ Preparation does not submit or reserve:
   SQUARE_V0_RUN=20260901_phase1_square_t014_v000_seed_chi200_loose
   bash $script_path prepare-square-v0-seed-pilot "\$SQUARE_V0_RUN"
 
-Submission remains explicitly staged:
+Direct scientific submission:
   bash $script_path submit "\$SQUARE_V0_RUN"
   bash $script_path status "\$SQUARE_V0_RUN"
-  bash $script_path submit-matrix "\$SQUARE_V0_RUN"
 EOF
   print_budget
   awk -v current="$committed" -v requested="$initial" -v cap="$PHASE1_ADDITIONAL_NODE_HOUR_CAP" \
@@ -342,12 +333,11 @@ EOF
 
 print_square_tight5_plan() {
   validate_project
-  local segment smoke initial ceiling committed projected remaining
+  local segment initial ceiling committed projected remaining
   segment="$(gpu_node_hours "$PHASE1_SQUARE_TIGHT5_TIME")"
-  smoke="$(gpu_node_hours "$PHASE1_SMOKE_TIME")"
-  initial="$(awk -v s="$segment" -v p="$smoke" 'BEGIN {printf "%.9f", 6*s+p}')"
-  ceiling="$(awk -v s="$segment" -v p="$smoke" -v m="$PHASE1_MAX_SEGMENTS" \
-    'BEGIN {printf "%.9f", 6*m*s+p}')"
+  initial="$(awk -v s="$segment" 'BEGIN {printf "%.9f", 6*s}')"
+  ceiling="$(awk -v s="$segment" -v m="$PHASE1_MAX_SEGMENTS" \
+    'BEGIN {printf "%.9f", 6*m*s}')"
   committed="$(ledger_total)"
   projected="$(awk -v c="$committed" -v a="$initial" 'BEGIN {printf "%.9f", c+a}')"
   remaining="$(awk -v cap="$PHASE1_ADDITIONAL_NODE_HOUR_CAP" -v p="$projected" \
@@ -366,7 +356,6 @@ Threshold policy:     physical map threshold=0; posthoc floor scan=0,1e-6,1e-5,1
 Interpretation:       convergence/error-resolution probe; preliminary energies only
 GPU request:          one of four GPUs, ${PHASE1_SQUARE_TIGHT5_TIME}, ${PHASE1_GPU_CPUS} CPUs, shared QOS
 Per-branch reserve:   ${segment} GPU node-hours
-Per-campaign smoke:   ${smoke} GPU node-hours
 First-segment envelope: ${initial} node-hours
 Four-segment emergency ceiling: ${ceiling} node-hours (not pre-authorized)
 Hard project cap:     ${PHASE1_ADDITIONAL_NODE_HOUR_CAP} additional node-hours
@@ -378,10 +367,9 @@ where the six full parent artifacts can be rehashed:
   TIGHT_RUN=20260831_phase1_square_t014_vm04_chi200_tight5
   bash $script_path prepare-square-tight5 "\$SOURCE_RUN" "\$TIGHT_RUN"
 
-Submission remains explicitly staged:
+Direct scientific submission:
   bash $script_path submit "\$TIGHT_RUN"
   bash $script_path status "\$TIGHT_RUN"
-  bash $script_path submit-matrix "\$TIGHT_RUN"
 EOF
   print_budget
   awk -v current="$committed" -v requested="$initial" -v cap="$PHASE1_ADDITIONAL_NODE_HOUR_CAP" \
@@ -392,19 +380,18 @@ EOF
 
 print_recurrence_plan() {
   validate_project
-  local segment smoke recurrence_initial competitors_initial combined_initial
+  local segment recurrence_initial competitors_initial combined_initial
   local recurrence_ceiling competitors_ceiling combined_ceiling committed
   local recurrence_projected combined_projected recurrence_remaining combined_remaining
   segment="$(gpu_node_hours "$PHASE1_GPU_TIME")"
-  smoke="$(gpu_node_hours "$PHASE1_SMOKE_TIME")"
-  recurrence_initial="$(awk -v s="$segment" -v p="$smoke" 'BEGIN {printf "%.9f", 3*s+p}')"
-  competitors_initial="$(awk -v s="$segment" -v p="$smoke" 'BEGIN {printf "%.9f", 2*s+p}')"
+  recurrence_initial="$(awk -v s="$segment" 'BEGIN {printf "%.9f", 3*s}')"
+  competitors_initial="$(awk -v s="$segment" 'BEGIN {printf "%.9f", 2*s}')"
   combined_initial="$(awk -v a="$recurrence_initial" -v b="$competitors_initial" \
     'BEGIN {printf "%.9f", a+b}')"
-  recurrence_ceiling="$(awk -v s="$segment" -v p="$smoke" -v m="$PHASE1_MAX_SEGMENTS" \
-    'BEGIN {printf "%.9f", 3*m*s+p}')"
-  competitors_ceiling="$(awk -v s="$segment" -v p="$smoke" -v m="$PHASE1_MAX_SEGMENTS" \
-    'BEGIN {printf "%.9f", 2*m*s+p}')"
+  recurrence_ceiling="$(awk -v s="$segment" -v m="$PHASE1_MAX_SEGMENTS" \
+    'BEGIN {printf "%.9f", 3*m*s}')"
+  competitors_ceiling="$(awk -v s="$segment" -v m="$PHASE1_MAX_SEGMENTS" \
+    'BEGIN {printf "%.9f", 2*m*s}')"
   combined_ceiling="$(awk -v a="$recurrence_ceiling" -v b="$competitors_ceiling" \
     'BEGIN {printf "%.9f", a+b}')"
   committed="$(ledger_total)"
@@ -429,7 +416,6 @@ Stage B physics:      the same raw-map recurrence policy; Anderson may accelerat
                       only after a recurrence-free raw probe
 GPU request:          one of four GPUs, ${PHASE1_GPU_TIME}, ${PHASE1_GPU_CPUS} CPUs, shared QOS
 Per-segment reserve:  ${segment} GPU node-hours
-Per-campaign smoke:   ${smoke} GPU node-hours
 Stage A first segments: ${recurrence_initial} node-hours
 Conditional Stage B first segments: ${competitors_initial} node-hours
 Combined first-segment envelope: ${combined_initial} node-hours
@@ -444,17 +430,15 @@ Stage A preparation does not submit or reserve:
   RECURRENCE_RUN=20260826_phase1_unfrustrated_pairing_recurrence_chi400
   bash $script_path prepare-recurrence 20260824_phase1_gpu_v3_float64_history "\$RECURRENCE_RUN"
 
-Stage A submission remains explicitly staged:
+Stage A direct scientific submission:
   bash $script_path submit "\$RECURRENCE_RUN"
   bash $script_path status "\$RECURRENCE_RUN"
-  bash $script_path submit-matrix "\$RECURRENCE_RUN"
 
 Only after the recorded gate passes, prepare Stage B without submitting or reserving:
   CONTROL_RUN=20260826_phase1_unfrustrated_competitors_chi400
   bash $script_path prepare-recurrence-competitors "\$RECURRENCE_RUN" "\$CONTROL_RUN"
   bash $script_path submit "\$CONTROL_RUN"
   bash $script_path status "\$CONTROL_RUN"
-  bash $script_path submit-matrix "\$CONTROL_RUN"
 EOF
   print_budget
   awk -v current="$committed" -v requested="$combined_initial" -v cap="$PHASE1_ADDITIONAL_NODE_HOUR_CAP" \
@@ -489,11 +473,10 @@ EOF
 
 print_plan() {
   validate_project
-  local segment smoke initial maximum
+  local segment initial maximum
   segment="$(gpu_node_hours "$PHASE1_GPU_TIME")"
-  smoke="$(gpu_node_hours "$PHASE1_SMOKE_TIME")"
-  initial="$(awk -v s="$segment" -v p="$smoke" 'BEGIN {printf "%.9f", 9*s+p}')"
-  maximum="$(awk -v s="$segment" -v p="$smoke" -v m="$PHASE1_MAX_SEGMENTS" 'BEGIN {printf "%.9f", 9*m*s+p}')"
+  initial="$(awk -v s="$segment" 'BEGIN {printf "%.9f", 9*s}')"
+  maximum="$(awk -v s="$segment" -v m="$PHASE1_MAX_SEGMENTS" 'BEGIN {printf "%.9f", 9*m*s}')"
   cat <<EOF
 Ladder MPS+MF Phase 1 refactored GPU campaign
 
@@ -507,16 +490,14 @@ GPU request:          one of four GPUs, ${PHASE1_GPU_TIME}, ${PHASE1_GPU_CPUS} C
 Full-result storage:  \$PSCRATCH/MPS-MFT/ladder_mps_mft/phase1_gpu/<run-id>
 CFS/local storage:    MPS-free analysis mirrors under output/phase1_gpu/<run-id>/results
 Per-segment reserve:  ${segment} GPU node-hours
-Smoke-test reserve:   ${smoke} GPU node-hours
-Initial staged total: ${initial} node-hours
+Initial branch total: ${initial} node-hours
 Four-segment ceiling: ${maximum} node-hours for these nine branches
 Hard project cap:     ${PHASE1_ADDITIONAL_NODE_HOUR_CAP} additional node-hours
 
-Submission is staged:
+Direct scientific submission:
   1. bash $script_path prepare-standard 20260826_phase1_standard
   2. bash $script_path submit 20260826_phase1_standard
   3. bash $script_path status 20260826_phase1_standard
-  4. bash $script_path submit-matrix 20260826_phase1_standard
 
 To recover nine immutable Float32 branch states into the corrected Float64
 solver while inspecting the generated controls before allocation:
@@ -524,14 +505,14 @@ solver while inspecting the generated controls before allocation:
   bash $script_path submit NEW_RUN_ID
 
 submit-recovery SOURCE_RUN_ID NEW_RUN_ID remains the one-command equivalent
-that prepares the controls and submits only the smoke job.
+that prepares the controls and directly submits all scientific branches.
 
 Before step 1, instantiate CUDA once on a Perlmutter login node:
   JULIA_PKG_PRECOMPILE_AUTO=0 $PHASE1_JULIA --project="$project_dir/gpu" \\
     -e 'using Pkg; Pkg.instantiate(; allow_autoprecomp=false)'
 
-Do not import CUDA on the GPU-less login node. The smoke allocation performs
-the first CUDA import and precompile on a real GPU. Scratch is temporary and
+Do not import CUDA on the GPU-less login node. Each scientific branch performs
+its CUDA import and linear-algebra preflight on its allocated GPU. Scratch is temporary and
 purgeable: archive scientifically irreplaceable full states to HPSS separately.
 EOF
   print_budget
@@ -590,7 +571,7 @@ load_environment() {
   # shellcheck disable=SC1090
   source "$run_dir/run.env"
   case "${PHASE1_RUN_SCRIPT_VERSION:-missing}" in
-    1.0.0|1.0.1|1.1.0|1.2.0|1.3.0|1.4.0|1.5.0|1.6.0|1.7.0|1.8.0|1.9.0|1.10.0|1.11.0|1.12.0) ;;
+    1.0.0|1.0.1|1.1.0|1.2.0|1.3.0|1.4.0|1.5.0|1.6.0|1.7.0|1.8.0|1.9.0|1.10.0|1.11.0|1.12.0|1.13.0) ;;
     *) die "unsupported run script version ${PHASE1_RUN_SCRIPT_VERSION:-missing}; current version is $PHASE1_SCRIPT_VERSION";;
   esac
   project_dir="$PHASE1_PROJECT_DIR"
@@ -628,9 +609,20 @@ require_current_run_version() {
     "run was prepared with script ${PHASE1_RUN_SCRIPT_VERSION:-missing}; preserve it for audit and start a new run with $PHASE1_SCRIPT_VERSION"
 }
 
+require_direct_submission_compatible_run_version() {
+  case "${PHASE1_RUN_SCRIPT_VERSION:-missing}" in
+    1.12.0)
+      echo "warning: directly submitting a launcher-v1.12.0 campaign with v${PHASE1_SCRIPT_VERSION}; the standalone smoke gate has been retired" >&2
+      ;;
+    1.13.0) ;;
+    *) die \
+      "direct submission requires a run prepared by launcher v1.12.0 or v1.13.0; found ${PHASE1_RUN_SCRIPT_VERSION:-missing}";;
+  esac
+}
+
 require_worker_compatible_run_version() {
   case "${PHASE1_RUN_SCRIPT_VERSION:-missing}" in
-    1.2.0|1.3.0|1.4.0|1.5.0|1.6.0|1.7.0|1.8.0|1.9.0|1.10.0|1.11.0|1.12.0) ;;
+    1.2.0|1.3.0|1.4.0|1.5.0|1.6.0|1.7.0|1.8.0|1.9.0|1.10.0|1.11.0|1.12.0|1.13.0) ;;
     *) die "queued worker cannot execute run script ${PHASE1_RUN_SCRIPT_VERSION:-missing} with launcher $PHASE1_SCRIPT_VERSION";;
   esac
 }
@@ -716,30 +708,30 @@ validate_initialized_run() {
   [[ -f "$run_dir/manifest.tsv" ]] || die "prepared run is missing manifest.tsv"
   [[ -f "$run_dir/gpu-Manifest.toml" ]] || die "prepared run is missing its GPU manifest"
   [[ -f "$run_dir/gpu-Manifest.toml.sha256" ]] || die "prepared run is missing its GPU-manifest hash"
-  if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(3|4|5|6|7|8|9|10|11|12)\.0$ ]]; then
+  if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(3|4|5|6|7|8|9|10|11|12|13)\.0$ ]]; then
     [[ -d "$(full_run_directory_from_control "$run_dir")/results" ]] || die \
       "prepared run is missing its full-result scratch directory"
   fi
-  if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(5|6|7|8|9|10|11|12)\.0$ ]]; then
+  if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(5|6|7|8|9|10|11|12|13)\.0$ ]]; then
     [[ -f "$run_dir/campaign_kind.txt" ]] || die "prepared run is missing campaign_kind.txt"
     campaign_kind="$(<"$run_dir/campaign_kind.txt")"
     case "$campaign_kind" in
       standard|recurrence|recurrence_competitors) ;;
       matched_seed_pilot)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(6|7|8|9|10|11|12)\.0$ ]] || die \
-          "matched-seed pilot requires launcher v1.6.0 through v1.12.0"
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(6|7|8|9|10|11|12|13)\.0$ ]] || die \
+          "matched-seed pilot requires launcher v1.6.0 through v1.13.0"
         ;;
       square_seed_pilot)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(7|8|9|10|11|12)\.0$ ]] || die \
-          "square seed pilot requires launcher v1.7.0 through v1.12.0"
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(7|8|9|10|11|12|13)\.0$ ]] || die \
+          "square seed pilot requires launcher v1.7.0 through v1.13.0"
         ;;
       square_seed_pilot_v0)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(11|12)\.0$ ]] || die \
-          "square V=0 seed pilots require launcher v1.11.0 or v1.12.0"
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(11|12|13)\.0$ ]] || die \
+          "square V=0 seed pilots require launcher v1.11.0 through v1.13.0"
         ;;
       square_tight5)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(10|11|12)\.0$ ]] || die \
-          "square tight-five runs require launcher v1.10.0 through v1.12.0"
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(10|11|12|13)\.0$ ]] || die \
+          "square tight-five runs require launcher v1.10.0 through v1.13.0"
         ;;
       *) die "invalid prepared campaign kind: $campaign_kind";;
     esac
@@ -885,27 +877,6 @@ record_submission() {
     "$kind" "$label" "$segment" "$pool" "$requested_time" "$reserved" "$job_id" "$config" >>"$run_dir/jobs.tsv"
 }
 
-submit_smoke_job() {
-  local run_dir="$1" reserved raw job_id
-  awk -F'\t' '$1 == "smoke" {found=1} END {exit !found}' "$run_dir/jobs.tsv" && die "GPU smoke already submitted"
-  reserved="$(gpu_node_hours "$PHASE1_SMOKE_TIME")"
-  acquire_budget_lock
-  trap release_budget_lock EXIT
-  ensure_ledger
-  check_reservation "$reserved"
-  raw="$(sbatch --parsable --account="$PHASE1_ACCOUNT" --constraint=gpu --qos="$PHASE1_QOS" \
-    --licenses=scratch,cfs \
-    --nodes=1 --ntasks=1 --cpus-per-task="$PHASE1_GPU_CPUS" --gpus-per-task=1 \
-    --time="$PHASE1_SMOKE_TIME" --job-name=lmf1-gpu-smoke \
-    --output="$run_dir/logs/smoke-%j.out" --export=ALL \
-    "$script_path" _smoke "$run_dir")"
-  job_id="${raw%%;*}"
-  record_submission "$run_dir" smoke smoke 0 gpu "$PHASE1_SMOKE_TIME" "$reserved" "$job_id" "$project_dir/scripts/gpu_smoke.jl"
-  release_budget_lock
-  trap - EXIT
-  printf '%s\n' "$job_id"
-}
-
 submit_gpu_job_locked() {
   local run_dir="$1" label="$2" segment="$3" config="$4" reserved constraint raw job_id
   reserved="$(gpu_node_hours "$PHASE1_GPU_TIME")"
@@ -934,26 +905,8 @@ submit_gpu_job() {
   printf '%s\n' "$job_id"
 }
 
-slurm_state() {
-  local job_id="$1"
-  sacct -n -X -j "$job_id" --format=State -P 2>/dev/null | awk -F'|' 'NF {gsub(/[ +].*/, "", $1); print $1; exit}'
-}
-
-require_completed_smoke() {
-  local run_dir="$1" job_id state
-  job_id="$(awk -F'\t' '$1 == "smoke" {id=$7} END {print id}' "$run_dir/jobs.tsv")"
-  [[ -n "$job_id" ]] || die "submit the GPU smoke job first"
-  state="$(slurm_state "$job_id")"
-  [[ "$state" == "COMPLETED" ]] || die "GPU smoke job $job_id is ${state:-unknown}, not COMPLETED"
-  [[ -f "$run_dir/gpu_smoke.h5" ]] || die "GPU smoke artifact is missing"
-  "$PHASE1_JULIA" --startup-file=no --project="$project_dir" \
-    "$project_dir/scripts/validate_gpu_smoke.jl" "$run_dir/gpu_smoke.h5" >&2 || die \
-    "GPU smoke artifact failed Float64/runtime/preflight validation"
-}
-
 submit_matrix_jobs() {
   local run_dir="$1"
-  require_completed_smoke "$run_dir"
   local label config matrix_reservation index
   local -a pending_labels=() pending_configs=()
   acquire_budget_lock
@@ -1214,9 +1167,9 @@ Preparation only (no Slurm submission or budget reservation):
                                         Prepare six accepted-parent tight five-update probes
 
 Submissions:
-  submit RUN_ID                         Submit GPU smoke for an existing prepared campaign
-  submit-recovery SOURCE_RUN NEW_RUN    Prepare Float64 warm-start recovery and submit smoke
-  submit-matrix RUN_ID                  Submit all prepared branches after smoke completes
+  submit RUN_ID                         Submit all prepared scientific branches directly
+  submit-recovery SOURCE_RUN NEW_RUN    Prepare recovery and directly submit its branches
+  submit-matrix RUN_ID                  Backward-compatible alias for submit
   continue RUN_ID LABEL                 Submit an explicit same-model continuation
   submit-ep RUN_ID LABEL L U V t0 n ... Submit a guarded legacy CPU E_p calculation
 
@@ -1249,9 +1202,9 @@ case "$action" in
       "run is not prepared: $2; use an explicit preparation action first"
     run_dir="$(resolve_run_dir "$2")"
     load_environment "$run_dir"
-    require_current_run_version
+    require_direct_submission_compatible_run_version
     validate_initialized_run "$run_dir"
-    submit_smoke_job "$run_dir"
+    submit_matrix_jobs "$run_dir"
     ;;
   prepare-standard)
     [[ $# == 2 ]] || die "prepare-standard requires NEW_RUN_ID"
@@ -1309,15 +1262,14 @@ case "$action" in
     require_command sbatch
     source_run_dir="$(resolve_run_dir "$2")"
     [[ ! -e "$run_root/$3" ]] || die "new recovery run already exists: $run_root/$3"
-    check_reservation "$(gpu_node_hours "$PHASE1_SMOKE_TIME")"
     run_dir="$(initialize_run "$3" "$source_run_dir")"
-    submit_smoke_job "$run_dir"
+    submit_matrix_jobs "$run_dir"
     ;;
   submit-matrix)
     [[ $# == 2 ]] || die "submit-matrix requires RUN_ID"
     validate_submission_run_id "$2"
-    require_command sbatch; require_command sacct
-    run_dir="$(resolve_run_dir "$2")"; load_environment "$run_dir"; require_current_run_version; submit_matrix_jobs "$run_dir"
+    require_command sbatch
+    run_dir="$(resolve_run_dir "$2")"; load_environment "$run_dir"; require_direct_submission_compatible_run_version; validate_initialized_run "$run_dir"; submit_matrix_jobs "$run_dir"
     ;;
   continue)
     [[ $# == 3 ]] || die "continue requires RUN_ID LABEL"

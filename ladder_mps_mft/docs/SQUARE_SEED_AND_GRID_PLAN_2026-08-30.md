@@ -132,19 +132,19 @@ node-hours and `264.250` unreserved under the 400-additional-node-hour cap.
 Perlmutter accounting remains authoritative and must be rechecked immediately
 before submission.
 
-One smoke requests `0.125` node-hours and six first segments request
-`6*3=18.000`, for a representative first-segment envelope of `18.125`. If
-authorized, the ledger would move to `153.875` reserved and `246.125`
-unreserved. The four-segment emergency ceiling is `72.125`; it is not
-pre-authorized, and early completion never reclaims a ledger reservation.
+Six first segments request `6*3=18.000` node-hours. If authorized under the
+direct-submission policy, the ledger would move to `153.750` reserved and
+`246.250` unreserved. The four-segment emergency ceiling is `72.000`; it is not
+pre-authorized. Finalized early completions may release unused requested
+ceilings only through the append-only `sacct` reconciliation action.
 
 The intended square grid is `t0={1.0,1.2,1.4}` by `V={0,-0.2,-0.4}`. Running
 this full six-branch reconnaissance at the representative point and a
 provisional three-branch bank at each of the other eight points would reserve
-`18.125 + 8*9.125 = 91.125` first-segment node-hours. That would project the
-current ledger to `226.875` reserved and leave `173.125`. Repeating all six
-branches at all nine points would instead reserve `163.125`, project the
-ledger to `298.875`, and leave only `101.125`; that is explicitly not
+`18.000 + 8*9.000 = 90.000` first-segment node-hours. That would project the
+current ledger to `225.750` reserved and leave `174.250`. Repeating all six
+branches at all nine points would instead reserve `162.000`, project the
+ledger to `297.750`, and leave only `102.250`; that is explicitly not
 recommended. The later three-branch bank is
 not yet locked or authorized: use this representative result to prune it while
 retaining compute for higher bond dimension, length scaling, and any later
@@ -189,11 +189,9 @@ sed -n '1,7p' "output/phase1_gpu/$SQUARE_RUN/manifest.tsv"
 bash slurm/phase1_gpu.sh budget
 ```
 
-Only after reviewing those outputs should the already guarded smoke and matrix
-actions be used:
+Only after reviewing those outputs should the guarded direct action be used:
 
 ```bash
 bash slurm/phase1_gpu.sh submit "$SQUARE_RUN"
 bash slurm/phase1_gpu.sh status "$SQUARE_RUN"
-bash slurm/phase1_gpu.sh submit-matrix "$SQUARE_RUN"
 ```

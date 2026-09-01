@@ -69,12 +69,13 @@ HDF5 status or acceptance field was edited. See
 
 ## Ledger and staged Perlmutter commands
 
-Each 12-hour shared-GPU branch reserves `3.000` GPU node-hours and the smoke
-reserves `0.125`, so the first-segment envelope is `18.125` node-hours. The
-synced conservative ledger contains `158.500` reserved; this campaign would
-project to `176.625` reserved and `223.375` unreserved under the 400-additional-
-node-hour cap. Perlmutter measurement and the live ledger remain authoritative.
-The four-segment emergency ceiling is `72.125` and is not pre-authorized.
+Each 12-hour shared-GPU branch reserves `3.000` GPU node-hours, so launcher
+v1.13.0's direct first-segment envelope is `18.000` node-hours. Perlmutter
+measurement and the live ledger remain authoritative. The four-segment
+emergency ceiling is `72.000` and is not pre-authorized. For this already-
+prepared v1.12.0 campaign, any smoke reservation recorded before the launcher
+update remains in the append-only ledger until the terminal job is reconciled;
+it is not repeated by direct submission.
 
 Run on Perlmutter after syncing the code:
 
@@ -88,12 +89,8 @@ bash slurm/phase1_gpu.sh submit "$SQUARE_V0_RUN"
 bash slurm/phase1_gpu.sh status "$SQUARE_V0_RUN"
 ```
 
-Only after the smoke is complete and its log passes the existing Float64 CUDA
-checks:
-
-```bash
-bash slurm/phase1_gpu.sh submit-matrix "$SQUARE_V0_RUN"
-```
-
-The smoke and matrix actions are intentionally separate. Preparation alone
-does not submit a job or reserve ledger capacity.
+`submit` sends all still-pending scientific branches directly. Each branch
+performs the Float64 artifact-runtime and linear-algebra preflight before its
+SCF work. `submit-matrix` remains only as a backward-compatible alias for the
+same direct action. Preparation alone does not submit a job or reserve ledger
+capacity.

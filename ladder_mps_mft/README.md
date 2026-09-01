@@ -11,7 +11,7 @@ The implementation currently provides:
 - immutable final HDF5 states, hash-checked parent/restart lineage, model/numerics/implementation fingerprints, and accepted-only selection;
 - charge and spin structure factors, `K_rho`, rung-cut entanglement/central-charge fits, sign-resolved pair correlations, and separate fixed-sector spin/charge/pair-gap calculations;
 - a dense-CUDA production backend that preserves the refactored SCF, recurrence, variational, checkpoint, and diagnostic logic while explicitly disabling QN block sparsity; and
-- a guarded Perlmutter Phase 1 launcher with a staged GPU smoke test, explicit continuations, optional ledgered CPU `E_p` jobs, scratch-resident full MPS artifacts with automatic stateless CFS mirrors, and a conservative 400-additional-node-hour cap.
+- a guarded Perlmutter Phase 1 launcher with direct scientific-branch submission, per-branch GPU preflight, explicit continuations, optional ledgered CPU `E_p` jobs, scratch-resident full MPS artifacts with automatic stateless CFS mirrors, and a conservative 400-additional-node-hour cap.
 
 The first complete Perlmutter CPU matrix (`20260821_phase0_cpu_v2`) is retained as
 backend-equivalence and screening evidence. It shortlisted `serial-t1` and
@@ -52,8 +52,8 @@ bash slurm/phase1_gpu.sh prepare-matched-seed-pilot \
 ```
 
 Preparation does not submit a job or reserve node-hours. See
-`docs/PERLMUTTER_PHASE1_GPU.md` before running the separate smoke and matrix
-submission actions.
+`docs/PERLMUTTER_PHASE1_GPU.md` before directly submitting the prepared
+scientific branches.
 
 Run a configured SCF branch:
 
@@ -94,5 +94,5 @@ with `docs/DEVICE_HANDOFF_2026-08-25.md` and paste
 - `canonical_variational_energy` is a zero-temperature energy, not a finite-temperature free energy.
 - Cross-geometry energies describe different Hamiltonians and are not ranked as competing phases by the comparison tool.
 - Production GPU states conserve neither `S_z` nor fermion parity at the tensor-block level. The Hamiltonian still has the corresponding symmetries; disabling QNs changes representation/performance, not its terms. Fixed-sector gap and `E_p` calculations remain separate QN-conserving CPU runs.
-- The pinned CUDA.jl artifact toolkit is the sole CUDA runtime for Phase 1. The guarded launcher unloads Perlmutter's `cudatoolkit` module and the GPU smoke fails if system CUDA runtime libraries are loaded.
+- The pinned CUDA.jl artifact toolkit is the sole CUDA runtime for Phase 1. The guarded launcher unloads Perlmutter's `cudatoolkit` module and every scientific branch aborts during its preflight if system CUDA runtime libraries are loaded.
 - Fixed bond dimension, enhanced pair fields, long correlation lengths, or favorable finite-size pairing do not by themselves establish superconducting long-range order.

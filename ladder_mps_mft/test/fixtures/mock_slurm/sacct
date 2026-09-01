@@ -14,10 +14,6 @@ done
 if [[ "$wants_elapsed" == true ]]; then
   elapsed=3600
   end_time=2026-09-01T01:00:00
-  if [[ "$job_id" == "700000" ]]; then
-    elapsed=600
-    end_time=2026-09-01T00:10:00
-  fi
   printf '%s|COMPLETED|%s|2026-09-01T00:00:00|%s|\n' "$job_id" "$elapsed" "$end_time"
 else
   printf 'COMPLETED|\n'

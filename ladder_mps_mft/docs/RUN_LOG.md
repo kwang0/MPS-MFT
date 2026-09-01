@@ -1349,3 +1349,28 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   a seed point when replotted without rewriting them.
 - The complete local Julia suite passed `642/642` assertions, including schema
   v7 seed identity, time-zero reader alignment, and stateless-mirror retention.
+
+## 2026-09-01: direct Phase 1 scientific submission
+
+- At the user's explicit request, launcher v1.13.0 retires the standalone GPU
+  smoke as a public submission gate. `submit RUN_ID` now atomically checks the
+  project allowance and submits every still-pending scientific branch directly;
+  `submit-matrix RUN_ID` is a backward-compatible alias for the same action.
+- Every scientific branch retains the artifact-runtime isolation and dense
+  GPU linear-algebra preflight before entering SCF, so removing the separate
+  smoke does not remove the branch-level CUDA guard.
+- Direct initial envelopes no longer include a `0.125` smoke reservation:
+  standard nine-branch `27.000`, three-branch `9.000`, six-branch `18.000`,
+  tight-five `4.500`, and recurrence Stage A plus conditional Stage B `15.000`
+  node-hours. Continuations remain explicit and are not pre-authorized.
+- The already-prepared square `V=0,t0=1.4` v1.12.0 campaign is intentionally
+  direct-submission compatible with v1.13.0. An existing smoke row does not
+  block or duplicate any branch; its prior reservation remains append-only
+  until that terminal job is processed through `reconcile RUN_ID`.
+- Bash syntax passed and the complete local Julia suite passed `642/642`
+  assertions. The launcher test directly submitted a v1.12.0-prepared mock
+  campaign, recorded exactly nine branch reservations with no smoke, enforced
+  the hard cap, and reconciled finalized elapsed charges idempotently.
+- No real job was submitted or cancelled and no Perlmutter ledger was changed
+  locally. Live `sacct` measurements and Perlmutter accounting remain
+  authoritative.

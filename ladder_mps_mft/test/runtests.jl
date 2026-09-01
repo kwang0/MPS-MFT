@@ -716,7 +716,7 @@ end
     @test occursin("sanitize_cuda_runtime_environment", script_source)
     @test occursin("require_current_run_version", script_source)
     @test occursin("require_worker_compatible_run_version", script_source)
-    @test occursin("PHASE1_SCRIPT_VERSION=\"1.12.0\"", script_source)
+    @test occursin("PHASE1_SCRIPT_VERSION=\"1.13.0\"", script_source)
     @test occursin("reconcile)", script_source)
     @test occursin("additional_node_hours_reconciliations.tsv", script_source)
     @test occursin("prepare-recovery)", script_source)
@@ -787,38 +787,26 @@ end
         ))
         @test !isfile(ledger)
         @test strip(read(joinpath(run_root, "mock_phase1", "campaign_kind.txt"), String)) == "standard"
+        run_environment_path = joinpath(run_root, "mock_phase1", "run.env")
+        write(
+            run_environment_path,
+            replace(
+                read(run_environment_path, String),
+                "PHASE1_RUN_SCRIPT_VERSION=1.13.0" => "PHASE1_RUN_SCRIPT_VERSION=1.12.0",
+            ),
+        )
         run(pipeline(
             addenv(`$bash_executable $script submit mock_phase1`, environment...),
             stdout=devnull,
         ))
-        smoke_path = joinpath(run_root, "mock_phase1", "gpu_smoke.h5")
-        h5open(smoke_path, "w") do file
-            file["completed"] = true
-            file["energy"] = -1.0
-            file["density"] = 1.0
-            device = create_group(file, "device")
-            device["cuda_runtime_library_isolation"] = "passed"
-            device["tensor_scalar_type"] = "float64"
-            linalg = create_group(file, "linalg_preflight")
-            linalg["dimension"] = 256
-            linalg["scalar_type"] = "Float64"
-            psi_group = create_group(file, "psi")
-            tensor_group = create_group(psi_group, "MPS[1]")
-            storage_group = create_group(tensor_group, "storage")
-            storage_group["data"] = Float64[1.0]
-        end
-        run(pipeline(
-            addenv(`$bash_executable $script submit-matrix mock_phase1`, environment...),
-            stdout=devnull,
-        ))
         ledger_rows = readlines(ledger)[2:end]
-        @test length(ledger_rows) == 10
-        @test sum(parse(Float64, split(row, '\t')[7]) for row in ledger_rows) ≈ 27.125
+        @test length(ledger_rows) == 9
+        @test sum(parse(Float64, split(row, '\t')[7]) for row in ledger_rows) ≈ 27.0
         submission_arguments = read(joinpath(directory, "slurm", "submitted_args.tsv"), String)
-        @test count(line -> occursin("--constraint=gpu", line), split(chomp(submission_arguments), '\n')) == 10
+        @test count(line -> occursin("--constraint=gpu", line), split(chomp(submission_arguments), '\n')) == 9
         @test !occursin("hbm80g", submission_arguments)
         @test length(readlines(joinpath(run_root, "mock_phase1", "manifest.tsv"))) == 10
-        @test length(readlines(joinpath(run_root, "mock_phase1", "jobs.tsv"))) == 11
+        @test length(readlines(joinpath(run_root, "mock_phase1", "jobs.tsv"))) == 10
         @test isdir(joinpath(scratch_root, "mock_phase1", "results"))
         prepared_config = TOML.parsefile(joinpath(
             run_root,
@@ -896,7 +884,7 @@ end
             addenv(`$bash_executable $script plan-recurrence`, environment...),
             String,
         )
-        @test occursin("9.125000000 node-hours", recurrence_plan)
+        @test occursin("9.000000000 node-hours", recurrence_plan)
         run(pipeline(
             addenv(
                 `$bash_executable $script prepare-recurrence source_recurrence mock_recurrence`,
@@ -1014,8 +1002,8 @@ end
             addenv(`$bash_executable $script plan-recurrence-controls`, environment...),
             String,
         )
-        @test occursin("Conditional Stage B first segments: 6.125000000 node-hours", controls_plan)
-        @test occursin("Combined first-segment envelope: 15.250000000 node-hours", controls_plan)
+        @test occursin("Conditional Stage B first segments: 6.000000000 node-hours", controls_plan)
+        @test occursin("Combined first-segment envelope: 15.000000000 node-hours", controls_plan)
         ledger_before_controls = read(ledger, String)
         run(pipeline(
             addenv(
@@ -1048,7 +1036,7 @@ end
             addenv(`$bash_executable $script plan-matched-seed-pilot`, environment...),
             String,
         )
-        @test occursin("First-segment envelope: 9.125000000 node-hours", matched_plan)
+        @test occursin("First-segment envelope: 9.000000000 node-hours", matched_plan)
         @test occursin("mode n=0, d_wave", matched_plan)
         @test occursin("mode n=58, odd leg parity", matched_plan)
         @test occursin("mode n=11, even leg parity", matched_plan)
@@ -1107,12 +1095,12 @@ end
             addenv(`$bash_executable $script plan-square-seed-pilot`, environment...),
             String,
         )
-        @test occursin("First-segment envelope: 18.125000000 node-hours", square_plan)
+        @test occursin("First-segment envelope: 18.000000000 node-hours", square_plan)
         @test occursin("envelope m=4 -> AF spin n=59 and charge harmonic n=8", square_plan)
         @test occursin("envelope m=5 -> AF spin n=58 and charge harmonic n=10", square_plan)
-        @test occursin("representative six-branch bank plus eight later three-branch points:  91.125000000", square_plan)
-        @test occursin("eight later points only (conditional, seed bank not yet locked):       73.000000000", square_plan)
-        @test occursin("repeating all six branches at all nine points is not recommended:     163.125000000", square_plan)
+        @test occursin("representative six-branch bank plus eight later three-branch points:  90.000000000", square_plan)
+        @test occursin("eight later points only (conditional, seed bank not yet locked):       72.000000000", square_plan)
+        @test occursin("repeating all six branches at all nine points is not recommended:     162.000000000", square_plan)
         ledger_before_square = read(ledger, String)
         run(pipeline(
             addenv(
@@ -1243,7 +1231,7 @@ end
         )
         @test occursin("L=64, U=8, V=0, t0=1.4", square_v0_plan)
         @test occursin("exact registry E_p=-0.14653773091916378", square_v0_plan)
-        @test occursin("First-segment envelope: 18.125000000 node-hours", square_v0_plan)
+        @test occursin("First-segment envelope: 18.000000000 node-hours", square_v0_plan)
         @test occursin("step cosine<=-0.5 and d2/d1<=0.5", square_v0_plan)
         @test occursin("apply r/(1-lambda)", square_v0_plan)
         ledger_before_square_v0 = read(ledger, String)
@@ -1370,7 +1358,7 @@ end
             addenv(`$bash_executable $script plan-square-tight5`, environment...),
             String,
         )
-        @test occursin("First-segment envelope: 4.625000000 node-hours", tight_plan)
+        @test occursin("First-segment envelope: 4.500000000 node-hours", tight_plan)
         @test occursin("one of four GPUs, 03:00:00", tight_plan)
         @test occursin("physical map threshold=0", tight_plan)
         ledger_before_tight = read(ledger, String)
@@ -1463,7 +1451,7 @@ end
         @test !success(rejected)
         @test isdir(joinpath(run_root, "cap_rejection"))
         @test length(readlines(joinpath(run_root, "cap_rejection", "jobs.tsv"))) == 1
-        @test strip(read(joinpath(directory, "slurm", "next_job_id"), String)) == "700010"
+        @test strip(read(joinpath(directory, "slurm", "next_job_id"), String)) == "700009"
 
         ledger_before_reconcile = read(ledger, String)
         reconciliation = joinpath(budget_root, "additional_node_hours_reconciliations.tsv")
@@ -1473,17 +1461,17 @@ end
         ))
         @test read(ledger, String) == ledger_before_reconcile
         reconciliation_rows = readlines(reconciliation)[2:end]
-        @test length(reconciliation_rows) == 10
+        @test length(reconciliation_rows) == 9
         @test all(split(row, '\t')[14] == "COMPLETED" for row in reconciliation_rows)
         @test all(parse(Float64, split(row, '\t')[11]) ≈ 0.25 for row in reconciliation_rows)
-        @test sum(parse(Float64, split(row, '\t')[13]) for row in reconciliation_rows) ≈ 24.833333333
+        @test sum(parse(Float64, split(row, '\t')[13]) for row in reconciliation_rows) ≈ 24.75
         budget_after_reconcile = read(
             addenv(`$bash_executable $script budget`, environment...),
             String,
         )
-        @test occursin("Requested upper bounds in ledger: 27.125000000", budget_after_reconcile)
-        @test occursin("Released after sacct reconcile:   24.833333333", budget_after_reconcile)
-        @test occursin("Active project accounting:        2.291666667", budget_after_reconcile)
+        @test occursin("Requested upper bounds in ledger: 27.000000000", budget_after_reconcile)
+        @test occursin("Released after sacct reconcile:   24.750000000", budget_after_reconcile)
+        @test occursin("Active project accounting:        2.250000000", budget_after_reconcile)
         reconciliation_before_repeat = read(reconciliation, String)
         run(pipeline(
             addenv(`$bash_executable $script reconcile mock_phase1`, environment...),

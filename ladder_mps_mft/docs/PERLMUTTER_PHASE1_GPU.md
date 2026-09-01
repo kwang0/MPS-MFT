@@ -18,7 +18,8 @@ bash slurm/phase1_gpu.sh plan
 
 The committed GPU manifest pins CUDA.jl 5.9.5 together with ITensors 0.9.15 and
 ITensorMPS 0.3.25. Do not import or precompile CUDA on the GPU-less login node:
-the allocated smoke job performs the first CUDA import and is the device proof.
+each allocated scientific branch performs its own CUDA import and device
+preflight before entering the SCF calculation.
 CUDA.jl is configured to use its pinned artifact toolkit, so do not load the
 Perlmutter `cudatoolkit` module for this workflow. The launcher unloads that
 module, removes inherited NVIDIA-HPC-SDK runtime-library paths, and aborts if a
@@ -28,7 +29,7 @@ configuration](https://cuda.juliagpu.org/stable/installation/overview/); the
 Perlmutter system toolkit remains appropriate for software compiled against
 it, but must not be mixed into this artifact-based Julia process.
 
-## Staged submission
+## Direct submission
 
 Choose a new immutable run ID:
 
@@ -40,42 +41,31 @@ bash slurm/phase1_gpu.sh status "$RUN_ID"
 ```
 
 `prepare-standard` creates all nine configs without submitting or reserving
-anything. `submit` accepts only an existing prepared campaign and submits only
-a 30-minute smoke test; it can no longer create a default campaign implicitly.
-Literal placeholders such as `RUN_ID` are rejected for submission. The smoke
-is not a scientific calculation. It requires artifact-only CUDA
-runtime libraries, exercises a 256-by-256 dense GPU matrix multiplication and
-Hermitian eigendecomposition through cuBLAS/cuSOLVER, runs the tiny DMRG, and
-round-trips its MPS through HDF5. After `status` reports the smoke job as
-`COMPLETED` and `gpu_smoke.h5` exists, inspect the smoke log for the recorded
-preflight and submit the branch matrix:
+anything. `submit` accepts only an existing prepared campaign and directly
+submits every still-pending scientific branch; it cannot create a default
+campaign implicitly. Literal placeholders such as `RUN_ID` are rejected.
+`submit-matrix` is retained only as a backward-compatible alias for the same
+direct action. There is no standalone smoke gate in launcher v1.13.0.
 
-```bash
-grep -E 'gpu_smoke_path|linalg_preflight_dimension|tensor_scalar_type|CUDA runtime library.*system path' \
-  "output/phase1_gpu/$RUN_ID"/logs/smoke-*.out
-bash slurm/phase1_gpu.sh submit-matrix "$RUN_ID"
-bash slurm/phase1_gpu.sh status "$RUN_ID"
-```
-
-The corrected smoke must print `linalg_preflight_dimension=256` and
-`tensor_scalar_type=float64`, must not print a `system path` CUDA-runtime
-warning, and must save a Float64 MPS. `submit-matrix` validates all of these
-properties from `gpu_smoke.h5`; scheduler completion alone is insufficient.
+Every branch requires artifact-only CUDA runtime libraries and runs the
+256-by-256 dense matrix-multiplication/eigendecomposition preflight through
+cuBLAS/cuSOLVER before scientific work. A failed preflight aborts that branch;
+it does not certify or contaminate an SCF result.
 
 The matrix contains pairing, SDW, and CDW seeds for each of
 `cubic_frustrated`, `cubic_unfrustrated`, and `square`. Each job requests one of
 four GPUs for 12 hours in shared QOS, a conservative charge of 3 GPU node-hours.
-The smoke plus matrix reserves 27.125 node-hours. NERSC shared jobs are charged
+The nine branches reserve 27.000 node-hours. NERSC shared jobs are charged
 by the dominant node fraction; see the [NERSC queue and charge
 policy](https://docs.nersc.gov/jobs/policy/#calculating-charges).
 
-Launcher version 1.12.0 requests the general `gpu` constraint for the smoke and
-for branch configs with `dmrg.maxdim < 1200`. Configs at `chi >= 1200` retain
+Launcher version 1.13.0 requests the general `gpu` constraint for branch
+configs with `dmrg.maxdim < 1200`. Configs at `chi >= 1200` retain
 `gpu&hbm80g`. This broadens the eligible GPU pool for the current chi-200 and
 chi-400 work without weakening the explicit memory guard for the planned
 large-bond-dimension campaign.
 
-Launcher version 1.12.0 writes all MPS-bearing branch artifacts to Perlmutter
+Launcher version 1.13.0 writes all MPS-bearing branch artifacts to Perlmutter
 scratch and automatically creates MPS-free analysis mirrors on CFS. The same
 policy applies to guarded CPU `E_p` calculations: `psi_N_*` sectors remain in
 scratch while energies and metadata are mirrored to CFS. Continuation and
@@ -117,17 +107,11 @@ The recovery manifest hashes every immutable v2 `state.h5`, records its status,
 numerical fingerprint, and Float32 storage type, and uses it as a parent seed.
 The new numerical fingerprint is intentionally different because the MPS is
 promoted to Float64. Each branch starts with a fresh raw-map probe, so the v2
-mixer-dependent recurrences are not inherited as physical solutions. After the
-new smoke passes the Float64 gate:
-
-```bash
-bash slurm/phase1_gpu.sh submit-matrix "$RUN_ID"
-```
-
-Preparation and matrix submission are restart-safe: a failed smoke submission
-can reuse the validated prepared run, and a partially submitted matrix retries
-only missing labels. Manifest validation happens before GPU allocation, while
-matrix selection and the full budget check share one ledger lock.
+mixer-dependent recurrences are not inherited as physical solutions. The
+following `submit` directly launches the scientific branches. Submission is
+restart-safe: a partially submitted campaign retries only missing labels.
+Manifest validation happens before GPU allocation, while branch selection and
+the full budget check share one ledger lock.
 
 Every schema-v5-and-newer checkpoint and terminal state saves the exact initial field in
 `fields/initial` and the complete applied and measured MF fields for every
@@ -191,12 +175,11 @@ against the live ledger before the separately authorized staged submission:
 
 ```bash
 sed -n '1,4p' "output/phase1_gpu/$RUN_ID/manifest.tsv"
-bash slurm/phase1_gpu.sh submit "$RUN_ID"          # smoke only
+bash slurm/phase1_gpu.sh submit "$RUN_ID"
 bash slurm/phase1_gpu.sh status "$RUN_ID"
-bash slurm/phase1_gpu.sh submit-matrix "$RUN_ID"   # only after smoke gates pass
 ```
 
-The Stage A plan-only upper bound is `0.125 + 3*3 = 9.125` node-hours. Preparation
+The Stage A plan-only upper bound is `3*3 = 9.000` node-hours. Preparation
 never substitutes the stateless mirror for a restartable parent: both phase
 configs reference the same immutable full source SHA plus distinct
 `parent_orbit_phase` values.
@@ -232,21 +215,20 @@ provenance rather than part of the numerical fingerprint, so accepted Stage A
 and Stage B results remain eligible for the canonical comparator if all other
 fingerprints match.
 
-Only after inspecting the gate record, stage Stage B through its own smoke:
+Only after inspecting the gate record, directly submit Stage B:
 
 ```bash
 bash slurm/phase1_gpu.sh submit "$CONTROL_RUN"
 bash slurm/phase1_gpu.sh status "$CONTROL_RUN"
-bash slurm/phase1_gpu.sh submit-matrix "$CONTROL_RUN"
 ```
 
-Stage B's first-segment bound is `0.125 + 2*3 = 6.125` node-hours. Stage A plus
-conditional Stage B is therefore `15.250` node-hours for first segments. With
+Stage B's first-segment bound is `2*3 = 6.000` node-hours. Stage A plus
+conditional Stage B is therefore `15.000` node-hours for first segments. With
 the ledger snapshot of `114.500` after the accidental standard campaign, this
-would project to `123.625` after Stage A or `129.750` after both, leaving
-`276.375` or `270.250` node-hours under the 400-node-hour project cap. The live
+would project to `123.500` after Stage A or `129.500` after both, leaving
+`276.500` or `270.500` node-hours under the 400-node-hour project cap. The live
 Perlmutter ledger is authoritative. The combined four-segment emergency
-ceiling is `60.250` node-hours, but continuations are not pre-authorized and
+ceiling is `60.000` node-hours, but continuations are not pre-authorized and
 must be justified branch by branch; preserving the remaining budget for
 higher-chi and scaling runs is part of the gate.
 
@@ -281,19 +263,17 @@ sed -n '1,4p' "output/phase1_gpu/$MATCHED_RUN/manifest.tsv"
 ```
 
 Preparation creates configs and scratch directories only; it does not submit
-or reserve. The first-segment upper bound is `0.125 + 3*3 = 9.125` node-hours.
-Only after checking the manifest and live ledger, stage the smoke and matrix:
+or reserve. The first-segment upper bound is `3*3 = 9.000` node-hours.
+Only after checking the manifest and live ledger, submit directly:
 
 ```bash
 bash slurm/phase1_gpu.sh submit "$MATCHED_RUN"
 bash slurm/phase1_gpu.sh status "$MATCHED_RUN"
-bash slurm/phase1_gpu.sh submit-matrix "$MATCHED_RUN"
 ```
 
-The first `submit` reserves only the `0.125`-node-hour smoke. The matrix action
-is unavailable until the smoke is `COMPLETED` and its Float64/runtime/linear-
-algebra artifact passes validation; it then reserves three `3.0`-node-hour
-segments atomically under the ledger lock. No continuation is pre-authorized.
+The direct action reserves three `3.0`-node-hour segments atomically under the
+ledger lock. Each branch performs its own Float64/runtime/linear-algebra
+preflight. No continuation is pre-authorized.
 Reserve later work for higher bond dimension and length convergence.
 
 ## Exploratory square seed/basin pilot
@@ -336,21 +316,20 @@ bash slurm/phase1_gpu.sh budget
 ```
 
 Preparation does not reserve or submit. The first-segment envelope is
-`0.125 + 6*3 = 18.125` node-hours. With the synced `135.750` ledger snapshot,
-submission would project to `153.875` reserved and `246.125` unreserved; the
+`6*3 = 18.000` node-hours. With the synced `135.750` ledger snapshot,
+submission would project to `153.750` reserved and `246.250` unreserved; the
 live Perlmutter ledger is authoritative. Submit only after inspection:
 
 ```bash
 bash slurm/phase1_gpu.sh submit "$SQUARE_RUN"
 bash slurm/phase1_gpu.sh status "$SQUARE_RUN"
-bash slurm/phase1_gpu.sh submit-matrix "$SQUARE_RUN"
 ```
 
 The full `t0={1.0,1.2,1.4}` by `V={0,-0.2,-0.4}` square grid remains
 conditional and plan-only. This six-branch representative bank plus
 provisional three-branch banks at the other eight points would reserve
-`91.125` node-hours total, leaving `173.125` from the current synced ledger.
-Repeating all six branches everywhere would leave only `101.125` and is not
+`90.000` node-hours total, leaving `174.250` from the current synced ledger.
+Repeating all six branches everywhere would leave only `102.250` and is not
 recommended. Gate each point so that chi and length convergence retain
 priority. The evidence and accuracy ladder are recorded in
 `docs/SQUARE_SEED_AND_GRID_PLAN_2026-08-30.md`.
@@ -385,15 +364,12 @@ a post-processing floor scan of `0,1e-6,1e-5,1e-4`; see
 `docs/PHASE1_NUMERICAL_ERROR_BUDGET.md`.
 
 Each branch requests one of four GPUs for three hours, or `0.75` node-hours.
-The complete first-segment envelope is therefore `0.125 + 6*0.75 = 4.625`
-node-hours. From the synced `153.875` ledger this would project to `158.500`
-reserved and `241.500` unreserved. Recheck the live Perlmutter ledger before
-the separately staged submission:
+The complete first-segment envelope is therefore `6*0.75 = 4.500`
+node-hours. Recheck the live Perlmutter ledger before direct submission:
 
 ```bash
-bash slurm/phase1_gpu.sh submit "$TIGHT_RUN"          # smoke only
+bash slurm/phase1_gpu.sh submit "$TIGHT_RUN"
 bash slurm/phase1_gpu.sh status "$TIGHT_RUN"
-bash slurm/phase1_gpu.sh submit-matrix "$TIGHT_RUN"   # after smoke passes
 ```
 
 Five records are insufficient for complete period-two validation. Any apparent
@@ -418,11 +394,14 @@ sed -n '1,7p' "output/phase1_gpu/$SQUARE_V0_RUN/manifest.tsv"
 bash slurm/phase1_gpu.sh budget
 ```
 
-Preparation does not submit or reserve. The first-segment envelope is
-`0.125 + 6*3 = 18.125` node-hours. From the synced `158.500` ledger it would
-project to `176.625` reserved and `223.375` unreserved. Recheck the live ledger,
-then stage the smoke and matrix separately. The complete scientific and seed
-contract is in `docs/SQUARE_V0_T014_SEED_PLAN_2026-09-01.md`.
+Preparation does not submit or reserve. Launcher v1.13.0 directly reserves
+`6*3 = 18.000` node-hours for the scientific branches. The already-prepared
+v1.12.0 campaign is explicitly compatible: `submit` ignores an existing smoke
+row and submits only pending branches. If that smoke is cancelled, wait until
+`sacct` shows a terminal state and run `reconcile "$SQUARE_V0_RUN"` so its
+unused ceiling is released in project-control accounting. Recheck the live
+ledger before submission. The complete scientific and seed contract is in
+`docs/SQUARE_V0_T014_SEED_PLAN_2026-09-01.md`.
 
 ## Pair-binding interpolation and optional calculations
 

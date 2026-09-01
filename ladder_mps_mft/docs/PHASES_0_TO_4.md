@@ -32,9 +32,10 @@ phase-resolved artifacts and orbit-averaged energies; fields are never averaged.
 The initial point is `L=64`, `U=8`, `V=-0.2`, `t0=1.1`, `t_perp=0.1`,
 `density=0.9375`, and `chi=200`. Its signed `E_p` is linearly interpolated
 between the exact registry entries at `t0=1.0` and `1.2`; all endpoint data are
-stored. A 30-minute GPU smoke test precedes the nine 12-hour shared-GPU branch
-segments. The initial worst-case reservation is `27.125` node-hours, and four
-segments for all nine branches would reserve `108.125`.
+stored. The nine 12-hour shared-GPU branch segments submit directly, and each
+performs the artifact-runtime and dense-linear-algebra preflight on its allocated
+GPU before scientific work. The initial worst-case reservation is `27.000`
+node-hours, and four segments for all nine branches would reserve `108.000`.
 
 The project-wide launcher ledger enforces a conservative cap of 400 additional
 node-hours from the user-reported 277-node-hour baseline. It sums requested CPU
