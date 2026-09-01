@@ -55,6 +55,8 @@ function test_energy(value=0.0)
         direct_variational_energy=value,
         variational_consistency_error=0.0,
         canonical_variational_energy=value,
+        target_density_correction=0.0,
+        target_density_corrected_variational_energy=value,
         grand_potential=value,
     )
 end
@@ -77,6 +79,11 @@ function test_record(iteration, applied, measured; energy=0.0, density=1.0, upda
         field_abs_residual=absolute,
         field_rel_residual=relative,
         wall_seconds=0.1,
+        dmrg_max_discarded_weight=1.0e-9,
+        dmrg_maxlinkdim=4,
+        dmrg_sweep_energies=[Float64(energy)],
+        dmrg_sweep_max_discarded_weights=[1.0e-9],
+        dmrg_sweep_maxlinkdims=[4],
     )
 end
 
@@ -150,6 +157,10 @@ end
     @test settings.dmrg.mu_density_tol == 5e-4
     @test settings.dmrg.mu_max_iterations == 16
     @test settings.dmrg.mu_bracket_step == 0.05
+    @test settings.dmrg.mu_warm_start_noise == 1e-8
+    @test settings.convergence.period2_oscillation_cosine_max == -0.5
+    @test settings.convergence.period2_two_step_ratio_max == 0.5
+    @test settings.convergence.slow_mode_cosine_min == 0.9
     @test !settings.run.require_accepted_solution
     gpu_settings = load_settings(joinpath(ROOT, "configs", "phase1_gpu_base.toml"))
     @test gpu_settings.runtime.backend == :gpu
@@ -204,6 +215,11 @@ end
         runtime=RuntimeSettings(tensor_scalar_type=:float32),
     ))
     @test cpu_fingerprint != float32_fingerprint
+    performance_only_fingerprint = LadderMPSMFT.numerical_fingerprint(ProjectSettings(
+        model=test_model(),
+        dmrg=DMRGSettings(max_time_seconds=123.0, output_level=7),
+    ))
+    @test cpu_fingerprint == performance_only_fingerprint
     first_seed = initial_fields(test_model(); seed=:pairing, rng=MersenneTwister(7))
     second_seed = initial_fields(test_model(); seed=:pairing, rng=MersenneTwister(7))
     explicit_legacy_seed = initial_fields(
@@ -635,6 +651,33 @@ end
     end
 end
 
+@testset "solver-only and full-tree fingerprints" begin
+    mktempdir() do directory
+        source_directory = joinpath(directory, "src")
+        launcher_directory = joinpath(directory, "slurm")
+        test_directory = joinpath(directory, "test")
+        mkpath.((source_directory, launcher_directory, test_directory))
+        manifest = joinpath(directory, "Manifest.toml")
+        source = joinpath(source_directory, "Solver.jl")
+        launcher = joinpath(launcher_directory, "run.sh")
+        test_file = joinpath(test_directory, "runtests.jl")
+        write(manifest, "manifest_format = \"2.0\"\n")
+        write(source, "solver_value() = 1\n")
+        write(launcher, "#!/bin/bash\necho first\n")
+        write(test_file, "using Test\n@test true\n")
+
+        implementation_before = LadderMPSMFT.implementation_fingerprint(directory)
+        tree_before = LadderMPSMFT.tree_fingerprint(directory)
+        write(launcher, "#!/bin/bash\necho second\n")
+        @test LadderMPSMFT.implementation_fingerprint(directory) == implementation_before
+        @test LadderMPSMFT.tree_fingerprint(directory) != tree_before
+        write(test_file, "using Test\n@test 1 == 1\n")
+        @test LadderMPSMFT.implementation_fingerprint(directory) == implementation_before
+        write(source, "solver_value() = 2\n")
+        @test LadderMPSMFT.implementation_fingerprint(directory) != implementation_before
+    end
+end
+
 @testset "Phase 0 run environment round trip" begin
     script = joinpath(ROOT, "slurm", "phase0_calibrate_cpu.sh")
     mktempdir() do directory
@@ -673,7 +716,9 @@ end
     @test occursin("sanitize_cuda_runtime_environment", script_source)
     @test occursin("require_current_run_version", script_source)
     @test occursin("require_worker_compatible_run_version", script_source)
-    @test occursin("PHASE1_SCRIPT_VERSION=\"1.10.0\"", script_source)
+    @test occursin("PHASE1_SCRIPT_VERSION=\"1.12.0\"", script_source)
+    @test occursin("reconcile)", script_source)
+    @test occursin("additional_node_hours_reconciliations.tsv", script_source)
     @test occursin("prepare-recovery)", script_source)
     @test occursin("prepare-recurrence)", script_source)
     @test occursin("prepare-recurrence-competitors)", script_source)
@@ -681,6 +726,8 @@ end
     @test occursin("plan-matched-seed-pilot)", script_source)
     @test occursin("prepare-square-seed-pilot)", script_source)
     @test occursin("plan-square-seed-pilot)", script_source)
+    @test occursin("prepare-square-v0-seed-pilot)", script_source)
+    @test occursin("plan-square-v0-seed-pilot)", script_source)
     @test occursin("prepare-square-tight5)", script_source)
     @test occursin("plan-square-tight5)", script_source)
     @test occursin("prepare-standard)", script_source)
@@ -703,6 +750,11 @@ end
         String,
     )
     @test strip(sanitized_environment) == "/safe/one:/safe/two|unset|unset"
+    constraint_policy = read(
+        `$bash_executable -c 'source "$1" budget >/dev/null; gpu_constraint_for_chi 1199; gpu_constraint_for_chi 1200' bash $script`,
+        String,
+    )
+    @test split(chomp(constraint_policy), '\n') == ["gpu", "gpu&hbm80g"]
     function bash_path(path::AbstractString)
         normalized = replace(abspath(path), '\\' => '/')
         match_result = match(r"^([A-Za-z]):/(.*)$", normalized)
@@ -762,6 +814,9 @@ end
         ledger_rows = readlines(ledger)[2:end]
         @test length(ledger_rows) == 10
         @test sum(parse(Float64, split(row, '\t')[7]) for row in ledger_rows) ≈ 27.125
+        submission_arguments = read(joinpath(directory, "slurm", "submitted_args.tsv"), String)
+        @test count(line -> occursin("--constraint=gpu", line), split(chomp(submission_arguments), '\n')) == 10
+        @test !occursin("hbm80g", submission_arguments)
         @test length(readlines(joinpath(run_root, "mock_phase1", "manifest.tsv"))) == 10
         @test length(readlines(joinpath(run_root, "mock_phase1", "jobs.tsv"))) == 11
         @test isdir(joinpath(scratch_root, "mock_phase1", "results"))
@@ -875,7 +930,7 @@ end
         )
 
         recurrence_numerical = LadderMPSMFT.numerical_fingerprint(recurrence_base)
-        recurrence_implementation = LadderMPSMFT.implementation_fingerprint()
+        recurrence_implementation = LadderMPSMFT.implementation_fingerprint(recurrence_base)
         recurrence_ep_hash = LadderMPSMFT.sha256_file(recurrence_base.model.ep_source)
         function write_gate_state(
             label::AbstractString;
@@ -1142,8 +1197,12 @@ end
         @test all(settings.dmrg.mu_density_tol == 1.0e-3 for settings in square_settings)
         @test all(settings.dmrg.mu_bracket_step == 0.01 for settings in square_settings)
         @test all(settings.dmrg.mu_bracket_growth == 3.0 for settings in square_settings)
+        @test all(settings.dmrg.mu_warm_start_noise == 1.0e-8 for settings in square_settings)
         @test all(settings.convergence.density_tol == 1.0e-3 for settings in square_settings)
         @test all(settings.convergence.variational_energy_tol == 1.0e-6 for settings in square_settings)
+        @test all(settings.convergence.period2_oscillation_cosine_max == -0.5 for settings in square_settings)
+        @test all(settings.convergence.period2_two_step_ratio_max == 0.5 for settings in square_settings)
+        @test all(settings.convergence.slow_mode_cosine_min == 0.9 for settings in square_settings)
         @test all(settings.convergence.probe_iterations == 20 for settings in square_settings)
         @test all(settings.convergence.cycle_action == :continue for settings in square_settings)
         @test all(settings.run.max_iterations == 80 for settings in square_settings)
@@ -1174,6 +1233,71 @@ end
         @test "stripe_charge_mode_number" in square_header
         @test "stripe_pairing_to_spin_ratio" in square_header
         @test "legacy_pairing_center_of_mass_structure" in square_header
+        @test "mu_warm_start_noise" in square_header
+        @test "period2_oscillation_cosine_max" in square_header
+        @test "slow_mode_cosine_min" in square_header
+
+        square_v0_plan = read(
+            addenv(`$bash_executable $script plan-square-v0-seed-pilot`, environment...),
+            String,
+        )
+        @test occursin("L=64, U=8, V=0, t0=1.4", square_v0_plan)
+        @test occursin("exact registry E_p=-0.14653773091916378", square_v0_plan)
+        @test occursin("First-segment envelope: 18.125000000 node-hours", square_v0_plan)
+        @test occursin("step cosine<=-0.5 and d2/d1<=0.5", square_v0_plan)
+        @test occursin("apply r/(1-lambda)", square_v0_plan)
+        ledger_before_square_v0 = read(ledger, String)
+        run(pipeline(
+            addenv(
+                `$bash_executable $script prepare-square-v0-seed-pilot mock_square_v0_seed`,
+                environment...,
+            ),
+            stdout=devnull,
+        ))
+        @test read(ledger, String) == ledger_before_square_v0
+        square_v0_run = joinpath(run_root, "mock_square_v0_seed")
+        @test strip(read(joinpath(square_v0_run, "campaign_kind.txt"), String)) ==
+            "square_seed_pilot_v0"
+        @test strip(read(joinpath(square_v0_run, "branch_count.txt"), String)) == "6"
+        @test length(readlines(joinpath(square_v0_run, "manifest.tsv"))) == 7
+        square_v0_paths = [joinpath(
+            square_v0_run,
+            "configs",
+            "$label.segment-001.toml",
+        ) for label in square_labels]
+        square_v0_settings = load_settings.(square_v0_paths)
+        @test [settings.run.initial_seed for settings in square_v0_settings] ==
+            [:pairing, :legacy_pairing, :stripe, :stripe, :stripe_pairing, :stripe_pairing]
+        @test [settings.run.initial_mode_number for settings in square_v0_settings] == [0, 0, 4, 5, 4, 5]
+        @test all(settings.model.geometry == :square for settings in square_v0_settings)
+        @test all(settings.model.V == 0.0 for settings in square_v0_settings)
+        @test all(settings.model.t0 == 1.4 for settings in square_v0_settings)
+        @test all(settings.model.mu_initial == 0.55 for settings in square_v0_settings)
+        @test all(settings.model.ep_mode == :exact for settings in square_v0_settings)
+        @test all(settings.model.ep_signed == -0.14653773091916378 for settings in square_v0_settings)
+        @test all(settings.dmrg.mu_warm_start_noise == 1.0e-8 for settings in square_v0_settings)
+        @test length(unique(
+            LadderMPSMFT.model_fingerprint(settings.model) for settings in square_v0_settings
+        )) == 1
+        @test length(unique(
+            LadderMPSMFT.numerical_fingerprint(settings) for settings in square_v0_settings
+        )) == 1
+        @test length(unique(
+            LadderMPSMFT.initial_seed_fingerprint(settings) for settings in square_v0_settings
+        )) == 6
+        @test all(startswith(
+            settings.run.output_directory,
+            joinpath(scratch_root, "mock_square_v0_seed", "results"),
+        ) for settings in square_v0_settings)
+        square_v0_header = split(first(readlines(joinpath(square_v0_run, "manifest.tsv"))), '\t')
+        @test all(column in square_v0_header for column in (
+            "point_id", "L", "U", "V", "t0", "tp", "density", "chi",
+        ))
+        square_v0_rows = split.(readlines(joinpath(square_v0_run, "manifest.tsv"))[2:end], '\t')
+        v0_index = findfirst(==("V"), square_v0_header)
+        point_index = findfirst(==("point_id"), square_v0_header)
+        @test all(row[v0_index] == "0.0" for row in square_v0_rows)
+        @test all(row[point_index] == "square_t014_v000" for row in square_v0_rows)
 
         # Build six synthetic full/compact accepted parents under the prepared
         # square pilot. The tight-five preparer must rehash the full parents,
@@ -1184,7 +1308,7 @@ end
         )
         square_model_fingerprint = LadderMPSMFT.model_fingerprint(first(square_settings).model)
         square_numerical_fingerprint = LadderMPSMFT.numerical_fingerprint(first(square_settings))
-        square_implementation = LadderMPSMFT.implementation_fingerprint()
+        square_implementation = LadderMPSMFT.implementation_fingerprint(first(square_settings))
         square_ep_hash = LadderMPSMFT.sha256_file(first(square_settings).model.ep_source)
         square_parent_hashes = Dict{String,String}()
         for (index, label) in enumerate(square_labels)
@@ -1340,6 +1464,32 @@ end
         @test isdir(joinpath(run_root, "cap_rejection"))
         @test length(readlines(joinpath(run_root, "cap_rejection", "jobs.tsv"))) == 1
         @test strip(read(joinpath(directory, "slurm", "next_job_id"), String)) == "700010"
+
+        ledger_before_reconcile = read(ledger, String)
+        reconciliation = joinpath(budget_root, "additional_node_hours_reconciliations.tsv")
+        run(pipeline(
+            addenv(`$bash_executable $script reconcile mock_phase1`, environment...),
+            stdout=devnull,
+        ))
+        @test read(ledger, String) == ledger_before_reconcile
+        reconciliation_rows = readlines(reconciliation)[2:end]
+        @test length(reconciliation_rows) == 10
+        @test all(split(row, '\t')[14] == "COMPLETED" for row in reconciliation_rows)
+        @test all(parse(Float64, split(row, '\t')[11]) ≈ 0.25 for row in reconciliation_rows)
+        @test sum(parse(Float64, split(row, '\t')[13]) for row in reconciliation_rows) ≈ 24.833333333
+        budget_after_reconcile = read(
+            addenv(`$bash_executable $script budget`, environment...),
+            String,
+        )
+        @test occursin("Requested upper bounds in ledger: 27.125000000", budget_after_reconcile)
+        @test occursin("Released after sacct reconcile:   24.833333333", budget_after_reconcile)
+        @test occursin("Active project accounting:        2.291666667", budget_after_reconcile)
+        reconciliation_before_repeat = read(reconciliation, String)
+        run(pipeline(
+            addenv(`$bash_executable $script reconcile mock_phase1`, environment...),
+            stdout=devnull,
+        ))
+        @test read(reconciliation, String) == reconciliation_before_repeat
     end
 end
 
@@ -1479,6 +1629,14 @@ end
     @test density_energy.density_transverse_energy ≈ 0.02
     @test density_energy.double_counting_correction ≈ -0.12
     @test density_energy.canonical_variational_energy ≈ -3.12
+
+    off_target = test_correlations()
+    off_target.density_down .= 0.45
+    off_target.density_up .= 0.45
+    corrected = variational_energy(-3.0, 2.0, test_fields(), off_target, model)
+    @test corrected.target_density_correction ≈ 0.8
+    @test corrected.target_density_corrected_variational_energy ≈
+        corrected.canonical_variational_energy + 0.8
 end
 
 @testset "period-resolved convergence" begin
@@ -1501,12 +1659,51 @@ end
     @test detect_period(test_fields.([0.0, 1.0, 0.0, 2.0, 0.0, 3.0]), settings).period == 0
 
     fixed_records = [
-        test_record(1, test_fields(1.0), test_fields(1.0 + 1e-12)),
+        test_record(1, test_fields(1.0), test_fields(1.0 + 1e-10)),
         test_record(2, test_fields(1.0), test_fields(1.0 + 1e-12)),
     ]
     fixed = assess_convergence(fixed_records, settings, 1.0)
     @test fixed.status == :fixed_point
     @test fixed.accepted
+    @test fixed.fixed_point_contraction_estimate ≈ 0.01 rtol=1e-4
+    @test fixed.fixed_point_extrapolated_rel_residual <= settings.field_rel_tol
+
+    drift_settings = ConvergenceSettings(
+        max_period=2,
+        period_repeats=3,
+        period_abs_tol=1e-12,
+        period_rel_tol=1e-3,
+        period2_oscillation_cosine_max=-0.5,
+        period2_two_step_ratio_max=0.5,
+    )
+    monotone_history = test_fields.([1.0 + 1e-4 * index for index in 0:7])
+    monotone_recurrence = detect_period(
+        monotone_history,
+        drift_settings;
+        min_period=2,
+        max_period=2,
+    )
+    @test monotone_recurrence.period == 0
+
+    slow_settings = ConvergenceSettings(
+        field_abs_tol=1e-12,
+        field_rel_tol=5e-3,
+        density_tol=1e-8,
+        variational_energy_tol=1e-8,
+        stable_iterations=2,
+        slow_mode_cosine_min=0.9,
+        stagnation_window=20,
+    )
+    slow_records = [
+        test_record(1, test_fields(1.0), test_fields(1.004)),
+        test_record(2, test_fields(1.0), test_fields(1.00392)),
+    ]
+    slow = assess_convergence(slow_records, slow_settings, 1.0)
+    @test !slow.accepted
+    @test slow.status == :iterating
+    @test slow.fixed_point_contraction_estimate ≈ 0.98 rtol=1e-10
+    @test slow.fixed_point_extrapolation_factor ≈ 50.0 rtol=1e-10
+    @test slow.fixed_point_extrapolated_rel_residual > slow_settings.field_rel_tol
 
     values = [0.0, 1.0, 0.0, 1.0, 0.0, 1.0]
     applied_values = [1.0, values[1:end - 1]...]
@@ -1533,6 +1730,8 @@ end
     @test cycle.solution_canonical_variational_energy ≈ 1.0
     @test cycle.orbit_energy_spread ≈ 2.0
     @test cycle.orbit_density_contrast ≈ 0.4
+    @test cycle.cycle_oscillation_cosine <= settings.period2_oscillation_cosine_max
+    @test cycle.cycle_two_step_ratio <= settings.period2_two_step_ratio_max
 
     mixed_cycle_records = [
         test_record(index, test_fields(applied_values[index]), test_fields(value); update_mode=:anderson)
@@ -1613,6 +1812,22 @@ end
     @test midpoint.mu_cdw[1, 1] ≈ 0.5 atol=1e-10
 end
 
+@testset "DMRG stopping evidence and carried compressibility" begin
+    observer = LadderMPSMFT.EnergyTimerObserver(1e-4, Inf, 3)
+    @test !ITensorMPS.checkdone!(observer; energy=-10.0, sweep=1)
+    @test !ITensorMPS.checkdone!(observer; energy=-10.00001, sweep=2)
+    @test ITensorMPS.checkdone!(observer; energy=-10.00002, sweep=3)
+    @test observer.converged
+    @test observer.sweep_energies == [-10.0, -10.00001, -10.00002]
+
+    left = (mu=0.1, density=0.9)
+    right = (mu=0.2, density=1.0)
+    @test LadderMPSMFT._positive_density_slope(left, right) ≈ 1.0
+    @test LadderMPSMFT._positive_density_slope(right, left) ≈ 1.0
+    nonmonotone = (mu=0.3, density=0.8)
+    @test LadderMPSMFT._positive_density_slope(right, nonmonotone, 0.75) == 0.75
+end
+
 @testset "ladder diagnostics primitives" begin
     correlation = Matrix{Float64}(I, 4, 4)
     expectation = zeros(4)
@@ -1623,6 +1838,35 @@ end
     @test length(states) == 8
     @test count(==("Up"), states) + count(==("UpDn"), states) == 3
     @test count(==("Dn"), states) + count(==("UpDn"), states) == 3
+    mktempdir() do directory
+        evidence = (;
+            sweep_energies=[-1.0, -1.1],
+            sweep_max_discarded_weights=[1.0e-5, 2.0e-7],
+            sweep_maxlinkdims=[4, 8],
+            max_discarded_weight=1.0e-5,
+            maximum_link_dimension=8,
+            energy_converged=true,
+        )
+        gaps = (;
+            particle_number=4,
+            spin_gap=0.1,
+            charge_gap=0.2,
+            hole_pair_binding=-0.05,
+            particle_pair_binding=-0.04,
+            energies=Dict((4, 0) => -1.1),
+            dmrg_evidence=Dict((4, 0) => evidence),
+        )
+        path = joinpath(directory, "sector_gaps.h5")
+        write_sector_gaps(path, gaps; immutable=true)
+        h5open(path, "r") do file
+            @test Int(read(file, "schema_version")) == 2
+            @test read(file, "sector_dmrg_evidence/N4_twoSz0/sweep_energy") == [-1.0, -1.1]
+            @test read(file, "sector_dmrg_evidence/N4_twoSz0/sweep_max_discarded_weight") ==
+                [1.0e-5, 2.0e-7]
+            @test read(file, "sector_dmrg_evidence/N4_twoSz0/sweep_maxlinkdim") == [4, 8]
+            @test Int(read(file, "sector_dmrg_evidence/N4_twoSz0/maximum_link_dimension")) == 8
+        end
+    end
 end
 
 @testset "checkpoint schema and strict selection" begin
@@ -1680,8 +1924,15 @@ end
         @test refactored_inherit.fields.mu_cdw[1, 1] == 0.25
         @test refactored_inherit.chemical_potential == 0.4
         h5open(path, "r") do file
-            @test Int(read(file, "schema_version")) == 5
+            @test Int(read(file, "schema_version")) == 6
             @test read(file, "fields/initial/mu_cdw")[1, 1] == 0.0
+            @test haskey(file, "solution_target_density_corrected_variational_energy")
+            @test haskey(file, "fixed_point_extrapolated_rel_residual")
+            @test haskey(file, "history/mu_density_slope")
+            @test haskey(file, "history/target_density_corrected_variational_energy")
+            @test haskey(file, "history/dmrg/0001/sweep_energy")
+            @test haskey(file, "history/dmrg/0002/sweep_max_discarded_weight")
+            @test haskey(file, "history/dmrg/0002/sweep_maxlinkdim")
         end
         @test_throws ArgumentError write_checkpoint(path; settings, psi, records=[record], diagnostic, immutable=true)
 

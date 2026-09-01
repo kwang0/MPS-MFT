@@ -1,3 +1,34 @@
+function _period_two_oscillation(history::AbstractVector{FieldState}, required::Integer, settings::ConvergenceSettings)
+    count = length(history)
+    count >= 3 || return (; passes=false, cosine=NaN, two_step_ratio=NaN)
+    first_index = max(3, count - Int(required) + 3)
+    worst_cosine = -Inf
+    worst_ratio = 0.0
+    comparisons = 0
+    for index in first_index:count
+        current = field_vector(history[index])
+        previous = field_vector(history[index - 1])
+        two_back = field_vector(history[index - 2])
+        current_step = current .- previous
+        previous_step = previous .- two_back
+        denominator = norm(current_step) * norm(previous_step)
+        denominator > eps(Float64) || continue
+        cosine = dot(current_step, previous_step) / denominator
+        ratio = norm(current .- two_back) / max(norm(current_step), eps(Float64))
+        worst_cosine = max(worst_cosine, cosine)
+        worst_ratio = max(worst_ratio, ratio)
+        comparisons += 1
+    end
+    passes = comparisons > 0 &&
+        worst_cosine <= settings.period2_oscillation_cosine_max &&
+        worst_ratio <= settings.period2_two_step_ratio_max
+    return (;
+        passes,
+        cosine=comparisons > 0 ? worst_cosine : NaN,
+        two_step_ratio=comparisons > 0 ? worst_ratio : NaN,
+    )
+end
+
 function detect_period(
     history::AbstractVector{FieldState},
     settings::ConvergenceSettings;
@@ -26,9 +57,23 @@ function detect_period(
                 break
             end
         end
-        passes && return (; period, absolute=worst_abs, relative=worst_rel)
+        oscillation = period == 2 ? _period_two_oscillation(history, required, settings) :
+            (; passes=true, cosine=NaN, two_step_ratio=NaN)
+        passes && oscillation.passes && return (;
+            period,
+            absolute=worst_abs,
+            relative=worst_rel,
+            oscillation_cosine=oscillation.cosine,
+            two_step_ratio=oscillation.two_step_ratio,
+        )
     end
-    return (; period=0, absolute=Inf, relative=Inf)
+    return (;
+        period=0,
+        absolute=Inf,
+        relative=Inf,
+        oscillation_cosine=NaN,
+        two_step_ratio=NaN,
+    )
 end
 
 _field_pass(record::IterationRecord, settings::ConvergenceSettings) =
@@ -37,10 +82,44 @@ _field_pass(record::IterationRecord, settings::ConvergenceSettings) =
 
 function _energy_change(records::AbstractVector{IterationRecord})
     length(records) >= 2 || return Inf
-    current = records[end].variational.canonical_variational_energy
-    previous = records[end - 1].variational.canonical_variational_energy
+    current = records[end].variational.target_density_corrected_variational_energy
+    previous = records[end - 1].variational.target_density_corrected_variational_energy
     sites = 2 * size(records[end].applied.alpha, 1)
     return abs(current - previous) / sites
+end
+
+function _slow_mode_diagnostic(records::AbstractVector{IterationRecord}, settings::ConvergenceSettings)
+    isempty(records) && return (;
+        cosine=NaN,
+        contraction=NaN,
+        factor=1.0,
+        absolute=Inf,
+        relative=Inf,
+        passes=false,
+    )
+    current = last(records)
+    factor = 1.0
+    cosine = NaN
+    contraction = NaN
+    if length(records) >= 2
+        previous = records[end - 1]
+        current_residual = field_vector(current.measured) .- field_vector(current.applied)
+        previous_residual = field_vector(previous.measured) .- field_vector(previous.applied)
+        current_norm = norm(current_residual)
+        previous_norm = norm(previous_residual)
+        if current_norm > eps(Float64) && previous_norm > eps(Float64)
+            cosine = dot(current_residual, previous_residual) / (current_norm * previous_norm)
+            contraction = dot(current_residual, previous_residual) / (previous_norm^2)
+            if cosine >= settings.slow_mode_cosine_min
+                factor = contraction >= 1 ? Inf :
+                    max(1.0, 1 / max(1 - contraction, eps(Float64)))
+            end
+        end
+    end
+    absolute = current.field_abs_residual * factor
+    relative = current.field_rel_residual * factor
+    passes = absolute <= settings.field_abs_tol || relative <= settings.field_rel_tol
+    return (; cosine, contraction, factor, absolute, relative, passes)
 end
 
 function _trailing_records(records::AbstractVector{IterationRecord}, predicate)
@@ -72,8 +151,8 @@ function _periodic_energy_change(records::AbstractVector{IterationRecord}, perio
     for phase_offset in 0:(period - 1), repeat in 0:(repeats - 1)
         right_index = count - phase_offset - repeat * period
         left_index = right_index - period
-        right_energy = records[right_index].variational.canonical_variational_energy
-        left_energy = records[left_index].variational.canonical_variational_energy
+        right_energy = records[right_index].variational.target_density_corrected_variational_energy
+        left_energy = records[left_index].variational.target_density_corrected_variational_energy
         worst = max(worst, abs(right_energy - left_energy) / sites)
     end
     return worst
@@ -119,8 +198,13 @@ function _periodic_diagnostic(
     effective_error = maximum(abs(record.variational.effective_eigenvalue_error) / sites for record in phases)
     energy_change = _periodic_energy_change(records, period, settings.period_repeats)
     energies = [record.variational.canonical_variational_energy for record in phases]
+    corrected_energies = [
+        record.variational.target_density_corrected_variational_energy for record in phases
+    ]
     energy_mean = mean(energies)
+    corrected_energy_mean = mean(corrected_energies)
     energy_spread = maximum(energies) - minimum(energies)
+    corrected_energy_spread = maximum(corrected_energies) - minimum(corrected_energies)
     density_contrast = _orbit_density_contrast(records, period, settings.orbit_bulk_fraction)
     closure = unmixed_probe ? _map_closure(records) : (; absolute=Inf, relative=Inf)
     closure_pass = unmixed_probe &&
@@ -153,12 +237,16 @@ function _periodic_diagnostic(
         orbit_validated=closure_pass && numerical_gates,
         unmixed_probe,
         solution_canonical_variational_energy=energy_mean,
+        solution_target_density_corrected_variational_energy=corrected_energy_mean,
         orbit_energy_spread=energy_spread,
+        orbit_target_density_corrected_energy_spread=corrected_energy_spread,
         orbit_density_contrast=density_contrast,
         fixed_point_abs_residual=last(phases).field_abs_residual,
         fixed_point_rel_residual=last(phases).field_rel_residual,
         cycle_abs_residual=max(recurrence.absolute, closure.absolute),
         cycle_rel_residual=max(recurrence.relative, closure.relative),
+        cycle_oscillation_cosine=recurrence.oscillation_cosine,
+        cycle_two_step_ratio=recurrence.two_step_ratio,
         density_error,
         variational_energy_change=energy_change,
         hamiltonian_identity_error_per_site=identity_error,
@@ -179,11 +267,13 @@ function assess_convergence(
     sites = 2 * size(current.applied.alpha, 1)
     identity_error = abs(current.variational.hamiltonian_identity_error) / sites
     effective_error = abs(current.variational.effective_eigenvalue_error) / sites
+    slow_mode = _slow_mode_diagnostic(records, settings)
     best_iteration = findmin(record.field_rel_residual for record in records)[2]
     stable_count = min(settings.stable_iterations, length(records))
     recent = records[(end - stable_count + 1):end]
     fixed = length(records) >= settings.stable_iterations &&
         all(record -> _field_pass(record, settings), recent) &&
+        slow_mode.passes &&
         all(record -> abs(record.density - target_density) <= settings.density_tol, recent) &&
         energy_change <= settings.variational_energy_tol &&
         identity_error <= settings.hamiltonian_identity_tol &&
@@ -192,16 +282,24 @@ function assess_convergence(
         return ConvergenceDiagnostic(;
             status=:fixed_point,
             accepted=true,
-            reason="fixed-point, density, variational-energy, and Hamiltonian-consistency gates passed",
+            reason="fixed-point raw and slow-mode-extrapolated residual, density, target-density-corrected energy, and Hamiltonian-consistency gates passed",
             solution_kind=:fixed_point,
             fundamental_period=1,
             orbit_validated=false,
             unmixed_probe=current.update_mode == :unmixed_probe,
             solution_canonical_variational_energy=current.variational.canonical_variational_energy,
+            solution_target_density_corrected_variational_energy=
+                current.variational.target_density_corrected_variational_energy,
             orbit_energy_spread=0.0,
+            orbit_target_density_corrected_energy_spread=0.0,
             orbit_density_contrast=0.0,
             fixed_point_abs_residual=current.field_abs_residual,
             fixed_point_rel_residual=current.field_rel_residual,
+            fixed_point_residual_cosine=slow_mode.cosine,
+            fixed_point_contraction_estimate=slow_mode.contraction,
+            fixed_point_extrapolation_factor=slow_mode.factor,
+            fixed_point_extrapolated_abs_residual=slow_mode.absolute,
+            fixed_point_extrapolated_rel_residual=slow_mode.relative,
             cycle_abs_residual=current.field_abs_residual,
             cycle_rel_residual=current.field_rel_residual,
             density_error,
@@ -279,10 +377,17 @@ function assess_convergence(
         orbit_validated=false,
         unmixed_probe=current.update_mode == :unmixed_probe,
         solution_canonical_variational_energy=NaN,
+        solution_target_density_corrected_variational_energy=NaN,
         orbit_energy_spread=NaN,
+        orbit_target_density_corrected_energy_spread=NaN,
         orbit_density_contrast=NaN,
         fixed_point_abs_residual=current.field_abs_residual,
         fixed_point_rel_residual=current.field_rel_residual,
+        fixed_point_residual_cosine=slow_mode.cosine,
+        fixed_point_contraction_estimate=slow_mode.contraction,
+        fixed_point_extrapolation_factor=slow_mode.factor,
+        fixed_point_extrapolated_abs_residual=slow_mode.absolute,
+        fixed_point_extrapolated_rel_residual=slow_mode.relative,
         cycle_abs_residual=Inf,
         cycle_rel_residual=Inf,
         density_error,

@@ -2,7 +2,7 @@
 L = 64
 t = 1.0
 U = 8.0
-V = -0.4
+V = 0.0
 t0 = 1.4
 tp = 0.1
 density = 0.9375
@@ -73,9 +73,9 @@ conserve_sz = false
 conserve_nfparity = false
 
 [run]
-output_directory = "output/phase1_gpu/UNPREPARED_SQUARE_SEED_PILOT"
+output_directory = "output/phase1_gpu/UNPREPARED_SQUARE_V0_SEED_PILOT"
 branch_label = "unprepared"
-preparation = "unprepared_square_seed_pilot"
+preparation = "unprepared_square_v0_seed_pilot"
 direction = "none"
 seed_label = "unprepared"
 random_seed = 1404

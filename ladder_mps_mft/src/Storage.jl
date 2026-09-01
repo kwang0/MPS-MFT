@@ -66,6 +66,18 @@ function _write_energy(group, energy::EnergyBreakdown)
     end
 end
 
+function _write_dmrg_history(group, records::AbstractVector{IterationRecord})
+    for record in records
+        record_group = create_group(group, lpad(string(record.iteration), 4, '0'))
+        record_group["sweep_energy"] = record.dmrg_sweep_energies
+        record_group["sweep_max_discarded_weight"] = record.dmrg_sweep_max_discarded_weights
+        record_group["sweep_maxlinkdim"] = record.dmrg_sweep_maxlinkdims
+        record_group["max_discarded_weight"] = record.dmrg_max_discarded_weight
+        record_group["maximum_link_dimension"] = record.dmrg_maxlinkdim
+    end
+    return group
+end
+
 function write_checkpoint(
     path::AbstractString;
     settings::ProjectSettings,
@@ -83,7 +95,7 @@ function write_checkpoint(
     temporary = tempname(dirname(path))
     storage_psi = move_to_cpu(psi)
     h5open(temporary, "w") do file
-        file["schema_version"] = 5
+        file["schema_version"] = 6
         file["artifact_kind"] = "ladder_mps_mft_state"
         file["process_completed"] = diagnostic.status != :iterating
         file["accepted"] = diagnostic.accepted
@@ -95,12 +107,25 @@ function write_checkpoint(
         file["orbit_validated"] = diagnostic.orbit_validated
         file["unmixed_cycle_probe"] = diagnostic.unmixed_probe
         file["solution_canonical_variational_energy"] = diagnostic.solution_canonical_variational_energy
+        file["solution_target_density_corrected_variational_energy"] =
+            diagnostic.solution_target_density_corrected_variational_energy
         file["orbit_energy_spread"] = diagnostic.orbit_energy_spread
+        file["orbit_target_density_corrected_energy_spread"] =
+            diagnostic.orbit_target_density_corrected_energy_spread
         file["orbit_density_contrast"] = diagnostic.orbit_density_contrast
         file["fixed_point_abs_residual"] = diagnostic.fixed_point_abs_residual
         file["fixed_point_rel_residual"] = diagnostic.fixed_point_rel_residual
+        file["fixed_point_residual_cosine"] = diagnostic.fixed_point_residual_cosine
+        file["fixed_point_contraction_estimate"] = diagnostic.fixed_point_contraction_estimate
+        file["fixed_point_extrapolation_factor"] = diagnostic.fixed_point_extrapolation_factor
+        file["fixed_point_extrapolated_abs_residual"] =
+            diagnostic.fixed_point_extrapolated_abs_residual
+        file["fixed_point_extrapolated_rel_residual"] =
+            diagnostic.fixed_point_extrapolated_rel_residual
         file["cycle_abs_residual"] = diagnostic.cycle_abs_residual
         file["cycle_rel_residual"] = diagnostic.cycle_rel_residual
+        file["cycle_oscillation_cosine"] = diagnostic.cycle_oscillation_cosine
+        file["cycle_two_step_ratio"] = diagnostic.cycle_two_step_ratio
         file["density_error"] = diagnostic.density_error
         file["variational_energy_change"] = diagnostic.variational_energy_change
         file["hamiltonian_identity_error_per_site"] = diagnostic.hamiltonian_identity_error_per_site
@@ -153,11 +178,20 @@ function write_checkpoint(
             history_group["mu_search_status"] = String.(getfield.(records, :mu_search_status))
             history_group["mu_evaluations"] = [record.mu_evaluations for record in records]
             history_group["mu_density_converged"] = [record.mu_density_converged for record in records]
+            history_group["mu_density_slope"] = [record.mu_density_slope for record in records]
             history_group["effective_energy"] = [record.effective_energy for record in records]
             history_group["variational_energy"] = [record.variational.canonical_variational_energy for record in records]
+            history_group["target_density_corrected_variational_energy"] = [
+                record.variational.target_density_corrected_variational_energy for record in records
+            ]
             history_group["field_abs_residual"] = [record.field_abs_residual for record in records]
             history_group["field_rel_residual"] = [record.field_rel_residual for record in records]
             history_group["wall_seconds"] = [record.wall_seconds for record in records]
+            history_group["dmrg_max_discarded_weight"] = [
+                record.dmrg_max_discarded_weight for record in records
+            ]
+            history_group["dmrg_maxlinkdim"] = [record.dmrg_maxlinkdim for record in records]
+            _write_dmrg_history(create_group(history_group, "dmrg"), records)
             _write_field_history(create_group(history_group, "fields"), records)
             period = diagnostic.fundamental_period
             if period > 1 && length(records) >= period
@@ -173,6 +207,10 @@ function write_checkpoint(
                     member_group["density"] = record.density
                     member_group["chemical_potential"] = record.chemical_potential
                     member_group["variational_energy"] = record.variational.canonical_variational_energy
+                    member_group["target_density_corrected_variational_energy"] =
+                        record.variational.target_density_corrected_variational_energy
+                    member_group["dmrg_max_discarded_weight"] = record.dmrg_max_discarded_weight
+                    member_group["dmrg_maxlinkdim"] = record.dmrg_maxlinkdim
                     if haskey(phase_psis, record.iteration)
                         member_group["psi"] = move_to_cpu(phase_psis[record.iteration])
                     end
@@ -381,7 +419,7 @@ function mirror_stateless_tree(
 end
 
 """
-Read the complete per-iteration mean-field history saved by schema-v5 states.
+Read the complete per-iteration mean-field history saved by schema-v5-and-newer states.
 
 `source=:applied` returns the fields used to build each effective Hamiltonian;
 `source=:measured` returns the corresponding raw DMRG mean-field map outputs.
@@ -563,7 +601,8 @@ function write_run_summary_markdown(path::AbstractString, settings::ProjectSetti
         println(io, "- Conserved S_z / fermion parity: `$(settings.runtime.conserve_sz)` / `$(settings.runtime.conserve_nfparity)`")
         println(io, "- Model fingerprint: `$(model_fingerprint(settings.model))`")
         println(io, "- Numerical fingerprint: `$(numerical_fingerprint(settings))`")
-        println(io, "- Implementation SHA-256: `$(implementation_fingerprint())`")
+        println(io, "- Solver implementation SHA-256: `$(implementation_fingerprint(settings))`")
+        println(io, "- Full source/config/launcher/test tree SHA-256: `$(tree_fingerprint())`")
         println(io, "- Configuration SHA-256: `$(isfile(settings.config_path) ? sha256_file(settings.config_path) : "not-file-backed")`")
         println(io, "- Field-only inherit source: `$(something(settings.run.inherit_from, "none"))`")
         println(io, "- Parent checkpoint: `$(something(settings.run.parent_checkpoint, "none"))`")
@@ -579,21 +618,29 @@ function write_run_summary_markdown(path::AbstractString, settings::ProjectSetti
         println(io, "- Fundamental period: `$(diagnostic.fundamental_period)`")
         println(io, "- Orbit validated from unmixed map: `$(diagnostic.orbit_validated && diagnostic.unmixed_probe)`")
         println(io, "- Solution canonical variational energy: `$(diagnostic.solution_canonical_variational_energy)`")
+        println(io, "- Solution target-density-corrected energy: `$(diagnostic.solution_target_density_corrected_variational_energy)`")
         println(io, "- Orbit phase-energy spread: `$(diagnostic.orbit_energy_spread)`")
+        println(io, "- Orbit target-density-corrected spread: `$(diagnostic.orbit_target_density_corrected_energy_spread)`")
         println(io, "- Orbit density contrast: `$(diagnostic.orbit_density_contrast)`")
         println(io, "- Fixed-point residual (relative): `$(diagnostic.fixed_point_rel_residual)`")
+        println(io, "- Fixed-point residual cosine / lambda: `$(diagnostic.fixed_point_residual_cosine)` / `$(diagnostic.fixed_point_contraction_estimate)`")
+        println(io, "- Fixed-point extrapolation factor / relative residual: `$(diagnostic.fixed_point_extrapolation_factor)` / `$(diagnostic.fixed_point_extrapolated_rel_residual)`")
+        println(io, "- Period-two step cosine / two-step ratio: `$(diagnostic.cycle_oscillation_cosine)` / `$(diagnostic.cycle_two_step_ratio)`")
         println(io, "- Hamiltonian identity error/site: `$(diagnostic.hamiltonian_identity_error_per_site)`")
         println(io, "- Effective eigenvalue error/site: `$(diagnostic.effective_eigenvalue_error_per_site)`")
         if final !== nothing
             println(io, "- Iterations: `$(length(records))`")
             println(io, "- Density: `$(final.density)`")
             println(io, "- Final mu-search status/evaluations: `$(final.mu_search_status)` / `$(final.mu_evaluations)`")
+            println(io, "- Final density slope dn/dmu: `$(final.mu_density_slope)`")
             println(io, "- Canonical variational energy: `$(final.variational.canonical_variational_energy)`")
+            println(io, "- Target-density correction / corrected energy: `$(final.variational.target_density_correction)` / `$(final.variational.target_density_corrected_variational_energy)`")
             println(io, "- Direct / reconstructed variational energy: `$(final.variational.direct_variational_energy)` / `$(final.variational.reconstructed_variational_energy)`")
             println(io, "- Variational consistency error: `$(final.variational.variational_consistency_error)`")
             println(io, "- Effective-H eigenvalue: `$(final.effective_energy)`")
             println(io, "- Effective-H expectation: `$(final.variational.effective_expectation)`")
             println(io, "- Double-counting correction: `$(final.variational.double_counting_correction)`")
+            println(io, "- Final DMRG maximum discarded weight / link dimension: `$(final.dmrg_max_discarded_weight)` / `$(final.dmrg_maxlinkdim)`")
         end
         println(io)
         println(io, "## Control scales")
@@ -605,6 +652,9 @@ function write_run_summary_markdown(path::AbstractString, settings::ProjectSetti
         println(io, "- E_p endpoint values: `$(settings.model.ep_lower_signed)` to `$(settings.model.ep_upper_signed)`")
         println(io, "- Effective MF coupling t_perp^2 / |E_p|: `$(settings.model.tp^2 / settings.model.ep)`")
         println(io, "- E_p registry: `$(settings.model.ep_source)`")
+        println(io, "- Warm-start mu-resolve noise: `$(settings.dmrg.mu_warm_start_noise)`")
+        println(io, "- Period-two cosine / two-step-ratio gates: `$(settings.convergence.period2_oscillation_cosine_max)` / `$(settings.convergence.period2_two_step_ratio_max)`")
+        println(io, "- Slow-mode cosine gate: `$(settings.convergence.slow_mode_cosine_min)`")
         println(io)
         println(io, "This summary is generated evidence. Add collaborator interpretation to `docs/RUN_LOG.md`; do not edit an immutable HDF5 artifact.")
     end

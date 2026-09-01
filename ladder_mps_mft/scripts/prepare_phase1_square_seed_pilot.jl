@@ -9,9 +9,24 @@ length(ARGS) == 4 || error(
 
 const COMMON_RANDOM_SEED = 1404
 const INITIAL_AMPLITUDE = 1.0e-3
-const EXPECTED_EP_SIGNED = -0.24962435880865996
 const STRIPE_CHARGE_TO_SPIN_RATIO = 0.2
 const STRIPE_PAIRING_TO_SPIN_RATIO = 1.0
+const POINT_CONTRACTS = (
+    (
+        point_id="square_t014_vm04",
+        V=-0.4,
+        t0=1.4,
+        mu_initial=0.55,
+        ep_signed=-0.24962435880865996,
+    ),
+    (
+        point_id="square_t014_v000",
+        V=0.0,
+        t0=1.4,
+        mu_initial=0.55,
+        ep_signed=-0.14653773091916378,
+    ),
+)
 
 base_path = abspath(ARGS[1])
 control_run = abspath(ARGS[2])
@@ -25,14 +40,22 @@ base_settings = load_settings(base_path)
 base_settings.model.geometry == :square || error("square seed pilot must use square geometry")
 base_settings.model.L == 64 || error("square seed pilot must use L=64")
 base_settings.model.U == 8.0 || error("square seed pilot must use U=8")
-base_settings.model.V == -0.4 || error("square seed pilot must use V=-0.4")
-base_settings.model.t0 == 1.4 || error("square seed pilot must use t0=1.4")
+point_matches = filter(
+    contract -> base_settings.model.V == contract.V && base_settings.model.t0 == contract.t0,
+    POINT_CONTRACTS,
+)
+length(point_matches) == 1 || error(
+    "unsupported square seed-pilot point V=$(base_settings.model.V), t0=$(base_settings.model.t0)",
+)
+point_contract = only(point_matches)
 base_settings.model.tp == 0.1 || error("square seed pilot must use t_perp=0.1")
 base_settings.model.density == 0.9375 || error("square seed pilot must use density=0.9375")
-base_settings.model.mu_initial == 0.55 || error("square seed pilot must begin from mu=0.55")
+base_settings.model.mu_initial == point_contract.mu_initial || error(
+    "square seed pilot at $(point_contract.point_id) must begin from mu=$(point_contract.mu_initial)",
+)
 base_settings.model.ep_mode == :exact || error("square seed pilot must use an exact E_p registry row")
-base_settings.model.ep_signed == EXPECTED_EP_SIGNED || error(
-    "square seed pilot resolved an unexpected E_p=$(base_settings.model.ep_signed)",
+base_settings.model.ep_signed == point_contract.ep_signed || error(
+    "square seed pilot at $(point_contract.point_id) resolved an unexpected E_p=$(base_settings.model.ep_signed)",
 )
 base_settings.runtime.backend == :gpu || error("square seed pilot must use the GPU backend")
 base_settings.runtime.tensor_scalar_type == :float64 || error(
@@ -51,11 +74,29 @@ base_settings.dmrg.mu_bracket_step == 0.01 || error(
 base_settings.dmrg.mu_bracket_growth == 3.0 || error(
     "square seed pilot must use mu bracket growth=3",
 )
+base_settings.dmrg.mu_warm_start_noise == 1.0e-8 || error(
+    "square seed pilot must use 1e-8 noise for warm-started mu re-solves",
+)
 base_settings.convergence.density_tol == 1.0e-3 || error(
     "square seed pilot must use outer density_tol=1e-3",
 )
 base_settings.convergence.variational_energy_tol == 1.0e-6 || error(
     "square seed pilot must use exploratory variational_energy_tol=1e-6",
+)
+base_settings.convergence.field_abs_tol == 1.0e-6 || error(
+    "square seed pilot must use exploratory field_abs_tol=1e-6",
+)
+base_settings.convergence.field_rel_tol == 5.0e-3 || error(
+    "square seed pilot must use exploratory field_rel_tol=5e-3",
+)
+base_settings.convergence.period2_oscillation_cosine_max == -0.5 || error(
+    "square seed pilot must require a negative period-two step cosine",
+)
+base_settings.convergence.period2_two_step_ratio_max == 0.5 || error(
+    "square seed pilot must require d2/d1 <= 0.5 for period two",
+)
+base_settings.convergence.slow_mode_cosine_min == 0.9 || error(
+    "square seed pilot must apply slow-mode extrapolation above cosine 0.9",
 )
 base_settings.run.initial_seed_protocol == :matched_mode || error(
     "square seed-pilot base must opt in to matched_mode",
@@ -176,7 +217,8 @@ seed_fingerprints = String[]
 
 open(manifest_path, "w") do io
     println(io, join((
-        "label", "geometry", "branch", "seed", "random_seed", "config", "config_sha256",
+        "label", "geometry", "point_id", "L", "U", "V", "t0", "tp", "density", "chi",
+        "branch", "seed", "random_seed", "config", "config_sha256",
         "ep_mode", "ep_signed", "ep_abs", "ep_t0_lower", "ep_t0_upper",
         "ep_lower_signed", "ep_upper_signed", "ep_weight", "tp2_over_ep",
         "full_output_directory", "stateless_output_directory",
@@ -191,8 +233,10 @@ open(manifest_path, "w") do io
         "legacy_pairing_random_seed", "legacy_pairing_center_of_mass_structure",
         "legacy_pairing_beta_initialization", "legacy_pairing_mu_cdw_initialization",
         "analysis_role", "preliminary_energy_only", "dmrg_energy_tol", "dmrg_cutoff",
-        "mu_density_tol", "outer_density_tol", "variational_energy_tol",
-        "mu_bracket_step", "mu_bracket_growth",
+        "mu_density_tol", "outer_density_tol", "field_abs_tol", "field_rel_tol",
+        "variational_energy_tol", "mu_bracket_step", "mu_bracket_growth",
+        "mu_warm_start_noise", "period2_oscillation_cosine_max",
+        "period2_two_step_ratio_max", "slow_mode_cosine_min",
     ), '\t'))
 
     for branch in branches
@@ -285,6 +329,14 @@ open(manifest_path, "w") do io
         println(io, join((
             branch.label,
             String(model.geometry),
+            point_contract.point_id,
+            string(model.L),
+            string(model.U),
+            string(model.V),
+            string(model.t0),
+            string(model.tp),
+            string(model.density),
+            string(settings.dmrg.maxdim),
             branch.branch,
             branch.seed,
             string(COMMON_RANDOM_SEED),
@@ -328,9 +380,15 @@ open(manifest_path, "w") do io
             string(settings.dmrg.cutoff),
             string(settings.dmrg.mu_density_tol),
             string(settings.convergence.density_tol),
+            string(settings.convergence.field_abs_tol),
+            string(settings.convergence.field_rel_tol),
             string(settings.convergence.variational_energy_tol),
             string(settings.dmrg.mu_bracket_step),
             string(settings.dmrg.mu_bracket_growth),
+            string(settings.dmrg.mu_warm_start_noise),
+            string(settings.convergence.period2_oscillation_cosine_max),
+            string(settings.convergence.period2_two_step_ratio_max),
+            string(settings.convergence.slow_mode_cosine_min),
         ), '\t'))
     end
 end

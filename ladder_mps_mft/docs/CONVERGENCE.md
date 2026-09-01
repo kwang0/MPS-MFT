@@ -50,6 +50,27 @@ validated by all of the following:
 4. the energy of each phase recurs on the next visit to that same phase;
 5. `p` appears in the explicit `accepted_periods` list.
 
+For period two, recurrence proximity is necessary but no longer sufficient.
+Every recent pair of one-step changes must reverse direction, with step-vector
+cosine at most `period2_oscillation_cosine_max` (default `-0.5`), and the
+two-step displacement divided by the one-step norm must not exceed
+`period2_two_step_ratio_max` (default `0.5`). A slowly drifting sequence can be
+close at lag two while its consecutive steps remain parallel; that is not a
+two-cycle.
+
+Period-one acceptance also tests a slow-mode extrapolation. For residual
+vectors `r_k=f(x_k)-x_k`, the code estimates
+
+```text
+lambda = dot(r_k,r_(k-1)) / ||r_(k-1)||^2.
+```
+
+When their cosine is at least `slow_mode_cosine_min` (default `0.9`), the
+reported and gated residual is multiplied by `max(1,1/(1-lambda))`.
+`lambda>=1` gives an infinite extrapolation factor and cannot be accepted.
+This prevents a small raw residual with an almost marginal decay rate from
+being called converged merely because it crosses the local threshold.
+
 With `period_repeats=3`, period two needs four complete cycles, or eight
 contiguous raw-map records. Searching upward reports the smallest passing
 period. A recurrence in Anderson- or linearly mixed history is only a
@@ -70,9 +91,10 @@ damping and re-probing the same recurrence.
 An accepted orbit stores every phase's applied and measured fields,
 correlations, energy decomposition, chemical potential, density, and MPS. Quick
 diagnostics are produced separately for every phase. The HDF5 file also stores
-the orbit-averaged canonical energy, phase-energy spread, and the Bollmark-style
-density contrast over the central `orbit_bulk_fraction` of rungs (one half by
-default) to reduce open-boundary contamination.
+the orbit-averaged canonical and target-density-corrected energies, their phase
+spreads, and the Bollmark-style density contrast over the central
+`orbit_bulk_fraction` of rungs (one half by default) to reduce open-boundary
+contamination.
 
 The code never averages orbit phases. `cycle_action` applies only after the
 initial raw probe has exhausted its full budget with an unaccepted recurrence.
@@ -111,4 +133,7 @@ after residual growth and increased conservatively after improvement. Their
 role is acceleration of a period-one search after the unbiased orbit probe, not
 classification of physical recurrence. Density targeting remains a separate
 safeguarded bracket/secant search with its own tolerance, iteration cap, and
-deadline.
+deadline. Its positive density-versus-mu slope is carried between SCF updates
+to supply a bounded Newton predictor. The first solve at a new MF Hamiltonian
+retains the normal optimization schedule; subsequent warm-started mu re-solves
+use the configured tiny noise schedule rather than restarting at `1e-3`.

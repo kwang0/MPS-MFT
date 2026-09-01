@@ -19,4 +19,9 @@ for ((index=0; index<${#args[@]}; index++)); do
     : >"${args[run_index]}/gpu_smoke.h5"
   fi
 done
+{
+  printf '%s\t' "$job_id"
+  printf '%q ' "$@"
+  printf '\n'
+} >>"$state_dir/submitted_args.tsv"
 printf '%s\n' "$job_id"

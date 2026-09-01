@@ -1158,3 +1158,179 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   ledger row changed, and no HDF5 artifact was modified. Actual preparation
   must occur on Perlmutter after syncing this code because scratch is not
   mounted locally.
+
+## 2026-09-01: six-parent square tight-five compact audit
+
+- Audited the synced campaign
+  `output/phase1_gpu/20260831_phase1_square_t014_vm04_chi200_tight5` at code
+  commit `4370a46d47acb874965fb8fdbe4eda6a0c26d5b7`. The common contract is
+  square, `L=64`, `U=8`, `V=-0.4`, `t0=1.4`, `t_perp=0.1`, density
+  `0.9375`, `chi=200`, Float64, at most five additional raw-map updates, and
+  no possible Anderson entry. The DMRG, density, field, and energy settings
+  match the 2026-08-31 preparation entry.
+- Ran `scripts/verify_stateless_results.jl` without `--full` on all six result
+  roots. All 24 compact artifacts passed marker, compact SHA-256, compact-size,
+  recorded full-size, and recorded full-SHA metadata checks; no MPS tensors
+  remain in the mirrors. The compact copies total `107,910,655` bytes
+  (`102.912 MiB`) while their recorded immutable full artifacts total
+  `2,921,150,977` bytes (`2.7205 GiB`). Scratch is not mounted locally, so
+  `full_artifacts_verified=false`; the authoritative full-file hashes and
+  Perlmutter accounting were not independently remeasured on this computer.
+- Reproduced the campaign audit below `analysis/audit_20260901`. All six
+  branches ended `maximum_iterations`, not a Slurm time limit: each contains
+  one inherited initial record plus four new unmixed-probe records. There are
+  `0/6` accepted states, zero raw-map candidates, zero mixer-dependent
+  candidates, no validated recurrence period, and no stored canonical
+  solution energy. Hamiltonian-identity and effective-energy checks pass for
+  every record.
+- Every terminal density error passes the `1e-4` gate (`6.35e-5`--`7.76e-5`).
+  The d-wave and legacy-like pairing branches pass the final and trailing-two
+  field gate, but all branches miss the `1e-7`-per-site energy-change gate by
+  factors `2.50`--`2.79`. The four stripe-family branches also miss the
+  relative-field gate by factors `1.06`--`1.78`. Both residuals and energy
+  changes decrease monotonically over the available child records.
+- Density fixing required five or six Hamiltonian evaluations only on the
+  first child update and one on each later update, for nine or ten evaluations
+  per branch. It is therefore not the limiting cause of the five-record stop.
+  Stored branch wall time sums to `2.593` GPU-hours, or approximately `0.648`
+  one-of-four GPU node-hours before scheduler and compilation effects; the
+  conservative ledger continues to count requested ceilings rather than
+  reclaiming early completion.
+- The spatial audit below `analysis/spatial_phase_defects_20260901` finds a
+  common terminal charge mode `q/pi=8/63` with RMS approximately `4.751e-4`
+  and a common selected d-wave `q=0` component with RMS approximately
+  `2.775e-3`. Across all six terminal states, the maximum pairwise relative
+  RMS difference is only `0.03193%` for charge and `0.00412%` for d-wave.
+  Thus the six initial seeds have collapsed to the same resolved charge and
+  pairing profiles to substantially better precision than the stopping gates.
+- The weak stripe-seed odd-leg spin component falls by factors `11.5`--`12.4`
+  from parent to child, to RMS `1.98e-6`--`3.46e-6`; pairing controls are at
+  `2e-8`--`4e-8`. With the declared derived-profile floor `1e-5`, every
+  terminal spin profile is identically zero while charge and d-wave are
+  unchanged. The remaining stripe residual is `97.8%`--`98.4%` Hartree-field
+  residual and is consistent with decay of a numerically negligible seeded
+  spin texture, not evidence for a distinct resolved SDW state.
+- No branch satisfies the spatial audit's combined moving-phase-slip and
+  residual-co-localization heuristic, so these data do not support a moving
+  domain wall as the primary convergence limitation. Five complete records
+  remain insufficient for the canonical period-two test, which requires
+  eight; any apparent future two-cycle remains unresolved until that contract
+  is met.
+- The six child terminal current-iterate energies span `7.717e-6` per site,
+  versus `2.490e-5` per site among the accepted loose parents. This reduced
+  spread is useful evidence of basin collapse only. The child states are
+  unaccepted and store no solution energy, and the parent and child numerical
+  fingerprints differ, so no variational energy ranking is authorized either
+  among the children or between parent and child. No thermodynamic order or
+  phase is claimed from one-point finite-ladder fields.
+- Generated the established 12 per-branch figures below
+  `analysis/mf_observables_20260901`, spatial diagnostics below
+  `analysis/spatial_phase_defects_20260901`, and reproducible cross-campaign
+  tables, threshold scans, figures, and report below
+  `analysis/tight5_comparison_20260901_final`.
+- The exact recommended next calculation is one further same-six-parent
+  raw-map segment with at most five additional MF updates and no Anderson.
+  Its plan-only requested ceiling is `6*0.75 = 4.500` additional node-hours
+  without repeating the completed smoke. From the synced ledger value of
+  `158.500` reserved, this would project to `163.000` reserved and `237.000`
+  unreserved under the 400-node-hour project hard cap, subject to an
+  authoritative live Perlmutter recheck before submission. This keeps most of
+  the allowance for later bond-dimension and length convergence.
+- This audit submitted or cancelled no job, changed no budget-ledger row,
+  migrated/pruned/deleted no data, and modified no HDF5 artifact. Only compact
+  stateless content was inspected locally; full-artifact verification,
+  authoritative charging, higher-chi/length convergence, and thermodynamic
+  scientific conclusions remain outside this audit boundary.
+
+## 2026-09-01: numerical re-audit, classifier repair, and square V=0 campaign preparation
+
+- Before changing the classifier, added and ran the read-only
+  `scripts/audit_scf_numerics.py` over all 45 local Phase 1 final-state paths.
+  Thirty-six complete-history artifacts were auditable; nine v2 paths lack
+  `history/fields/applied` in their local compact files and therefore remain
+  explicitly unclassifiable under the new test. Fourteen auditable paths
+  change classification. The tabular evidence and error list are under
+  `analysis/numerics_reaudit_pre_fix_20260901`; no HDF5 field was edited.
+- Five v3 stored fixed points fail the new slow-mode-extrapolated residual
+  gate. The v3 unfrustrated-pairing period-two candidate and both Stage A
+  phase-parent candidates have consecutive-step cosine approximately
+  `+0.9999` and two-step/one-step ratio approximately `2`, so the repaired
+  classifier calls them monotone drift rather than oscillatory period two.
+  The two Stage A states were already unaccepted; this audit does not promote
+  or rank them.
+- Period-two recurrence now additionally requires step-vector cosine at most
+  `-0.5` and two-step/one-step ratio at most `0.5`. Fixed-point acceptance
+  estimates `lambda=dot(r_k,r_(k-1))/||r_(k-1)||^2` for aligned residuals and
+  gates the extrapolated residual `r/(1-lambda)`; `lambda>=1` fails.
+- The density solver now carries a positive `dn/dmu` estimate between SCF
+  updates, tries a bounded Newton predictor before safeguarded bracketing, and
+  uses configurable `1e-8,1e-9,0` noise for warm-started mu re-solves. The
+  first solve for a changed MF Hamiltonian retains the normal DMRG schedule.
+- The DMRG observer now stops on absolute sweep-energy change only after the
+  final max-dimension/noise schedule is reached and records per-sweep energy,
+  maximum discarded weight, and maximum link dimension. State schema v6
+  stores this evidence per MF update; sector-gap schema v2 stores it per
+  fixed-N/fixed-Sz sector. A real four-site DMRG smoke produced three finite
+  sweep energies, nonzero discarded weights, and realized link dimensions
+  `[4,4,4]`.
+- Energy stabilization and authorized ranking now use the stored
+  target-density correction `E + mu*(N_target-N)` while preserving the raw
+  canonical energy and full double-counting decomposition. An older artifact
+  must contain enough data to reconstruct this correction or is excluded from
+  ranking.
+- The ranking implementation fingerprint now hashes only `src/**/*.jl` plus
+  the active CPU or GPU Manifest. Requested walltime and output verbosity are
+  omitted from the numerical fingerprint. The broader source/config/launcher/
+  test hash remains separately recorded as `tree_sha256`. This prevents a
+  launcher-only edit from blocking future same-solver campaign comparison.
+- Added the exact-registry square `V=0,t0=1.4` six-seed loose chi-200 config,
+  generalized the square preparer across the locked `V=-0.4` and `V=0` points,
+  and added launcher v1.11.0 actions `plan-square-v0-seed-pilot` and
+  `prepare-square-v0-seed-pilot`. The six starts are uniform d-wave,
+  legacy-like pairing, stripe `m=4,5`, and stripe+d-wave `m=4,5`; all share
+  amplitude `1e-3`, phase zero, and product-state seed `1404`.
+- The plan-only first-segment envelope is `0.125 + 6*3 = 18.125` node-hours.
+  From the synced conservative ledger of `158.500`, submission would project
+  to `176.625` reserved and `223.375` unreserved under the 400-additional-
+  node-hour cap. The four-segment `72.125` ceiling is not pre-authorized, which
+  preserves capacity for later bond-dimension and length convergence.
+- The full local Julia suite passed `619/619` assertions, including the real
+  DMRG observer callback, synthetic sector-gap schema v2 evidence, numerical
+  classifier counterexamples, solver/tree fingerprint separation, and
+  preparation of the V=0 six-branch campaign with an unchanged test ledger.
+  Bash syntax and Python audit help also passed.
+- No MPO optimization was added because the supplied evidence says MPO
+  construction is not the bottleneck. The proposed `sacct` reconciliation,
+  `hbm80g` constraint change, and CPU-pool routing were accounting/scheduler
+  policy rather than solver numerics and were deliberately deferred from that
+  numerical change.
+- No Slurm job was submitted or cancelled, no Perlmutter run directory was
+  prepared, no budget row changed, no data were migrated/pruned/deleted, and
+  no immutable HDF5 artifact was overwritten. Perlmutter accounting and full
+  scratch verification remain authoritative; higher-chi/length convergence
+  and thermodynamic phase claims remain outside this preparation.
+
+## 2026-09-01: elapsed-time budget reconciliation and GPU constraint policy
+
+- Launcher v1.12.0 keeps the original requested reservations immutable and
+  adds an independent append-only reconciliation ledger keyed by Slurm job ID.
+  The explicit `reconcile [RUN_ID]` action reads finalized allocation rows from
+  Perlmutter `sacct`, records `ElapsedRaw`, state/start/end, the effective node
+  fraction, measured node-hours, and released ceiling, and is idempotent on
+  repeated use. Pending/running or missing jobs retain their full requested
+  reservation.
+- The active 400-node-hour project total is now original requested ceilings
+  minus recorded terminal-job releases. Present one-of-four-GPU and 64-of-128-
+  CPU jobs both carry an effective fractional rate of `0.25` node-hours per
+  elapsed wall hour. The measured amount is capped at its original reservation;
+  Perlmutter scheduler and allocation accounting remain authoritative.
+- The smoke and all branch configs below chi `1200` now request `gpu` instead
+  of `gpu&hbm80g`; configs at chi `1200` and above retain the 80-GB-HBM guard.
+  The selected threshold is frozen in each new run environment.
+- The complete local Julia suite passed `633/633` assertions. Mock Slurm tests
+  verified low-chi and high-chi constraint selection, exact elapsed-charge
+  arithmetic, byte-for-byte preservation of the reservation ledger, active-cap
+  reporting, and job-ID idempotence on repeated reconciliation.
+- No real reconciliation was run locally, no existing reservation row changed,
+  and no job was submitted or cancelled. CPU-pool routing beyond the already
+  guarded `E_p` path remains a separate future scheduler change.

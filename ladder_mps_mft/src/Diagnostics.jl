@@ -264,7 +264,7 @@ function write_sector_gaps(path::AbstractString, gaps; immutable::Bool=false)
     mkpath(dirname(path))
     temporary = tempname(dirname(path))
     h5open(temporary, "w") do file
-        file["schema_version"] = 1
+        file["schema_version"] = 2
         file["artifact_kind"] = "ladder_sector_gaps"
         file["particle_number"] = gaps.particle_number
         file["spin_gap"] = gaps.spin_gap
@@ -274,6 +274,20 @@ function write_sector_gaps(path::AbstractString, gaps; immutable::Bool=false)
         group = create_group(file, "sector_energies")
         for ((particle_number, twice_sz), energy) in sort(collect(gaps.energies); by=first)
             group["N$(particle_number)_twoSz$(twice_sz)"] = energy
+        end
+        evidence_group = create_group(file, "sector_dmrg_evidence")
+        for ((particle_number, twice_sz), evidence) in sort(collect(gaps.dmrg_evidence); by=first)
+            sector_group = create_group(
+                evidence_group,
+                "N$(particle_number)_twoSz$(twice_sz)",
+            )
+            sector_group["sweep_energy"] = evidence.sweep_energies
+            sector_group["sweep_max_discarded_weight"] =
+                evidence.sweep_max_discarded_weights
+            sector_group["sweep_maxlinkdim"] = evidence.sweep_maxlinkdims
+            sector_group["max_discarded_weight"] = evidence.max_discarded_weight
+            sector_group["maximum_link_dimension"] = evidence.maximum_link_dimension
+            sector_group["energy_converged"] = evidence.energy_converged
         end
     end
     mv(temporary, path; force=!immutable)
@@ -306,21 +320,32 @@ function sector_energy(model::ModelSettings, dmrg_settings::DMRGSettings, partic
         deadline=time() + dmrg_settings.max_time_seconds,
     )
     result.timed_out && error("fixed-sector DMRG timed out for N=$particle_number, 2Sz=$twice_sz")
-    return result.energy
+    return result
 end
 
 function sector_resolved_gaps(model::ModelSettings, dmrg_settings::DMRGSettings)
     particle_number = round(Int, 2 * model.L * model.density)
     iseven(particle_number) || throw(ArgumentError("sector diagnostic currently requires even target N"))
     sectors = Dict{Tuple{Int,Int},Float64}()
+    dmrg_evidence = Dict{Tuple{Int,Int},NamedTuple}()
     for key in ((particle_number, 0), (particle_number, 2), (particle_number - 2, 0),
                 (particle_number - 1, 1), (particle_number + 1, 1), (particle_number + 2, 0))
-        sectors[key] = sector_energy(model, dmrg_settings, key...)
+        result = sector_energy(model, dmrg_settings, key...)
+        sectors[key] = result.energy
+        dmrg_evidence[key] = (;
+            sweep_energies=result.sweep_energies,
+            sweep_max_discarded_weights=result.sweep_max_discarded_weights,
+            sweep_maxlinkdims=result.sweep_maxlinkdims,
+            max_discarded_weight=result.max_discarded_weight,
+            maximum_link_dimension=result.maximum_link_dimension,
+            energy_converged=result.energy_converged,
+        )
     end
     e0 = sectors[(particle_number, 0)]
     return (
         particle_number,
         energies=sectors,
+        dmrg_evidence,
         spin_gap=sectors[(particle_number, 2)] - e0,
         charge_gap=0.5 * (sectors[(particle_number + 2, 0)] + sectors[(particle_number - 2, 0)] - 2 * e0),
         hole_pair_binding=sectors[(particle_number - 2, 0)] + e0 - 2 * sectors[(particle_number - 1, 1)],

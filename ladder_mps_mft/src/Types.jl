@@ -37,6 +37,7 @@ Base.@kwdef struct DMRGSettings
     mu_bracket_step::Float64 = 0.05
     mu_bracket_growth::Float64 = 2.0
     mu_interval_tol::Float64 = 1e-6
+    mu_warm_start_noise::Float64 = 1e-8
 end
 
 Base.@kwdef struct MixingSettings
@@ -61,6 +62,9 @@ Base.@kwdef struct ConvergenceSettings
     period_repeats::Int = 3
     period_abs_tol::Float64 = 2e-6
     period_rel_tol::Float64 = 1e-2
+    period2_oscillation_cosine_max::Float64 = -0.5
+    period2_two_step_ratio_max::Float64 = 0.5
+    slow_mode_cosine_min::Float64 = 0.9
     unmixed_cycle_probe::Bool = true
     probe_max_period::Int = 2
     probe_iterations::Int = 20
@@ -158,6 +162,8 @@ Base.@kwdef struct EnergyBreakdown
     direct_variational_energy::Float64
     variational_consistency_error::Float64
     canonical_variational_energy::Float64
+    target_density_correction::Float64
+    target_density_corrected_variational_energy::Float64
     grand_potential::Float64
 end
 
@@ -170,12 +176,21 @@ Base.@kwdef struct ConvergenceDiagnostic
     orbit_validated::Bool = false
     unmixed_probe::Bool = false
     solution_canonical_variational_energy::Float64 = NaN
+    solution_target_density_corrected_variational_energy::Float64 = NaN
     orbit_energy_spread::Float64 = NaN
+    orbit_target_density_corrected_energy_spread::Float64 = NaN
     orbit_density_contrast::Float64 = NaN
     fixed_point_abs_residual::Float64 = Inf
     fixed_point_rel_residual::Float64 = Inf
+    fixed_point_residual_cosine::Float64 = NaN
+    fixed_point_contraction_estimate::Float64 = NaN
+    fixed_point_extrapolation_factor::Float64 = 1.0
+    fixed_point_extrapolated_abs_residual::Float64 = Inf
+    fixed_point_extrapolated_rel_residual::Float64 = Inf
     cycle_abs_residual::Float64 = Inf
     cycle_rel_residual::Float64 = Inf
+    cycle_oscillation_cosine::Float64 = NaN
+    cycle_two_step_ratio::Float64 = NaN
     density_error::Float64 = Inf
     variational_energy_change::Float64 = Inf
     hamiltonian_identity_error_per_site::Float64 = Inf
@@ -199,6 +214,12 @@ Base.@kwdef struct IterationRecord
     field_abs_residual::Float64
     field_rel_residual::Float64
     wall_seconds::Float64
+    mu_density_slope::Float64 = NaN
+    dmrg_max_discarded_weight::Float64 = NaN
+    dmrg_maxlinkdim::Int = 0
+    dmrg_sweep_energies::Vector{Float64} = Float64[]
+    dmrg_sweep_max_discarded_weights::Vector{Float64} = Float64[]
+    dmrg_sweep_maxlinkdims::Vector{Int} = Int[]
 end
 
 struct EpRecord

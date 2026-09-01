@@ -32,6 +32,18 @@ E_var,direct = <H_ladder> + E_perp
 
 as `canonical_variational_energy`. The two expressions must agree. Their difference is stored as `variational_consistency_error`.
 
+Density targeting is numerical rather than exact, so comparisons and SCF
+energy-stability gates use the leading fixed-density interpolation
+
+```text
+E_target = E_var,direct + mu (N_target - <N>).
+```
+
+Both the correction and `E_target` are stored. This does not replace the
+canonical functional or its double-counting terms; it puts nearby residual
+density errors on the same target-N tangent plane. It is not a substitute for
+tighter density convergence or a certified error bar.
+
 ## Channel-by-channel constants
 
 All current fields and correlators are real. With `F_a` the anomalous pair correlator, `X_a` the normal exchange correlator, and `delta n = n-1/2`:
@@ -64,7 +76,12 @@ The error per physical site must pass `hamiltonian_identity_tol`. The final DMRG
 
 ## When a comparison is permitted
 
-`scripts/compare_branches.jl` accepts either a gated period-one fixed point or an unmixed, validated periodic solution. It requires identical model, numerical, implementation, and E_p-registry fingerprints. For a periodic solution it ranks the orbit-averaged canonical energy, never a single phase or an averaged field. It rejects cross-geometry ranking because the geometries define different Hamiltonians.
+`scripts/compare_branches.jl` accepts either a gated period-one fixed point or
+an unmixed, validated periodic solution. It requires identical model,
+numerical, implementation, and E_p-registry fingerprints. For a periodic
+solution it ranks the orbit-averaged target-density-corrected canonical energy,
+never a single phase or an averaged field. It rejects cross-geometry ranking
+because the geometries define different Hamiltonians.
 
 Mixer-dependent recurrences and intermediate iterations remain diagnostic. A periodic branch may enter phase competition only when every phase, recurrence link, density, phase-energy recurrence, and Hamiltonian-consistency gate passes in the unmixed probe. Periods beyond those explicitly mapped to the transverse physics remain candidates rather than automatically accepted solutions.
 

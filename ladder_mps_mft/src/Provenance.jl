@@ -1,15 +1,6 @@
 sha256_file(path::AbstractString) = bytes2hex(open(SHA.sha256, path))
 
-function implementation_fingerprint(root::AbstractString=PROJECT_ROOT)
-    files = String[]
-    for (directory, subdirectories, names) in walkdir(root)
-        filter!(name -> name != "output" && !startswith(name, "."), subdirectories)
-        for name in names
-            extension = lowercase(splitext(name)[2])
-            extension in (".jl", ".toml", ".csv", ".sh") || continue
-            push!(files, joinpath(directory, name))
-        end
-    end
+function _fingerprint_files(files::AbstractVector{<:AbstractString}, root::AbstractString)
     sort!(files; by=path -> relpath(path, root))
     context = SHA.SHA256_CTX()
     for path in files
@@ -19,6 +10,42 @@ function implementation_fingerprint(root::AbstractString=PROJECT_ROOT)
         SHA.update!(context, UInt8[0x00])
     end
     return bytes2hex(SHA.digest!(context))
+end
+
+function tree_fingerprint(root::AbstractString=PROJECT_ROOT)
+    files = String[]
+    for (directory, subdirectories, names) in walkdir(root)
+        filter!(name -> name != "output" && !startswith(name, "."), subdirectories)
+        for name in names
+            extension = lowercase(splitext(name)[2])
+            extension in (".jl", ".toml", ".csv", ".sh") || continue
+            push!(files, joinpath(directory, name))
+        end
+    end
+    return _fingerprint_files(files, root)
+end
+
+function implementation_fingerprint(
+    root::AbstractString=PROJECT_ROOT;
+    manifest_path::AbstractString=joinpath(root, "Manifest.toml"),
+)
+    source_root = joinpath(root, "src")
+    isdir(source_root) || throw(ArgumentError("solver source directory not found: $source_root"))
+    isfile(manifest_path) || throw(ArgumentError("solver Manifest not found: $manifest_path"))
+    files = String[manifest_path]
+    for (directory, _, names) in walkdir(source_root)
+        for name in names
+            lowercase(splitext(name)[2]) == ".jl" || continue
+            push!(files, joinpath(directory, name))
+        end
+    end
+    return _fingerprint_files(files, root)
+end
+
+function implementation_fingerprint(settings::ProjectSettings; root::AbstractString=PROJECT_ROOT)
+    manifest_path = settings.runtime.backend == :gpu ?
+        joinpath(root, "gpu", "Manifest.toml") : joinpath(root, "Manifest.toml")
+    return implementation_fingerprint(root; manifest_path)
 end
 
 function _read_git(args...; default="unknown")
@@ -43,6 +70,7 @@ function numerical_fingerprint(settings::ProjectSettings)
     values = Any[]
     for block in (settings.dmrg, settings.mixing, settings.convergence)
         for field in fieldnames(typeof(block))
+            block isa DMRGSettings && field in (:max_time_seconds, :output_level) && continue
             push!(values, field, getfield(block, field))
         end
     end
@@ -151,11 +179,12 @@ function collect_provenance(settings::ProjectSettings)
     seed_metadata = initial_seed_metadata(settings.model, settings.run)
     return Dict{String,Any}(
         "generated_utc" => string(now(UTC)),
-        "schema_version" => 3,
+        "schema_version" => 4,
         "git_commit" => _read_git("rev-parse", "HEAD"),
         "git_branch" => _read_git("branch", "--show-current"),
         "git_dirty" => !isempty(_read_git("status", "--porcelain"; default="")),
-        "implementation_sha256" => implementation_fingerprint(),
+        "implementation_sha256" => implementation_fingerprint(settings),
+        "tree_sha256" => tree_fingerprint(),
         "model_fingerprint" => model_fingerprint(settings.model),
         "numerical_fingerprint" => numerical_fingerprint(settings),
         "config_path" => settings.config_path,

@@ -39,8 +39,11 @@ segments for all nine branches would reserve `108.125`.
 The project-wide launcher ledger enforces a conservative cap of 400 additional
 node-hours from the user-reported 277-node-hour baseline. It sums requested CPU
 and GPU upper bounds even though NERSC maintains separate allocation pools and
-does not reclaim unused walltime. Continuations are explicit; no job resubmits
-itself.
+keeps those original reservations immutable. A separate append-only
+reconciliation ledger may replace the unused portion of a terminal job's
+ceiling with its finalized `sacct` elapsed charge for the active cap total.
+Unfinished jobs retain their full ceiling. Continuations are explicit; no job
+resubmits itself.
 
 An exploratory square-geometry seed/basin reconnaissance at
 `t0=1.4,V=-0.4` now precedes any grid expansion. It uses six independent,
@@ -54,6 +57,11 @@ strong initialization sensitivity. Even accepted states at this loose
 fingerprint provide only preliminary within-campaign energy rankings. Surviving
 basins must be repeated with common tighter controls and then higher chi before
 they can satisfy the Phase 1 scientific gate.
+
+The next reconnaissance point is square `V=0,t0=1.4` with the same six-seed
+bank. It uses the corrected recurrence and slow-mode gates before any state is
+accepted. This remains a loose chi-200 basin test; later chi and length work is
+still reserved in the project budget.
 
 ## Phase 2 — transition and hysteresis scans
 
@@ -74,7 +82,8 @@ never be ranked against square states.
 
 Use at least L=32,48,64,96,128 where E_p and model coverage permit, and
 chi=200,400,800,1200+ as resources allow. Extrapolate energy and long-distance
-observables against discarded-weight or controlled chi proxies. Recompute or
+observables against the stored per-sweep discarded weight, realized maximum
+link dimension, and controlled chi proxies. Recompute or
 extend the `E_p` registry where interpolation uncertainty matters. Bracketed
 `t0` interpolation is permitted for fine transition scans only when its
 endpoints and effective coupling `t_perp^2/|E_p|` are stored; extrapolation is

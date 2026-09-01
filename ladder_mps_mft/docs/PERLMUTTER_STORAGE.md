@@ -2,7 +2,7 @@
 
 ## Storage contract
 
-Launcher version 1.4.0 retains the legacy stateless-data design principle and
+Launcher version 1.11.0 retains the legacy stateless-data design principle and
 makes scratch the authoritative location for heavyweight numerical artifacts:
 
 - Full `state.h5`, rolling checkpoints, orbit files, and pair-binding
@@ -190,3 +190,21 @@ is compatible with the older Python 3.6 interpreter available as `python3` on
 some Perlmutter login environments. The removed compact extras can be regenerated
 from the recorded full scratch artifacts. Do not apply the tool to an active
 campaign, and archive irreplaceable full states to HPSS independently.
+
+## Current square V=0 staged campaign
+
+Launcher v1.11.0 adds a preparation-only action for the six-seed square
+`V=0,t0=1.4,chi=200` campaign. It preserves the same scratch-first full output
+and stateless CFS mirror contract described above:
+
+```bash
+bash slurm/phase1_gpu.sh plan-square-v0-seed-pilot
+SQUARE_V0_RUN=20260901_phase1_square_t014_v000_seed_chi200_loose
+bash slurm/phase1_gpu.sh prepare-square-v0-seed-pilot "$SQUARE_V0_RUN"
+```
+
+Neither command submits or reserves. The plan-only first-segment envelope is
+`18.125` node-hours (`0.125` smoke plus six `3.000` branch reservations),
+projecting the synced conservative ledger from `158.500` to `176.625` and
+leaving `223.375` under the project cap. Recheck the live Perlmutter ledger
+before the separately staged smoke and matrix submissions.

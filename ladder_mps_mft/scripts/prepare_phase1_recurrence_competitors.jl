@@ -52,7 +52,7 @@ function gate_row(
 )
     expected_model = LadderMPSMFT.model_fingerprint(base_settings.model)
     expected_numerical = LadderMPSMFT.numerical_fingerprint(base_settings)
-    expected_implementation = LadderMPSMFT.implementation_fingerprint()
+    expected_implementation = LadderMPSMFT.implementation_fingerprint(base_settings)
     expected_ep = LadderMPSMFT.sha256_file(base_settings.model.ep_source)
     return h5open(path, "r") do file
         for required in (

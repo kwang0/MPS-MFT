@@ -5,7 +5,7 @@
 
 set -euo pipefail
 
-readonly PHASE1_SCRIPT_VERSION="1.10.0"
+readonly PHASE1_SCRIPT_VERSION="1.12.0"
 script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
 project_dir="${PHASE1_PROJECT_DIR:-$(cd "$(dirname "$script_path")/.." && pwd)}"
 repo_root="${PHASE1_REPO_ROOT:-$(cd "$project_dir/.." && pwd)}"
@@ -13,6 +13,7 @@ run_root="${PHASE1_RUN_ROOT:-$project_dir/output/phase1_gpu}"
 scratch_root="${PHASE1_SCRATCH_ROOT:-}"
 budget_root="${PHASE1_BUDGET_ROOT:-$project_dir/output/project_budget}"
 ledger_path="${PHASE1_LEDGER_PATH:-$budget_root/additional_node_hours.tsv}"
+reconciliation_path="${PHASE1_RECONCILIATION_PATH:-$budget_root/additional_node_hours_reconciliations.tsv}"
 lock_path="${ledger_path}.lock"
 
 PHASE1_ACCOUNT="${PHASE1_ACCOUNT:-m4863_g}"
@@ -24,6 +25,7 @@ PHASE1_SQUARE_TIGHT5_TIME="${PHASE1_SQUARE_TIGHT5_TIME:-03:00:00}"
 PHASE1_GPU_CPUS="${PHASE1_GPU_CPUS:-32}"
 PHASE1_SMOKE_TIME="${PHASE1_SMOKE_TIME:-00:30:00}"
 PHASE1_MAX_SEGMENTS="${PHASE1_MAX_SEGMENTS:-4}"
+PHASE1_HBM80G_MIN_CHI="${PHASE1_HBM80G_MIN_CHI:-1200}"
 PHASE1_ADDITIONAL_NODE_HOUR_CAP="${PHASE1_ADDITIONAL_NODE_HOUR_CAP:-400}"
 PHASE1_DECLARED_ALLOCATION_NODE_HOURS="${PHASE1_DECLARED_ALLOCATION_NODE_HOURS:-1000}"
 PHASE1_DECLARED_USED_NODE_HOURS="${PHASE1_DECLARED_USED_NODE_HOURS:-277}"
@@ -31,6 +33,7 @@ PHASE1_BASE_CONFIG="${PHASE1_BASE_CONFIG:-$project_dir/configs/phase1_gpu_base.t
 PHASE1_RECURRENCE_CONFIG="${PHASE1_RECURRENCE_CONFIG:-$project_dir/configs/phase1_gpu_recurrence_chi400.toml}"
 PHASE1_MATCHED_SEED_CONFIG="${PHASE1_MATCHED_SEED_CONFIG:-$project_dir/configs/phase1_gpu_matched_seed_pilot_chi400.toml}"
 PHASE1_SQUARE_SEED_CONFIG="${PHASE1_SQUARE_SEED_CONFIG:-$project_dir/configs/phase1_gpu_square_seed_pilot_chi200_loose.toml}"
+PHASE1_SQUARE_V0_SEED_CONFIG="${PHASE1_SQUARE_V0_SEED_CONFIG:-$project_dir/configs/phase1_gpu_square_v0_seed_pilot_chi200_loose.toml}"
 
 die() { echo "error: $*" >&2; exit 1; }
 require_command() { command -v "$1" >/dev/null 2>&1 || die "required command not found: $1"; }
@@ -77,9 +80,49 @@ ep_node_hours() {
   awk 'BEGIN {printf "%.9f", 48.0 / 4.0}'
 }
 
-ledger_total() {
+ledger_requested_total() {
   [[ -f "$ledger_path" ]] || { printf '0.000000000\n'; return; }
   awk -F'\t' 'NR > 1 {sum += $7} END {printf "%.9f\n", sum + 0}' "$ledger_path"
+}
+
+reconciliation_release_total() {
+  [[ -f "$reconciliation_path" ]] || { printf '0.000000000\n'; return; }
+  awk -F'\t' 'NR > 1 {sum += $13} END {printf "%.9f\n", sum + 0}' "$reconciliation_path"
+}
+
+ledger_total() {
+  awk -v requested="$(ledger_requested_total)" -v released="$(reconciliation_release_total)" \
+    'BEGIN {active=requested-released; if (active < 0 && active > -1e-8) active=0; printf "%.9f\n", active}'
+}
+
+gpu_constraint_for_chi() {
+  local chi="$1"
+  [[ "$chi" =~ ^[1-9][0-9]*$ ]] || die "invalid DMRG maxdim for GPU constraint: $chi"
+  [[ "$PHASE1_HBM80G_MIN_CHI" =~ ^[1-9][0-9]*$ ]] || die \
+    "PHASE1_HBM80G_MIN_CHI must be a positive integer"
+  if (( chi >= PHASE1_HBM80G_MIN_CHI )); then
+    printf 'gpu&hbm80g\n'
+  else
+    printf 'gpu\n'
+  fi
+}
+
+config_maxdim() {
+  local config="$1" value
+  [[ -f "$config" ]] || die "missing branch config for GPU constraint: $config"
+  value="$(awk '
+    /^[[:space:]]*\[/ {in_dmrg=($0 ~ /^[[:space:]]*\[dmrg\][[:space:]]*$/); next}
+    in_dmrg && /^[[:space:]]*maxdim[[:space:]]*=/ {
+      line=$0; sub(/#.*/, "", line); sub(/.*=/, "", line); gsub(/[[:space:]]/, "", line);
+      print line; exit
+    }
+  ' "$config")"
+  [[ "$value" =~ ^[1-9][0-9]*$ ]] || die "could not read integer [dmrg].maxdim from $config"
+  printf '%s\n' "$value"
+}
+
+gpu_constraint_for_config() {
+  gpu_constraint_for_chi "$(config_maxdim "$1")"
 }
 
 validate_project() {
@@ -93,6 +136,8 @@ validate_project() {
     "missing Phase 1 matched-seed pilot config: $PHASE1_MATCHED_SEED_CONFIG"
   [[ -f "$PHASE1_SQUARE_SEED_CONFIG" ]] || die \
     "missing Phase 1 square seed-pilot config: $PHASE1_SQUARE_SEED_CONFIG"
+  [[ -f "$PHASE1_SQUARE_V0_SEED_CONFIG" ]] || die \
+    "missing Phase 1 square V=0 seed-pilot config: $PHASE1_SQUARE_V0_SEED_CONFIG"
   [[ -f "$project_dir/scripts/run_scf_gpu.jl" ]] || die "missing GPU SCF entry point"
   [[ -f "$project_dir/scripts/prepare_phase1_recurrence.jl" ]] || die \
     "missing recurrence preparation entry point"
@@ -108,6 +153,8 @@ validate_project() {
   [[ -f "$project_dir/scripts/validate_gpu_smoke.jl" ]] || die "missing GPU smoke validator"
   [[ -f "$project_dir/scripts/compact_results.jl" ]] || die "missing stateless-result compactor"
   (( PHASE1_MAX_SEGMENTS >= 1 )) || die "PHASE1_MAX_SEGMENTS must be positive"
+  [[ "$PHASE1_HBM80G_MIN_CHI" =~ ^[1-9][0-9]*$ ]] || die \
+    "PHASE1_HBM80G_MIN_CHI must be a positive integer"
 }
 
 print_matched_seed_pilot_plan() {
@@ -197,6 +244,8 @@ Stripe source ratio:  separately normalized charge:spin=0.2
 Coexistence starts:   both stripe modes plus uniform d_wave; pairing:spin=1
 Branch bank:          d_wave, legacy-like pairing, stripe m4/m5, stripe+d_wave m4/m5 (6 jobs)
 Physics policy:       20 raw-map updates first; preserve any raw recurrence before mixing
+Recurrence gate:      period 2 also requires step cosine<=-0.5 and d2/d1<=0.5
+Fixed-point gate:     apply r/(1-lambda) when residual cosine>=0.9
 Convergence policy:   up to 80 MF updates; Anderson follows the raw probe when needed
 Lineage policy:       six independent starts; no inherited or resumed field/MPS state
 Interpretation:       controls plus predeclared two-mode coexistence bank; preliminary energies only
@@ -228,6 +277,66 @@ EOF
   awk -v current="$committed" -v requested="$initial" -v cap="$PHASE1_ADDITIONAL_NODE_HOUR_CAP" \
     'BEGIN {exit !((current+requested) > cap)}' && die \
     "square seed-pilot first-segment envelope would exceed the hard cap"
+  return 0
+}
+
+print_square_v0_seed_pilot_plan() {
+  validate_project
+  local segment smoke initial ceiling committed projected remaining
+  segment="$(gpu_node_hours "$PHASE1_GPU_TIME")"
+  smoke="$(gpu_node_hours "$PHASE1_SMOKE_TIME")"
+  initial="$(awk -v s="$segment" -v p="$smoke" 'BEGIN {printf "%.9f", 6*s+p}')"
+  ceiling="$(awk -v s="$segment" -v p="$smoke" -v m="$PHASE1_MAX_SEGMENTS" \
+    'BEGIN {printf "%.9f", 6*m*s+p}')"
+  committed="$(ledger_total)"
+  projected="$(awk -v c="$committed" -v a="$initial" 'BEGIN {printf "%.9f", c+a}')"
+  remaining="$(awk -v cap="$PHASE1_ADDITIONAL_NODE_HOUR_CAP" -v p="$projected" \
+    'BEGIN {printf "%.9f", cap-p}')"
+  cat <<EOF
+Ladder MPS+MF square V=0 chi=200 exploratory seed/basin pilot
+
+Representative point: L=64, U=8, V=0, t0=1.4, t_perp=0.1, density=0.9375
+Pair binding:         exact registry E_p=-0.14653773091916378; no interpolation
+Numerical control:    chi=200, 12 sweeps, cutoff=1e-10, DMRG energy_tol=1e-6
+Density control:      inner and outer tolerances=1e-3; initial mu=0.55; step=0.01; growth=3
+Mu acceleration:      carry positive dn/dmu; warm re-solve noise starts at 1e-8
+Field gates:          absolute=1e-6 OR relative=5e-3; preliminary loose threshold
+Common seed control:  amplitude=1e-3, phase/pi=0, product-state random seed=1404
+Pairing control:      uniform d_wave source; Hartree source exactly zero
+Legacy-like control:  random relative-bond alpha, constant along rungs; beta=mu_cdw=0
+Primary stripe:       envelope m=4 -> AF spin n=59 and charge harmonic n=8
+Neighbor stripe:      envelope m=5 -> AF spin n=58 and charge harmonic n=10
+Coexistence starts:   both stripe modes plus uniform d_wave; pairing:spin=1
+Branch bank:          d_wave, legacy-like pairing, stripe m4/m5, stripe+d_wave m4/m5 (6 jobs)
+Physics policy:       20 raw-map updates first; preserve any raw recurrence before mixing
+Recurrence gate:      period 2 also requires step cosine<=-0.5 and d2/d1<=0.5
+Fixed-point gate:     apply r/(1-lambda) when residual cosine>=0.9
+Energy comparison:    E + mu*(N_target-N), including canonical double counting
+DMRG evidence:        per-sweep energy, discarded weight, and realized maxlinkdim
+Convergence policy:   up to 80 MF updates; Anderson follows the raw probe when needed
+Lineage policy:       six independent starts; no inherited or resumed field/MPS state
+Interpretation:       competing-basin reconnaissance; preliminary within-fingerprint energies only
+GPU request:          one of four GPUs, ${PHASE1_GPU_TIME}, ${PHASE1_GPU_CPUS} CPUs, shared QOS
+Per-segment reserve:  ${segment} GPU node-hours
+Per-campaign smoke:   ${smoke} GPU node-hours
+First-segment envelope: ${initial} node-hours
+Four-segment emergency ceiling: ${ceiling} node-hours (not pre-authorized)
+Hard project cap:     ${PHASE1_ADDITIONAL_NODE_HOUR_CAP} additional node-hours
+Ledger after first segments: ${projected} reserved; ${remaining} unreserved
+
+Preparation does not submit or reserve:
+  SQUARE_V0_RUN=20260901_phase1_square_t014_v000_seed_chi200_loose
+  bash $script_path prepare-square-v0-seed-pilot "\$SQUARE_V0_RUN"
+
+Submission remains explicitly staged:
+  bash $script_path submit "\$SQUARE_V0_RUN"
+  bash $script_path status "\$SQUARE_V0_RUN"
+  bash $script_path submit-matrix "\$SQUARE_V0_RUN"
+EOF
+  print_budget
+  awk -v current="$committed" -v requested="$initial" -v cap="$PHASE1_ADDITIONAL_NODE_HOUR_CAP" \
+    'BEGIN {exit !((current+requested) > cap)}' && die \
+    "square V=0 seed-pilot first-segment envelope would exceed the hard cap"
   return 0
 }
 
@@ -354,20 +463,27 @@ EOF
 }
 
 print_budget() {
-  local committed remaining declared_remaining
+  local requested released committed remaining declared_remaining
+  requested="$(ledger_requested_total)"
+  released="$(reconciliation_release_total)"
   committed="$(ledger_total)"
   remaining="$(awk -v cap="$PHASE1_ADDITIONAL_NODE_HOUR_CAP" -v used="$committed" 'BEGIN {printf "%.9f", cap-used}')"
   declared_remaining="$(awk -v total="$PHASE1_DECLARED_ALLOCATION_NODE_HOURS" -v used="$PHASE1_DECLARED_USED_NODE_HOURS" 'BEGIN {printf "%.3f", total-used}')"
   cat <<EOF
 User-reported allocation snapshot: ${PHASE1_DECLARED_ALLOCATION_NODE_HOURS} total, ${PHASE1_DECLARED_USED_NODE_HOURS} used, ${declared_remaining} remaining
 Project additional hard cap:      ${PHASE1_ADDITIONAL_NODE_HOUR_CAP} node-hours
-Conservatively reserved by ledger: ${committed} node-hours
+Requested upper bounds in ledger: ${requested} node-hours
+Released after sacct reconcile:   ${released} node-hours
+Active project accounting:        ${committed} node-hours
 Unreserved project allowance:      ${remaining} node-hours
-Ledger:                            ${ledger_path}
+Reservation ledger:                ${ledger_path}
+Reconciliation ledger:             ${reconciliation_path}
+GPU constraint policy:             gpu below chi=${PHASE1_HBM80G_MIN_CHI}; gpu&hbm80g at or above it
 
-The hard cap counts requested upper bounds, not actual elapsed charge, and never
-reclaims early completion. CPU and GPU charges are summed here as a conservative
-project control even though NERSC accounts them in separate allocation pools.
+The reservation ledger remains append-only. Terminal jobs may release the unused
+part of their requested ceiling through an append-only sacct reconciliation.
+Unfinished jobs retain their full ceiling. CPU and GPU charges are summed here as
+a project control even though NERSC accounts them in separate allocation pools.
 EOF
 }
 
@@ -438,6 +554,7 @@ write_environment() {
     printf 'PHASE1_GPU_CPUS=%q\n' "$PHASE1_GPU_CPUS"
     printf 'PHASE1_SMOKE_TIME=%q\n' "$PHASE1_SMOKE_TIME"
     printf 'PHASE1_MAX_SEGMENTS=%q\n' "$PHASE1_MAX_SEGMENTS"
+    printf 'PHASE1_HBM80G_MIN_CHI=%q\n' "$PHASE1_HBM80G_MIN_CHI"
     printf 'PHASE1_ADDITIONAL_NODE_HOUR_CAP=%q\n' "$PHASE1_ADDITIONAL_NODE_HOUR_CAP"
     printf 'PHASE1_DECLARED_ALLOCATION_NODE_HOURS=%q\n' "$PHASE1_DECLARED_ALLOCATION_NODE_HOURS"
     printf 'PHASE1_DECLARED_USED_NODE_HOURS=%q\n' "$PHASE1_DECLARED_USED_NODE_HOURS"
@@ -450,6 +567,7 @@ write_environment() {
     printf 'PHASE1_RUN_SCRATCH_DIR=%q\n' "$scratch_run_dir"
     printf 'PHASE1_BUDGET_ROOT=%q\n' "$budget_root"
     printf 'PHASE1_LEDGER_PATH=%q\n' "$ledger_path"
+    printf 'PHASE1_RECONCILIATION_PATH=%q\n' "$reconciliation_path"
   } >"$path"
 }
 
@@ -472,7 +590,7 @@ load_environment() {
   # shellcheck disable=SC1090
   source "$run_dir/run.env"
   case "${PHASE1_RUN_SCRIPT_VERSION:-missing}" in
-    1.0.0|1.0.1|1.1.0|1.2.0|1.3.0|1.4.0|1.5.0|1.6.0|1.7.0|1.8.0|1.9.0|1.10.0) ;;
+    1.0.0|1.0.1|1.1.0|1.2.0|1.3.0|1.4.0|1.5.0|1.6.0|1.7.0|1.8.0|1.9.0|1.10.0|1.11.0|1.12.0) ;;
     *) die "unsupported run script version ${PHASE1_RUN_SCRIPT_VERSION:-missing}; current version is $PHASE1_SCRIPT_VERSION";;
   esac
   project_dir="$PHASE1_PROJECT_DIR"
@@ -481,6 +599,7 @@ load_environment() {
   scratch_root="${PHASE1_SCRATCH_ROOT:-$scratch_root}"
   budget_root="$PHASE1_BUDGET_ROOT"
   ledger_path="$PHASE1_LEDGER_PATH"
+  reconciliation_path="${PHASE1_RECONCILIATION_PATH:-$(dirname "$ledger_path")/additional_node_hours_reconciliations.tsv}"
   lock_path="${ledger_path}.lock"
 }
 
@@ -511,7 +630,7 @@ require_current_run_version() {
 
 require_worker_compatible_run_version() {
   case "${PHASE1_RUN_SCRIPT_VERSION:-missing}" in
-    1.2.0|1.3.0|1.4.0|1.5.0|1.6.0|1.7.0|1.8.0|1.9.0|1.10.0) ;;
+    1.2.0|1.3.0|1.4.0|1.5.0|1.6.0|1.7.0|1.8.0|1.9.0|1.10.0|1.11.0|1.12.0) ;;
     *) die "queued worker cannot execute run script ${PHASE1_RUN_SCRIPT_VERSION:-missing} with launcher $PHASE1_SCRIPT_VERSION";;
   esac
 }
@@ -565,6 +684,11 @@ initialize_run() {
       prepare_script="$project_dir/scripts/prepare_phase1_square_seed_pilot.jl"
       prepare_args=("$PHASE1_SQUARE_SEED_CONFIG" "$run_dir" "$scratch_run_dir" "$run_id")
       ;;
+    square_seed_pilot_v0)
+      [[ -z "$source_run_dir" ]] || die "square V=0 seed pilot must use independent starts"
+      prepare_script="$project_dir/scripts/prepare_phase1_square_seed_pilot.jl"
+      prepare_args=("$PHASE1_SQUARE_V0_SEED_CONFIG" "$run_dir" "$scratch_run_dir" "$run_id")
+      ;;
     square_tight5)
       [[ -n "$source_run_dir" ]] || die "square tight-five preparation requires a source run"
       prepare_script="$project_dir/scripts/prepare_phase1_square_tight5.jl"
@@ -592,26 +716,30 @@ validate_initialized_run() {
   [[ -f "$run_dir/manifest.tsv" ]] || die "prepared run is missing manifest.tsv"
   [[ -f "$run_dir/gpu-Manifest.toml" ]] || die "prepared run is missing its GPU manifest"
   [[ -f "$run_dir/gpu-Manifest.toml.sha256" ]] || die "prepared run is missing its GPU-manifest hash"
-  if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(3|4|5|6|7|8|9|10)\.0$ ]]; then
+  if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(3|4|5|6|7|8|9|10|11|12)\.0$ ]]; then
     [[ -d "$(full_run_directory_from_control "$run_dir")/results" ]] || die \
       "prepared run is missing its full-result scratch directory"
   fi
-  if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(5|6|7|8|9|10)\.0$ ]]; then
+  if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(5|6|7|8|9|10|11|12)\.0$ ]]; then
     [[ -f "$run_dir/campaign_kind.txt" ]] || die "prepared run is missing campaign_kind.txt"
     campaign_kind="$(<"$run_dir/campaign_kind.txt")"
     case "$campaign_kind" in
       standard|recurrence|recurrence_competitors) ;;
       matched_seed_pilot)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(6|7|8|9|10)\.0$ ]] || die \
-          "matched-seed pilot requires launcher v1.6.0 through v1.10.0"
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(6|7|8|9|10|11|12)\.0$ ]] || die \
+          "matched-seed pilot requires launcher v1.6.0 through v1.12.0"
         ;;
       square_seed_pilot)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(7|8|9|10)\.0$ ]] || die \
-          "square seed pilot requires launcher v1.7.0 through v1.10.0"
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(7|8|9|10|11|12)\.0$ ]] || die \
+          "square seed pilot requires launcher v1.7.0 through v1.12.0"
+        ;;
+      square_seed_pilot_v0)
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(11|12)\.0$ ]] || die \
+          "square V=0 seed pilots require launcher v1.11.0 or v1.12.0"
         ;;
       square_tight5)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" == "1.10.0" ]] || die \
-          "square tight-five runs require launcher v1.10.0"
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(10|11|12)\.0$ ]] || die \
+          "square tight-five runs require launcher v1.10.0 through v1.12.0"
         ;;
       *) die "invalid prepared campaign kind: $campaign_kind";;
     esac
@@ -650,6 +778,93 @@ ensure_ledger() {
   fi
 }
 
+ensure_reconciliation_ledger() {
+  if [[ ! -f "$reconciliation_path" ]]; then
+    printf 'reconciled_utc\tcampaign\tkind\tlabel\tsegment\tpool\tjob_id\treserved_node_hours\trequested_time\telapsed_raw_seconds\teffective_node_fraction\tmeasured_node_hours\treleased_node_hours\tsacct_state\tsacct_start\tsacct_end\tsubmission_git_commit\treconciliation_git_commit\tlauncher_version\n' >"$reconciliation_path"
+  fi
+}
+
+terminal_slurm_state() {
+  case "$1" in
+    COMPLETED|FAILED|TIMEOUT|CANCELLED|OUT_OF_MEMORY|NODE_FAIL|PREEMPTED|BOOT_FAIL|DEADLINE|REVOKED) return 0;;
+    *) return 1;;
+  esac
+}
+
+reconcile_ledger() {
+  local campaign_filter="${1:-}"
+  [[ -f "$ledger_path" ]] || die "reservation ledger does not exist: $ledger_path"
+  local submitted campaign kind label segment pool reserved job_id requested_time submission_commit
+  local record sacct_job state elapsed_raw start_time end_time requested_seconds metrics
+  local effective_fraction measured released timestamp reconcile_commit
+  local considered=0 reconciled=0 already=0 unfinished=0 missing=0
+  acquire_budget_lock
+  trap release_budget_lock EXIT
+  ensure_reconciliation_ledger
+  while IFS=$'\t' read -r submitted campaign kind label segment pool reserved job_id requested_time submission_commit; do
+    [[ "$submitted" == "submitted_utc" ]] && continue
+    [[ -z "$campaign_filter" || "$campaign" == "$campaign_filter" ]] || continue
+    considered=$((considered + 1))
+    if awk -F'\t' -v wanted="$job_id" 'NR > 1 && $7 == wanted {found=1} END {exit !found}' \
+      "$reconciliation_path"; then
+      already=$((already + 1))
+      continue
+    fi
+    record="$(sacct -n -X -j "$job_id" \
+      --format=JobIDRaw,State,ElapsedRaw,Start,End -P 2>/dev/null | \
+      awk -F'|' 'NF >= 3 {print; exit}' || true)"
+    if [[ -z "$record" ]]; then
+      missing=$((missing + 1))
+      printf 'skip job %s: no sacct allocation record\n' "$job_id" >&2
+      continue
+    fi
+    IFS='|' read -r sacct_job state elapsed_raw start_time end_time _ <<<"$record"
+    [[ "$sacct_job" == "$job_id" ]] || die \
+      "sacct returned allocation $sacct_job while reconciling job $job_id"
+    state="${state%% *}"
+    state="${state%%+*}"
+    if ! terminal_slurm_state "$state"; then
+      unfinished=$((unfinished + 1))
+      printf 'retain job %s ceiling: sacct state %s is not terminal\n' "$job_id" "${state:-UNKNOWN}" >&2
+      continue
+    fi
+    [[ "$elapsed_raw" =~ ^[0-9]+$ ]] || die \
+      "terminal job $job_id has invalid sacct ElapsedRaw: ${elapsed_raw:-missing}"
+    [[ -n "$end_time" && "$end_time" != "Unknown" ]] || die \
+      "terminal job $job_id has no finalized sacct End time"
+    requested_seconds="$(time_to_seconds "$requested_time")"
+    metrics="$(awk -v reserved="$reserved" -v elapsed="$elapsed_raw" -v requested="$requested_seconds" '
+      BEGIN {
+        fraction=reserved*3600.0/requested;
+        measured=elapsed/3600.0*fraction;
+        if (measured < 0) measured=0;
+        if (measured > reserved) measured=reserved;
+        released=reserved-measured;
+        if (released < 0 && released > -1e-10) released=0;
+        printf "%.9f\t%.9f\t%.9f", fraction, measured, released
+      }
+    ')"
+    IFS=$'\t' read -r effective_fraction measured released <<<"$metrics"
+    timestamp="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    reconcile_commit="$(git -C "$repo_root" rev-parse HEAD 2>/dev/null || printf unknown)"
+    printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+      "$timestamp" "$campaign" "$kind" "$label" "$segment" "$pool" "$job_id" \
+      "$reserved" "$requested_time" "$elapsed_raw" "$effective_fraction" "$measured" \
+      "$released" "$state" "$start_time" "$end_time" "$submission_commit" \
+      "$reconcile_commit" "$PHASE1_SCRIPT_VERSION" >>"$reconciliation_path"
+    printf 'reconciled job %s: reserved=%s measured=%s released=%s node-hours\n' \
+      "$job_id" "$reserved" "$measured" "$released"
+    reconciled=$((reconciled + 1))
+  done <"$ledger_path"
+  (( considered > 0 )) || die \
+    "no reservation rows match campaign ${campaign_filter:-ALL}"
+  release_budget_lock
+  trap - EXIT
+  printf 'reconcile summary: considered=%d new=%d already=%d unfinished=%d missing=%d\n' \
+    "$considered" "$reconciled" "$already" "$unfinished" "$missing"
+  print_budget
+}
+
 check_reservation() {
   local requested="$1" current
   current="$(ledger_total)"
@@ -678,7 +893,7 @@ submit_smoke_job() {
   trap release_budget_lock EXIT
   ensure_ledger
   check_reservation "$reserved"
-  raw="$(sbatch --parsable --account="$PHASE1_ACCOUNT" --constraint='gpu&hbm80g' --qos="$PHASE1_QOS" \
+  raw="$(sbatch --parsable --account="$PHASE1_ACCOUNT" --constraint=gpu --qos="$PHASE1_QOS" \
     --licenses=scratch,cfs \
     --nodes=1 --ntasks=1 --cpus-per-task="$PHASE1_GPU_CPUS" --gpus-per-task=1 \
     --time="$PHASE1_SMOKE_TIME" --job-name=lmf1-gpu-smoke \
@@ -692,9 +907,10 @@ submit_smoke_job() {
 }
 
 submit_gpu_job_locked() {
-  local run_dir="$1" label="$2" segment="$3" config="$4" reserved raw job_id
+  local run_dir="$1" label="$2" segment="$3" config="$4" reserved constraint raw job_id
   reserved="$(gpu_node_hours "$PHASE1_GPU_TIME")"
-  raw="$(sbatch --parsable --account="$PHASE1_ACCOUNT" --constraint='gpu&hbm80g' --qos="$PHASE1_QOS" \
+  constraint="$(gpu_constraint_for_config "$config")"
+  raw="$(sbatch --parsable --account="$PHASE1_ACCOUNT" --constraint="$constraint" --qos="$PHASE1_QOS" \
     --licenses=scratch,cfs \
     --nodes=1 --ntasks=1 --cpus-per-task="$PHASE1_GPU_CPUS" --gpus-per-task=1 \
     --time="$PHASE1_GPU_TIME" --job-name="lmf1-${label:0:40}" \
@@ -976,10 +1192,14 @@ Read-only:
   plan-recurrence-controls
   plan-matched-seed-pilot
   plan-square-seed-pilot
+  plan-square-v0-seed-pilot
   plan-square-tight5
   budget
   status [RUN_ID]
   show [RUN_ID]
+
+Accounting mutation (no submission or cancellation):
+  reconcile [RUN_ID]                    Record finalized sacct elapsed charge and release unused ceilings
 
 Preparation only (no Slurm submission or budget reservation):
   prepare-standard NEW_RUN              Prepare the standard nine-branch campaign
@@ -989,6 +1209,7 @@ Preparation only (no Slurm submission or budget reservation):
                                         Prepare two controls only after the pairing-survival gate
   prepare-matched-seed-pilot NEW_RUN     Prepare the three-branch chi=400 matched-seed pilot
   prepare-square-seed-pilot NEW_RUN      Prepare the six-branch square stripe/pairing pilot
+  prepare-square-v0-seed-pilot NEW_RUN   Prepare the six-branch square V=0 stripe/pairing pilot
   prepare-square-tight5 SOURCE_RUN NEW_RUN
                                         Prepare six accepted-parent tight five-update probes
 
@@ -1011,8 +1232,15 @@ case "$action" in
   plan-recurrence|plan-recurrence-controls) print_recurrence_plan;;
   plan-matched-seed-pilot) print_matched_seed_pilot_plan;;
   plan-square-seed-pilot) print_square_seed_pilot_plan;;
+  plan-square-v0-seed-pilot) print_square_v0_seed_pilot_plan;;
   plan-square-tight5) print_square_tight5_plan;;
   budget) print_budget;;
+  reconcile)
+    (( $# <= 2 )) || die "reconcile accepts at most one optional RUN_ID"
+    if [[ $# == 2 ]]; then validate_submission_run_id "$2"; fi
+    require_command sacct
+    reconcile_ledger "${2:-}"
+    ;;
   submit)
     [[ $# == 2 ]] || die "submit requires RUN_ID"
     validate_submission_run_id "$2"
@@ -1061,6 +1289,12 @@ case "$action" in
     [[ ! -e "$run_root/$2" ]] || die \
       "new square seed-pilot run already exists: $run_root/$2"
     initialize_run "$2" "" square_seed_pilot
+    ;;
+  prepare-square-v0-seed-pilot)
+    [[ $# == 2 ]] || die "prepare-square-v0-seed-pilot requires NEW_RUN_ID"
+    [[ ! -e "$run_root/$2" ]] || die \
+      "new square V=0 seed-pilot run already exists: $run_root/$2"
+    initialize_run "$2" "" square_seed_pilot_v0
     ;;
   prepare-square-tight5)
     [[ $# == 3 ]] || die "prepare-square-tight5 requires SOURCE_RUN_ID NEW_RUN_ID"

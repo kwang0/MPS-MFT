@@ -55,6 +55,9 @@ function variational_energy(
     identity_error = isfinite(bare_ladder_energy) ? reconstructed_bare - Float64(bare_ladder_energy) : NaN
     consistency_error = reconstructed_variational - direct_variational
     canonical = direct_variational
+    target_particle_number = 2 * model.L * model.density
+    target_density_correction = Float64(chemical_potential) * (target_particle_number - particle_number)
+    target_density_corrected = canonical + target_density_correction
     grand = canonical - mu_term
     return EnergyBreakdown(;
         effective_eigenvalue=Float64(effective_eigenvalue),
@@ -75,6 +78,8 @@ function variational_energy(
         direct_variational_energy=direct_variational,
         variational_consistency_error=consistency_error,
         canonical_variational_energy=canonical,
+        target_density_correction,
+        target_density_corrected_variational_energy=target_density_corrected,
         grand_potential=grand,
     )
 end

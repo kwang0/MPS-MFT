@@ -76,6 +76,7 @@ function load_settings(path::AbstractString)
         mu_bracket_step=Float64(_value(dmrg_raw, "mu_bracket_step", 0.05)),
         mu_bracket_growth=Float64(_value(dmrg_raw, "mu_bracket_growth", 2.0)),
         mu_interval_tol=Float64(_value(dmrg_raw, "mu_interval_tol", 1e-6)),
+        mu_warm_start_noise=Float64(_value(dmrg_raw, "mu_warm_start_noise", 1e-8)),
     )
     mixing = MixingSettings(;
         method=Symbol(lowercase(String(_value(mixing_raw, "method", "anderson")))),
@@ -98,6 +99,17 @@ function load_settings(path::AbstractString)
         period_repeats=Int(_value(convergence_raw, "period_repeats", 3)),
         period_abs_tol=Float64(_value(convergence_raw, "period_abs_tol", 2e-6)),
         period_rel_tol=Float64(_value(convergence_raw, "period_rel_tol", 1e-2)),
+        period2_oscillation_cosine_max=Float64(_value(
+            convergence_raw,
+            "period2_oscillation_cosine_max",
+            -0.5,
+        )),
+        period2_two_step_ratio_max=Float64(_value(
+            convergence_raw,
+            "period2_two_step_ratio_max",
+            0.5,
+        )),
+        slow_mode_cosine_min=Float64(_value(convergence_raw, "slow_mode_cosine_min", 0.9)),
         unmixed_cycle_probe=Bool(_value(convergence_raw, "unmixed_cycle_probe", true)),
         probe_max_period=Int(_value(convergence_raw, "probe_max_period", 2)),
         probe_iterations=Int(_value(convergence_raw, "probe_iterations", 20)),
@@ -199,6 +211,9 @@ function validate_settings(settings::ProjectSettings)
     settings.dmrg.mu_max_iterations >= 1 || throw(ArgumentError("mu_max_iterations must be positive"))
     settings.dmrg.mu_bracket_step > 0 || throw(ArgumentError("mu_bracket_step must be positive"))
     settings.dmrg.mu_bracket_growth > 1 || throw(ArgumentError("mu_bracket_growth must exceed 1"))
+    settings.dmrg.mu_warm_start_noise >= 0 || throw(ArgumentError(
+        "mu_warm_start_noise must be nonnegative",
+    ))
     settings.mixing.method in (:linear, :anderson) || throw(ArgumentError("mixing.method must be linear or anderson"))
     0 < settings.mixing.minimum_damping <= settings.mixing.damping <= settings.mixing.maximum_damping <= 1 ||
         throw(ArgumentError("mixing damping values must satisfy 0 < min <= damping <= max <= 1"))
@@ -207,6 +222,15 @@ function validate_settings(settings::ProjectSettings)
     settings.convergence.hamiltonian_identity_tol > 0 || throw(ArgumentError("hamiltonian_identity_tol must be positive"))
     settings.convergence.effective_energy_consistency_tol > 0 || throw(ArgumentError("effective_energy_consistency_tol must be positive"))
     settings.convergence.period_repeats >= 2 || throw(ArgumentError("period_repeats must be at least 2"))
+    -1 <= settings.convergence.period2_oscillation_cosine_max < 0 || throw(ArgumentError(
+        "period2_oscillation_cosine_max must lie in [-1,0)",
+    ))
+    0 < settings.convergence.period2_two_step_ratio_max < 1 || throw(ArgumentError(
+        "period2_two_step_ratio_max must lie in (0,1)",
+    ))
+    0 <= settings.convergence.slow_mode_cosine_min <= 1 || throw(ArgumentError(
+        "slow_mode_cosine_min must lie in [0,1]",
+    ))
     settings.convergence.probe_max_period >= 2 || throw(ArgumentError("probe_max_period must be at least 2"))
     settings.convergence.probe_max_period <= settings.convergence.max_period || throw(ArgumentError(
         "probe_max_period cannot exceed max_period",

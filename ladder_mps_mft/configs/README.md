@@ -64,6 +64,14 @@ targeted basin reconnaissance and preliminary within-fingerprint ranking, not
 an unbiased seed survey or a production scientific comparison. See
 `docs/SQUARE_SEED_AND_GRID_PLAN_2026-08-30.md`.
 
+`phase1_gpu_square_v0_seed_pilot_chi200_loose.toml` applies the identical
+six-seed bank and loose chi-200 controls at square `V=0,t0=1.4`, using the
+exact registry value `E_p=-0.14653773091916378`. It also requires the
+oscillatory period-two gate, slow-mode-extrapolated fixed-point gate, carried
+compressibility predictor, and `1e-8` warm-start mu-resolve noise. Prepare it
+only through `prepare-square-v0-seed-pilot`; see
+`docs/SQUARE_V0_T014_SEED_PLAN_2026-09-01.md`.
+
 There are three mutually exclusive lineage modes:
 
 - `inherit_from` plus `inherit_sha256` reproduces the legacy field-only
@@ -79,10 +87,12 @@ There are three mutually exclusive lineage modes:
 - `resume_checkpoint` plus `resume_sha256` is a same-model restart that reuses
   both the MPS and fields and requires the model fingerprint to match.
 
-Every SHA is mandatory, and only one mode may be set. New schema-v5 states
+Every SHA is mandatory, and only one mode may be set. New schema-v6 states
 store the exact seed in `fields/initial` plus the full
 `history/fields/applied` and `history/fields/measured` arrays at every SCF
-iteration; the final dimension matches `history/iteration`.
+iteration; the final dimension matches `history/iteration`. They also store
+the extrapolated-residual diagnostics, density-slope history, and per-update
+DMRG truncation/link-dimension evidence.
 
 Generate a validated, SHA-pinned field-only inheritance config without editing
 the source artifact:

@@ -65,6 +65,9 @@ u_floor   = max_tau |E_tau - E_0| / N_s
 
 `u_density` is the leading fixed-density interpolation scale from
 `d(E/N_s)/dn = mu`. `u_floor` is the common frozen-correlation floor scan above.
+The stored comparison energy applies the signed correction
+`mu*(N_target-N)`; `u_density` remains the magnitude of that correction and a
+resolution scale rather than a statistical uncertainty.
 The signed `E_p` registry row also supplies a convergence diagnostic for the
 coupling `t_perp^2/|E_p|`; its `rel_diff` can be propagated as a frozen-state
 sensitivity, but it is not treated as a certified error bar without the source

@@ -69,7 +69,13 @@ The smoke plus matrix reserves 27.125 node-hours. NERSC shared jobs are charged
 by the dominant node fraction; see the [NERSC queue and charge
 policy](https://docs.nersc.gov/jobs/policy/#calculating-charges).
 
-Launcher version 1.3.0 writes all MPS-bearing branch artifacts to Perlmutter
+Launcher version 1.12.0 requests the general `gpu` constraint for the smoke and
+for branch configs with `dmrg.maxdim < 1200`. Configs at `chi >= 1200` retain
+`gpu&hbm80g`. This broadens the eligible GPU pool for the current chi-200 and
+chi-400 work without weakening the explicit memory guard for the planned
+large-bond-dimension campaign.
+
+Launcher version 1.12.0 writes all MPS-bearing branch artifacts to Perlmutter
 scratch and automatically creates MPS-free analysis mirrors on CFS. The same
 policy applies to guarded CPU `E_p` calculations: `psi_N_*` sectors remain in
 scratch while energies and metadata are mirrored to CFS. Continuation and
@@ -123,7 +129,7 @@ can reuse the validated prepared run, and a partially submitted matrix retries
 only missing labels. Manifest validation happens before GPU allocation, while
 matrix selection and the full budget check share one ledger lock.
 
-Every schema-v5 checkpoint and terminal state saves the exact initial field in
+Every schema-v5-and-newer checkpoint and terminal state saves the exact initial field in
 `fields/initial` and the complete applied and measured MF fields for every
 iteration under `history/fields`. This restores the legacy analysis history
 and additionally distinguishes the field used to construct the effective
@@ -390,6 +396,30 @@ Five records are insufficient for complete period-two validation. Any apparent
 two-cycle remains unresolved and its raw phases must remain separate. Anderson
 is disabled throughout this probe.
 
+## Square V=0, t0=1.4 six-seed pilot
+
+The next staged reconnaissance reuses the six independent seed classes at
+square `L=64,U=8,V=0,t0=1.4,t_perp=0.1`, density `0.9375`, and `chi=200`.
+It uses the exact registry value `E_p=-0.14653773091916378`. The first 20
+updates remain the raw map, but period two now requires sign-reversing steps
+and fixed-point acceptance includes the slow-mode-extrapolated residual.
+
+```bash
+cd "$CFS/m4863/MPS-MFT/ladder_mps_mft"
+bash slurm/phase1_gpu.sh plan-square-v0-seed-pilot
+
+SQUARE_V0_RUN=20260901_phase1_square_t014_v000_seed_chi200_loose
+bash slurm/phase1_gpu.sh prepare-square-v0-seed-pilot "$SQUARE_V0_RUN"
+sed -n '1,7p' "output/phase1_gpu/$SQUARE_V0_RUN/manifest.tsv"
+bash slurm/phase1_gpu.sh budget
+```
+
+Preparation does not submit or reserve. The first-segment envelope is
+`0.125 + 6*3 = 18.125` node-hours. From the synced `158.500` ledger it would
+project to `176.625` reserved and `223.375` unreserved. Recheck the live ledger,
+then stage the smoke and matrix separately. The complete scientific and seed
+contract is in `docs/SQUARE_V0_T014_SEED_PLAN_2026-09-01.md`.
+
 ## Pair-binding interpolation and optional calculations
 
 At the representative point, the registry contains
@@ -424,8 +454,30 @@ separate reviewed change.
 
 `output/project_budget/additional_node_hours.tsv` is an append-only reservation
 ledger capped at 400 node-hours beyond the user-reported baseline of 277 used
-from an approximately 1000-node-hour allocation. It counts requested upper
-bounds and does not reclaim early finishes, so actual charge can only be lower.
+from an approximately 1000-node-hour allocation. Every submission keeps its
+original requested upper bound in this file. A separate append-only ledger,
+`output/project_budget/additional_node_hours_reconciliations.tsv`, records the
+final `sacct` allocation row for terminal jobs and releases only the unused
+part of the original ceiling. No reservation row is rewritten or deleted.
+
+On Perlmutter, reconcile one campaign or all recorded campaigns with:
+
+```bash
+bash slurm/phase1_gpu.sh reconcile "$RUN_ID"
+# or, after inspecting the live ledger:
+bash slurm/phase1_gpu.sh reconcile
+bash slurm/phase1_gpu.sh budget
+```
+
+The action is idempotent by Slurm job ID. It ignores pending/running jobs and
+requires a terminal state, integer `ElapsedRaw`, and finalized `End` time. The
+measured project amount is `ElapsedRaw/3600` times the effective node fraction
+already implied by the reservation (`0.25` for the present one-of-four-GPU
+jobs and 64-CPU jobs), capped at the reserved ceiling. The active hard-cap
+total is original reservations minus recorded releases. NERSC `sacct` and
+allocation reports remain authoritative; the reconciliation ledger is the
+project's reproducible accounting mirror.
+
 CPU and GPU allocation pools are [separate NERSC
 pools](https://docs.nersc.gov/jobs/policy/#charge-factors), but the project cap
 deliberately sums their raw node-hour numbers.

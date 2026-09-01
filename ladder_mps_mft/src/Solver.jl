@@ -4,16 +4,67 @@ mutable struct EnergyTimerObserver <: AbstractObserver
     deadline::Float64
     timed_out::Bool
     converged::Bool
+    minimum_convergence_sweep::Int
+    sweep_energies::Vector{Float64}
+    sweep_max_discarded_weights::Vector{Float64}
+    sweep_maxlinkdims::Vector{Int}
 end
 
-EnergyTimerObserver(energy_tol::Real, deadline::Real) =
-    EnergyTimerObserver(Float64(energy_tol), NaN, Float64(deadline), false, false)
+EnergyTimerObserver(energy_tol::Real, deadline::Real, minimum_convergence_sweep::Integer=1) =
+    EnergyTimerObserver(
+        Float64(energy_tol),
+        NaN,
+        Float64(deadline),
+        false,
+        false,
+        Int(minimum_convergence_sweep),
+        Float64[],
+        Float64[],
+        Int[],
+    )
+
+function _ensure_sweep_slot!(observer::EnergyTimerObserver, sweep::Integer)
+    while length(observer.sweep_energies) < sweep
+        push!(observer.sweep_energies, NaN)
+        push!(observer.sweep_max_discarded_weights, 0.0)
+        push!(observer.sweep_maxlinkdims, 0)
+    end
+    return nothing
+end
+
+function ITensorMPS.measure!(
+    observer::EnergyTimerObserver;
+    sweep,
+    spec=nothing,
+    psi=nothing,
+    kwargs...,
+)
+    sweep_index = Int(sweep)
+    _ensure_sweep_slot!(observer, sweep_index)
+    if spec !== nothing
+        observer.sweep_max_discarded_weights[sweep_index] = max(
+            observer.sweep_max_discarded_weights[sweep_index],
+            Float64(truncerror(spec)),
+        )
+    end
+    if psi !== nothing
+        observer.sweep_maxlinkdims[sweep_index] = max(
+            observer.sweep_maxlinkdims[sweep_index],
+            Int(maxlinkdim(psi)),
+        )
+    end
+    return nothing
+end
 
 function ITensorMPS.checkdone!(observer::EnergyTimerObserver; energy, sweep, kwargs...)
     value = Float64(real(energy))
-    if observer.energy_tol > 0 && isfinite(observer.last_energy)
-        relative_change = abs(value - observer.last_energy) / max(abs(value), 1.0)
-        if relative_change <= observer.energy_tol
+    sweep_index = Int(sweep)
+    _ensure_sweep_slot!(observer, sweep_index)
+    observer.sweep_energies[sweep_index] = value
+    if observer.energy_tol > 0 && isfinite(observer.last_energy) &&
+            sweep_index >= observer.minimum_convergence_sweep
+        absolute_change = abs(value - observer.last_energy)
+        if absolute_change <= observer.energy_tol
             observer.converged = true
             return true
         end
@@ -64,6 +115,7 @@ function run_dmrg_ground(
     rng=MersenneTwister(1),
     deadline::Real=Inf,
     backend::Union{Symbol,RuntimeSettings}=:cpu,
+    noise_mode::Symbol=:standard,
 )
     warm_start = psi_init !== nothing
     psi0_cpu = warm_start ? psi_init : productMPS(sites, density_product_state(length(sites), target_density; rng))
@@ -71,12 +123,30 @@ function run_dmrg_ground(
     sweeps = Sweeps(settings.nsweeps)
     maxdims = warm_start ? fill(settings.maxdim, settings.nsweeps) :
         _extend_schedule([min(10, settings.maxdim), min(20, settings.maxdim), min(100, settings.maxdim), settings.maxdim], settings.nsweeps)
-    noises = warm_start ? _extend_schedule([1e-3, 1e-4, 1e-5, 1e-6, 0.0], settings.nsweeps) :
+    noise_mode in (:standard, :mu_resolve) || throw(ArgumentError(
+        "noise_mode must be standard or mu_resolve",
+    ))
+    noises = if noise_mode == :mu_resolve
+        initial_noise = settings.mu_warm_start_noise
+        _extend_schedule([initial_noise, initial_noise / 10, 0.0], settings.nsweeps)
+    elseif warm_start
+        _extend_schedule([1e-3, 1e-4, 1e-5, 1e-6, 0.0], settings.nsweeps)
+    else
         _extend_schedule([1e-5, 1e-6, 1e-7, 1e-8, 0.0], settings.nsweeps)
+    end
     maxdim!(sweeps, maxdims...)
     noise!(sweeps, noises...)
     cutoff!(sweeps, settings.cutoff)
-    observer = EnergyTimerObserver(settings.energy_tol, deadline)
+    first_final_sweep = findfirst(
+        index -> maxdims[index] == settings.maxdim && noises[index] == 0.0,
+        eachindex(maxdims),
+    )
+    minimum_convergence_sweep = something(first_final_sweep, settings.nsweeps)
+    observer = EnergyTimerObserver(
+        settings.energy_tol,
+        deadline,
+        minimum_convergence_sweep,
+    )
     energy, psi = dmrg(
         hamiltonian,
         psi0,
@@ -90,6 +160,13 @@ function run_dmrg_ground(
         psi,
         timed_out=observer.timed_out,
         energy_converged=observer.converged,
+        sweep_energies=copy(observer.sweep_energies),
+        sweep_max_discarded_weights=copy(observer.sweep_max_discarded_weights),
+        sweep_maxlinkdims=copy(observer.sweep_maxlinkdims),
+        max_discarded_weight=isempty(observer.sweep_max_discarded_weights) ? NaN :
+            maximum(observer.sweep_max_discarded_weights),
+        maximum_link_dimension=isempty(observer.sweep_maxlinkdims) ? 0 :
+            maximum(observer.sweep_maxlinkdims),
     )
 end
 
@@ -103,6 +180,7 @@ function _solve_mu_point(
     psi_init,
     rng,
     deadline,
+    mu_resolve::Bool=false,
 )
     hamiltonian = build_mf_mpo(sites, model, fields, mu; backend=runtime)
     result = run_dmrg_ground(
@@ -114,6 +192,7 @@ function _solve_mu_point(
         rng,
         deadline,
         backend=runtime,
+        noise_mode=mu_resolve ? :mu_resolve : :standard,
     )
     return (
         mu=Float64(mu),
@@ -123,10 +202,26 @@ function _solve_mu_point(
         hamiltonian,
         timed_out=result.timed_out,
         energy_converged=result.energy_converged,
+        sweep_energies=result.sweep_energies,
+        sweep_max_discarded_weights=result.sweep_max_discarded_weights,
+        sweep_maxlinkdims=result.sweep_maxlinkdims,
+        max_discarded_weight=result.max_discarded_weight,
+        maximum_link_dimension=result.maximum_link_dimension,
     )
 end
 
 _density_error(point, target) = abs(point.density - target)
+
+function _positive_density_slope(left, right, fallback=nothing)
+    delta_mu = right.mu - left.mu
+    if abs(delta_mu) > eps(Float64)
+        slope = (right.density - left.density) / delta_mu
+        isfinite(slope) && slope > 0 && return slope
+    end
+    return fallback
+end
+
+_slope_value(slope) = slope === nothing ? NaN : Float64(slope)
 
 function find_mu_for_density(
     sites,
@@ -138,6 +233,7 @@ function find_mu_for_density(
     psi_init=nothing,
     rng=MersenneTwister(1),
     deadline::Real=Inf,
+    density_slope::Union{Nothing,Real}=nothing,
 )
     target = model.density
     evaluations = 0
@@ -154,17 +250,78 @@ function find_mu_for_density(
     )
     evaluations += 1
     best = point
+    carried_slope = density_slope === nothing ? nothing : Float64(density_slope)
+    if carried_slope !== nothing && (!isfinite(carried_slope) || carried_slope <= 0)
+        carried_slope = nothing
+    end
     if point.timed_out
-        return merge(point, (; converged=false, status=:time_limit, evaluations))
+        return merge(point, (;
+            converged=false,
+            status=:time_limit,
+            evaluations,
+            density_slope=_slope_value(carried_slope),
+        ))
     elseif _density_error(point, target) <= settings.mu_density_tol
-        return merge(point, (; converged=true, status=:density_tolerance, evaluations))
+        return merge(point, (;
+            converged=true,
+            status=:density_tolerance,
+            evaluations,
+            density_slope=_slope_value(carried_slope),
+        ))
     end
 
-    direction = point.density < target ? 1.0 : -1.0
-    step = settings.mu_bracket_step
-    previous = point
     bracket = nothing
-    while evaluations < settings.mu_max_iterations
+    previous = point
+    if carried_slope !== nothing && evaluations < settings.mu_max_iterations
+        predictor_step = (target - point.density) / carried_slope
+        maximum_predictor_step = settings.mu_bracket_step * settings.mu_bracket_growth^2
+        predicted_mu = point.mu + clamp(
+            predictor_step,
+            -maximum_predictor_step,
+            maximum_predictor_step,
+        )
+        if isfinite(predicted_mu) && predicted_mu != point.mu
+            candidate = _solve_mu_point(
+                sites,
+                model,
+                fields,
+                predicted_mu,
+                settings;
+                runtime,
+                psi_init=point.psi,
+                rng,
+                deadline,
+                mu_resolve=true,
+            )
+            evaluations += 1
+            carried_slope = _positive_density_slope(point, candidate, carried_slope)
+            _density_error(candidate, target) < _density_error(best, target) && (best = candidate)
+            if candidate.timed_out
+                return merge(best, (;
+                    converged=false,
+                    status=:time_limit,
+                    evaluations,
+                    timed_out=true,
+                    density_slope=_slope_value(carried_slope),
+                ))
+            elseif _density_error(candidate, target) <= settings.mu_density_tol
+                return merge(candidate, (;
+                    converged=true,
+                    status=:density_tolerance,
+                    evaluations,
+                    density_slope=_slope_value(carried_slope),
+                ))
+            elseif (point.density - target) * (candidate.density - target) <= 0
+                bracket = (point, candidate)
+            else
+                previous = candidate
+            end
+        end
+    end
+
+    direction = previous.density < target ? 1.0 : -1.0
+    step = settings.mu_bracket_step
+    while bracket === nothing && evaluations < settings.mu_max_iterations
         candidate_mu = previous.mu + direction * step
         candidate = _solve_mu_point(
             sites,
@@ -176,13 +333,26 @@ function find_mu_for_density(
             psi_init=previous.psi,
             rng,
             deadline,
+            mu_resolve=true,
         )
         evaluations += 1
+        carried_slope = _positive_density_slope(previous, candidate, carried_slope)
         _density_error(candidate, target) < _density_error(best, target) && (best = candidate)
         if candidate.timed_out
-            return merge(best, (; converged=false, status=:time_limit, evaluations, timed_out=true))
+            return merge(best, (;
+                converged=false,
+                status=:time_limit,
+                evaluations,
+                timed_out=true,
+                density_slope=_slope_value(carried_slope),
+            ))
         elseif _density_error(candidate, target) <= settings.mu_density_tol
-            return merge(candidate, (; converged=true, status=:density_tolerance, evaluations))
+            return merge(candidate, (;
+                converged=true,
+                status=:density_tolerance,
+                evaluations,
+                density_slope=_slope_value(carried_slope),
+            ))
         elseif (previous.density - target) * (candidate.density - target) <= 0
             bracket = (previous, candidate)
             break
@@ -191,12 +361,22 @@ function find_mu_for_density(
         step *= settings.mu_bracket_growth
     end
 
-    bracket === nothing && return merge(best, (; converged=false, status=:unbracketed, evaluations))
+    bracket === nothing && return merge(best, (;
+        converged=false,
+        status=:unbracketed,
+        evaluations,
+        density_slope=_slope_value(carried_slope),
+    ))
     left, right = bracket
     left.mu > right.mu && ((left, right) = (right, left))
     while evaluations < settings.mu_max_iterations
         width = right.mu - left.mu
-        width <= settings.mu_interval_tol && return merge(best, (; converged=false, status=:mu_interval_tolerance, evaluations))
+        width <= settings.mu_interval_tol && return merge(best, (;
+            converged=false,
+            status=:mu_interval_tolerance,
+            evaluations,
+            density_slope=_slope_value(carried_slope),
+        ))
         left_residual = left.density - target
         right_residual = right.density - target
         denominator = right_residual - left_residual
@@ -218,20 +398,39 @@ function find_mu_for_density(
             psi_init=initial,
             rng,
             deadline,
+            mu_resolve=true,
         )
         evaluations += 1
+        carried_slope = _positive_density_slope(left, candidate, carried_slope)
+        carried_slope = _positive_density_slope(candidate, right, carried_slope)
         _density_error(candidate, target) < _density_error(best, target) && (best = candidate)
         if candidate.timed_out
-            return merge(best, (; converged=false, status=:time_limit, evaluations, timed_out=true))
+            return merge(best, (;
+                converged=false,
+                status=:time_limit,
+                evaluations,
+                timed_out=true,
+                density_slope=_slope_value(carried_slope),
+            ))
         elseif _density_error(candidate, target) <= settings.mu_density_tol
-            return merge(candidate, (; converged=true, status=:density_tolerance, evaluations))
+            return merge(candidate, (;
+                converged=true,
+                status=:density_tolerance,
+                evaluations,
+                density_slope=_slope_value(carried_slope),
+            ))
         elseif (left.density - target) * (candidate.density - target) <= 0
             right = candidate
         else
             left = candidate
         end
     end
-    return merge(best, (; converged=false, status=:maximum_mu_iterations, evaluations))
+    return merge(best, (;
+        converged=false,
+        status=:maximum_mu_iterations,
+        evaluations,
+        density_slope=_slope_value(carried_slope),
+    ))
 end
 
 function _field_shapes_match(fields::FieldState, model::ModelSettings)
@@ -348,7 +547,11 @@ function _copy_diagnostic(
     orbit_validated::Bool=diagnostic.orbit_validated,
     unmixed_probe::Bool=diagnostic.unmixed_probe,
     solution_canonical_variational_energy::Float64=diagnostic.solution_canonical_variational_energy,
+    solution_target_density_corrected_variational_energy::Float64=
+        diagnostic.solution_target_density_corrected_variational_energy,
     orbit_energy_spread::Float64=diagnostic.orbit_energy_spread,
+    orbit_target_density_corrected_energy_spread::Float64=
+        diagnostic.orbit_target_density_corrected_energy_spread,
     orbit_density_contrast::Float64=diagnostic.orbit_density_contrast,
 )
     return ConvergenceDiagnostic(;
@@ -360,12 +563,23 @@ function _copy_diagnostic(
         orbit_validated=orbit_validated,
         unmixed_probe=unmixed_probe,
         solution_canonical_variational_energy=solution_canonical_variational_energy,
+        solution_target_density_corrected_variational_energy=
+            solution_target_density_corrected_variational_energy,
         orbit_energy_spread=orbit_energy_spread,
+        orbit_target_density_corrected_energy_spread=
+            orbit_target_density_corrected_energy_spread,
         orbit_density_contrast=orbit_density_contrast,
         fixed_point_abs_residual=diagnostic.fixed_point_abs_residual,
         fixed_point_rel_residual=diagnostic.fixed_point_rel_residual,
+        fixed_point_residual_cosine=diagnostic.fixed_point_residual_cosine,
+        fixed_point_contraction_estimate=diagnostic.fixed_point_contraction_estimate,
+        fixed_point_extrapolation_factor=diagnostic.fixed_point_extrapolation_factor,
+        fixed_point_extrapolated_abs_residual=diagnostic.fixed_point_extrapolated_abs_residual,
+        fixed_point_extrapolated_rel_residual=diagnostic.fixed_point_extrapolated_rel_residual,
         cycle_abs_residual=diagnostic.cycle_abs_residual,
         cycle_rel_residual=diagnostic.cycle_rel_residual,
+        cycle_oscillation_cosine=diagnostic.cycle_oscillation_cosine,
+        cycle_two_step_ratio=diagnostic.cycle_two_step_ratio,
         density_error=diagnostic.density_error,
         variational_energy_change=diagnostic.variational_energy_change,
         hamiltonian_identity_error_per_site=diagnostic.hamiltonian_identity_error_per_site,
@@ -385,7 +599,9 @@ function _clear_solution_diagnostic(diagnostic::ConvergenceDiagnostic, reason::S
         orbit_validated=false,
         unmixed_probe=false,
         solution_canonical_variational_energy=NaN,
+        solution_target_density_corrected_variational_energy=NaN,
         orbit_energy_spread=NaN,
+        orbit_target_density_corrected_energy_spread=NaN,
         orbit_density_contrast=NaN,
     )
 end
@@ -434,14 +650,17 @@ end
 
 function _print_iteration(record::IterationRecord, diagnostic::ConvergenceDiagnostic, mu_result)
     @printf(
-        "MF %3d  n=%.9f  mu=% .8f  r_abs=%.3e  r_rel=%.3e  Evar/site=% .12f  mu_evals=%d  status=%s\n",
+        "MF %3d  n=%.9f  mu=% .8f  r_abs=%.3e  r_rel=%.3e  Evar_target/site=% .12f  mu_evals=%d  dw=%.3e  chi=%d  status=%s\n",
         record.iteration,
         record.density,
         record.chemical_potential,
         record.field_abs_residual,
         record.field_rel_residual,
-        record.variational.canonical_variational_energy / (2 * size(record.applied.alpha, 1)),
+        record.variational.target_density_corrected_variational_energy /
+            (2 * size(record.applied.alpha, 1)),
         mu_result.evaluations,
+        record.dmrg_max_discarded_weight,
+        record.dmrg_maxlinkdim,
         String(diagnostic.status),
     )
 end
@@ -459,6 +678,7 @@ function run_scf(settings::ProjectSettings)
     fields = start.fields
     psi = start.psi
     chemical_potential = start.chemical_potential
+    density_slope = nothing
     diagnostic = ConvergenceDiagnostic()
     best_residual = Inf
     update_mode = :initial
@@ -491,9 +711,12 @@ function run_scf(settings::ProjectSettings)
             psi_init=psi,
             rng,
             deadline,
+            density_slope,
         )
         psi = mu_result.psi
         chemical_potential = mu_result.mu
+        density_slope = isfinite(mu_result.density_slope) && mu_result.density_slope > 0 ?
+            mu_result.density_slope : density_slope
         measured, correlations = calculate_mean_fields(psi, settings.model; threshold=0.0)
         absolute_residual, relative_residual = hybrid_distance(measured, fields)
         effective_expectation = Float64(real(inner(psi', mu_result.hamiltonian, psi)))
@@ -524,6 +747,12 @@ function run_scf(settings::ProjectSettings)
             field_abs_residual=absolute_residual,
             field_rel_residual=relative_residual,
             wall_seconds=time() - iteration_start,
+            mu_density_slope=mu_result.density_slope,
+            dmrg_max_discarded_weight=mu_result.max_discarded_weight,
+            dmrg_maxlinkdim=mu_result.maximum_link_dimension,
+            dmrg_sweep_energies=mu_result.sweep_energies,
+            dmrg_sweep_max_discarded_weights=mu_result.sweep_max_discarded_weights,
+            dmrg_sweep_maxlinkdims=mu_result.sweep_maxlinkdims,
         )
         push!(records, record)
         if update_mode == :unmixed_probe
