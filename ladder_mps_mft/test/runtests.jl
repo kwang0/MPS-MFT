@@ -710,6 +710,7 @@ end
 
 @testset "Phase 1 guarded GPU launcher" begin
     script = joinpath(ROOT, "slurm", "phase1_gpu.sh")
+    gpu_project = TOML.parsefile(joinpath(ROOT, "gpu", "Project.toml"))
     migration_script = joinpath(ROOT, "slurm", "migrate_phase1_to_scratch.sh")
     corrupt_cleaner = joinpath(ROOT, "scripts", "prune_corrupt_auxiliary_hdf5.jl")
     script_source = read(script, String)
@@ -718,6 +719,13 @@ end
     @test !occursin(r"(?m)^\s*module load cudatoolkit\s*$", script_source)
     @test occursin("module unload cudatoolkit", script_source)
     @test occursin("sanitize_cuda_runtime_environment", script_source)
+    @test gpu_project["extras"]["CUDA_Runtime_jll"] ==
+        "76a88914-d11a-5bdc-97e0-2f5a05c973a2"
+    @test gpu_project["preferences"]["CUDA_Runtime_jll"]["local"] == "false"
+    @test gpu_project["extras"]["MPIPreferences"] ==
+        "3da0fdf6-3ccc-4f1b-acd9-58baa6c99267"
+    @test gpu_project["preferences"]["MPIPreferences"]["binary"] == "MPICH_jll"
+    @test isempty(gpu_project["preferences"]["MPIPreferences"]["preloads"])
     @test occursin("require_current_run_version", script_source)
     @test occursin("require_worker_compatible_run_version", script_source)
     @test occursin("PHASE1_SCRIPT_VERSION=\"1.13.1\"", script_source)

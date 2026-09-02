@@ -24,6 +24,12 @@ CUDA.jl is configured to use its pinned artifact toolkit, so do not load the
 Perlmutter `cudatoolkit` module for this workflow. The launcher unloads that
 module, removes inherited NVIDIA-HPC-SDK runtime-library paths, and aborts if a
 non-artifact cuBLAS, cuSOLVER, cuSPARSE, or other CUDA runtime library is loaded.
+The GPU `Project.toml` explicitly exports `CUDA_Runtime_jll.local = "false"`,
+which prevents a Julia-module or higher-load-path preference from switching the
+calculation back to a local toolkit. It also selects artifact `MPICH_jll` with
+an empty preload list for HDF5's single-process MPI dependency; these jobs do
+not use GPU-aware MPI, so they must not preload Cray `libmpi_gtl_cuda.so` and
+its system `libcudart` dependency.
 This follows [CUDA.jl's recommended artifact-toolkit
 configuration](https://cuda.juliagpu.org/stable/installation/overview/); the
 Perlmutter system toolkit remains appropriate for software compiled against

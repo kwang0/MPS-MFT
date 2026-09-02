@@ -1450,3 +1450,35 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   No Codex in-app NERSC browser tab remained open. The attempted connection in
   the preceding entry was outside the intended workflow and must not be
   repeated.
+
+## 2026-09-01: square V=0 CUDA preference failure and durable isolation fix
+
+- Perlmutter jobs `57842419` and `57842420` from
+  `20260901_phase1_square_t014_v000_seed_chi200_loose` failed before SCF in the
+  branch-level dense CUDA preflight. Job `57842419` used `00:05:58`, mostly for
+  first-use precompilation, and job `57842420` reused that cache and failed in
+  `00:00:44`. Their logs report both a Cray `libmpi_gtl_cuda.so` preload missing
+  `libcudart.so.13` and CUDA.jl selecting a local toolkit with no discoverable
+  runtime. Neither job produced scientific MF iterations or a state eligible
+  for analysis.
+- The successful 2026-08-30 square six-seed campaign used the same CUDA 5.9.5,
+  CUDA runtime wrapper, GPU manifest, and artifact-isolation function. The
+  relevant launcher-policy change was the requested relaxation from
+  `gpu&hbm80g` to `gpu` below chi 1200. The failed logs additionally demonstrate
+  that a local-toolkit preference was effective at package precompile time even
+  though no uncommented setting exists in the repository or the user's searched
+  `~/.julia` preference files. The printed files under `~/.julia/packages/CUDA`
+  are package documentation templates, not active preferences.
+- Made the established artifact-only policy explicit in `gpu/Project.toml`:
+  `CUDA_Runtime_jll.local = "false"`. Added the runtime wrapper as an extra so
+  Julia's preference loader treats the setting as belonging to the active GPU
+  environment and gives it precedence over higher load-path environments.
+- The same project now selects artifact `MPICH_jll` and an empty MPI preload
+  list. HDF5 is used only from a single Julia process in Phase 1; GPU-aware Cray
+  MPI is not part of the solver and must not pull system CUDA runtime libraries
+  into the artifact-only process.
+- The four remaining submitted branches must stay held until this project file
+  is synchronized and a one-allocation preflight succeeds. No Codex action was
+  taken on Perlmutter: no job was submitted, held, released, requeued, or
+  cancelled, no ledger row changed, and no HDF5 artifact was modified. Terminal
+  elapsed-time reconciliation remains authoritative on Perlmutter.
