@@ -17,3 +17,12 @@
 5. Analyze Perlmutter results only after the user has synchronized the relevant
    logs and artifacts into the local workspace.
 
+## User-managed Perlmutter checkout
+
+- The ladder subproject checkout on Perlmutter is
+  `$CFS/m4863/MPS-MFT/ladder_mps_mft`.
+- Perlmutter handoff commands for the ladder workflow should use
+  `cd "$CFS/m4863/MPS-MFT/ladder_mps_mft"` as their starting directory.
+- This path is reference information for commands the user runs; it does not
+  authorize Codex to connect to Perlmutter or perform synchronization or
+  scheduler actions.

@@ -1,0 +1,7 @@
+sector,purpose,sweeps,dmrg_hours,final_stage_sweeps,final_max_discarded_weight,last_five_energy_spread,energy,converged,log
+N120_twoSz0,"N, 2Sz=0 ground",47,3.0392063888888887,5,2.48e-07,3.6934396803189884e-06,-85.00120662383387,True,output/bare_stage1/20260901_bare_t014_v0_stage1/logs/sector-57852448_1.out
+N120_twoSz2,"N, 2Sz=2 spin excitation",99,9.050928611111111,14,1.83e-06,5.669544833608597e-07,-84.84784529181864,True,output/bare_stage1/20260901_bare_t014_v0_stage1/logs/sector-57852448_2.out
+N119_twoSz1,"N-1, 2Sz=1",61,5.046832500000001,9,3.22e-07,6.816302970946708e-07,-86.6014994747124,True,output/bare_stage1/20260901_bare_t014_v0_stage1/logs/sector-57852448_3.out
+N118_twoSz0,"N-2, 2Sz=0",43,2.8573169444444444,5,3.57e-07,3.5641172928535525e-06,-88.34830254679446,True,output/bare_stage1/20260901_bare_t014_v0_stage1/logs/sector-57852448_4.out
+N121_twoSz1,"N+1, 2Sz=1",57,4.7011225,10,2.04e-07,6.08945995850263e-07,-83.24252898708448,True,output/bare_stage1/20260901_bare_t014_v0_stage1/logs/sector-57852448_5.out
+N122_twoSz0,"N+2, 2Sz=0",44,2.341627777777778,4,1.69e-07,2.345404652714933e-06,-81.63239409876014,True,output/bare_stage1/20260901_bare_t014_v0_stage1/logs/sector-57852448_6.out

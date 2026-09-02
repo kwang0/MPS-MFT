@@ -1974,6 +1974,44 @@ end
     @test maximum(spectrum.residuals) < 1e-12
     @test last_five_sweep_change([-2.0, -2.1, -2.11]) ≈ 0.11
 
+    stage2 = load_bare_stage2_settings(
+        joinpath(ROOT, "test", "fixtures", "phase0_tiny.toml"),
+        model,
+    )
+    @test stage2.charge_even_modes == [1]
+    kernel_model = LadderMPSMFT._model_with_geometry(model, :square; ep_signed=-0.5)
+    @test kernel_model.ep == 0.5
+    @test kernel_model.ep_signed == -0.5
+    zero = zero_field_state(model)
+    @test field_metric_norm(zero, model) == 0.0
+    stage1_result = compute_bare_stage1(psi, model, stage1)
+    mktempdir() do directory
+        stage1_path = joinpath(directory, "stage1.h5")
+        write_bare_stage1(stage1_path, stage1_result, model; immutable=true)
+        candidates = build_stage2_candidates(stage1_path, model, stage2)
+        @test length(candidates) == 10
+        @test count(candidate -> candidate.block == :pair, candidates) == 5
+        pair_bank = orthonormalize_stage2_candidates(
+            filter(candidate -> candidate.block == :pair, candidates),
+            model;
+            tolerance=stage2.orthogonalization_tol,
+        )
+        @test length(pair_bank.basis) == 3
+        @test pair_bank.maximum_orthogonality_error < 1e-12
+        @test pair_bank.candidate_retained_basis_index[4:5] == [0, 0]
+
+        direction = first(filter(candidate -> candidate.block == :normal, candidates)).fields
+        @test field_metric_norm(direction, model) ≈ 1.0 atol=1e-12
+        measured_fields, raw_correlations = calculate_mean_fields(psi, model)
+        @test mean_fields_from_correlations(raw_correlations, model).mu_cdw ≈
+            measured_fields.mu_cdw
+        h0 = build_mf_mpo(sites, model, zero, 0.0)
+        h1 = build_mf_mpo(sites, model, direction, 0.0)
+        direct_field_expectation = real(inner(psi', h1, psi) - inner(psi', h0, psi))
+        @test field_conjugate_expectation(direction, raw_correlations, model) ≈
+            direct_field_expectation atol=1e-11
+    end
+
     sectors = [
         (particle_number=number, twice_sz=sz, energy=energy)
         for ((number, sz), energy) in zip(

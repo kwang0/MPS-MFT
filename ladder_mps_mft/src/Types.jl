@@ -162,6 +162,45 @@ Base.@kwdef struct BareStage1Settings
     pair_classes::Vector{Symbol} = [:onsite0, :onsite1, :rung, :leg0, :leg1]
 end
 
+"""
+Controls for Stage 2 of the bare-ladder hybrid response search. The motivated
+and Stage-1 covariance candidates are orthonormalized in the full mean-field
+metric before any DMRG solve, so linearly dependent named form factors remain
+available for interpretation without consuming redundant probe jobs.
+"""
+Base.@kwdef struct BareStage2Settings
+    field_strength::Float64 = 1e-4
+    validation_field_strength::Float64 = 5e-5
+    charge_even_modes::Vector{Int} = [7, 8, 9]
+    spin_odd_modes::Vector{Int} = [58, 59, 63]
+    pair_form_factors::Vector{Symbol} = [:onsite_s, :rung_s, :leg_s, :extended_s, :d_wave]
+    covariance_candidates::Vector{String} = [
+        "charge:even:1",
+        "charge:odd:1",
+        "spin:even:1",
+    ]
+    geometries::Vector{Symbol} = [:cubic_frustrated, :cubic_unfrustrated, :square]
+    maxdim::Int = 1200
+    normal_reference_sweeps::Int = 20
+    pair_reference_sweeps::Int = 20
+    probe_sweeps::Int = 20
+    validation_sweeps::Int = 20
+    minimum_convergence_sweep::Int = 4
+    cutoff::Float64 = 1e-10
+    energy_tol::Float64 = 1e-9
+    noise_floor::Float64 = 1e-8
+    last_five_energy_tol::Float64 = 1e-6
+    density_tol::Float64 = 2e-4
+    orthogonalization_tol::Float64 = 1e-10
+    reciprocity_relative_tol::Float64 = 5e-2
+    cross_block_relative_tol::Float64 = 5e-2
+    linearity_relative_tol::Float64 = 5e-2
+    top_validation_modes::Int = 3
+    eigsolve_krylovdim::Int = 8
+    output_level::Int = 1
+    maximum_job_seconds::Float64 = 11.5 * 3600
+end
+
 struct FieldState
     alpha::Array{Float64,4}
     beta::Array{Float64,5}

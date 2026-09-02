@@ -1,0 +1,15 @@
+block,candidate,retained_basis
+normal,charge even mode 7,True
+normal,charge even mode 8,True
+normal,charge even mode 9,True
+normal,spin odd mode 58,True
+normal,spin odd mode 59,True
+normal,spin odd mode 63,True
+normal,Stage-1 charge-even rank 1,True
+normal,Stage-1 charge-odd rank 1,True
+normal,Stage-1 spin-even rank 1,True
+pair,onsite s,True
+pair,rung s,True
+pair,leg s,True
+pair,extended s,False
+pair,d wave,False

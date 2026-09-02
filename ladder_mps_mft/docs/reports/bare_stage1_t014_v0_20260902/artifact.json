@@ -1,0 +1,60 @@
+{
+  "surface": "technical_report",
+  "title": "Bare-Ladder Stage 1 at V=0, t0=1.4",
+  "generated_at": "2026-09-02T21:48:51.773576Z",
+  "run_id": "20260901_bare_t014_v0_stage1",
+  "decision": "proceed_to_gated_stage2_discovery",
+  "model": {
+    "L": 64,
+    "U": 8.0,
+    "V": 0.0,
+    "density": 0.9375,
+    "ep": 0.14653773091916378,
+    "ep_signed": -0.14653773091916378,
+    "geometry": "square",
+    "r_range": 4,
+    "t": 1.0,
+    "t0": 1.4,
+    "tp": 0.1
+  },
+  "metrics": {
+    "final_spin_gap": 0.15336133201522273,
+    "final_charge_gap": 0.010858301056572373,
+    "final_hole_pair_binding": -0.14651022120352764,
+    "final_particle_pair_binding": -0.14854274842502946,
+    "pair_decay_exponent": 0.761360607199044,
+    "charge_decay_exponent": 1.2157937792577231,
+    "total_sweeps": 351,
+    "summed_dmrg_hours": 27.037034722222224,
+    "sector_critical_path_hours": 9.050928611111111,
+    "full_bytes": 7220991055,
+    "compact_bytes": 2145531,
+    "stage2_named_candidates": 14,
+    "stage2_independent_directions": 12,
+    "stage2_kernel_pair_binding": -0.14651022120352764
+  },
+  "sources": [
+    {
+      "path": "output/bare_stage1/20260901_bare_t014_v0_stage1/stateless_results/backbone.h5",
+      "sha256": "98cd7106626c13086055a0c641df8254c6fd04c1030e0614a6ff1ebb553ac514"
+    },
+    {
+      "path": "output/bare_stage1/20260901_bare_t014_v0_stage1/stateless_results/stage1.h5",
+      "sha256": "1d1b1a5500eea43d2b59cc26cb38596dc36e2335f0ee5dff6fc8ea9654b9b9ac"
+    },
+    {
+      "path": "output/bare_stage1/20260901_bare_t014_v0_stage1/stateless_results/stateless_manifest.tsv",
+      "sha256": "6d411ea624459c8545b3983d4e97438cd3a7b83b000572a47e36f5f30e980139"
+    },
+    {
+      "path": "output/bare_stage1/20260901_bare_t014_v0_stage1/stateless_results/stage1_summary.tsv",
+      "sha256": "dfb0939836f1ddd9a382b3f040592d0c258287bd5eb7a26c221cec68c98122bc"
+    }
+  ],
+  "limitations": [
+    "No synchronized sacct or /usr/bin/time record: CPU efficiency and peak RSS are not measured.",
+    "Equal-time covariance eigenvalues are screening quantities, not static susceptibilities.",
+    "L=64 and chi=1200 are finite-size and finite-entanglement results.",
+    "The weak-coupling validity ratios do not support a controlled MPS+MF claim at tp=0.1."
+  ]
+}

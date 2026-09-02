@@ -538,13 +538,16 @@ function _threshold(value::Real, threshold::Real)
     return abs(value) > threshold ? Float64(value) : 0.0
 end
 
-function calculate_mean_fields(psi::MPS, model::ModelSettings; threshold::Real=0.0)
-    pair = real.(correlation_matrix(psi, "Cup", "Cdn"))
-    exchange_down = real.(correlation_matrix(psi, "Cdagdn", "Cdn"))
-    exchange_up = real.(correlation_matrix(psi, "Cdagup", "Cup"))
-    density_down = real.(expect(psi, "Ndn"))
-    density_up = real.(expect(psi, "Nup"))
-    correlations = CorrelationState(pair, exchange_down, exchange_up, density_down, density_up)
+function mean_fields_from_correlations(
+    correlations::CorrelationState,
+    model::ModelSettings;
+    threshold::Real=0.0,
+)
+    pair = correlations.pair
+    exchange_down = correlations.exchange_down
+    exchange_up = correlations.exchange_up
+    density_down = correlations.density_down
+    density_up = correlations.density_up
     prefactor = 2 * model.tp^2 / model.ep
     alpha = zeros(Float64, model.L, model.L, 2, 2)
     beta = zeros(Float64, 2, model.L, model.L, 2, 2)
@@ -597,5 +600,15 @@ function calculate_mean_fields(psi::MPS, model::ModelSettings; threshold::Real=0
         mu_cdw[2, sites] .= kernel * (density_up[sites] .- 0.5)
     end
     mu_cdw[abs.(mu_cdw) .<= threshold] .= 0.0
-    return FieldState(alpha, beta, mu_cdw), correlations
+    return FieldState(alpha, beta, mu_cdw)
+end
+
+function calculate_mean_fields(psi::MPS, model::ModelSettings; threshold::Real=0.0)
+    pair = real.(correlation_matrix(psi, "Cup", "Cdn"))
+    exchange_down = real.(correlation_matrix(psi, "Cdagdn", "Cdn"))
+    exchange_up = real.(correlation_matrix(psi, "Cdagup", "Cup"))
+    density_down = real.(expect(psi, "Ndn"))
+    density_up = real.(expect(psi, "Nup"))
+    correlations = CorrelationState(pair, exchange_down, exchange_up, density_down, density_up)
+    return mean_fields_from_correlations(correlations, model; threshold), correlations
 end

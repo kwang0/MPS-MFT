@@ -13,6 +13,10 @@ The implementation currently provides:
 - a restartable six-sector isolated-ladder backbone plus a zero-field,
   data-driven Stage 1 covariance screen for charge, spin, and Hermitian pairing
   candidates;
+- a gated Stage 2 projected-response pilot that orthonormalizes the motivated
+  and covariance-selected bank, reuses each finite-field ladder solve across
+  all three geometries, preserves fermion parity for pairing probes, and
+  validates only the leading measured eigenvectors at a second amplitude;
 - a dense-CUDA production backend that preserves the refactored SCF, recurrence, variational, checkpoint, and diagnostic logic while explicitly disabling QN block sparsity; and
 - a guarded Perlmutter Phase 1 launcher with direct scientific-branch submission, per-branch GPU preflight, explicit continuations, optional ledgered CPU `E_p` jobs, scratch-resident full MPS artifacts with automatic stateless CFS mirrors, and a conservative 400-additional-node-hour cap.
 
@@ -59,6 +63,18 @@ bash slurm/bare_stage1_cpu.sh plan
 Its six fixed-sector backbone, immutable per-`chi` MPS checkpoints, Stage 1
 candidate spectra, and the deliberate stop before finite-field Stage 2 are
 documented in `docs/BARE_STAGE1_CPU.md`.
+
+After the Stage 1 results have been synchronized and reviewed, inspect the
+separate Stage 2 discovery plan (still without submitting):
+
+```bash
+bash slurm/bare_stage2_cpu.sh plan 20260901_bare_t014_v0_stage1
+```
+
+The Stage 1 physics/efficiency report is under
+`docs/reports/bare_stage1_t014_v0_20260902/`; the Stage 2 scientific gates,
+job graph, resource bounds, and user-run handoff are in
+`docs/BARE_STAGE2_CPU.md`.
 
 The targeted chi=400 matched-seed convergence pilot has its own read-only plan
 and preparation-only action:

@@ -1522,3 +1522,47 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   no HDF5 artifact. A third campaign must not be submitted until the effective
   preferences report artifact CUDA `13.0` and the preceding terminal campaign
   has been reconciled on Perlmutter.
+
+## 2026-09-02: bare Stage 1 analysis and gated Stage 2 handoff
+
+- Analyzed the user-synchronized bare-ladder run
+  `20260901_bare_t014_v0_stage1` at `L=64`, `V=0`, `t0=1.4`, and `chi=1200`.
+  All 33 compact manifest rows were present. All six final sectors passed the
+  saved gates; the final spin gap is `0.1533613320`, charge gap
+  `0.0108583011`, hole pair binding `-0.1465102212`, and particle pair binding
+  `-0.1485427484`.
+- The rung-pair decay exponent is `0.76136 +/- 0.02146` with strong fits, while
+  the charge exponent is `1.21579 +/- 0.08304` with materially weaker fits.
+  Equal-time covariance spectra are broad and contain boundary-dominated modes,
+  so they are retained as an unbiased screen rather than interpreted as
+  susceptibility eigenvalues. At `tp=0.1`, especially
+  `tp/charge_gap=9.2095`, the MPS+MF result must remain exploratory.
+- The six sector logs contain 351 sweeps and 27.037 summed DMRG hours. The ideal
+  six-way sector-array critical path is 9.051 hours, set by the spin-excited
+  sector. No synchronized `sacct` or `/usr/bin/time -v` data were available, so
+  actual CPU utilization, charge, and peak RSS were not inferred. The compact
+  mirror is 2.046 MiB versus 6.725 GiB represented by the full manifest.
+- Added the reproducible report under
+  `docs/reports/bare_stage1_t014_v0_20260902/`, including a self-contained HTML
+  report, Markdown narrative, machine-readable artifact metadata, deterministic
+  CSV extracts, source hashes, and explicit evidence exclusions.
+- Implemented Stage 2 projected-response discovery in `src/BareStage2.jl` and
+  `scripts/run_bare_stage2.jl`. Fourteen motivated/covariance names
+  orthonormalize to twelve independent directions: nine normal and three
+  pairing. The implementation adds a strict number-conserving zero-field
+  reference, a parity- and `Sz`-conserving pairing reference obtained by
+  removing only `Nf`, exact MPO-conjugate response measurements, all-geometry
+  map reuse, measured reciprocity and cross-block gates, and a separately
+  submitted three-mode `h`/`h/2` validation with Richardson assembly.
+- Added `configs/bare_stage2_t014_v0.toml`, the guarded user-run Perlmutter
+  launcher `slurm/bare_stage2_cpu.sh`, and `docs/BARE_STAGE2_CPU.md`. Discovery
+  retains the calibrated four-thread block-sparse topology, parallelizes the 12
+  independent probes, and enforces an 18.65625 CPU-node-hour reservation cap.
+  Preparation and assembly request only 8 GiB because they do not load the
+  large MPS tensors. Optional validation has a separate 9.609375-node-hour
+  bound and cannot be
+  submitted accidentally with discovery.
+- Codex performed no Perlmutter login, transfer, scheduler query, submission,
+  cancellation, or accounting change. The persistent checkout remains
+  `$CFS/m4863/MPS-MFT/ladder_mps_mft`; all documented commands are operator
+  handoffs for the user.

@@ -216,6 +216,19 @@ point, all CPU QN DMRG. Probes are short because psi_0 is a good start; the sect
 solves dominate. Section 6 gives the measured basis for the estimate and the agreed
 scope.
 
+Pilot refinement (2026-09-02): the completed Stage 1 screen at `V=0`,
+`t0=1.4` supports the hybrid protocol from the linear-response notes. Discovery
+uses one amplitude in an orthonormal candidate subspace and saves `h/2` for the
+three leading measured eigenvectors. Eleven motivated names plus three
+covariance additions reduce to twelve independent directions (nine normal,
+three pairing), because uniform extended-s and d-wave fields are combinations
+of the onsite/rung/leg span. A strict number-conserving `h=0` reference is
+re-relaxed with the response tolerance before any finite difference; the
+pairing branch then removes only `Nf` and computes a second `h=0` reference
+while retaining `NfParity` and `Sz`. Discovery must pass measured reciprocity
+and normal/pair cross-block gates before the separate two-amplitude validation
+submission is allowed. See `docs/BARE_STAGE2_CPU.md`.
+
 ## 4. What comes after the survey
 
 - One channel unstable at a point: seed that channel with delta(e), run the SCF with
@@ -228,16 +241,25 @@ scope.
 - CDW claims additionally need the bulk four-k_F modulation amplitude scaled in L
   against the isolated-ladder profile from section 2.2 (Friedel control).
 
-## 5. Implementation notes (for the later code change; not done)
+## 5. Implementation status
 
-- New `scripts/run_ladder_backbone.jl`: sectors, states, diagnostics, registry row.
-- New `scripts/run_bare_response.jl`: probes 1-4 above, reusing `build_mf_mpo`,
-  `calculate_mean_fields`, `density_kernel`, and the matched-mode templates.
-- `sector_resolved_gaps` to save MPSs and truncation evidence; `write_sector_gaps`
-  schema version 2.
-- Launcher: a CPU-pool action mirroring `submit-ep` with its own sub-ledger.
-- Fingerprints: a solver-only implementation fingerprint (src/ plus Manifest) so
-  survey and SCF artifacts remain comparable across launcher edits.
+- `scripts/run_ladder_backbone.jl`, `src/Backbone.jl`, and
+  `slurm/bare_stage1_cpu.sh` implement the six-sector restartable backbone with
+  immutable per-chi MPS checkpoints, convergence evidence, fingerprints, and
+  stateless mirroring.
+- `scripts/run_bare_stage1.jl` and `src/BareStage1.jl` implement the complete
+  equal-time charge, spin, and Hermitian-pair covariance screen and the
+  diagnostics in section 2.
+- `scripts/run_bare_stage2.jl`, `src/BareStage2.jl`, and
+  `slurm/bare_stage2_cpu.sh` implement the projected finite-field response,
+  strict representation-matched baselines, all-geometry kernel reuse,
+  reciprocity/cross-block gates, selected-mode validation, and Richardson
+  assembly described above.
+- Full restartable states remain on scratch; hash-checked stateless analysis
+  copies are mirrored to CFS. Solver-only and run-tree fingerprints prevent
+  accidental mixing of incompatible sources.
+- Stage 3 random residual probing remains intentionally unimplemented until a
+  measured Stage 2 spectrum demonstrates that it is needed.
 
 ## 6. Cost basis from the legacy E_p logs and agreed scope (2026-09-01)
 

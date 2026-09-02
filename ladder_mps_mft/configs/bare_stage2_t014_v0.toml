@@ -1,0 +1,86 @@
+[model]
+L = 64
+t = 1.0
+U = 8.0
+V = 0.0
+t0 = 1.4
+tp = 0.1
+density = 0.9375
+mu_initial = 0.0
+r_range = 4
+geometry = "square"
+
+[pair_binding]
+registry = "data/E_p_values.csv"
+
+[dmrg]
+nsweeps = 20
+maxdim = 1200
+cutoff = 1.0e-10
+energy_tol = 1.0e-9
+eigsolve_krylovdim = 8
+max_time_seconds = 41400.0
+output_level = 1
+
+[runtime]
+backend = "cpu"
+tensor_scalar_type = "float64"
+blas_threads = 1
+strided_threads = 1
+threaded_blocksparse = true
+conserve_sz = true
+conserve_nfparity = true
+
+[run]
+output_directory = "output/bare_stage2"
+branch_label = "bare_t014_v0"
+preparation = "hybrid_response_stage2"
+direction = "projected_response"
+seed_label = "stage1_selected_basis"
+random_seed = 20260902
+initial_seed = "zero"
+initial_amplitude = 0.0
+max_iterations = 1
+require_accepted_solution = false
+allow_unbound_ep = false
+quick_diagnostics = false
+full_pair_correlations = false
+
+[stage2]
+# The field metric is ||x|| / sqrt(2L). Each orthonormal basis direction has
+# unit norm, so these are the physical field amplitudes per ladder site.
+field_strength = 1.0e-4
+validation_field_strength = 5.0e-5
+
+# Eleven motivated names plus three Stage-1 covariance additions. The five
+# q=0 pairing names span only three independent directions; exact dependencies
+# are removed before submission and retained in the candidate-bank metadata.
+charge_even_modes = [7, 8, 9]
+spin_odd_modes = [58, 59, 63]
+pair_form_factors = ["onsite_s", "rung_s", "leg_s", "extended_s", "d_wave"]
+covariance_candidates = [
+    "charge:even:1",
+    "charge:odd:1",
+    "spin:even:1",
+]
+geometries = ["cubic_frustrated", "cubic_unfrustrated", "square"]
+
+maxdim = 1200
+normal_reference_sweeps = 20
+pair_reference_sweeps = 20
+probe_sweeps = 20
+validation_sweeps = 20
+minimum_convergence_sweep = 4
+cutoff = 1.0e-10
+energy_tol = 1.0e-9
+noise_floor = 1.0e-8
+last_five_energy_tol = 1.0e-6
+density_tol = 2.0e-4
+orthogonalization_tol = 1.0e-10
+reciprocity_relative_tol = 5.0e-2
+cross_block_relative_tol = 5.0e-2
+linearity_relative_tol = 5.0e-2
+top_validation_modes = 3
+eigsolve_krylovdim = 8
+output_level = 1
+maximum_job_seconds = 41400.0

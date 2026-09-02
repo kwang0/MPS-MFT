@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="color-scheme" content="light dark" />
+<title>Bare-Ladder Stage 1 at V=0, t0=1.4</title>
+<style>
+:root{--bg:#f4f3ef;--card:#fff;--ink:#18212a;--muted:#5c6873;--line:#d9ddd9;--accent:#3978a8;--good:#2f7d5a;--warn:#a75d24;--track:#e8ebe8}
+@media(prefers-color-scheme:dark){:root{--bg:#15191d;--card:#20262b;--ink:#eef2f3;--muted:#b6c0c7;--line:#384149;--track:#343c42}}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.58 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+main{width:min(1040px,calc(100% - 32px));margin:0 auto;padding:42px 0 72px} h1{font-size:clamp(30px,5vw,52px);line-height:1.04;letter-spacing:-.035em;margin:.2em 0}
+h2{margin:52px 0 14px;font-size:25px;letter-spacing:-.02em} h3{margin:26px 0 8px} p{max-width:78ch} code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+.eyebrow{text-transform:uppercase;letter-spacing:.13em;color:var(--accent);font-weight:700;font-size:12px} .lede{font-size:20px;max-width:76ch;color:var(--muted)}
+.decision{border-left:5px solid var(--good);background:var(--card);padding:20px 24px;border-radius:12px;box-shadow:0 8px 26px #0000000b;margin:28px 0}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:26px 0} .metric{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px}
+.metric strong{font-size:25px;display:block} .metric span{color:var(--muted);font-size:13px} .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;margin:18px 0}
+.callout{border:1px solid #d7a56c;background:color-mix(in srgb,var(--card) 86%,#e7a357 14%);padding:18px 20px;border-radius:12px}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:12px;background:var(--card)} table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap} th:first-child,td:first-child{text-align:left} th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)} tbody tr:last-child td{border-bottom:0}
+svg{width:100%;height:auto} svg text{fill:var(--ink);font:13px ui-sans-serif,system-ui} ul{max-width:82ch} li+li{margin-top:7px} .small{font-size:13px;color:var(--muted)}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;counter-reset:step} .step{counter-increment:step;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:17px}
+.step:before{content:counter(step);display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--accent);color:white;font-weight:700;margin-bottom:12px}
+footer{border-top:1px solid var(--line);margin-top:54px;padding-top:18px;color:var(--muted);font-size:13px}
+@media(max-width:800px){.grid,.steps{grid-template-columns:repeat(2,1fr)}} @media(max-width:520px){.grid,.steps{grid-template-columns:1fr} main{width:min(100% - 20px,1040px)}}
+</style>
+</head>
+<body><main>
+<div class="eyebrow">Bare ladder · Stage 1 readout · 2 September 2026</div>
+<h1>Pairing correlations lead, but the Stage 2 stability result must remain exploratory</h1>
+<p class="lede">L=64, U=8, n=0.9375, V=0, t0=1.4, tp=0.1. The synchronized six-sector backbone is numerically usable at chi=1200. Equal-time screening supports a compact hybrid response bank, while the very small charge gap rules out a controlled weak-coupling claim.</p>
+<div class="decision"><strong>Decision: proceed to gated Stage 2 discovery.</strong><br />Run 12 independent projected-response directions at one amplitude, inspect reciprocity and symmetry leakage, and only then submit h/h2 validation for three selected eigenvectors.</div>
+<div class="grid">
+ <div class="metric"><span>spin gap</span><strong>0.1534</strong><span>chi=1200</span></div>
+ <div class="metric"><span>charge gap</span><strong>0.01086</strong><span>finite L</span></div>
+ <div class="metric"><span>hole pair binding</span><strong>-0.1465</strong><span>negative = bound</span></div>
+ <div class="metric"><span>pair decay exponent</span><strong>0.761</strong><span>+/- 0.021 by window</span></div>
+</div>
+
+<h2>1. The backbone passed its finite-system convergence contract</h2>
+<p>All six final sectors pass the saved chi=1200 gates. From chi=800 to 1200, the spin gap changes -0.90%, while the charge gap and pair bindings move by at most 0.03%. The chi=200 row is retained as solver history, not as physics: its sectors did not all converge.</p>
+<div class="table-wrap"><table><thead><tr><th>χ</th><th>Δs</th><th>Δc</th><th>Ep hole</th><th>Ep particle</th><th>μ</th><th>all sectors passed</th></tr></thead><tbody><tr><td>200</td><td>-0.18606252</td><td>-0.16838894</td><td>-0.13905156</td><td>-0.50647421</td><td>1.59003007</td><td>no</td></tr><tr><td>400</td><td>0.15893712</td><td>0.01084912</td><td>-0.14633906</td><td>-0.14821574</td><td>1.67846757</td><td>yes</td></tr><tr><td>800</td><td>0.15475381</td><td>0.01086149</td><td>-0.14654314</td><td>-0.14856052</td><td>1.67890967</td><td>no</td></tr><tr><td>1200</td><td>0.15336133</td><td>0.01085830</td><td>-0.14651022</td><td>-0.14854275</td><td>1.67897711</td><td>yes</td></tr></tbody></table></div>
+<div class="card"><h3>Where the computation went</h3><svg viewBox="0 0 760 262" role="img" aria-label="Horizontal bar chart in h"><text x="218" y="38" text-anchor="end">N+2, 2Sz=0</text><rect x="230" y="20" width="116.42" height="24" rx="5" fill="#3978a8" opacity="0.86" /><text x="354.42" y="38">2.34 h</text><text x="218" y="76" text-anchor="end">N-2, 2Sz=0</text><rect x="230" y="58" width="142.06" height="24" rx="5" fill="#3978a8" opacity="0.86" /><text x="380.06" y="76">2.86 h</text><text x="218" y="114" text-anchor="end">N, 2Sz=0 ground</text><rect x="230" y="96" width="151.11" height="24" rx="5" fill="#3978a8" opacity="0.86" /><text x="389.11" y="114">3.04 h</text><text x="218" y="152" text-anchor="end">N+1, 2Sz=1</text><rect x="230" y="134" width="233.73" height="24" rx="5" fill="#3978a8" opacity="0.86" /><text x="471.73" y="152">4.70 h</text><text x="218" y="190" text-anchor="end">N-1, 2Sz=1</text><rect x="230" y="172" width="250.92" height="24" rx="5" fill="#3978a8" opacity="0.86" /><text x="488.92" y="190">5.05 h</text><text x="218" y="228" text-anchor="end">N, 2Sz=2 spin excitation</text><rect x="230" y="210" width="450.00" height="24" rx="5" fill="#3978a8" opacity="0.86" /><text x="688.00" y="228">9.05 h</text></svg><p class="small">Bars sum per-sweep times printed by ITensor DMRG. They exclude compilation, HDF5, covariance analysis, scheduler wait, and other job overhead.</p></div>
+<div class="table-wrap"><table><thead><tr><th>Sector</th><th>Sweeps</th><th>Logged DMRG h</th><th>χ=1200 max discarded</th><th>last-five ΔE</th></tr></thead><tbody><tr><td>N, 2Sz=0 ground</td><td>47</td><td>3.039</td><td>2.480e-07</td><td>3.693e-06</td></tr><tr><td>N, 2Sz=2 spin excitation</td><td>99</td><td>9.051</td><td>1.830e-06</td><td>5.670e-07</td></tr><tr><td>N-1, 2Sz=1</td><td>61</td><td>5.047</td><td>3.220e-07</td><td>6.816e-07</td></tr><tr><td>N-2, 2Sz=0</td><td>43</td><td>2.857</td><td>3.570e-07</td><td>3.564e-06</td></tr><tr><td>N+1, 2Sz=1</td><td>57</td><td>4.701</td><td>2.040e-07</td><td>6.089e-07</td></tr><tr><td>N+2, 2Sz=0</td><td>44</td><td>2.342</td><td>1.690e-07</td><td>2.345e-06</td></tr></tbody></table></div>
+<p>The sector logs contain <strong>351 sweeps</strong> and <strong>27.037 summed DMRG hours</strong>. Six-way Slurm parallelism reduced the ideal sector phase to the 9.051-hour spin-excited bottleneck.</p>
+
+<h2>2. The physical signal favors pairing correlations, with important caveats</h2>
+<p>The rung-pair exponent is 0.7614 +/- 0.0215; the charge exponent is 1.2158 +/- 0.0830. Pair fits are consistently strong (R² 0.953–0.982), whereas the charge result is window-sensitive (R² 0.527–0.707). Thus the defensible statement is that pair correlations decay more slowly over the fitted finite-ladder windows—not that the ladder has long-range superconducting order.</p>
+<div class="table-wrap"><table><thead><tr><th>Channel</th><th>edge excluded</th><th>points</th><th>exponent</th><th>R²</th></tr></thead><tbody><tr><td>Charge</td><td>0.15</td><td>22</td><td>1.2158</td><td>0.707</td></tr><tr><td>Charge</td><td>0.20</td><td>19</td><td>1.2690</td><td>0.658</td></tr><tr><td>Charge</td><td>0.25</td><td>15</td><td>1.1029</td><td>0.527</td></tr><tr><td>Rung pair</td><td>0.15</td><td>22</td><td>0.7703</td><td>0.982</td></tr><tr><td>Rung pair</td><td>0.20</td><td>19</td><td>0.7614</td><td>0.973</td></tr><tr><td>Rung pair</td><td>0.25</td><td>15</td><td>0.7274</td><td>0.953</td></tr></tbody></table></div>
+<ul>
+ <li><strong>K-rho normalization matters:</strong> 1.4247 per rung versus 0.7124 per site.</li>
+ <li><strong>Open-boundary Friedel scale:</strong> the largest density-profile Fourier component is q/pi=0.1250.</li>
+ <li><strong>Pair profiles:</strong> leading rung and leg covariance modes are q=0-like, with uniform overlaps 0.980 and 0.975.</li>
+ <li><strong>Entanglement-fit failure:</strong> c=2.009 with R²=0.155; no central-charge inference should use it.</li>
+</ul>
+
+<h2>3. Stage 1 is an unbiased screen, not a susceptibility measurement</h2>
+<p>The equal-time matrices locate strong ground-state fluctuations but omit the excitation-energy denominators in a static susceptibility. Their spectra are also broad. High participation ranks and large k90 values mean the data do not support assuming a globally low-rank response.</p>
+<div class="card"><svg viewBox="0 0 760 340" role="img" aria-label="Covariance participation rank relative to block dimension"><text x="178" y="34" text-anchor="end">charge even</text><rect x="190" y="18" width="490" height="22" rx="5" fill="var(--track)" /><rect x="190" y="18" width="428.93" height="22" rx="5" fill="#b86b3d" /><text x="688" y="34">56.0/64</text><text x="178" y="68" text-anchor="end">charge odd</text><rect x="190" y="52" width="490" height="22" rx="5" fill="var(--track)" /><rect x="190" y="52" width="479.45" height="22" rx="5" fill="#b86b3d" /><text x="688" y="68">62.6/64</text><text x="178" y="102" text-anchor="end">spin even</text><rect x="190" y="86" width="490" height="22" rx="5" fill="var(--track)" /><rect x="190" y="86" width="367.54" height="22" rx="5" fill="#b86b3d" /><text x="688" y="102">48.0/64</text><text x="178" y="136" text-anchor="end">spin odd</text><rect x="190" y="120" width="490" height="22" rx="5" fill="var(--track)" /><rect x="190" y="120" width="416.23" height="22" rx="5" fill="#b86b3d" /><text x="688" y="136">54.4/64</text><text x="178" y="170" text-anchor="end">pair rung</text><rect x="190" y="154" width="490" height="22" rx="5" fill="var(--track)" /><rect x="190" y="154" width="485.22" height="22" rx="5" fill="#b86b3d" /><text x="688" y="170">63.4/64</text><text x="178" y="204" text-anchor="end">pair leg 0</text><rect x="190" y="188" width="490" height="22" rx="5" fill="var(--track)" /><rect x="190" y="188" width="483.65" height="22" rx="5" fill="#b86b3d" /><text x="688" y="204">62.2/63</text><text x="178" y="238" text-anchor="end">pair leg 1</text><rect x="190" y="222" width="490" height="22" rx="5" fill="var(--track)" /><rect x="190" y="222" width="483.65" height="22" rx="5" fill="#b86b3d" /><text x="688" y="238">62.2/63</text><text x="178" y="272" text-anchor="end">pair onsite 0</text><rect x="190" y="256" width="490" height="22" rx="5" fill="var(--track)" /><rect x="190" y="256" width="469.67" height="22" rx="5" fill="#b86b3d" /><text x="688" y="272">61.3/64</text><text x="178" y="306" text-anchor="end">pair onsite 1</text><rect x="190" y="290" width="490" height="22" rx="5" fill="var(--track)" /><rect x="190" y="290" width="469.67" height="22" rx="5" fill="#b86b3d" /><text x="688" y="306">61.3/64</text></svg></div>
+<div class="table-wrap"><table><thead><tr><th>Block</th><th>dimension</th><th>participation rank</th><th>modes for 90%</th><th>top covariance λ</th></tr></thead><tbody><tr><td>charge even</td><td>64</td><td>56.02</td><td>50</td><td>0.148687</td></tr><tr><td>charge odd</td><td>64</td><td>62.62</td><td>56</td><td>0.261171</td></tr><tr><td>spin even</td><td>64</td><td>48.00</td><td>42</td><td>0.111549</td></tr><tr><td>spin odd</td><td>64</td><td>54.36</td><td>54</td><td>0.721232</td></tr><tr><td>pair rung</td><td>64</td><td>63.38</td><td>57</td><td>1.892141</td></tr><tr><td>pair leg 0</td><td>63</td><td>62.18</td><td>56</td><td>1.169045</td></tr><tr><td>pair leg 1</td><td>63</td><td>62.18</td><td>56</td><td>1.169046</td></tr><tr><td>pair onsite 0</td><td>64</td><td>61.34</td><td>55</td><td>0.211081</td></tr><tr><td>pair onsite 1</td><td>64</td><td>61.34</td><td>55</td><td>0.211081</td></tr></tbody></table></div>
+<p>The screen still changes the pilot constructively. The first charge-even covariance eigenmode with dominant q/pi=0.125 is rank 11 (lambda=0.129339), so a top-six rule would miss the physically motivated charge scale. Conversely, the two largest spin-odd modes are almost entirely boundary-localized (edge weights 0.980 and 0.980); the leading bulk spin-odd candidate is rank 3.</p>
+<p>Raw covariance eigenvalues cannot be compared across differently normalized operator classes. Separate rung and leg matrices also cannot choose d-wave versus extended-s mixing. The projected finite-field response is needed for both questions.</p>
+
+<h2>4. The method-validity flag is red at tp=0.1</h2>
+<div class="callout"><strong>Use Stage 2 as a diagnostic ordering-tendency calculation.</strong> The ratios are tp/|Ep|=0.683, tp/Delta_s=0.652, and tp/Delta_c=9.210. In particular, the charge ratio is 9.21. Normal-state dressing is not parametrically small: g=0.06825 and g||F(0)||=0.300.</div>
+
+<h2>5. The Stage 2 pilot is deliberately staged</h2>
+<div class="steps">
+ <div class="step"><strong>Prepare</strong><br />Hash-check Stage 1 and orthonormalize 14 named candidates to 12 directions.</div>
+ <div class="step"><strong>Re-reference</strong><br />Strict h=0 number-conserving solve, then a parity-only pairing reference.</div>
+ <div class="step"><strong>Discover</strong><br />Nine normal and three pairing probes at h=1e-4; reuse responses across three geometries.</div>
+ <div class="step"><strong>Gate</strong><br />Require convergence, 5% reciprocity, and 5% normal/pair decoupling before validation.</div>
+</div>
+<p>The five familiar q=0 pair labels contain only three independent fields: onsite, rung, and leg. Extended-s and d-wave are combinations within that span. Keeping their labels in provenance while eliminating exact linear dependence makes the response solve cheaper without restricting the mixed eigenvector.</p>
+<p>A fresh strict h=0 reference is not cosmetic. Dividing a shared residual relaxation by h=1e-4 would contaminate every finite-difference column and can visibly break reciprocity. Pairing probes branch from the same re-relaxed state after removing only <code>Nf</code>; fermion parity and <code>Sz</code> remain conserved.</p>
+<p>All three geometry kernels use the newly measured backbone hole binding, <strong>-0.146510221</strong>, for their prefactor; the older registry interpolation is retained only as model provenance.</p>
+<p>Discovery reserves at most <strong>18.656 CPU node-hours</strong>. The optional three-mode h/h2 validation reserves at most <strong>9.609</strong> more and is a separate operator decision. Each validation task performs its two amplitudes sequentially and checks 5% linearity before Richardson extrapolation.</p>
+
+<h2>6. Efficiency and evidence boundaries</h2>
+<ul>
+ <li>The compact mirror is 2.046 MiB versus 6.725 GiB represented by the manifest: a 3366x reduction.</li>
+ <li>Final MPS data appear in the backbone, sector artifacts, and final checkpoints, accounting for 79.6% of full bytes. A future deduplicated storage schema could save roughly two of those three copies.</li>
+ <li>No synchronized <code>sacct</code> or <code>/usr/bin/time -v</code> record exists, so charged node-hours, CPU utilization, and peak RSS are unknown. Logged DMRG time is not a substitute.</li>
+ <li>The next launcher keeps the calibrated four-thread block-sparse topology and parallelizes across probes. It does not spend cores on unbenchmarked intra-solve thread counts.</li>
+ <li>The full restartable states remain on Perlmutter scratch. This report opened only user-synchronized compact artifacts and logs; no remote operation occurred.</li>
+</ul>
+
+<footer>Source run: <code>20260901_bare_t014_v0_stage1</code>. Generated 2026-09-02T21:48:51.773576Z. Rebuild with <code>python build_report.py</code>. Inspect <code>artifact.json</code>, <code>SOURCE_NOTES.md</code>, and the CSV files under <code>data/</code> for machine-readable evidence.</footer>
+</main></body></html>
