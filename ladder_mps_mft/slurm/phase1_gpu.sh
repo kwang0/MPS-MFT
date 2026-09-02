@@ -5,7 +5,7 @@
 
 set -euo pipefail
 
-readonly PHASE1_SCRIPT_VERSION="1.13.1"
+readonly PHASE1_SCRIPT_VERSION="1.13.2"
 script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
 project_dir="${PHASE1_PROJECT_DIR:-$(cd "$(dirname "$script_path")/.." && pwd)}"
 repo_root="${PHASE1_REPO_ROOT:-$(cd "$project_dir/.." && pwd)}"
@@ -571,7 +571,7 @@ load_environment() {
   # shellcheck disable=SC1090
   source "$run_dir/run.env"
   case "${PHASE1_RUN_SCRIPT_VERSION:-missing}" in
-    1.0.0|1.0.1|1.1.0|1.2.0|1.3.0|1.4.0|1.5.0|1.6.0|1.7.0|1.8.0|1.9.0|1.10.0|1.11.0|1.12.0|1.13.0|1.13.1) ;;
+    1.0.0|1.0.1|1.1.0|1.2.0|1.3.0|1.4.0|1.5.0|1.6.0|1.7.0|1.8.0|1.9.0|1.10.0|1.11.0|1.12.0|1.13.0|1.13.1|1.13.2) ;;
     *) die "unsupported run script version ${PHASE1_RUN_SCRIPT_VERSION:-missing}; current version is $PHASE1_SCRIPT_VERSION";;
   esac
   project_dir="$PHASE1_PROJECT_DIR"
@@ -611,18 +611,18 @@ require_current_run_version() {
 
 require_direct_submission_compatible_run_version() {
   case "${PHASE1_RUN_SCRIPT_VERSION:-missing}" in
-    1.12.0|1.13.0)
+    1.12.0|1.13.0|1.13.1)
       echo "warning: directly submitting a launcher-v${PHASE1_RUN_SCRIPT_VERSION} campaign with v${PHASE1_SCRIPT_VERSION}; the standalone smoke gate has been retired" >&2
       ;;
-    1.13.1) ;;
+    1.13.2) ;;
     *) die \
-      "direct submission requires a run prepared by launcher v1.12.0 through v1.13.1; found ${PHASE1_RUN_SCRIPT_VERSION:-missing}";;
+      "direct submission requires a run prepared by launcher v1.12.0 through v1.13.2; found ${PHASE1_RUN_SCRIPT_VERSION:-missing}";;
   esac
 }
 
 require_worker_compatible_run_version() {
   case "${PHASE1_RUN_SCRIPT_VERSION:-missing}" in
-    1.2.0|1.3.0|1.4.0|1.5.0|1.6.0|1.7.0|1.8.0|1.9.0|1.10.0|1.11.0|1.12.0|1.13.0|1.13.1) ;;
+    1.2.0|1.3.0|1.4.0|1.5.0|1.6.0|1.7.0|1.8.0|1.9.0|1.10.0|1.11.0|1.12.0|1.13.0|1.13.1|1.13.2) ;;
     *) die "queued worker cannot execute run script ${PHASE1_RUN_SCRIPT_VERSION:-missing} with launcher $PHASE1_SCRIPT_VERSION";;
   esac
 }
@@ -719,35 +719,35 @@ validate_initialized_run() {
   [[ -f "$run_dir/gpu-Manifest.toml" ]] || die "prepared run is missing its GPU manifest"
   [[ -f "$run_dir/gpu-Manifest.toml.sha256" ]] || die "prepared run is missing its GPU-manifest hash"
   if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(3|4|5|6|7|8|9|10|11|12|13)\.0$ ||
-        "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" == "1.13.1" ]]; then
+        "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.13\.[12]$ ]]; then
     [[ -d "$(full_run_directory_from_control "$run_dir")/results" ]] || die \
       "prepared run is missing its full-result scratch directory"
   fi
   if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(5|6|7|8|9|10|11|12|13)\.0$ ||
-        "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" == "1.13.1" ]]; then
+        "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.13\.[12]$ ]]; then
     [[ -f "$run_dir/campaign_kind.txt" ]] || die "prepared run is missing campaign_kind.txt"
     campaign_kind="$(<"$run_dir/campaign_kind.txt")"
     case "$campaign_kind" in
       standard|recurrence|recurrence_competitors) ;;
       matched_seed_pilot)
         [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(6|7|8|9|10|11|12|13)\.0$ ||
-          "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" == "1.13.1" ]] || die \
-          "matched-seed pilot requires launcher v1.6.0 through v1.13.1"
+          "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.13\.[12]$ ]] || die \
+          "matched-seed pilot requires launcher v1.6.0 through v1.13.2"
         ;;
       square_seed_pilot)
         [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(7|8|9|10|11|12|13)\.0$ ||
-          "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" == "1.13.1" ]] || die \
-          "square seed pilot requires launcher v1.7.0 through v1.13.1"
+          "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.13\.[12]$ ]] || die \
+          "square seed pilot requires launcher v1.7.0 through v1.13.2"
         ;;
       square_seed_pilot_v0)
         [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(11|12|13)\.0$ ||
-          "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" == "1.13.1" ]] || die \
-          "square V=0 seed pilots require launcher v1.11.0 through v1.13.1"
+          "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.13\.[12]$ ]] || die \
+          "square V=0 seed pilots require launcher v1.11.0 through v1.13.2"
         ;;
       square_tight5)
         [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(10|11|12|13)\.0$ ||
-          "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" == "1.13.1" ]] || die \
-          "square tight-five runs require launcher v1.10.0 through v1.13.1"
+          "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.13\.[12]$ ]] || die \
+          "square tight-five runs require launcher v1.10.0 through v1.13.2"
         ;;
       *) die "invalid prepared campaign kind: $campaign_kind";;
     esac
@@ -908,9 +908,18 @@ submit_gpu_job_locked() {
   printf '%s\n' "$job_id"
 }
 
+validate_gpu_runtime_preferences() {
+  local preference_check="$project_dir/scripts/check_gpu_preferences.jl"
+  [[ -f "$preference_check" ]] || die "missing GPU preference checker: $preference_check"
+  require_command "$PHASE1_JULIA"
+  "$PHASE1_JULIA" --startup-file=no --project="$project_dir/gpu" "$preference_check" || die \
+    "GPU runtime preference check failed; no job was submitted or budget reserved"
+}
+
 submit_gpu_job() {
   local run_dir="$1" label="$2" segment="$3" config="$4" reserved job_id
   reserved="$(gpu_node_hours "$PHASE1_GPU_TIME")"
+  validate_gpu_runtime_preferences
   acquire_budget_lock
   trap release_budget_lock EXIT
   ensure_ledger
@@ -950,6 +959,7 @@ submit_matrix_jobs() {
   local run_dir="$1"
   local label config matrix_reservation index
   local -a pending_labels=() pending_configs=()
+  validate_gpu_runtime_preferences
   acquire_budget_lock
   trap release_budget_lock EXIT
   ensure_ledger
@@ -1190,6 +1200,7 @@ Read-only:
   plan-square-seed-pilot
   plan-square-v0-seed-pilot
   plan-square-tight5
+  check-gpu-preferences                  Verify merged Julia preferences without loading CUDA
   budget
   status [RUN_ID]
   show [RUN_ID]
@@ -1230,6 +1241,7 @@ case "$action" in
   plan-square-seed-pilot) print_square_seed_pilot_plan;;
   plan-square-v0-seed-pilot) print_square_v0_seed_pilot_plan;;
   plan-square-tight5) print_square_tight5_plan;;
+  check-gpu-preferences) validate_gpu_runtime_preferences;;
   budget) print_budget;;
   reconcile)
     (( $# <= 2 )) || die "reconcile accepts at most one optional RUN_ID"

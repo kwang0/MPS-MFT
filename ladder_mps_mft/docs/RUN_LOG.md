@@ -1482,3 +1482,43 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   taken on Perlmutter: no job was submitted, held, released, requeued, or
   cancelled, no ledger row changed, and no HDF5 artifact was modified. Terminal
   elapsed-time reconciliation remains authoritative on Perlmutter.
+
+## 2026-09-02: square V=0 CUDA artifact-version failure and explicit 13.0 pin
+
+- Audited the locally synchronized rerun
+  `20260901_phase1_square_t014_v000_seed_chi200_loose_cudafix`, commit
+  `f92c15deb0afafb5ef3da74c6854262fc6177b98`. All six jobs (`57852352` through
+  `57852357`) failed before the dense CUDA preflight and before any MF update;
+  the CFS result tree contains no artifacts.
+- The prior artifact/local-toolkit repair did take effect. The new logs no
+  longer attempt to preload `libmpi_gtl_cuda.so`, and they no longer say a local
+  toolkit was requested. Instead CUDA_Runtime_jll reports an inherited request
+  for CUDA `13.2.0`, while its pinned wrapper provides toolkits only through
+  `13.0.2`. Leaving only `local = "false"` allowed the higher-load-path `version`
+  preference to remain merged into the active GPU environment.
+- A locally synchronized accepted state from the successful 2026-08-30 square
+  campaign records CUDA.jl `5.9.5`, artifact runtime `13.0.0`, driver `13.0.0`,
+  A100-SXM4-80GB, and passed runtime isolation. The GPU project now explicitly
+  pins `CUDA_Runtime_jll.version = "13.0"` in addition to `local = "false"`,
+  reproducing that demonstrated artifact family rather than selecting an
+  untested version.
+- The synchronized reconciliation ledger records measured fractional GPU
+  node-hours of `0.057847222` for the six failed rerun jobs and releases
+  `17.942152778` of their `18.000000000` requested ceiling. Those Perlmutter
+  measurements are authoritative. Across the preceding failed/cancelled
+  campaign and this rerun, the synchronized measured charge is `0.093611111`
+  node-hours; no scientific result was produced by either attempt.
+- Future branch logs now print the selected CUDA runtime, driver, and toolkit
+  source immediately after the existing dense preflight. Only lightweight
+  project parsing, source assertions, and whitespace checks are required for
+  this preference-only repair; the user explicitly declined another heavy
+  local integration suite.
+- Launcher v1.13.2 adds a zero-node-hour `check-gpu-preferences` action that
+  reads Julia's effective merged preferences without importing CUDA, HDF5, or
+  MPI. Direct GPU submissions and continuations run it before acquiring the
+  budget lock or calling `sbatch`; they require artifact mode, CUDA 13.0,
+  artifact `MPICH_jll`, and no MPI preloads.
+- Codex performed no Perlmutter operation, changed no budget ledger, and wrote
+  no HDF5 artifact. A third campaign must not be submitted until the effective
+  preferences report artifact CUDA `13.0` and the preceding terminal campaign
+  has been reconciled on Perlmutter.

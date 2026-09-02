@@ -710,10 +710,12 @@ end
 
 @testset "Phase 1 guarded GPU launcher" begin
     script = joinpath(ROOT, "slurm", "phase1_gpu.sh")
+    preference_script = joinpath(ROOT, "scripts", "check_gpu_preferences.jl")
     gpu_project = TOML.parsefile(joinpath(ROOT, "gpu", "Project.toml"))
     migration_script = joinpath(ROOT, "slurm", "migrate_phase1_to_scratch.sh")
     corrupt_cleaner = joinpath(ROOT, "scripts", "prune_corrupt_auxiliary_hdf5.jl")
     script_source = read(script, String)
+    preference_source = read(preference_script, String)
     migration_source = read(migration_script, String)
     cleaner_source = read(corrupt_cleaner, String)
     @test !occursin(r"(?m)^\s*module load cudatoolkit\s*$", script_source)
@@ -722,13 +724,18 @@ end
     @test gpu_project["extras"]["CUDA_Runtime_jll"] ==
         "76a88914-d11a-5bdc-97e0-2f5a05c973a2"
     @test gpu_project["preferences"]["CUDA_Runtime_jll"]["local"] == "false"
+    @test gpu_project["preferences"]["CUDA_Runtime_jll"]["version"] == "13.0"
     @test gpu_project["extras"]["MPIPreferences"] ==
         "3da0fdf6-3ccc-4f1b-acd9-58baa6c99267"
     @test gpu_project["preferences"]["MPIPreferences"]["binary"] == "MPICH_jll"
     @test isempty(gpu_project["preferences"]["MPIPreferences"]["preloads"])
     @test occursin("require_current_run_version", script_source)
     @test occursin("require_worker_compatible_run_version", script_source)
-    @test occursin("PHASE1_SCRIPT_VERSION=\"1.13.1\"", script_source)
+    @test occursin("PHASE1_SCRIPT_VERSION=\"1.13.2\"", script_source)
+    @test occursin("check-gpu-preferences)", script_source)
+    @test occursin("validate_gpu_runtime_preferences", script_source)
+    @test occursin("Base.get_preferences", preference_source)
+    @test !occursin(r"(?m)^\s*using\s+(CUDA|HDF5|MPI)", preference_source)
     @test occursin("reconcile)", script_source)
     @test occursin("additional_node_hours_reconciliations.tsv", script_source)
     @test occursin("prepare-recovery)", script_source)
@@ -807,7 +814,7 @@ end
             run_environment_path,
             replace(
                 read(run_environment_path, String),
-                "PHASE1_RUN_SCRIPT_VERSION=1.13.1" => "PHASE1_RUN_SCRIPT_VERSION=1.12.0",
+                "PHASE1_RUN_SCRIPT_VERSION=1.13.2" => "PHASE1_RUN_SCRIPT_VERSION=1.12.0",
             ),
         )
         run(pipeline(

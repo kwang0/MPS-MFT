@@ -24,16 +24,30 @@ CUDA.jl is configured to use its pinned artifact toolkit, so do not load the
 Perlmutter `cudatoolkit` module for this workflow. The launcher unloads that
 module, removes inherited NVIDIA-HPC-SDK runtime-library paths, and aborts if a
 non-artifact cuBLAS, cuSOLVER, cuSPARSE, or other CUDA runtime library is loaded.
-The GPU `Project.toml` explicitly exports `CUDA_Runtime_jll.local = "false"`,
-which prevents a Julia-module or higher-load-path preference from switching the
-calculation back to a local toolkit. It also selects artifact `MPICH_jll` with
-an empty preload list for HDF5's single-process MPI dependency; these jobs do
-not use GPU-aware MPI, so they must not preload Cray `libmpi_gtl_cuda.so` and
+The GPU `Project.toml` explicitly exports `CUDA_Runtime_jll.local = "false"`
+and `CUDA_Runtime_jll.version = "13.0"`. These settings prevent a Julia-module
+or higher-load-path preference from switching the calculation back to a local
+toolkit or requesting Perlmutter's newer system-toolkit version from an artifact
+wrapper that does not provide it. CUDA 13.0 is the artifact runtime recorded by
+the successful Float64 campaigns. The project also selects artifact `MPICH_jll`
+with an empty preload list for HDF5's single-process MPI dependency; these jobs
+do not use GPU-aware MPI, so they must not preload Cray `libmpi_gtl_cuda.so` and
 its system `libcudart` dependency.
 This follows [CUDA.jl's recommended artifact-toolkit
-configuration](https://cuda.juliagpu.org/stable/installation/overview/); the
+configuration](https://cuda.juliagpu.org/stable/installation/overview/). The
 Perlmutter system toolkit remains appropriate for software compiled against
 it, but must not be mixed into this artifact-based Julia process.
+
+Before a scientific submission, the launcher checks Julia's effective merged
+preferences without importing CUDA or requesting a compute node:
+
+```bash
+bash slurm/phase1_gpu.sh check-gpu-preferences
+```
+
+The check requires artifact mode, CUDA 13.0, artifact `MPICH_jll`, and an empty
+MPI preload list. `submit`, `submit-matrix`, and GPU continuations run the same
+check automatically before taking the budget lock or calling `sbatch`.
 
 ## Direct submission
 
