@@ -1392,3 +1392,61 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   smoke remains a separate historical row subject to terminal reconciliation.
 - Bash syntax passed and the complete local Julia suite passed `646/646`
   assertions, including `256/256` guarded Phase 1 launcher assertions.
+
+## 2026-09-01: isolated-ladder backbone and hybrid Stage 1 pilot
+
+- Added the six-sector, number- and `S_z`-conserving isolated-ladder backbone
+  for the first `L=64`, `U=8`, `n=0.9375`, `V=0`, `t0=1.4` point. The site
+  indices explicitly carry `Nf`, redundant `NfParity`, and `Sz`; a tested
+  `removeqn(psi, "Nf")` transition therefore preserves parity and `Sz` for a
+  later pairing-field response calculation.
+- Each sector uses spatially distributed holes, a 15-sweep `chi<=200`
+  pre-relaxation, persistent noise at or above `1e-8`, and warm starts through
+  `chi=400,800,1200`. Absolute energy stopping begins only after the maximum
+  bond dimension has been held for the configured minimum sweeps. Immutable
+  MPS checkpoints are written after every completed stage and a missing final
+  sector automatically resumes from the newest exact-config/exact-code stage.
+- Sector and assembled schema v2 artifacts retain per-sweep energies,
+  discarded weights, realized link dimensions, last-five-sweep spreads, every
+  final MPS, and spin/charge/pair-binding estimates at every chi. Assembly
+  streams one MPS at a time, rejects mixed configuration or implementation
+  hashes, and marks whether all final sectors pass the scientific gates.
+- Implemented Stage 1 of the hybrid search only. It diagonalizes complete
+  connected charge and spin covariance matrices in both leg-parity sectors and
+  complete real-space pairing covariance matrices within onsite, rung, and
+  both leg-bond classes. Pair addition and removal Gram matrices are summed for
+  the Hermitian `Delta+Delta^dagger` source. Cross-class pairing mixing is
+  deliberately deferred to Stage 2 candidate orthonormalization.
+- Replaced the original independent-MPO pairing loop with a cached MPS transfer
+  sweep. On the tiny state, every optimized rung and leg matrix agreed with the
+  direct fermionic MPO definition to `1e-10`; the Hermitian field covariances
+  were positive semidefinite to numerical precision.
+- The tiny six-sector/HDF5/Stage-1 integration run completed. Checkpoint-only
+  recovery recreated a deliberately removed final sector without another DMRG
+  stage. The Stage-1 artifact passed its PSD gate with minimum eigenvalue
+  `-1.700029006457271e-16`; this tiny result is software evidence only, not a
+  physical ladder conclusion.
+- The finalized Windows Julia suite passed `442` assertions. Two Bash-only
+  launcher executions were reported as platform skips; source-level launcher
+  assertions passed. A separately discovered Git-for-Windows Bash then passed
+  `bash -n`, the bare-pilot plan, and the required Phase 0 CPU plan. The bare
+  plan reserves at most `17.015625` CPU node-hours under its `24.0` cap.
+  Perlmutter-side validation and the real Stage-1 submission remain pending
+  because this Windows session had no SSH key and non-interactive NERSC
+  authentication was rejected. No real Slurm job was submitted, no allocation
+  ledger changed, and Stage 2 was not started.
+
+## 2026-09-01: Perlmutter operator-boundary correction
+
+- The user clarified the permanent host boundary: Codex must never authenticate
+  to or log in to NERSC/Perlmutter, transfer files to or from it, or operate its
+  scheduler. The user always performs synchronization, live accounting/status
+  checks, submission, continuation, and cancellation.
+- Added this rule at the repository root and repeated it in the ladder
+  subproject. Perlmutter commands in documentation are now explicitly labeled
+  as user-run handoff commands. Codex prepares and validates locally and
+  analyzes only artifacts that the user has synchronized back.
+- The pending local SSH authentication prompt was terminated without login.
+  No Codex in-app NERSC browser tab remained open. The attempted connection in
+  the preceding entry was outside the intended workflow and must not be
+  repeated.

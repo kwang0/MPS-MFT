@@ -680,7 +680,10 @@ end
 
 @testset "Phase 0 run environment round trip" begin
     script = joinpath(ROOT, "slurm", "phase0_calibrate_cpu.sh")
-    mktempdir() do directory
+    if Sys.which("bash") === nothing
+        @test_skip "bash-only Perlmutter launcher round trip"
+    else
+      mktempdir() do directory
         command = `bash -c 'source "$1" plan >/dev/null; write_environment "$2/run.env"; load_environment "$2"; printf "%s\n" "$PHASE0_RUN_SCRIPT_VERSION"' bash $script $directory`
         loaded_version = read(command, String)
         environment = read(joinpath(directory, "run.env"), String)
@@ -701,6 +704,7 @@ end
         script_source = read(script, String)
         @test occursin("submit_matrix_jobs \"\$run_dir\" \"\$seed_id\" pending", script_source)
         @test occursin("submit_matrix_jobs \"\$run_dir\" \"\$seed_id\" completed", script_source)
+      end
     end
 end
 
@@ -744,7 +748,10 @@ end
     @test occursin("--prune-cfs", migration_source)
     @test occursin("gpu_linalg_preflight!", read(joinpath(ROOT, "scripts", "gpu_smoke.jl"), String))
     @test occursin("gpu_linalg_preflight!", read(joinpath(ROOT, "scripts", "run_scf_gpu.jl"), String))
-    bash_executable = something(Sys.which("bash"), "bash")
+    bash_executable = Sys.which("bash")
+    if bash_executable === nothing
+        @test_skip "bash-only Perlmutter launcher execution tests"
+    else
     sanitized_environment = read(
         `$bash_executable -c 'source "$1" plan >/dev/null; export CUDA_HOME=/opt/nvidia/hpc_sdk/Linux_x86_64/26.5/cuda/13.2; export LD_LIBRARY_PATH=/safe/one:/opt/nvidia/hpc_sdk/Linux_x86_64/26.5/math_libs/13.2/lib64:/safe/two; sanitize_cuda_runtime_environment; printf "%s|%s|%s\n" "${LD_LIBRARY_PATH-unset}" "${CUDA_HOME-unset}" "${CUDA_PATH-unset}"' bash $script`,
         String,
@@ -1495,6 +1502,7 @@ end
         ))
         @test read(reconciliation, String) == reconciliation_before_repeat
     end
+    end
 end
 
 @testset "fixed-mu Phase 0 payload and report" begin
@@ -1871,6 +1879,98 @@ end
             @test Int(read(file, "sector_dmrg_evidence/N4_twoSz0/maximum_link_dimension")) == 8
         end
     end
+end
+
+@testset "isolated-ladder backbone and Stage 1 primitives" begin
+    model = test_model()
+    backbone = load_ladder_backbone_settings(joinpath(ROOT, "test", "fixtures", "phase0_tiny.toml"))
+    stage1 = load_bare_stage1_settings(joinpath(ROOT, "test", "fixtures", "phase0_tiny.toml"))
+    @test backbone.chi_ladder == [4, 8]
+    @test stage1.top_modes == 2
+    @test backbone_sector_keys(model) == [(4, 0), (4, 2), (3, 1), (2, 0), (5, 1), (6, 0)]
+
+    sites = backbone_siteinds(model)
+    product = spread_fixed_sector_product_state(sites, 4, 0)
+    @test count(==("Up"), product) + count(==("UpDn"), product) == 2
+    @test count(==("Dn"), product) + count(==("UpDn"), product) == 2
+    psi = productMPS(sites, product)
+    parity_state = ITensorMPS.removeqn(psi, "Nf")
+    parity_space = sprint(show, ITensorMPS.ITensors.space(siteind(parity_state, 1)))
+    @test occursin("NfParity", parity_space)
+    @test !occursin("Nf,", parity_space)
+
+    pair_diagnostics = LadderMPSMFT.sign_resolved_pair_correlations(psi, model)
+    rung_bonds = [
+        (rung_leg_to_site(rung, 0), rung_leg_to_site(rung, 1))
+        for rung in 1:model.L
+    ]
+    direct_rung_addition = [
+        real(inner(
+            psi',
+            LadderMPSMFT.singlet_pair_mpo(sites, bond_left..., bond_right...),
+            psi,
+        ))
+        for bond_left in rung_bonds, bond_right in rung_bonds
+    ]
+    @test pair_diagnostics.rung ≈ direct_rung_addition atol = 1e-12
+    @test minimum(eigvals(Symmetric(pair_diagnostics.rung_field))) >= -1e-12
+    @test minimum(eigvals(Symmetric(pair_diagnostics.onsite0_field))) >= -1e-12
+
+    mktempdir() do directory
+        stage_record = (;
+            kind=:chi,
+            maxdim=8,
+            energy=-2.0,
+            timed_out=false,
+            energy_converged=true,
+            sweep_energies=[-1.9, -2.0],
+            sweep_max_discarded_weights=[1e-5, 1e-7],
+            sweep_maxlinkdims=[4, 8],
+            max_discarded_weight=1e-5,
+            maximum_link_dimension=8,
+            last_five_energy_change=0.1,
+            scientifically_converged=true,
+        )
+        checkpoint = joinpath(directory, "stage.h5")
+        write_backbone_stage_checkpoint(
+            checkpoint,
+            psi,
+            [stage_record],
+            4,
+            0,
+            model,
+            joinpath(ROOT, "test", "fixtures", "phase0_tiny.toml"),
+        )
+        restored = read_backbone_stage_checkpoint(checkpoint)
+        @test restored.particle_number == 4
+        @test restored.twice_sz == 0
+        @test restored.stages[1].maxdim == 8
+        @test restored.stages[1].sweep_energies == [-1.9, -2.0]
+        @test length(restored.psi) == length(psi)
+    end
+
+    covariance = connected_covariance_matrix(Matrix{Float64}(I, 4, 4), zeros(4))
+    blocks = leg_parity_covariance(covariance, 2)
+    @test blocks.even ≈ Matrix{Float64}(I, 2, 2)
+    @test blocks.odd ≈ Matrix{Float64}(I, 2, 2)
+    @test blocks.cross_relative_norm ≈ 0.0
+    spectrum = covariance_eigensystem(blocks.even, model; top_modes=2)
+    @test spectrum.eigenvalues ≈ ones(2)
+    @test maximum(spectrum.residuals) < 1e-12
+    @test last_five_sweep_change([-2.0, -2.1, -2.11]) ≈ 0.11
+
+    sectors = [
+        (particle_number=number, twice_sz=sz, energy=energy)
+        for ((number, sz), energy) in zip(
+            backbone_sector_keys(model),
+            (-10.0, -9.5, -8.0, -6.5, -7.8, -6.0),
+        )
+    ]
+    summary = backbone_energy_summary(sectors, model)
+    @test summary.spin_gap ≈ 0.5
+    @test summary.chemical_potential ≈ 0.125
+    @test summary.hole_pair_binding ≈ -0.5
+    @test summary.particle_pair_binding ≈ -0.4
 end
 
 @testset "checkpoint schema and strict selection" begin

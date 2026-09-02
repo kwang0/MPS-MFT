@@ -111,6 +111,18 @@ repulsive ladders with three competing channels and 1e-5/site splittings do not.
 
 ## 2. Isolated-ladder backbone protocol
 
+Implementation status (2026-09-01): the protocol below is implemented by
+`src/Backbone.jl`, `scripts/run_ladder_backbone.jl`, and
+`slurm/bare_stage1_cpu.sh`. It uses explicit simultaneous `Nf`, `NfParity`, and
+`Sz` site quantum numbers, so the fixed-number MPS can later drop only `Nf`
+for pairing probes while retaining parity and `Sz`. Every completed chi stage
+has an immutable resumable MPS; final sector files retain sweep energies,
+discarded weights, realized link dimensions, and convergence evidence. The
+assembled artifact records every gap and pair-binding estimate versus chi and
+is the hash-checked input to the Stage 1 covariance screen. Operational details
+and the local-versus-Perlmutter validation boundary are in
+`docs/BARE_STAGE1_CPU.md`.
+
 Per ladder point (t0, V) at fixed U=8, t=1, n=0.9375. Start with L=64; add L=96, 128
 at the points that matter. All runs are QN-conserving CPU DMRG (N and S_z) on the CPU
 pool. Save every MPS. This replaces the legacy `calculate_E_p_ladder.jl`, whose

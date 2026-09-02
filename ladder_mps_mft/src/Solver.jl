@@ -116,17 +116,36 @@ function run_dmrg_ground(
     deadline::Real=Inf,
     backend::Union{Symbol,RuntimeSettings}=:cpu,
     noise_mode::Symbol=:standard,
+    maxdim_schedule=nothing,
+    noise_schedule=nothing,
+    minimum_convergence_sweep=nothing,
 )
     warm_start = psi_init !== nothing
     psi0_cpu = warm_start ? psi_init : productMPS(sites, density_product_state(length(sites), target_density; rng))
     psi0 = move_to_backend(psi0_cpu, backend)
     sweeps = Sweeps(settings.nsweeps)
-    maxdims = warm_start ? fill(settings.maxdim, settings.nsweeps) :
-        _extend_schedule([min(10, settings.maxdim), min(20, settings.maxdim), min(100, settings.maxdim), settings.maxdim], settings.nsweeps)
+    maxdims = if maxdim_schedule === nothing
+        warm_start ? fill(settings.maxdim, settings.nsweeps) :
+            _extend_schedule(
+                [min(10, settings.maxdim), min(20, settings.maxdim),
+                 min(100, settings.maxdim), settings.maxdim],
+                settings.nsweeps,
+            )
+    else
+        length(maxdim_schedule) == settings.nsweeps || throw(ArgumentError(
+            "maxdim_schedule must contain exactly nsweeps entries",
+        ))
+        Int.(maxdim_schedule)
+    end
     noise_mode in (:standard, :mu_resolve) || throw(ArgumentError(
         "noise_mode must be standard or mu_resolve",
     ))
-    noises = if noise_mode == :mu_resolve
+    noises = if noise_schedule !== nothing
+        length(noise_schedule) == settings.nsweeps || throw(ArgumentError(
+            "noise_schedule must contain exactly nsweeps entries",
+        ))
+        Float64.(noise_schedule)
+    elseif noise_mode == :mu_resolve
         initial_noise = settings.mu_warm_start_noise
         _extend_schedule([initial_noise, initial_noise / 10, 0.0], settings.nsweeps)
     elseif warm_start
@@ -137,15 +156,16 @@ function run_dmrg_ground(
     maxdim!(sweeps, maxdims...)
     noise!(sweeps, noises...)
     cutoff!(sweeps, settings.cutoff)
-    first_final_sweep = findfirst(
-        index -> maxdims[index] == settings.maxdim && noises[index] == 0.0,
-        eachindex(maxdims),
-    )
-    minimum_convergence_sweep = something(first_final_sweep, settings.nsweeps)
+    first_final_sweep = findfirst(==(settings.maxdim), maxdims)
+    resolved_minimum_convergence_sweep = minimum_convergence_sweep === nothing ?
+        something(first_final_sweep, settings.nsweeps) : Int(minimum_convergence_sweep)
+    1 <= resolved_minimum_convergence_sweep <= settings.nsweeps || throw(ArgumentError(
+        "minimum_convergence_sweep must lie within the sweep schedule",
+    ))
     observer = EnergyTimerObserver(
         settings.energy_tol,
         deadline,
-        minimum_convergence_sweep,
+        resolved_minimum_convergence_sweep,
     )
     energy, psi = dmrg(
         hamiltonian,

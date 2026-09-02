@@ -127,6 +127,41 @@ Base.@kwdef struct ProjectSettings
     config_path::String = ""
 end
 
+"""
+Numerical controls for the isolated-ladder backbone. The default bond-dimension
+ladder and persistent noise implement the protocol in
+`docs/claude/BARE_SURVEY_AND_LADDER_BACKBONE.md` without changing the SCF
+defaults used elsewhere in the package.
+"""
+Base.@kwdef struct LadderBackboneSettings
+    chi_ladder::Vector{Int} = [400, 800, 1200]
+    pre_relax_maxdim::Int = 200
+    pre_relax_sweeps::Int = 15
+    stage_sweeps::Int = 40
+    minimum_sweeps_at_maxdim::Int = 4
+    cutoff::Float64 = 1e-10
+    energy_tol::Float64 = 1e-7
+    noise_floor::Float64 = 1e-8
+    eigsolve_krylovdim::Int = 8
+    output_level::Int = 1
+    maximum_sector_seconds::Float64 = 23.5 * 3600
+    last_five_energy_tol::Float64 = 1e-4
+    random_seed::Int = 20260901
+end
+
+"""
+Controls for Stage 1 of the hybrid response search. `top_modes` applies per
+normal-sector parity block and per pairing bond class. Pair correlations use
+the short-range singlet basis that spans the five matched pairing form factors:
+onsite leg 0/1, rung, and nearest-neighbour leg 0/1.
+"""
+Base.@kwdef struct BareStage1Settings
+    top_modes::Int = 6
+    covariance_psd_tol::Float64 = 1e-8
+    bulk_edge_fractions::Vector{Float64} = [0.15, 0.20, 0.25]
+    pair_classes::Vector{Symbol} = [:onsite0, :onsite1, :rung, :leg0, :leg1]
+end
+
 struct FieldState
     alpha::Array{Float64,4}
     beta::Array{Float64,5}

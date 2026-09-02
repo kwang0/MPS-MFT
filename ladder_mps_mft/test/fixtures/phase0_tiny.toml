@@ -40,3 +40,24 @@ initial_amplitude = 1.0e-3
 max_iterations = 1
 require_accepted_solution = false
 quick_diagnostics = false
+
+[backbone]
+chi_ladder = [4, 8]
+pre_relax_maxdim = 2
+pre_relax_sweeps = 4
+stage_sweeps = 2
+minimum_sweeps_at_maxdim = 2
+cutoff = 1.0e-8
+energy_tol = 0.0
+noise_floor = 1.0e-8
+eigsolve_krylovdim = 4
+output_level = 0
+maximum_sector_seconds = 180.0
+last_five_energy_tol = 1.0
+random_seed = 7
+
+[stage1]
+top_modes = 2
+covariance_psd_tol = 1.0e-7
+bulk_edge_fractions = [0.0]
+pair_classes = ["onsite0", "onsite1", "rung", "leg0", "leg1"]

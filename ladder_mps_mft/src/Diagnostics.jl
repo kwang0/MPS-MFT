@@ -134,22 +134,284 @@ function singlet_pair_mpo(sites, annihilation_left::Int, annihilation_right::Int
     return MPO(os, sites)
 end
 
-function sign_resolved_pair_correlations(psi::MPS, model::ModelSettings)
+function _two_fermion_tensor(sites, left::Int, right::Int, left_op::String, right_op::String)
+    left < right || throw(ArgumentError("two-site fermion operators require left < right"))
+    ITensors.using_auto_fermion() && throw(ArgumentError(
+        "the cached pair-correlation sweep requires ITensor's explicit fermion-string mode",
+    ))
+    tensor = op("$left_op * F", sites[left])
+    for site in (left + 1):(right - 1)
+        tensor *= op("F", sites[site])
+    end
+    tensor *= op(right_op, sites[right])
+    return tensor
+end
+
+"""Return the unnormalized singlet annihilator on one onsite or bond coordinate."""
+function _singlet_annihilation_tensor(sites, left::Int, right::Int)
+    if left == right
+        return op("Cup * Cdn", sites[left])
+    end
+    left < right || throw(ArgumentError("pair coordinates must be stored in site order"))
+    return _two_fermion_tensor(sites, left, right, "Cup", "Cdn") -
+        _two_fermion_tensor(sites, left, right, "Cdn", "Cup")
+end
+
+_adjoint_operator(tensor::ITensor) = dag(swapprime(tensor, 0, 1))
+
+function _plain_mps_transfer(environment::ITensor, psi::MPS, site::Int)
+    physical = siteind(psi, site)
+    return (environment * psi[site]) * prime(dag(psi[site]), !physical)
+end
+
+"""
+Insert a cluster operator into a left transfer environment. With
+`close_right=false`, the primed bra link is retained so another operator may be
+inserted farther right. With `close_right=true`, right-canonicality closes the
+remaining tail exactly.
+"""
+function _insert_cluster_operator(
+    environment::ITensor,
+    psi::MPS,
+    operator::ITensor,
+    first_site::Int,
+    last_site::Int;
+    close_right::Bool,
+)
+    tensor = environment
+    for site in first_site:last_site
+        tensor *= psi[site]
+    end
+    tensor *= operator
+    for site in first_site:last_site
+        bra = if close_right && site == last_site
+            if site == 1
+                prime(dag(psi[site]), siteind(psi, site))
+            else
+                left_link = commonind(psi[site - 1], psi[site])
+                prime(dag(psi[site]), (siteind(psi, site), left_link))
+            end
+        else
+            dag(psi[site])'
+        end
+        tensor *= bra
+    end
+    return tensor
+end
+
+function _extend_cluster_operator(operator::ITensor, sites, support, first_site, last_site)
+    extended = operator
+    for site in first_site:last_site
+        site in support && continue
+        extended *= op("Id", sites[site])
+    end
+    return extended
+end
+
+function _overlapping_cluster_expectation(
+    left_environment::ITensor,
+    psi::MPS,
+    sites,
+    left_operator::ITensor,
+    left_support,
+    right_operator::ITensor,
+    right_support,
+    normalization::Real,
+)
+    first_site = min(first(left_support), first(right_support))
+    last_site = max(last(left_support), last(right_support))
+    left_extended = _extend_cluster_operator(
+        left_operator,
+        sites,
+        left_support,
+        first_site,
+        last_site,
+    )
+    right_extended = _extend_cluster_operator(
+        right_operator,
+        sites,
+        right_support,
+        first_site,
+        last_site,
+    )
+    product_operator = apply(left_extended, right_extended)
+    value = _insert_cluster_operator(
+        left_environment,
+        psi,
+        product_operator,
+        first_site,
+        last_site;
+        close_right=true,
+    )
+    return scalar(value) / normalization
+end
+
+"""
+Compute both positive-semidefinite singlet-pair Gram matrices with one cached
+left-to-right sweep:
+
+  addition[i,j] = <Delta_i Delta_j^dagger>
+  removal[i,j]  = <Delta_i^dagger Delta_j>
+
+Each pair operator has support on at most three consecutive MPS sites. The
+algorithm is O(B^2 chi^3), rather than doing B^2 independent length-L MPO
+expectation values.
+"""
+function _singlet_pair_gram_matrices(psi::MPS, bonds)
+    isempty(bonds) && return (addition=zeros(0, 0), removal=zeros(0, 0))
+    ordered = collect(bonds)
+    issorted(ordered; by=first) || throw(ArgumentError("pair bonds must be sorted by first site"))
     sites = siteinds(psi)
+    canonical = orthogonalize(psi, 1)
+    normalization = norm(canonical[1])^2
+    normalization > eps(Float64) || throw(ArgumentError("cannot correlate a zero-norm MPS"))
+    annihilation = [_singlet_annihilation_tensor(sites, bond...) for bond in ordered]
+    creation = _adjoint_operator.(annihilation)
+    supports = [bond[1]:bond[2] for bond in ordered]
+    count = length(ordered)
+    addition = zeros(ComplexF64, count, count)
+    removal = zeros(ComplexF64, count, count)
+    left_environment = ITensor(1.0)
+    left_position = 0
+
+    for row in 1:count
+        first_row, last_row = first(supports[row]), last(supports[row])
+        while left_position < first_row - 1
+            left_position += 1
+            left_environment = _plain_mps_transfer(left_environment, canonical, left_position)
+        end
+
+        addition[row, row] = _overlapping_cluster_expectation(
+            left_environment,
+            canonical,
+            sites,
+            annihilation[row],
+            supports[row],
+            creation[row],
+            supports[row],
+            normalization,
+        )
+        removal[row, row] = _overlapping_cluster_expectation(
+            left_environment,
+            canonical,
+            sites,
+            creation[row],
+            supports[row],
+            annihilation[row],
+            supports[row],
+            normalization,
+        )
+
+        addition_row = _insert_cluster_operator(
+            left_environment,
+            canonical,
+            annihilation[row],
+            first_row,
+            last_row;
+            close_right=false,
+        )
+        removal_row = _insert_cluster_operator(
+            left_environment,
+            canonical,
+            creation[row],
+            first_row,
+            last_row;
+            close_right=false,
+        )
+        row_position = last_row
+        for column in (row + 1):count
+            first_column, last_column = first(supports[column]), last(supports[column])
+            if first_column <= last_row
+                addition[row, column] = _overlapping_cluster_expectation(
+                    left_environment,
+                    canonical,
+                    sites,
+                    annihilation[row],
+                    supports[row],
+                    creation[column],
+                    supports[column],
+                    normalization,
+                )
+                removal[row, column] = _overlapping_cluster_expectation(
+                    left_environment,
+                    canonical,
+                    sites,
+                    creation[row],
+                    supports[row],
+                    annihilation[column],
+                    supports[column],
+                    normalization,
+                )
+                continue
+            end
+            while row_position < first_column - 1
+                row_position += 1
+                addition_row = _plain_mps_transfer(addition_row, canonical, row_position)
+                removal_row = _plain_mps_transfer(removal_row, canonical, row_position)
+            end
+            addition_value = _insert_cluster_operator(
+                addition_row,
+                canonical,
+                creation[column],
+                first_column,
+                last_column;
+                close_right=true,
+            )
+            removal_value = _insert_cluster_operator(
+                removal_row,
+                canonical,
+                annihilation[column],
+                first_column,
+                last_column;
+                close_right=true,
+            )
+            addition[row, column] = scalar(addition_value) / normalization
+            removal[row, column] = scalar(removal_value) / normalization
+        end
+    end
+    for row in 1:count, column in (row + 1):count
+        addition[column, row] = conj(addition[row, column])
+        removal[column, row] = conj(removal[row, column])
+    end
+    return (; addition, removal)
+end
+
+function sign_resolved_pair_correlations(psi::MPS, model::ModelSettings)
     rung_bonds = [(rung_leg_to_site(rung, 0), rung_leg_to_site(rung, 1)) for rung in 1:model.L]
     leg0_bonds = [(rung_leg_to_site(rung, 0), rung_leg_to_site(rung + 1, 0)) for rung in 1:(model.L - 1)]
     leg1_bonds = [(rung_leg_to_site(rung, 1), rung_leg_to_site(rung + 1, 1)) for rung in 1:(model.L - 1)]
-    function matrix_for(bonds)
-        return [
-            real(inner(psi', singlet_pair_mpo(sites, a, b, c, d), psi))
-            for (a, b) in bonds, (c, d) in bonds
-        ]
-    end
+    rung = _singlet_pair_gram_matrices(psi, rung_bonds)
+    leg0 = _singlet_pair_gram_matrices(psi, leg0_bonds)
+    leg1 = _singlet_pair_gram_matrices(psi, leg1_bonds)
+    onsite_removal = real.(correlation_matrix(
+        psi,
+        "Cdagdn * Cdagup",
+        "Cup * Cdn";
+        ishermitian=true,
+    ))
+    onsite_addition = real.(correlation_matrix(
+        psi,
+        "Cup * Cdn",
+        "Cdagdn * Cdagup";
+        ishermitian=true,
+    ))
     return (
-        rung=matrix_for(rung_bonds),
-        leg0=matrix_for(leg0_bonds),
-        leg1=matrix_for(leg1_bonds),
-        convention="unnormalized singlet Delta_ab = c_up,a c_dn,b - c_dn,a c_up,b",
+        onsite0=onsite_removal[1:2:end, 1:2:end],
+        onsite1=onsite_removal[2:2:end, 2:2:end],
+        onsite0_addition=onsite_addition[1:2:end, 1:2:end],
+        onsite1_addition=onsite_addition[2:2:end, 2:2:end],
+        onsite0_field=(onsite_removal + onsite_addition)[1:2:end, 1:2:end],
+        onsite1_field=(onsite_removal + onsite_addition)[2:2:end, 2:2:end],
+        rung=real.(rung.addition),
+        leg0=real.(leg0.addition),
+        leg1=real.(leg1.addition),
+        rung_removal=real.(rung.removal),
+        leg0_removal=real.(leg0.removal),
+        leg1_removal=real.(leg1.removal),
+        rung_field=real.(rung.addition + rung.removal),
+        leg0_field=real.(leg0.addition + leg0.removal),
+        leg1_field=real.(leg1.addition + leg1.removal),
+        convention="P=c_up*c_dn; Delta_ab=c_up,a*c_dn,b-c_dn,a*c_up,b (unnormalized); bare class is <Delta_i Delta_j^dagger>",
     )
 end
 
@@ -171,6 +433,8 @@ function compute_ladder_diagnostics(psi::MPS, model::ModelSettings; full_pair_co
     return (
         density,
         spin,
+        charge_correlation,
+        spin_correlation,
         charge_structure=charge_grid,
         spin_structure=spin_grid,
         charge_peak=dominant_wavevector(charge_grid),
@@ -249,9 +513,14 @@ function write_diagnostics(
         end
         if diagnostics.pair_correlations !== nothing
             pair = create_group(file, "pair_correlations")
-            pair["rung"] = diagnostics.pair_correlations.rung
-            pair["leg0"] = diagnostics.pair_correlations.leg0
-            pair["leg1"] = diagnostics.pair_correlations.leg1
+            for name in (
+                :onsite0, :onsite1, :onsite0_addition, :onsite1_addition,
+                :onsite0_field, :onsite1_field, :rung, :leg0, :leg1,
+                :rung_removal, :leg0_removal, :leg1_removal,
+                :rung_field, :leg0_field, :leg1_field,
+            )
+                pair[String(name)] = getproperty(diagnostics.pair_correlations, name)
+            end
             pair["convention"] = diagnostics.pair_correlations.convention
         end
     end

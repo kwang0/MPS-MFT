@@ -1,0 +1,69 @@
+[model]
+L = 64
+t = 1.0
+U = 8.0
+V = 0.0
+t0 = 1.4
+tp = 0.1
+density = 0.9375
+mu_initial = 0.0
+r_range = 4
+geometry = "square"
+
+[pair_binding]
+registry = "data/E_p_values.csv"
+
+[dmrg]
+nsweeps = 40
+maxdim = 1200
+cutoff = 1.0e-10
+energy_tol = 1.0e-7
+eigsolve_krylovdim = 8
+max_time_seconds = 84600.0
+output_level = 1
+
+[runtime]
+backend = "cpu"
+tensor_scalar_type = "float64"
+blas_threads = 1
+strided_threads = 1
+threaded_blocksparse = true
+conserve_sz = true
+conserve_nfparity = true
+
+[run]
+output_directory = "output/bare_stage1"
+branch_label = "bare_t014_v0"
+preparation = "isolated_ladder_backbone"
+direction = "none"
+seed_label = "spread_fixed_sector"
+random_seed = 20260901
+initial_seed = "zero"
+initial_amplitude = 0.0
+max_iterations = 1
+require_accepted_solution = false
+allow_unbound_ep = false
+quick_diagnostics = false
+full_pair_correlations = true
+
+[backbone]
+chi_ladder = [400, 800, 1200]
+pre_relax_maxdim = 200
+pre_relax_sweeps = 15
+stage_sweeps = 40
+minimum_sweeps_at_maxdim = 4
+cutoff = 1.0e-10
+energy_tol = 1.0e-7
+noise_floor = 1.0e-8
+eigsolve_krylovdim = 8
+output_level = 1
+maximum_sector_seconds = 84600.0
+last_five_energy_tol = 1.0e-4
+random_seed = 20260901
+
+[stage1]
+top_modes = 6
+covariance_psd_tol = 1.0e-7
+bulk_edge_fractions = [0.15, 0.20, 0.25]
+pair_classes = ["onsite0", "onsite1", "rung", "leg0", "leg1"]
+

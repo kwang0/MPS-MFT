@@ -10,6 +10,9 @@ The implementation currently provides:
 - a mixer-independent raw-map probe that accepts physical period-two mean-field solutions, followed only when needed by adaptive linear or Anderson fixed-point acceleration;
 - immutable final HDF5 states, hash-checked parent/restart lineage, model/numerics/implementation fingerprints, and accepted-only selection;
 - charge and spin structure factors, `K_rho`, rung-cut entanglement/central-charge fits, sign-resolved pair correlations, and separate fixed-sector spin/charge/pair-gap calculations;
+- a restartable six-sector isolated-ladder backbone plus a zero-field,
+  data-driven Stage 1 covariance screen for charge, spin, and Hermitian pairing
+  candidates;
 - a dense-CUDA production backend that preserves the refactored SCF, recurrence, variational, checkpoint, and diagnostic logic while explicitly disabling QN block sparsity; and
 - a guarded Perlmutter Phase 1 launcher with direct scientific-branch submission, per-branch GPU preflight, explicit continuations, optional ledgered CPU `E_p` jobs, scratch-resident full MPS artifacts with automatic stateless CFS mirrors, and a conservative 400-additional-node-hour cap.
 
@@ -23,24 +26,39 @@ production backend; Phase 1 uses the refactored solver on CUDA.
 
 ## Quick start
 
+All Perlmutter commands in this repository are operator handoff commands for
+the user to run. Codex works and validates locally; it does not authenticate to
+NERSC, synchronize files, inspect the live scheduler, or submit/cancel jobs.
+
 Instantiate and test from this directory:
 
 ```bash
 julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.test()'
 ```
 
-Instantiate the pinned CUDA overlay on Perlmutter:
+User-run Perlmutter handoff: instantiate the pinned CUDA overlay:
 
 ```bash
 JULIA_PKG_PRECOMPILE_AUTO=0 julia --project=gpu \
   -e 'using Pkg; Pkg.instantiate(; allow_autoprecomp=false)'
 ```
 
-Inspect the Phase 1 GPU plan without submitting anything:
+User-run Perlmutter handoff: inspect the Phase 1 GPU plan without submitting:
 
 ```bash
 bash slurm/phase1_gpu.sh plan
 ```
+
+User-run Perlmutter handoff: inspect the guarded bare-ladder CPU pilot
+(`V=0`, `t0=1.4`) without submitting:
+
+```bash
+bash slurm/bare_stage1_cpu.sh plan
+```
+
+Its six fixed-sector backbone, immutable per-`chi` MPS checkpoints, Stage 1
+candidate spectra, and the deliberate stop before finite-field Stage 2 are
+documented in `docs/BARE_STAGE1_CPU.md`.
 
 The targeted chi=400 matched-seed convergence pilot has its own read-only plan
 and preparation-only action:
