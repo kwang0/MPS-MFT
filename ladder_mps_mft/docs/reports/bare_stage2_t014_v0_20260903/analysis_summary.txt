@@ -1,0 +1,11 @@
+stage2_reference_energy=-286.47846006074735
+stage2_reference_density=0.9375000000000094
+stage2_reference_chemical_potential=1.6789771120085781
+kernel_pair_binding=-0.14651022120352764
+kernel_prefactor=0.13650924717543494
+square_bare_field_norm=0.030665473405420758
+square_bare_modulation_norm=0.0032085668625292155
+total_measured_node_hours=3.8739518229166667
+normal_measured_node_hours=1.3527278645833334
+pair_measured_node_hours=2.5191015625000004
+overhead_measured_node_hours=0.0021223958333333333

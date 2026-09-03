@@ -1729,3 +1729,81 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   transfer, Perlmutter login, scheduler action, or ledger mutation. Local
   validation was limited to static source inspection and TOML parsing because
   this Windows host has no runnable Julia or Bash installation.
+
+## 2026-09-03: bare Stage 2 response and square-SCF seed analysis
+
+- Analyzed the synchronized Stage 2 pilot at `V=0`, `t0=1.4` from
+  `output/bare_stage2/20260902_bare_t014_v0_stage2`. All 22 compact artifacts
+  passed the local size/hash/stateless verifier; the full scratch artifacts
+  were not locally available for re-verification.
+- Wrote the portable technical report and reproducible extractor under
+  `docs/reports/bare_stage2_t014_v0_20260903/`. The report compares the
+  projected response spectrum, the geometry-dependent bare image `F(0)`, the
+  six existing square `chi=200` seeds and accepted endpoints, and synchronized
+  Slurm resource accounting.
+- The square bare image has norm `0.0306655`, dominated by a common beta
+  background and uniform Hartree offset; its nonuniform remainder has norm
+  `0.00320857`. Its charge-even profile has cosine `0.7251` with the current
+  `m=4` charge template but contains no resolved spin or pairing source.
+- All six current square branches are accepted period-one fixed points with
+  nearly identical total, beta, Hartree, and pairing-field scales. Their
+  beta-plus-Hartree distance from `F(0)` is only `0.00213`--`0.00262`.
+  Remaining spin-odd amplitudes retain seed dependence, so the recommended
+  basin test is `F(0)` plus the same controlled symmetry-breaking increment,
+  compared against the existing zero-background starts; `F(0)` alone is not a
+  new symmetry-breaking direction.
+- The retained response basis has maximum leakage `0.8327`, and the planned
+  `h/2` validation has not run. Reported eigenvalues are therefore pilot
+  subspace estimates. Measured Stage 2 charge was `3.87395` CPU node-hours.
+- The report artifact passed schema and portable-package validation; only
+  structural HTML verification was available because no local Chromium
+  headless executable is installed. No DMRG, transfer, Perlmutter login, or
+  scheduler action was performed during this analysis.
+
+## 2026-09-03: square smooth-pairing five-point grid fill prepared
+
+- Defined the five missing coordinates of the square `t0={1.0,1.2,1.4}` by
+  `V={-0.4,-0.2,0.0}` grid: `(1.0,-0.4)`, `(1.0,-0.2)`, `(1.2,-0.4)`,
+  `(1.2,-0.2)`, and `(1.2,0.0)`. Every point has an exact signed `E_p` row in
+  `data/E_p_values.csv`; no interpolation or additional isolated-ladder job is
+  required.
+- Replaced the initially considered exact-zero field control with the user's
+  requested previously tested smooth pairing control. It uses the
+  `legacy_pairing` matched-mode seed at total norm `1e-3` and common RNG seed
+  `1404`: coefficients vary across relative bond and leg-pair classes but are
+  copied along all rungs. `beta` and `mu_cdw` begin at zero. This contains no
+  center-of-mass spatial noise, while its nonzero `alpha` avoids the exact
+  number-conserving normal-sector lock. It is not claimed to be fully
+  symmetry-unbiased or an exhaustive basin search.
+- Added `configs/phase1_gpu_square_grid_smooth_pairing_chi200_loose.toml` and
+  `scripts/prepare_phase1_square_smooth_pairing_grid.jl`. Preparation verifies
+  the five point contracts, exact pair-binding values, common loose numerical
+  fingerprint, common initial-seed fingerprint, source/Manifest implementation
+  fingerprint, no lineage, zero normal fields, matched seed norm, and exact
+  center-of-mass uniformity before writing the five immutable configs and
+  manifest.
+- The campaign uses 12 sweeps, `chi=200`, cutoff `1e-10`, DMRG energy tolerance
+  `1e-6`, inner/outer density tolerance `1e-3`, loose field gates `1e-6`
+  absolute or `5e-3` relative, the corrected oscillation and slow-mode gates,
+  a 20-update raw-map probe, and up to 80 MF updates. Starting `mu` values are
+  rounded, V-informed bracketing guides (`0.55`, `1.10`, `1.65`); density is
+  still solved independently and uses the carried compressibility slope plus
+  `1e-8` warm re-solve noise.
+- Launcher v1.16.0 adds `plan-square-smooth-pairing-grid` and
+  `prepare-square-smooth-pairing-grid NEW_RUN`. Direct submission creates five
+  scientific jobs and no smoke. The run has separate CFS and scratch trees
+  from the currently running launcher-v1.15.0 square `chi=400` comparison.
+  Worker and narrowly scoped continuation compatibility for that active run
+  are retained because `src/` and the GPU Manifest did not change.
+- Five 12-hour one-of-four-GPU requests reserve `15.000` node-hours. The same
+  seed measured `0.123472222` and `0.228125000` node-hours at the completed
+  `t0=1.4,V=-0.4` and `V=0` endpoints, projecting `0.878993055` actual
+  node-hours for five jobs; the broader twelve-branch mean projects
+  `1.010243055`. These are estimates only. The last synchronized active ledger
+  total is `42.024097222`; including the running comparison's unreconciled
+  `6.000` ceiling and the new `15.000` envelope would give `63.024097222`
+  active and `336.975902778` unreserved. Live Perlmutter accounting supersedes
+  this illustration.
+- Full MPS artifacts remain scratch-first and only stateless mirrors go to CFS.
+  No cross-point energy ranking is authorized. Codex submitted or cancelled no
+  job, modified no ledger or HDF5 artifact, and performed no Perlmutter access.

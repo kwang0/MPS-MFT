@@ -731,7 +731,7 @@ end
     @test isempty(gpu_project["preferences"]["MPIPreferences"]["preloads"])
     @test occursin("require_current_run_version", script_source)
     @test occursin("require_worker_compatible_run_version", script_source)
-    @test occursin("PHASE1_SCRIPT_VERSION=\"1.15.0\"", script_source)
+    @test occursin("PHASE1_SCRIPT_VERSION=\"1.16.0\"", script_source)
     @test occursin("check-gpu-preferences)", script_source)
     @test occursin("validate_gpu_runtime_preferences", script_source)
     @test occursin("Base.get_preferences", preference_source)
@@ -751,6 +751,9 @@ end
     @test occursin("plan-square-tight5)", script_source)
     @test occursin("prepare-square-v0-chi400-compare)", script_source)
     @test occursin("plan-square-v0-chi400-compare)", script_source)
+    @test occursin("prepare-square-smooth-pairing-grid)", script_source)
+    @test occursin("plan-square-smooth-pairing-grid)", script_source)
+    @test occursin("require_continuation_compatible_run_version", script_source)
     @test occursin("prepare-standard)", script_source)
     @test occursin("--licenses=scratch,cfs", script_source)
     @test occursin("compact_results.jl", script_source)
@@ -781,6 +784,52 @@ end
     @test compare_settings.convergence.variational_energy_tol == 1.0e-7
     @test compare_settings.convergence.probe_iterations == 20
     @test compare_settings.run.max_iterations == 80
+    grid_settings = load_settings(joinpath(
+        ROOT,
+        "configs",
+        "phase1_gpu_square_grid_smooth_pairing_chi200_loose.toml",
+    ))
+    @test grid_settings.model.geometry == :square
+    @test grid_settings.model.V == -0.4
+    @test grid_settings.model.t0 == 1.0
+    @test grid_settings.model.ep_mode == :exact
+    @test grid_settings.model.ep_signed == -0.17882744409052975
+    @test grid_settings.dmrg.maxdim == 200
+    @test grid_settings.dmrg.nsweeps == 12
+    @test grid_settings.dmrg.mu_density_tol == 1.0e-3
+    @test grid_settings.dmrg.mu_warm_start_noise == 1.0e-8
+    @test grid_settings.convergence.density_tol == 1.0e-3
+    @test grid_settings.convergence.field_abs_tol == 1.0e-6
+    @test grid_settings.convergence.field_rel_tol == 5.0e-3
+    @test grid_settings.convergence.probe_iterations == 20
+    @test grid_settings.run.initial_seed == :legacy_pairing
+    @test grid_settings.run.initial_seed_protocol == :matched_mode
+    @test grid_settings.run.initial_amplitude == 1.0e-3
+    @test grid_settings.run.random_seed == 1404
+    grid_seed = initial_fields(
+        grid_settings.model;
+        seed=grid_settings.run.initial_seed,
+        amplitude=grid_settings.run.initial_amplitude,
+        protocol=grid_settings.run.initial_seed_protocol,
+        mode_number=grid_settings.run.initial_mode_number,
+        mode_phase_pi=grid_settings.run.initial_mode_phase_pi,
+        pairing_form_factor=grid_settings.run.initial_pairing_form_factor,
+        leg_parity=grid_settings.run.initial_leg_parity,
+        stripe_charge_to_spin_ratio=grid_settings.run.initial_stripe_charge_to_spin_ratio,
+        stripe_pairing_to_spin_ratio=grid_settings.run.initial_stripe_pairing_to_spin_ratio,
+        random_seed=grid_settings.run.random_seed,
+    )
+    @test all(iszero, grid_seed.beta)
+    @test all(iszero, grid_seed.mu_cdw)
+    @test any(value -> !iszero(value), grid_seed.alpha)
+    @test field_l2_per_physical_site(grid_seed, grid_settings.model) ≈ 1.0e-3
+    for offset in 0:grid_settings.model.r_range, leg in 1:2, other_leg in 1:2
+        values = [
+            grid_seed.alpha[rung, rung + offset, leg, other_leg]
+            for rung in 1:(grid_settings.model.L - offset)
+        ]
+        @test maximum(abs.(values .- first(values))) <= 1.0e-14
+    end
     bash_executable = Sys.which("bash")
     if bash_executable === nothing
         @test_skip "bash-only Perlmutter launcher execution tests"
@@ -832,7 +881,7 @@ end
             run_environment_path,
             replace(
                 read(run_environment_path, String),
-                "PHASE1_RUN_SCRIPT_VERSION=1.15.0" => "PHASE1_RUN_SCRIPT_VERSION=1.12.0",
+                "PHASE1_RUN_SCRIPT_VERSION=1.16.0" => "PHASE1_RUN_SCRIPT_VERSION=1.12.0",
             ),
         )
         run(pipeline(

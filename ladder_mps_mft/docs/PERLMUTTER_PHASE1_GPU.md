@@ -345,8 +345,9 @@ bash slurm/phase1_gpu.sh submit "$SQUARE_RUN"
 bash slurm/phase1_gpu.sh status "$SQUARE_RUN"
 ```
 
-The full `t0={1.0,1.2,1.4}` by `V={0,-0.2,-0.4}` square grid remains
-conditional and plan-only. This six-branch representative bank plus
+Historical plan (superseded 2026-09-03 by the five-point smooth-pairing grid
+section below): the full `t0={1.0,1.2,1.4}` by `V={0,-0.2,-0.4}` square grid
+was conditional and plan-only. This six-branch representative bank plus
 provisional three-branch banks at the other eight points would reserve
 `90.000` node-hours total, leaving `174.250` from the current synced ledger.
 Repeating all six branches everywhere would leave only `102.250` and is not
@@ -451,6 +452,44 @@ two 12-hour one-of-four-GPU jobs, reserves `6.000` node-hours, and creates no
 smoke job. See `docs/SQUARE_V0_T014_CHI400_COMPARISON_2026-09-03.md` for the
 parent-integrity checks, numerical contract, interpretation boundary, and
 completion gate.
+
+## Square smooth-pairing five-point grid fill
+
+The remaining coordinates of the square `t0={1.0,1.2,1.4}` by
+`V={-0.4,-0.2,0.0}` grid are prepared as five independent `chi=200` loose
+branches. Every point uses the same previously tested `legacy_pairing` seed:
+relative bond and leg-pair coefficients are random with fixed seed `1404`, but
+are copied uniformly along the ladder. The matched total field norm is `1e-3`,
+and `beta=mu_cdw=0` initially. This opens the pairing sector without injecting
+center-of-mass spatial noise or seed domain walls. It is a smooth mixed-pairing
+control, not a literally symmetry-unbiased or exhaustive basin search.
+
+The five points are `(t0,V)=(1.0,-0.4),(1.0,-0.2),(1.2,-0.4),`
+`(1.2,-0.2),(1.2,0.0)`. All have exact pair-binding registry rows. Their full
+MPS artifacts use a new scratch run tree and do not touch the concurrently
+running `chi=400` comparison. Launcher v1.16.0 remains worker-compatible with
+that comparison's v1.15.0 jobs. The submission check includes every
+unreconciled reservation already recorded in the live Perlmutter ledger.
+
+```bash
+cd "$CFS/m4863/MPS-MFT/ladder_mps_mft"
+bash slurm/phase1_gpu.sh plan-square-smooth-pairing-grid
+
+GRID_RUN=20260903_phase1_square_grid_smooth_pairing_chi200_loose
+bash slurm/phase1_gpu.sh prepare-square-smooth-pairing-grid "$GRID_RUN"
+column -ts $'\t' "output/phase1_gpu/$GRID_RUN/manifest.tsv" | less -S
+bash slurm/phase1_gpu.sh budget
+bash slurm/phase1_gpu.sh submit "$GRID_RUN"
+bash slurm/phase1_gpu.sh status "$GRID_RUN"
+```
+
+There is no smoke job. Five first segments reserve `15.000` node-hours, while
+the same-seed elapsed charges at the two completed `t0=1.4` endpoints project
+only `0.878993055` actual node-hours for five jobs. The broader twelve-branch
+mean projects `1.010243055`; these are estimates only, and the requested
+ceiling remains active until authoritative terminal `sacct` reconciliation.
+See `docs/SQUARE_SMOOTH_PAIRING_GRID_2026-09-03.md` for the exact point, seed,
+fingerprint, cost, storage, and interpretation contracts.
 
 ## Pair-binding interpolation and optional calculations
 

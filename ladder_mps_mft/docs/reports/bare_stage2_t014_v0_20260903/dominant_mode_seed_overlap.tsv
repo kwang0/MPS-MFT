@@ -1,0 +1,37 @@
+geometry	block	rank	eigenvalue_real	branch	seed	absolute_cosine	signed_cosine
+cubic_frustrated	normal	1	-1.187909018699175	square__stripe_pairing_m004_chi200_loose	stripe + d-wave, m=4	0.6898536068675001	0.6898536068675001
+cubic_frustrated	normal	1	-1.187909018699175	square__pairing_dwave_m000_chi200_loose	d-wave, q=0	0	0
+cubic_frustrated	normal	1	-1.187909018699175	square__stripe_pairing_m005_chi200_loose	stripe + d-wave, m=5	1.227559370421192e-05	-1.227559370421192e-05
+cubic_frustrated	normal	1	-1.187909018699175	square__stripe_m004_chi200_loose	stripe, m=4	0.9661740157070181	0.9661740157070181
+cubic_frustrated	normal	1	-1.187909018699175	square__stripe_m005_chi200_loose	stripe, m=5	1.719257469459071e-05	-1.719257469459071e-05
+cubic_frustrated	normal	1	-1.187909018699175	square__legacy_pairing_mixed_chi200_loose	legacy pairing	0	0
+cubic_frustrated	pair	1	24.4730200100419	square__stripe_pairing_m004_chi200_loose	stripe + d-wave, m=4	0.6998354668730901	0.6998354668730901
+cubic_frustrated	pair	1	24.4730200100419	square__pairing_dwave_m000_chi200_loose	d-wave, q=0	0.9995649796860087	0.9995649796860087
+cubic_frustrated	pair	1	24.4730200100419	square__stripe_pairing_m005_chi200_loose	stripe + d-wave, m=5	0.6998354668730898	0.6998354668730898
+cubic_frustrated	pair	1	24.4730200100419	square__stripe_m004_chi200_loose	stripe, m=4	0	0
+cubic_frustrated	pair	1	24.4730200100419	square__stripe_m005_chi200_loose	stripe, m=5	0	0
+cubic_frustrated	pair	1	24.4730200100419	square__legacy_pairing_mixed_chi200_loose	legacy pairing	0.2451362962067652	-0.2451362962067652
+cubic_unfrustrated	normal	1	3.563727056095904	square__stripe_pairing_m004_chi200_loose	stripe + d-wave, m=4	0.690542086822553	0.690542086822553
+cubic_unfrustrated	normal	1	3.563727056095904	square__pairing_dwave_m000_chi200_loose	d-wave, q=0	0	0
+cubic_unfrustrated	normal	1	3.563727056095904	square__stripe_pairing_m005_chi200_loose	stripe + d-wave, m=5	8.027361602451557e-06	8.027361602451557e-06
+cubic_unfrustrated	normal	1	3.563727056095904	square__stripe_m004_chi200_loose	stripe, m=4	0.9671382658555788	0.9671382658555788
+cubic_unfrustrated	normal	1	3.563727056095904	square__stripe_m005_chi200_loose	stripe, m=5	1.124271601652259e-05	1.124271601652259e-05
+cubic_unfrustrated	normal	1	3.563727056095904	square__legacy_pairing_mixed_chi200_loose	legacy pairing	0	0
+cubic_unfrustrated	pair	1	24.4730200100419	square__stripe_pairing_m004_chi200_loose	stripe + d-wave, m=4	0.6998354668730901	0.6998354668730901
+cubic_unfrustrated	pair	1	24.4730200100419	square__pairing_dwave_m000_chi200_loose	d-wave, q=0	0.9995649796860087	0.9995649796860087
+cubic_unfrustrated	pair	1	24.4730200100419	square__stripe_pairing_m005_chi200_loose	stripe + d-wave, m=5	0.6998354668730898	0.6998354668730898
+cubic_unfrustrated	pair	1	24.4730200100419	square__stripe_m004_chi200_loose	stripe, m=4	0	0
+cubic_unfrustrated	pair	1	24.4730200100419	square__stripe_m005_chi200_loose	stripe, m=5	0	0
+cubic_unfrustrated	pair	1	24.4730200100419	square__legacy_pairing_mixed_chi200_loose	legacy pairing	0.2451362962067652	-0.2451362962067652
+square	normal	1	1.187909018698632	square__stripe_pairing_m004_chi200_loose	stripe + d-wave, m=4	0.6905420868225531	0.6905420868225531
+square	normal	1	1.187909018698632	square__pairing_dwave_m000_chi200_loose	d-wave, q=0	0	0
+square	normal	1	1.187909018698632	square__stripe_pairing_m005_chi200_loose	stripe + d-wave, m=5	8.027361601610454e-06	8.027361601610454e-06
+square	normal	1	1.187909018698632	square__stripe_m004_chi200_loose	stripe, m=4	0.9671382658555792	0.9671382658555792
+square	normal	1	1.187909018698632	square__stripe_m005_chi200_loose	stripe, m=5	1.124271601530455e-05	1.124271601530455e-05
+square	normal	1	1.187909018698632	square__legacy_pairing_mixed_chi200_loose	legacy pairing	0	0
+square	pair	1	4.668807757152312	square__stripe_pairing_m004_chi200_loose	stripe + d-wave, m=4	0.5697964013179687	0.5697964013179687
+square	pair	1	4.668807757152312	square__pairing_dwave_m000_chi200_loose	d-wave, q=0	0.8138320437707103	0.8138320437707103
+square	pair	1	4.668807757152312	square__stripe_pairing_m005_chi200_loose	stripe + d-wave, m=5	0.5697964013179686	0.5697964013179686
+square	pair	1	4.668807757152312	square__stripe_m004_chi200_loose	stripe, m=4	0	0
+square	pair	1	4.668807757152312	square__stripe_m005_chi200_loose	stripe, m=5	0	0
+square	pair	1	4.668807757152312	square__legacy_pairing_mixed_chi200_loose	legacy pairing	0.1067383489473614	-0.1067383489473614

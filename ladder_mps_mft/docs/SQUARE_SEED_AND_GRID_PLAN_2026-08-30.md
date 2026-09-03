@@ -138,6 +138,11 @@ direct-submission policy, the ledger would move to `153.750` reserved and
 pre-authorized. Finalized early completions may release unused requested
 ceilings only through the append-only `sacct` reconciliation action.
 
+Update 2026-09-03: the provisional later three-branch bank below has been
+superseded by the authorized single smooth mixed-pairing control at the five
+missing coordinates. See `docs/SQUARE_SMOOTH_PAIRING_GRID_2026-09-03.md`.
+The original estimate is retained here as historical planning context.
+
 The intended square grid is `t0={1.0,1.2,1.4}` by `V={0,-0.2,-0.4}`. Running
 this full six-branch reconnaissance at the representative point and a
 provisional three-branch bank at each of the other eight points would reserve
