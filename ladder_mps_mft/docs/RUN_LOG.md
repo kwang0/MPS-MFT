@@ -1660,3 +1660,29 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   validation must occur during the non-submitting Perlmutter preparation step.
   Codex ran no DMRG, CUDA initialization, transfer, scheduler command, or ledger
   mutation.
+
+## 2026-09-03: frozen job 57886813 reporting failure isolated
+
+- User-reported status shows Slurm job `57886813` as `FAILED`, but its compact
+  Float64 state is present with status `frozen_field_evaluation` and finite
+  canonical energy `-84.624511246252`. The DMRG therefore completed without
+  reaching the internal deadline; this is not a CUDA or quantum-solve failure.
+  The status helper does not display the target-density-corrected energy, so
+  this number must not be compared directly with the ranked six-state values.
+- The first failure is a deterministic reporting bug after `state.h5` and
+  `diagnostics.h5` are written: `run_frozen_legacy_gpu.jl` requested a
+  nonexistent `qy` field while assembling `frozen_dmrg_observables.tsv`; the
+  diagnostics peak records expose that component as `ky`. The runner now uses
+  `ky`. A second latent bug was repaired before it could be reached: the runner
+  now derives `target_label` from the prepared output directory rather than
+  referring to the preparation-only `TARGET_LABEL` constant.
+- Added `scripts/finalize_frozen_legacy_result.jl` to rebuild
+  `frozen_dmrg_observables.tsv`, `energy_comparison.tsv`, and `run_summary.md`
+  from the compact state, compact diagnostics, and the six hashed accepted
+  references. It modifies no HDF5 artifact, runs no DMRG, requests no
+  allocation, and does not touch the ledger. The completed DMRG must not be
+  resubmitted merely to repair reporting.
+- The frozen diagnostic remains selection-ineligible because no SCF acceptance
+  test was performed. Its target-density-corrected energy, density, raw-map
+  mismatch, truncation evidence, and consistency errors must be read from the
+  artifact before any conditional energetic comparison is reported.

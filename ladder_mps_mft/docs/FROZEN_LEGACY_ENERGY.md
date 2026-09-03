@@ -62,3 +62,38 @@ authoritative Perlmutter ledger and enforce the 400-additional-node-hour cap.
 After completion, `energy_comparison.tsv` and `run_summary.md` are mirrored with
 the compact result. `state.h5` contains the full energy breakdown, fields,
 correlations, DMRG sweep evidence, source hashes, and diagnostic classification.
+
+## Reporting-only recovery for job 57886813
+
+The first frozen-field job completed its DMRG and wrote an immutable state, but
+the original runner requested a nonexistent `qy` field from the diagnostics
+peak records while writing `frozen_dmrg_observables.tsv`; those records expose
+the transverse component as `ky`. That reporting exception made Slurm mark the
+job failed after the scientific state and diagnostics had already been
+preserved and mirrored. The runner now uses `ky`. A second latent reporting bug
+was also repaired: it now derives the comparison label from its prepared output
+directory rather than referring to the preparation-only `TARGET_LABEL`
+constant.
+
+Do not resubmit the DMRG. After synchronizing the repaired scripts to
+Perlmutter, regenerate the three missing/incomplete text reports from the
+compact state and diagnostics on a login node:
+
+```bash
+cd "$CFS/m4863/MPS-MFT/ladder_mps_mft"
+FROZEN_RUN=20260903_phase1_square_t014_v000_legacy_frozen_dmrg_chi200
+RUN_DIR="output/phase1_gpu/$FROZEN_RUN"
+CONFIG=$(awk -F '\t' 'NR == 1 {for (i=1; i<=NF; i++) if ($i=="config") c=i; next} NR == 2 {print $c}' "$RUN_DIR/manifest.tsv")
+STATE=$(find "$RUN_DIR/results" -type f -name state.h5 -print -quit)
+
+module load julia
+julia --startup-file=no --project=. \
+  scripts/finalize_frozen_legacy_result.jl "$CONFIG" "$STATE"
+```
+
+This recovery reads the state, diagnostics, and six reference artifacts, then
+atomically replaces only `frozen_dmrg_observables.tsv`,
+`energy_comparison.tsv`, and `run_summary.md`. It performs no DMRG, uses no GPU
+allocation, changes no ledger entry, and does not modify any HDF5 file. The
+historical Slurm state remains `FAILED`; that scheduler label cannot and need
+not be rewritten.

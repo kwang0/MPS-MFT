@@ -151,6 +151,7 @@ get(contract, "selection_eligible", true) == false || error(
 
 settings = load_settings(config_path)
 validate_settings(settings)
+target_label = basename(settings.run.output_directory)
 settings.runtime.backend == :gpu || error("frozen-field entry point requires runtime.backend=gpu")
 settings.runtime.tensor_scalar_type == :float64 || error("frozen-field entry point requires Float64")
 settings.run.max_iterations == 1 || error("frozen-field diagnostic must permit exactly one evaluation")
@@ -386,10 +387,10 @@ frozen_table = write_key_values(joinpath(output_directory, "frozen_dmrg_observab
     "double_counting_correction" => energy.double_counting_correction,
     "hamiltonian_identity_error_per_site" => diagnostic.hamiltonian_identity_error_per_site,
     "effective_eigenvalue_error_per_site" => diagnostic.effective_eigenvalue_error_per_site,
-    "charge_peak_qx_over_pi" => diagnostics.charge_peak.qx / pi,
-    "charge_peak_qy_over_pi" => diagnostics.charge_peak.qy / pi,
-    "spin_peak_qx_over_pi" => diagnostics.spin_peak.qx / pi,
-    "spin_peak_qy_over_pi" => diagnostics.spin_peak.qy / pi,
+    "charge_peak_qx_over_pi" => diagnostics.charge_peak.qx_over_pi,
+    "charge_peak_ky_over_pi" => diagnostics.charge_peak.ky_over_pi,
+    "spin_peak_qx_over_pi" => diagnostics.spin_peak.qx_over_pi,
+    "spin_peak_ky_over_pi" => diagnostics.spin_peak.ky_over_pi,
     "spin_q_mismatch" => diagnostics.spin_q_mismatch,
     "K_rho_site_normalized" => diagnostics.K_rho.K_rho_site_normalized,
     "K_rho_rung_normalized" => diagnostics.K_rho.K_rho_rung_normalized,
@@ -412,7 +413,7 @@ open(comparison_path, "w") do io
         ), '\t'))
     end
     println(io, join((
-        "NA", "frozen_legacy_diagnostic", "false", "false", TARGET_LABEL,
+        "NA", "frozen_legacy_diagnostic", "false", "false", target_label,
         "single_dmrg_target_density_corrected",
         string(energy.target_density_corrected_variational_energy),
         string(energy.target_density_corrected_variational_energy - minimum_reference_energy),

@@ -8,7 +8,11 @@ for raw_path in ARGS
         status = String(read(file, "status"))
         accepted = Bool(read(file, "accepted"))
         period = Int(read(file, "fundamental_period"))
-        energy = Float64(read(file, "solution_canonical_variational_energy"))
+        canonical_energy = Float64(read(file, "solution_canonical_variational_energy"))
+        target_corrected_energy = haskey(
+            file,
+            "solution_target_density_corrected_variational_energy",
+        ) ? Float64(read(file, "solution_target_density_corrected_variational_energy")) : NaN
         tensor_path = "psi/MPS[1]/storage/data"
         tensor_scalar_type = if haskey(file, tensor_path)
             string(eltype(read(file, tensor_path)))
@@ -19,6 +23,14 @@ for raw_path in ARGS
         else
             "unknown"
         end
-        println(join((path, status, string(accepted), string(period), string(energy), tensor_scalar_type), '\t'))
+        println(join((
+            path,
+            status,
+            string(accepted),
+            string(period),
+            string(canonical_energy),
+            string(target_corrected_energy),
+            tensor_scalar_type,
+        ), '\t'))
     end
 end

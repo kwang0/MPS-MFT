@@ -1132,7 +1132,7 @@ show_status() {
     printf '%-8s %-35s %-7s %-12s %-10s\n' "$kind" "$label" "$segment" "$job_id" "${state:-UNKNOWN}"
   done <"$run_dir/jobs.tsv"
   echo
-  printf 'LATEST STATE\tSTATUS\tACCEPTED\tPERIOD\tENERGY\tSCALAR\n'
+  printf 'LATEST STATE\tSTATUS\tACCEPTED\tPERIOD\tCANONICAL_ENERGY\tTARGET_CORRECTED_ENERGY\tSCALAR\n'
   local -a states=()
   local branch
   while IFS= read -r branch; do
