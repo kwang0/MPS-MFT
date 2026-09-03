@@ -36,7 +36,7 @@
 
 \title{Ladder MPS+Mean-Field Project: Living Methods Notes}
 \author{Kevin Wang and contributors}
-\date{Initialized 1 September 2026}
+\date{Living notes --- updated 2 September 2026}
 
 \begin{document}
 
@@ -200,6 +200,56 @@ entries are set to zero.  This component-level map is implemented in
 \path{src/MeanField.jl}; changes to it require a simultaneous audit of the
 variational constants in Sec.~\ref{sec:variational}.
 
+\subsubsection{Bond-space interpretation of the pair and exchange fields}
+
+For each fixed ordered rung pair \((i,i')\), it is useful to regard
+\begin{equation}
+ \bm{\alpha}_{ii'}=
+ \left(\alpha^{00}_{ii'},\alpha^{11}_{ii'},
+       \alpha^{01}_{ii'},\alpha^{10}_{ii'}\right)^{\mathsf T}
+\end{equation}
+as a four-component vector in leg-label space.  The real exchange field
+\(\beta_\sigma\) has the analogous vector for each spin \(\sigma\).  The
+transverse kernel acts bond by bond: it mixes these four leg labels but never
+changes \((i,i')\).  For either
+\(q\in\{\alpha,\beta_\sigma\}\), the same-leg and cross-leg blocks decompose as
+\begin{align}
+ q^{\mathrm{same},\pm}_{ii'}
+ &=\frac{q^{00}_{ii'}\pm q^{11}_{ii'}}{\sqrt{2}},
+ &
+ q^{\times,\pm}_{ii'}
+ &=\frac{q^{01}_{ii'}\pm q^{10}_{ii'}}{\sqrt{2}}.
+ \label{eq:bond-leg-modes}
+\end{align}
+The \(+\) and \(-\) combinations are respectively even and odd under reflection
+of the ladder, and hence carry transverse momenta \(k_y=0\) and \(k_y=\pi\).
+
+For the stored real singlet pair field and real Hermitian exchange field, the
+transpose relations are
+\begin{equation}
+ \alpha_{ii'}^{\ell\ell'}=\alpha_{i'i}^{\ell'\ell},
+ \qquad
+ \beta_{\sigma,ii'}^{\ell\ell'}=\beta_{\sigma,i'i}^{\ell'\ell}.
+ \label{eq:bond-transpose-symmetry}
+\end{equation}
+Consequently, a cross-leg odd component obeys
+\begin{equation}
+ q^{\times,-}_{i'i}=-q^{\times,-}_{ii'}.
+ \label{eq:cross-leg-odd-reversal}
+\end{equation}
+It is therefore a legitimate diagonal-bond channel for \(i\ne i'\), but it
+vanishes identically on a rung: \(q^{\times,-}_{ii}=0\).  A cross-leg rung pair
+is necessarily leg-even, whereas the two oppositely oriented diagonals can form
+either an even or an odd combination.  For \(\beta_\sigma\), an imaginary
+antisymmetric rung amplitude would instead be a current/flux channel; complex
+fields of that kind are outside the present real-field implementation.
+
+Leg-reflection parity is not the same as the usual \(s\)- versus \(d\)-wave
+form-factor label.  In particular, the two leg bonds of a \(d\)-wave pair field
+have the same sign and are therefore leg-even; its \(d\)-wave character comes
+from the opposite sign of the rung-bond component, that is, from a relation
+between the same-leg and cross-leg blocks.
+
 For each rung and spin, the Hartree update is
 \begin{equation}
  \begin{pmatrix}\nu_{\sigma,i0}\\\nu_{\sigma,i1}\end{pmatrix}
@@ -209,27 +259,425 @@ For each rung and spin, the Hartree update is
 \label{eq:density-kernel}
 \end{equation}
 with
-\begin{center}
-\begin{tabular}{lcc}
+\begin{equation}
+ K_G=
+ \begin{cases}
+  2g\left(\begin{smallmatrix}2&1\\1&2\end{smallmatrix}\right),
+    &G=\text{frustrated cubic},\\[2pt]
+  6g\left(\begin{smallmatrix}0&1\\1&0\end{smallmatrix}\right),
+    &G=\text{unfrustrated cubic},\\[2pt]
+  2g\left(\begin{smallmatrix}0&1\\1&0\end{smallmatrix}\right),
+    &G=\text{square}.
+ \end{cases}
+\end{equation}
+The two-component Hartree field has the same even/odd leg-parity
+classification as the same-leg bond block.  Table~\ref{tab:kernel-spectrum}
+consolidates the spectra of every real field in
+\(x=(\alpha,\beta_\downarrow,\beta_\uparrow,\nu_\downarrow,\nu_\uparrow)\).
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabular}{@{}lcccc@{}}
 \toprule
-Geometry \(G\) & \(K_G\) & leg-even / leg-odd eigenvalues \\
+& \multicolumn{2}{c}{Same-leg bond / local leg}
+& \multicolumn{2}{c}{Cross-leg bond} \\
+\cmidrule(lr){2-3}\cmidrule(l){4-5}
+& even, \(k_y=0\) & odd, \(k_y=\pi\)
+& even, \(k_y=0\) & odd, \(k_y=\pi\) \\
 \midrule
-frustrated cubic
-& \(2g\left(\begin{smallmatrix}2&1\\1&2\end{smallmatrix}\right)\)
-& \(6g,\;2g\) \\
-unfrustrated cubic
-& \(6g\left(\begin{smallmatrix}0&1\\1&0\end{smallmatrix}\right)\)
-& \(6g,\;-6g\) \\
-square
-& \(2g\left(\begin{smallmatrix}0&1\\1&0\end{smallmatrix}\right)\)
-& \(2g,\;-2g\) \\
+Applicable fields
+& \(\alpha,\beta_\sigma,\nu_\sigma\)
+& \(\alpha,\beta_\sigma,\nu_\sigma\)
+& \(\alpha,\beta_\sigma\)
+& \(\alpha,\beta_\sigma\) \\
+\midrule
+frustrated cubic   & \(6g\) & \( 2g\) & \(4g\) & \( 4g\) \\
+unfrustrated cubic & \(6g\) & \(-6g\) & \(4g\) & \(-4g\) \\
+square              & \(2g\) & \(-2g\) & \(0\)  & \(0\) \\
 \bottomrule
 \end{tabular}
-\end{center}
-Negative map eigenvalues naturally motivate a two-sublattice transverse
-interpretation and can appear in the one-ladder iteration as a period-two
-orbit.  Numerical recurrence alone, however, does not identify its physical
-order parameter.
+\caption{Geometry-kernel eigenvalues \(k\) before multiplication by the
+isolated-ladder susceptibility and the channel-dependent source sign.  The
+first two columns describe same-leg bonds for \(\alpha,\beta_\sigma\) and the
+local leg vector for \(\nu_\sigma\).  Cross-leg even modes can occupy rungs or
+diagonals; cross-leg odd modes require \(i\ne i'\).  The pair and exchange maps
+have the same geometry kernel, although their response signs differ.  The
+exchange field omits the identical-site entry; the on-site singlet-pair entry
+is retained.}
+\label{tab:kernel-spectrum}
+\end{table}
+
+Both spin components of \(\beta_\sigma\) and \(\nu_\sigma\) have the displayed
+spectrum.  Their charge-like and spin-like combinations,
+\((q_\uparrow\pm q_\downarrow)/\sqrt{2}\), therefore inherit the same geometry
+eigenvalues, while their isolated-ladder susceptibilities need not be equal.
+The table exhausts the present real mean-field variables.  The global chemical
+potential \(\mu\) is a density-control Lagrange multiplier rather than a
+transverse mean-field channel; triplet pairing and imaginary current/flux
+fields are not implemented.
+
+\subsubsection{Kernel signs versus iteration signs}
+
+A kernel eigenvalue \(k\) is not by itself the eigenvalue of the complete
+linearized SCF map.  If \(\chi\ge0\) denotes the magnitude of the isolated
+ladder's response in an unmixed eigenchannel, the source signs in
+Eq.~\eqref{eq:linear-fields} give
+\begin{equation}
+ \lambda_{\alpha}=+k\chi_{\alpha},
+ \qquad
+ \lambda_{\beta}=-k\chi_{\beta},
+ \qquad
+ \lambda_{\nu}=-k\chi_{\nu}.
+\label{eq:response-signs}
+\end{equation}
+The anomalous term is written as minus the pair field times its conjugate
+operator, whereas the exchange and Hartree sources enter with plus signs.
+Kernel signs must therefore be read with opposite response conventions in the
+pair and normal one-body channels.
+
+Equation~\eqref{eq:response-signs} is scalar bookkeeping for an isolated mode.
+In general, the ladder response is a matrix: in particular, exchange and
+Hartree perturbations with the same symmetries can mix.  The physical stability
+numbers are therefore the eigenvalues of the full Jacobian
+\(J=\partial f/\partial x\), not the entries in
+Table~\ref{tab:kernel-spectrum}.  The table supplies the exact geometry part of
+that Jacobian.
+
+\paragraph{What is and is not diagonal.}
+Let \(\bm r(x)\) denote all isolated-ladder correlators used to construct the
+next field.  About a reference \(x_0\) (which must be a fixed point for an exact
+stability analysis),
+\begin{equation}
+ \delta\bm r=\mathcal R\,\delta x,
+ \qquad
+ \mathcal R_{ab}=\left.\frac{\partial r_a}{\partial x_b}\right|_{x_0},
+ \qquad
+ J_G=K_G\mathcal R.
+ \label{eq:full-response-composition}
+\end{equation}
+Here \(\mathcal R\) includes the pair-versus-normal source signs in
+Eq.~\eqref{eq:response-signs}; equivalently, those signs may be extracted and
+the remaining susceptibility denoted by \(\chi\).  The tables above diagonalize
+\(K_G\), not necessarily \(\mathcal R\).  Unless the two matrices commute, a
+kernel eigenvector is not an eigenvector of \(J_G\).
+
+Symmetry still imposes substantial block structure:
+\begin{itemize}
+ \item At a number-conserving reference, anomalous pair fields and normal
+       Hartree/exchange fields do not mix to linear order.  They can mix after
+       a paired state breaks \(U(1)\).
+ \item At an unpolarized spin-symmetric reference, charge-like and spin-like
+       normal perturbations form separate blocks.
+ \item Exact leg reflection separates \(k_y=0\) and \(k_y=\pi\) blocks.
+ \item Exact translation would separate longitudinal momenta \(q_x\).  The
+       finite open ladder has no exact translation symmetry, so nearby standing
+       waves and boundary-localized profiles can mix weakly or strongly.
+\end{itemize}
+Thus ``block diagonal'' is the appropriate expectation, not ``diagonal.''
+Within one block, on-site, rung, leg-bond, longer-range, Hartree, and exchange
+coordinates may mix whenever they share all exact quantum numbers.  In
+particular, extended \(s\)- and \(d\)-wave pair templates are not distinct
+irreducible representations of an anisotropic two-leg ladder: both are
+leg-even, spin-singlet, \(q_x=0\) fields.  Their rung/leg relative sign is an
+output to diagnose, not a symmetry prohibition against mixing.
+
+\paragraph{Isolated-ladder intuition.}
+Introduce sign-adjusted conjugate operators
+\(\widetilde O_a=-\partial H/\partial x_a\), so every source is written as
+\(-x_a\widetilde O_a\).  At zero temperature their static susceptibility has
+the spectral form
+\begin{equation}
+ \chi_{ab}
+ =2\operatorname{Re}\sum_{m>0}
+ \frac{\langle0|\widetilde O_a|m\rangle
+       \langle m|\widetilde O_b|0\rangle}
+      {E_m-E_0}.
+ \label{eq:spectral-susceptibility}
+\end{equation}
+An off-diagonal entry is nonzero when two different source operators couple the
+ground state to the same excited states.  This is generic on a ladder.  A
+leg-even density potential changes not only the density but also kinetic-energy
+and exchange-bond expectation values; conversely, a hopping-like
+\(\beta_\sigma\) perturbation redistributes charge.  Schematically,
+\begin{equation}
+ \begin{pmatrix}\delta n\\ \delta X\end{pmatrix}
+ =-
+ \begin{pmatrix}
+   \chi_{nn} & \chi_{nX}\\
+   \chi_{Xn} & \chi_{XX}
+ \end{pmatrix}
+ \begin{pmatrix}\delta\nu\\ \delta\beta\end{pmatrix}.
+ \label{eq:normal-response-mixing}
+\end{equation}
+The same effect occurs in the pair block: rung hopping \(t_0\), longitudinal
+hopping, and interactions allow a leg-bond pair source to induce a rung-pair
+correlator and vice versa.  Reciprocity makes the properly normalized
+susceptibility symmetric in the exact calculation, but the product
+\(J_G=K_G\mathcal R\) need not be symmetric because the geometry kernel weights
+the output coordinates differently.
+
+\paragraph{A two-coordinate pair example.}
+As a schematic example in the leg/rung basis, suppose the isolated ladder has
+the sign structure
+\begin{equation}
+ \chi_{\mathrm{pair}}=
+ \begin{pmatrix}1&-0.6\\-0.6&1.2\end{pmatrix}.
+ \label{eq:toy-pair-susceptibility}
+\end{equation}
+The negative off-diagonal response means that a positive leg source induces an
+opposite-sign rung response, as expected for a \(d\)-like tendency.  For either
+cubic geometry,
+\begin{equation}
+ \frac{J_{\mathrm{cubic}}}{g}
+ =\begin{pmatrix}6&0\\0&4\end{pmatrix}
+  \begin{pmatrix}1&-0.6\\-0.6&1.2\end{pmatrix}
+ =\begin{pmatrix}6&-3.6\\-2.4&4.8\end{pmatrix}.
+ \label{eq:toy-cubic-jacobian}
+\end{equation}
+This matrix is not diagonal.  Its eigenvalues are \(8.4g\) and \(2.4g\); the
+leading right eigenvector is proportional to
+\((1,-2/3)^{\mathsf T}\), not to either a pure leg field, a pure rung field, or
+the equal-amplitude seed \((1,-1)^{\mathsf T}\).  It is the field pattern that
+the complete raw map reproduces, multiplied by \(8.4g\).
+
+For the same illustrative ladder response, the square kernel gives
+\begin{equation}
+ \frac{J_{\mathrm{square}}}{g}
+ =\begin{pmatrix}2&0\\0&0\end{pmatrix}
+  \chi_{\mathrm{pair}}
+ =\begin{pmatrix}2&-1.2\\0&0\end{pmatrix}.
+ \label{eq:toy-square-jacobian}
+\end{equation}
+The leg source can still induce a rung correlator through \(\chi_{\mathrm{pair}}\),
+but the square kernel removes that output before it becomes the next rung
+field.  The leading self-reproducing field direction is consequently pure leg
+in this toy projection.
+
+\paragraph{What the current Stage 2 calculation measures.}
+Let the columns of \(Q\) be orthonormal candidate fields.  The finite-field
+calculation measures every column of
+\begin{equation}
+ Z=\mathcal RQ,
+ \qquad
+ \mathcal R_Q=Q^{\mathsf T}Z,
+ \qquad
+ J_{G,Q}=Q^{\mathsf T}K_GZ.
+ \label{eq:projected-stage2-response}
+\end{equation}
+Here \(Q^{\mathsf T}\) denotes projection using the implemented field metric.
+It then diagonalizes the complete projected normal and pair blocks, rather than
+treating the named candidates as independent scalar eigenmodes.  The present
+bank contains nine normal Hartree directions and three independent pair
+directions spanning the on-site, rung, and leg templates; the named extended
+\(s\) and \(d\) templates are exact combinations inside that pair span.
+
+This is a \emph{projected} Jacobian, not yet the literal full array-space
+Jacobian.  In particular, the current normal input basis has no independent
+\(\beta_\sigma\) source directions.  Exchange-field output is retained as a
+\(\beta\)-fraction/leakage diagnostic.  If that leakage is appreciable, the
+normal basis must be enlarged with exchange directions before its eigenvalues
+can be called full normal-sector stability eigenvalues.  The same principle
+applies to response outside the selected longitudinal modes or retained pair
+templates.
+
+For a linearized mode,
+\begin{equation}
+ \delta x_{m+1}=\lambda\,\delta x_m.
+\end{equation}
+A negative \(\lambda\) flips the mode's sign on every raw update.  If
+\(|\lambda|<1\), this is merely a decaying oscillation into the normal fixed
+point.  If \(|\lambda|>1\), the normal state is unstable along a
+sign-alternating trajectory; nonlinear saturation can then produce two fields
+that are exchanged by the raw map.  In the one-ladder formulation these two
+iterations represent transverse sublattices \(A\) and \(B\).  In an explicit
+two-sublattice formulation the same state is a fixed point of the doubled map,
+whose linear factor is \(\lambda^2>0\).  This interpretation is physical only
+when the transverse lattice supports the required bipartition; numerical
+period two alone is not sufficient.
+
+\subsubsection{Why the geometries promote \(d\)-wave pairing differently}
+
+For the two leading bond classes, collect the leg-even nearest-neighbor
+leg-bond correlator and the even rung-pair correlator into
+\(\bm F_d=(F_{\parallel,+},F_{\perp,+})^{\mathsf T}\).  A
+conventional ladder \(d\)-wave form factor has opposite signs on these two bond
+classes, \(F_{\parallel,+}F_{\perp,+}<0\).  Although the kernel does not mix
+different rung pairs, its action on this assembled form-factor vector is
+\begin{equation}
+ K^{(d)}_{\mathrm{frustrated}}
+ =K^{(d)}_{\mathrm{unfrustrated}}
+ =\begin{pmatrix}6g&0\\0&4g\end{pmatrix},
+ \qquad
+ K^{(d)}_{\mathrm{square}}
+ =\begin{pmatrix}2g&0\\0&0\end{pmatrix}.
+ \label{eq:d-wave-geometry-kernels}
+\end{equation}
+Both cubic geometries therefore provide exactly the same \emph{direct}
+feedback to the \(d\)-wave sector.  They preserve the relative minus sign,
+weight the leg-bond component by \(6g\), and weight the rung component by
+\(4g\).  On the common leg-bond component this is three times the square
+feedback.  More importantly, when the ladder's pair structure is rung-singlet
+dominated, as in the strong-rung \(t_0>1\) regime of interest, the square kernel
+discards the dominant component: it returns no rung-pair field at all.  In the
+square connectivity, the two legs of a rung tunnel toward different neighboring
+ladders, so the rung pair cannot make the same second-order pair hop into one
+neighboring ladder.
+
+Zero rung \emph{feedback} does not imply a zero rung-pair correlator.  The
+isolated ladder can still convert a leg-bond source into a rung response through
+off-diagonal entries of its pair susceptibility.  The missing square-kernel
+entry means that this rung response is not fed back as a rung source on the next
+SCF step.
+
+At a common bare isolated-ladder expansion point, the response matrix
+\(\chi_{\mathrm{pair}}\) is geometry independent, and
+\begin{equation}
+ J^{(d)}_G=K^{(d)}_G\chi_{\mathrm{pair}}.
+ \label{eq:d-wave-jacobian}
+\end{equation}
+The displayed \(2\times2\) matrices summarize bond-class weights.  The full
+susceptibility may also mix different longitudinal separations and the on-site
+pair component, but the equality of the two cubic kernels persists throughout
+the leg-even pair block.
+Hence the two cubic geometries have identical bare Jacobians within the
+leg-even \(d\)-wave subspace; any difference between their final \(d\)-wave
+solutions must enter indirectly through competing normal channels,
+geometry-dependent normal-state dressing, or nonlinear selection.
+Equation~\eqref{eq:d-wave-geometry-kernels} also shows
+that there is generally no single scalar ``\(d\)-wave kernel eigenvalue'': the
+leg and rung coordinates have different weights, and the full eigenvector and
+eigenvalue come from \(K^{(d)}_G\chi_{\mathrm{pair}}\).  The shorthand
+\(\lambda=k\chi\) is exact only for an unmixed eigenmode.
+
+The two cubic geometries separate most clearly in the leg-odd sectors.  The
+same-leg/local \(k_y=\pi\) kernel is \(-6g\) in the unfrustrated geometry but
+only \(+2g\) in the frustrated geometry: the magnitude is reduced by a factor
+of three and the sign is reversed.  For a leg-odd pair field this is a competing
+pair channel, not the conventional leg-even \(d\)-wave channel.  For a leg-odd
+Hartree or exchange field, the extra minus response sign in
+Eq.~\eqref{eq:response-signs} gives the opposite transverse interpretation:
+the unfrustrated mode is transversely in phase, whereas the weaker frustrated
+mode wants to alternate between neighboring ladders.  This leg-odd sector is
+the natural leg-staggered SDW/CDW competitor.
+
+There is a second, distinct frustration effect in the leg-even normal sector.
+Both cubic kernels have \(k=+6g\), so the normal response gives
+\(\lambda<0\) and favors an \(A/B\) alternation between neighboring ladders.
+The bipartite unfrustrated transverse lattice can realize that pattern; the
+non-bipartite frustrated lattice cannot satisfy it on every bond.  Thus
+``leg-odd'' (\(k_y=\pi\) within one ladder) and ``transversely staggered''
+(negative SCF \(\lambda\)) are independent labels and should not be conflated.
+More generally, no negative-\(\lambda\) channel has a globally consistent
+two-sublattice realization on the frustrated connectivity; a numerical
+period-two orbit there is not automatically a physical state.
+
+The remaining odd pairing channel is also informative but is not part of a
+uniform rung \(d\)-wave form factor.  The diagonal-only cross-leg odd mode has
+kernel eigenvalues \(+4g\), \(-4g\), and \(0\) in the frustrated,
+unfrustrated, and square geometries, respectively.  It vanishes for a rung pair
+by Eq.~\eqref{eq:cross-leg-odd-reversal}.
+
+\paragraph{Direct comparison with CDW and SDW.}
+Define the charge- and spin-like Hartree sources and responses by
+\begin{equation}
+ \nu_c=\frac{\nu_\uparrow+\nu_\downarrow}{\sqrt{2}},
+ \qquad
+ \nu_s=\frac{\nu_\uparrow-\nu_\downarrow}{\sqrt{2}},
+ \qquad
+ \chi_c\ne\chi_s\quad\text{in general}.
+ \label{eq:charge-spin-fields}
+\end{equation}
+The geometry kernel is spin blind, so CDW and SDW fields with the same leg
+parity have the same \(k\).  Their physical responses differ through the
+longitudinal wavevector and the isolated-ladder susceptibilities \(\chi_c\) and
+\(\chi_s\).  With hole density \(\delta=1-n_\star\), the principal candidates
+used in this project are a leg-even CDW near
+\(q_x\simeq2\pi\delta\) (the \(4k_F\) wavevector modulo \(2\pi\)) and a
+leg-odd SDW near \(q_x\simeq\pi(1-\delta)\).  Table~\ref{tab:dwave-cdw-sdw}
+compares these with uniform \(d\)-wave pairing.
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{@{}lXccc@{}}
+\toprule
+Tendency / component & Field and ladder sector
+& Frustrated cubic & Unfrustrated cubic & Square \\
+\midrule
+\(d\)-wave, leg bond
+& \(\alpha_{\parallel,+}\), \(q_x=0\), \(k_y=0\)
+& \(+6g\) & \(+6g\) & \(+2g\) \\
+\(d\)-wave, rung bond
+& \(\alpha_{\perp,+}\), \(q_x=0\), cross-leg even
+& \(+4g\) & \(+4g\) & \(0\) \\
+CDW candidate
+& \(\nu_c\), \(q_x\simeq2\pi\delta\), \(k_y=0\)
+& \(-6g\) & \(-6g\) & \(-2g\) \\
+SDW candidate
+& \(\nu_s\), \(q_x\simeq\pi(1-\delta)\), \(k_y=\pi\)
+& \(-2g\) & \(+6g\) & \(+2g\) \\
+\bottomrule
+\end{tabularx}
+\caption{Signed geometry factors entering the linearized response.  Pair rows
+use \(+k\), while CDW/SDW rows already include the minus source-response sign
+and therefore use \(-k\).  Each entry must still be multiplied by its own
+ladder susceptibility, and the two \(d\)-wave components generally mix.}
+\label{tab:dwave-cdw-sdw}
+\end{table}
+
+The table makes the relative mechanisms transparent:
+\begin{itemize}
+ \item In the frustrated cubic geometry, \(d\)-wave feedback remains strong and
+       positive.  The leading leg-even CDW factor has the same magnitude
+       \(6g\), but its negative sign calls for a transverse two-sublattice
+       pattern that is incompatible with the non-bipartite connectivity.  The
+       leg-odd SDW factor is both three times weaker than in the unfrustrated
+       cubic geometry and negative, so its simple transverse alternation is
+       frustrated as well.
+ \item In the unfrustrated cubic geometry, the \(d\)-wave leg component, the
+       charge-even CDW, and the spin-odd SDW all carry geometry factors of
+       magnitude \(6g\).  The CDW factor is negative and its transverse
+       \(A/B\) pattern is allowed; the SDW factor is positive and is in phase
+       across ladders.  Pairing therefore receives no comparable relief from
+       its main normal competitors, and the winner is controlled primarily by
+       \(\chi_{\mathrm{pair}}\), \(\chi_c\), and \(\chi_s\).
+ \item In the square geometry, the common leg scale is only \(2g\), so both
+       pairing and normal tendencies are weakened relative to cubic.  The
+       decisive asymmetry is that CDW and SDW feedback remains nonzero and can
+       use the bipartite transverse pattern where needed, whereas the dominant
+       rung component of \(d\)-wave pairing receives exactly zero direct
+       feedback.
+\end{itemize}
+
+These are Hartree-channel comparisons.  A complete CDW or SDW eigenmode may
+also contain the charge- or spin-like combination of \(\beta_\sigma\).  Because
+exchange and Hartree perturbations can mix, the quantitative comparison is
+between the spectral radii of the full pair, charge, and spin Jacobian blocks,
+not between isolated entries of Table~\ref{tab:dwave-cdw-sdw}.  Geometry fixes
+the feedback weights and transverse sign constraints; the ladder response
+decides how strongly each longitudinal order parameter exploits them.
+
+When the isolated ladder is spin gapped, the gap provides an additional,
+geometry-independent suppression of the low-energy SDW response.  It can favor
+singlet pairing relative to SDW, but it does not distinguish the three
+transverse geometries; that distinction still comes from the kernels above.
+The pairing--CDW competition can therefore remain the closer one.  Equal-time
+correlation amplitudes or decay exponents are useful diagnostics but cannot be
+substituted for the static susceptibilities in the Jacobian comparison.
+
+The resulting kernel-level expectation is that
+\texttt{cubic\_frustrated} has the strongest net tendency to stabilize
+\(d\)-wave order: it retains the same \(6g/4g\) pair feedback as
+\texttt{cubic\_unfrustrated} while weakening or geometrically frustrating key
+normal competitors.  The unfrustrated cubic geometry comes next, and the square
+geometry is least favorable because it has only \(2g\) leg feedback and no
+rung feedback.  This is a mechanism and ranking hypothesis, not by itself a
+phase-boundary result.  A dressed susceptibility can depend indirectly on
+geometry, and a non-bipartite array may support multi-sublattice or complex
+orders outside the present real one-/two-sublattice description.  Final claims
+must use the measured full Jacobian together with converged variational-energy
+comparisons.
 
 \section{MPS ground-state solve and density targeting}
 
@@ -610,6 +1058,19 @@ clearly labeled representative settings.
 \toprule
 Date & Revision & Summary \\
 \midrule
+2026-09-02 & 0.6 & Expanded the full-response discussion with symmetry blocks,
+isolated-ladder mixing, a two-component example, and the exact scope of the
+current projected Stage 2 Jacobian.\\
+2026-09-02 & 0.5 & Added a signed-response comparison of uniform \(d\)-wave,
+charge-even CDW, and spin-odd SDW tendencies across all three geometries.\\
+2026-09-02 & 0.4 & Added the geometry-by-geometry mechanism for \(d\)-wave
+feedback, separated leg parity from transverse staggering, and recorded the
+kernel-level ordering tendency and its caveats.\\
+2026-09-02 & 0.3 & Added the exchange-field spectrum, the diagonal-only
+cross-leg odd channels, spin/charge degeneracies, and the distinction between
+kernel and full-Jacobian eigenvalues.\\
+2026-09-02 & 0.2 & Added the bond-space interpretation, consolidated pairing
+and Hartree kernel spectra, and documented channel-dependent response signs.\\
 2026-09-01 & 0.1 & Initial synthesis of the modular model, SCF/DMRG method,
 variational functional, convergence gates, diagnostics, and provenance rules.\\
 \bottomrule

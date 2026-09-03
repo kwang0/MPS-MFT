@@ -5,7 +5,7 @@
 
 set -euo pipefail
 
-readonly PHASE1_SCRIPT_VERSION="1.13.2"
+readonly PHASE1_SCRIPT_VERSION="1.14.0"
 script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
 project_dir="${PHASE1_PROJECT_DIR:-$(cd "$(dirname "$script_path")/.." && pwd)}"
 repo_root="${PHASE1_REPO_ROOT:-$(cd "$project_dir/.." && pwd)}"
@@ -22,6 +22,7 @@ PHASE1_QOS="${PHASE1_QOS:-shared}"
 PHASE1_JULIA="${PHASE1_JULIA:-julia}"
 PHASE1_GPU_TIME="${PHASE1_GPU_TIME:-12:00:00}"
 PHASE1_SQUARE_TIGHT5_TIME="${PHASE1_SQUARE_TIGHT5_TIME:-03:00:00}"
+PHASE1_FROZEN_LEGACY_TIME="${PHASE1_FROZEN_LEGACY_TIME:-03:00:00}"
 PHASE1_GPU_CPUS="${PHASE1_GPU_CPUS:-32}"
 PHASE1_SMOKE_TIME="${PHASE1_SMOKE_TIME:-00:30:00}"
 PHASE1_MAX_SEGMENTS="${PHASE1_MAX_SEGMENTS:-4}"
@@ -149,6 +150,10 @@ validate_project() {
     "missing square seed-pilot preparation entry point"
   [[ -f "$project_dir/scripts/prepare_phase1_square_tight5.jl" ]] || die \
     "missing square tight-five preparation entry point"
+  [[ -f "$project_dir/scripts/prepare_frozen_legacy_energy.jl" ]] || die \
+    "missing frozen legacy-field preparation entry point"
+  [[ -f "$project_dir/scripts/run_frozen_legacy_gpu.jl" ]] || die \
+    "missing frozen legacy-field GPU entry point"
   [[ -f "$project_dir/scripts/gpu_smoke.jl" ]] || die "missing GPU smoke test"
   [[ -f "$project_dir/scripts/validate_gpu_smoke.jl" ]] || die "missing GPU smoke validator"
   [[ -f "$project_dir/scripts/compact_results.jl" ]] || die "missing stateless-result compactor"
@@ -378,6 +383,47 @@ EOF
   return 0
 }
 
+print_frozen_legacy_plan() {
+  validate_project
+  local requested committed projected remaining
+  requested="$(gpu_node_hours "$PHASE1_FROZEN_LEGACY_TIME")"
+  committed="$(ledger_total)"
+  projected="$(awk -v c="$committed" -v a="$requested" 'BEGIN {printf "%.9f", c+a}')"
+  remaining="$(awk -v cap="$PHASE1_ADDITIONAL_NODE_HOUR_CAP" -v p="$projected" \
+    'BEGIN {printf "%.9f", cap-p}')"
+  cat <<EOF
+Ladder MPS+MF frozen legacy-field one-shot DMRG
+
+Point:                L=64, U=8, V=0, t0=1.4, t_perp=0.1, density=0.9375, square
+Fields and mu:        exact terminal values from the supplied legacy HDF5 file
+Quantum solve:        one fresh chi=200 Float64-CUDA DMRG; no parent MPS
+MF policy:            no chemical-potential search and no MF update
+Energy:               current canonical functional plus target-density correction
+Comparison:           six accepted matching-fingerprint states remain the formal ranking
+Classification:       frozen legacy row is diagnostic and selection-ineligible
+Storage:              full MPS on scratch; automatic stateless CFS mirror
+GPU request:          one of four GPUs, ${PHASE1_FROZEN_LEGACY_TIME}, ${PHASE1_GPU_CPUS} CPUs, shared QOS
+Requested reserve:    ${requested} GPU node-hours
+Hard project cap:     ${PHASE1_ADDITIONAL_NODE_HOUR_CAP} additional node-hours
+Ledger after request: ${projected} reserved; ${remaining} unreserved
+
+Preparation does not submit or reserve:
+  SOURCE_RUN=20260902_phase1_square_t014_v000_seed_chi200_loose_cuda130
+  LEGACY_H5="\$CFS/m4863/MPS-MFT/stateless_data/results_L_64_U_8.0_V_0.0_t0_1.4_t_p_0.1_geometry_square_chi_200_density_0.9375_gpu.h5"
+  FROZEN_RUN=20260903_phase1_square_t014_v000_legacy_frozen_dmrg_chi200
+  bash $script_path prepare-frozen-legacy "\$SOURCE_RUN" "\$LEGACY_H5" "\$FROZEN_RUN"
+
+Direct scientific submission:
+  bash $script_path submit "\$FROZEN_RUN"
+  bash $script_path status "\$FROZEN_RUN"
+EOF
+  print_budget
+  awk -v current="$committed" -v add="$requested" -v cap="$PHASE1_ADDITIONAL_NODE_HOUR_CAP" \
+    'BEGIN {exit !((current+add) > cap)}' && die \
+    "frozen legacy-field request would exceed the hard cap"
+  return 0
+}
+
 print_recurrence_plan() {
   validate_project
   local segment recurrence_initial competitors_initial combined_initial
@@ -532,6 +578,7 @@ write_environment() {
     printf 'PHASE1_QOS=%q\n' "$PHASE1_QOS"
     printf 'PHASE1_JULIA=%q\n' "$PHASE1_JULIA"
     printf 'PHASE1_GPU_TIME=%q\n' "$PHASE1_GPU_TIME"
+    printf 'PHASE1_FROZEN_LEGACY_TIME=%q\n' "$PHASE1_FROZEN_LEGACY_TIME"
     printf 'PHASE1_GPU_CPUS=%q\n' "$PHASE1_GPU_CPUS"
     printf 'PHASE1_SMOKE_TIME=%q\n' "$PHASE1_SMOKE_TIME"
     printf 'PHASE1_MAX_SEGMENTS=%q\n' "$PHASE1_MAX_SEGMENTS"
@@ -571,7 +618,7 @@ load_environment() {
   # shellcheck disable=SC1090
   source "$run_dir/run.env"
   case "${PHASE1_RUN_SCRIPT_VERSION:-missing}" in
-    1.0.0|1.0.1|1.1.0|1.2.0|1.3.0|1.4.0|1.5.0|1.6.0|1.7.0|1.8.0|1.9.0|1.10.0|1.11.0|1.12.0|1.13.0|1.13.1|1.13.2) ;;
+    1.0.0|1.0.1|1.1.0|1.2.0|1.3.0|1.4.0|1.5.0|1.6.0|1.7.0|1.8.0|1.9.0|1.10.0|1.11.0|1.12.0|1.13.0|1.13.1|1.13.2|1.14.0) ;;
     *) die "unsupported run script version ${PHASE1_RUN_SCRIPT_VERSION:-missing}; current version is $PHASE1_SCRIPT_VERSION";;
   esac
   project_dir="$PHASE1_PROJECT_DIR"
@@ -611,24 +658,24 @@ require_current_run_version() {
 
 require_direct_submission_compatible_run_version() {
   case "${PHASE1_RUN_SCRIPT_VERSION:-missing}" in
-    1.12.0|1.13.0|1.13.1)
+    1.12.0|1.13.0|1.13.1|1.13.2)
       echo "warning: directly submitting a launcher-v${PHASE1_RUN_SCRIPT_VERSION} campaign with v${PHASE1_SCRIPT_VERSION}; the standalone smoke gate has been retired" >&2
       ;;
-    1.13.2) ;;
+    1.14.0) ;;
     *) die \
-      "direct submission requires a run prepared by launcher v1.12.0 through v1.13.2; found ${PHASE1_RUN_SCRIPT_VERSION:-missing}";;
+      "direct submission requires a run prepared by launcher v1.12.0 through v1.14.0; found ${PHASE1_RUN_SCRIPT_VERSION:-missing}";;
   esac
 }
 
 require_worker_compatible_run_version() {
   case "${PHASE1_RUN_SCRIPT_VERSION:-missing}" in
-    1.2.0|1.3.0|1.4.0|1.5.0|1.6.0|1.7.0|1.8.0|1.9.0|1.10.0|1.11.0|1.12.0|1.13.0|1.13.1|1.13.2) ;;
+    1.2.0|1.3.0|1.4.0|1.5.0|1.6.0|1.7.0|1.8.0|1.9.0|1.10.0|1.11.0|1.12.0|1.13.0|1.13.1|1.13.2|1.14.0) ;;
     *) die "queued worker cannot execute run script ${PHASE1_RUN_SCRIPT_VERSION:-missing} with launcher $PHASE1_SCRIPT_VERSION";;
   esac
 }
 
 initialize_run() {
-  local run_id="$1" source_run_dir="${2:-}" campaign_kind="${3:-standard}"
+  local run_id="$1" source_run_dir="${2:-}" campaign_kind="${3:-standard}" source_artifact="${4:-}"
   validate_new_run_id "$run_id"
   [[ -f "$project_dir/gpu/Manifest.toml" ]] || die \
     "GPU environment is not instantiated; run the command printed by plan"
@@ -686,6 +733,13 @@ initialize_run() {
       prepare_script="$project_dir/scripts/prepare_phase1_square_tight5.jl"
       prepare_args=("$source_run_dir" "$run_dir" "$scratch_run_dir" "$run_id")
       ;;
+    frozen_legacy_energy)
+      [[ -n "$source_run_dir" ]] || die "frozen legacy-field preparation requires a reference run"
+      [[ -n "$source_artifact" && -f "$source_artifact" ]] || die \
+        "frozen legacy-field preparation requires an existing legacy HDF5 file"
+      prepare_script="$project_dir/scripts/prepare_frozen_legacy_energy.jl"
+      prepare_args=("$source_run_dir" "$source_artifact" "$run_dir" "$scratch_run_dir" "$run_id")
+      ;;
     *) die "unknown Phase 1 campaign kind: $campaign_kind";;
   esac
   "$PHASE1_JULIA" --startup-file=no --project="$project_dir" \
@@ -718,36 +772,40 @@ validate_initialized_run() {
     "prepared manifest must contain named label and config columns"
   [[ -f "$run_dir/gpu-Manifest.toml" ]] || die "prepared run is missing its GPU manifest"
   [[ -f "$run_dir/gpu-Manifest.toml.sha256" ]] || die "prepared run is missing its GPU-manifest hash"
-  if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(3|4|5|6|7|8|9|10|11|12|13)\.0$ ||
+  if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(3|4|5|6|7|8|9|10|11|12|13|14)\.0$ ||
         "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.13\.[12]$ ]]; then
     [[ -d "$(full_run_directory_from_control "$run_dir")/results" ]] || die \
       "prepared run is missing its full-result scratch directory"
   fi
-  if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(5|6|7|8|9|10|11|12|13)\.0$ ||
+  if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(5|6|7|8|9|10|11|12|13|14)\.0$ ||
         "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.13\.[12]$ ]]; then
     [[ -f "$run_dir/campaign_kind.txt" ]] || die "prepared run is missing campaign_kind.txt"
     campaign_kind="$(<"$run_dir/campaign_kind.txt")"
     case "$campaign_kind" in
       standard|recurrence|recurrence_competitors) ;;
       matched_seed_pilot)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(6|7|8|9|10|11|12|13)\.0$ ||
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(6|7|8|9|10|11|12|13|14)\.0$ ||
           "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.13\.[12]$ ]] || die \
-          "matched-seed pilot requires launcher v1.6.0 through v1.13.2"
+          "matched-seed pilot requires launcher v1.6.0 through v1.14.0"
         ;;
       square_seed_pilot)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(7|8|9|10|11|12|13)\.0$ ||
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(7|8|9|10|11|12|13|14)\.0$ ||
           "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.13\.[12]$ ]] || die \
-          "square seed pilot requires launcher v1.7.0 through v1.13.2"
+          "square seed pilot requires launcher v1.7.0 through v1.14.0"
         ;;
       square_seed_pilot_v0)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(11|12|13)\.0$ ||
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(11|12|13|14)\.0$ ||
           "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.13\.[12]$ ]] || die \
-          "square V=0 seed pilots require launcher v1.11.0 through v1.13.2"
+          "square V=0 seed pilots require launcher v1.11.0 through v1.14.0"
         ;;
       square_tight5)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(10|11|12|13)\.0$ ||
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(10|11|12|13|14)\.0$ ||
           "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.13\.[12]$ ]] || die \
-          "square tight-five runs require launcher v1.10.0 through v1.13.2"
+          "square tight-five runs require launcher v1.10.0 through v1.14.0"
+        ;;
+      frozen_legacy_energy)
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" == "1.14.0" ]] || die \
+          "frozen legacy-field runs require launcher v1.14.0"
         ;;
       *) die "invalid prepared campaign kind: $campaign_kind";;
     esac
@@ -1014,6 +1072,9 @@ latest_analysis_state() {
 continue_branch() {
   local run_dir="$1" label="$2" latest_row segment job_id state source previous_config next_segment next_config
   [[ "$label" =~ ^[A-Za-z0-9_.-]+$ ]] || die "unsafe branch label: $label"
+  if [[ -f "$run_dir/campaign_kind.txt" && "$(<"$run_dir/campaign_kind.txt")" == "frozen_legacy_energy" ]]; then
+    die "frozen legacy-field diagnostics are one-shot calculations and cannot be continued"
+  fi
   latest_row="$(awk -F'\t' -v label="$label" '$1 == "branch" && $2 == label {row=$0} END {print row}' "$run_dir/jobs.tsv")"
   [[ -n "$latest_row" ]] || die "no submitted branch named $label"
   IFS=$'\t' read -r _ _ segment _ _ _ job_id previous_config <<<"$latest_row"
@@ -1148,13 +1209,20 @@ worker_run() {
       "$project_dir/scripts/run_scf_gpu.jl" "$config"
     return
   fi
-  local solver_status compact_status=0 full_branch compact_branch
+  local solver_status compact_status=0 full_branch compact_branch solver_entrypoint campaign_kind
   full_branch="$PHASE1_RUN_SCRATCH_DIR/results/$label"
   compact_branch="$run_dir/results/$label"
+  campaign_kind="standard"
+  [[ ! -f "$run_dir/campaign_kind.txt" ]] || campaign_kind="$(<"$run_dir/campaign_kind.txt")"
+  if [[ "$campaign_kind" == "frozen_legacy_energy" ]]; then
+    solver_entrypoint="$project_dir/scripts/run_frozen_legacy_gpu.jl"
+  else
+    solver_entrypoint="$project_dir/scripts/run_scf_gpu.jl"
+  fi
   set +e
   srun --ntasks=1 --cpus-per-task="$PHASE1_GPU_CPUS" --cpu-bind=cores \
     "$PHASE1_JULIA" --startup-file=no --project="$project_dir/gpu" \
-    "$project_dir/scripts/run_scf_gpu.jl" "$config"
+    "$solver_entrypoint" "$config"
   solver_status=$?
   set -e
   if [[ -d "$full_branch" ]]; then
@@ -1200,6 +1268,7 @@ Read-only:
   plan-square-seed-pilot
   plan-square-v0-seed-pilot
   plan-square-tight5
+  plan-frozen-legacy
   check-gpu-preferences                  Verify merged Julia preferences without loading CUDA
   budget
   status [RUN_ID]
@@ -1219,6 +1288,8 @@ Preparation only (no Slurm submission or budget reservation):
   prepare-square-v0-seed-pilot NEW_RUN   Prepare the six-branch square V=0 stripe/pairing pilot
   prepare-square-tight5 SOURCE_RUN NEW_RUN
                                         Prepare six accepted-parent tight five-update probes
+  prepare-frozen-legacy SOURCE_RUN LEGACY_H5 NEW_RUN
+                                        Prepare one frozen legacy-field DMRG diagnostic
 
 Submissions:
   submit RUN_ID                         Submit all prepared scientific branches directly
@@ -1241,6 +1312,7 @@ case "$action" in
   plan-square-seed-pilot) print_square_seed_pilot_plan;;
   plan-square-v0-seed-pilot) print_square_v0_seed_pilot_plan;;
   plan-square-tight5) print_square_tight5_plan;;
+  plan-frozen-legacy) print_frozen_legacy_plan;;
   check-gpu-preferences) validate_gpu_runtime_preferences;;
   budget) print_budget;;
   reconcile)
@@ -1311,6 +1383,16 @@ case "$action" in
       "new square tight-five run already exists: $run_root/$3"
     PHASE1_GPU_TIME="$PHASE1_SQUARE_TIGHT5_TIME"
     initialize_run "$3" "$source_run_dir" square_tight5
+    ;;
+  prepare-frozen-legacy)
+    [[ $# == 4 ]] || die "prepare-frozen-legacy requires SOURCE_RUN_ID LEGACY_H5 NEW_RUN_ID"
+    source_run_dir="$(resolve_run_dir "$2")"
+    legacy_h5="$3"
+    [[ -f "$legacy_h5" ]] || die "legacy HDF5 file not found: $legacy_h5"
+    [[ ! -e "$run_root/$4" ]] || die \
+      "new frozen legacy-field run already exists: $run_root/$4"
+    PHASE1_GPU_TIME="$PHASE1_FROZEN_LEGACY_TIME"
+    initialize_run "$4" "$source_run_dir" frozen_legacy_energy "$legacy_h5"
     ;;
   submit-recovery)
     [[ $# == 3 ]] || die "submit-recovery requires SOURCE_RUN_ID NEW_RUN_ID"

@@ -1566,3 +1566,97 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   cancellation, or accounting change. The persistent checkout remains
   `$CFS/m4863/MPS-MFT/ladder_mps_mft`; all documented commands are operator
   handoffs for the user.
+
+## 2026-09-03: square V=0, t0=1.4 six-seed compact analysis
+
+- Audited the user-synchronized campaign
+  `20260902_phase1_square_t014_v000_seed_chi200_loose_cuda130` at `L=64`,
+  `U=8`, `V=0`, `t0=1.4`, `tp=0.1`, density `0.9375`, square geometry, and
+  `chi=200`. All six compact Float64 states are accepted period-one fixed
+  points under the configured loose gates, and all required model, numerical,
+  implementation, pair-binding, and geometry fingerprints match.
+- The final d-wave-proxy profiles agree after global sign alignment to within
+  `0.0083%--0.199%` RMS of the d-wave-seeded reference, and their RMS
+  amplitudes span only `0.086%`. All have uniform `q=0` leg pairing, and the
+  spatial audit finds no pairing phase-slip candidate. Charge-profile
+  differences are below `0.95%` by the same comparison.
+- Pairing-only branches have spin below the `1e-6` analysis floor, but
+  stripe-started branches retain `3.58e-4--1.07e-3` spin-profile RMS at their
+  seeded wavevectors. In particular, pure `m=4` stopped after six raw updates
+  with relative residual `4.108e-3`, just inside the loose `5e-3` gate.
+  Therefore the evidence supports one common pairing-dominated family with
+  residual stripe memory, not six demonstrated high-precision identical fixed
+  points.
+- The authorized target-density-corrected canonical energy spread is only
+  `7.715e-5` total (`6.027e-7` per physical site). The apparent ordering is not
+  resolved: every last solve reached `maxlinkdim=200` with discarded weight
+  approximately `2.33e-4--2.35e-4`, density corrections exceed the inter-seed
+  spread, and no bond-dimension or full error extrapolation exists. Raw
+  canonical energies were not ranked.
+- The reviewed legacy table inside the repository already labels its generic
+  `V=0,t0=1.4` row d-wave-dominant, while the specific high-amplitude CDW/SDW
+  endpoint inherited from `t0=1.0` is not available in-scope as an identifiable
+  artifact. The six matched-norm `1e-3` seeds do not exclude that basin.
+- Recommended gate: replay the exact legacy-parent terminal fields at the
+  current `V=0,t0=1.4` endpoint without normalizing their amplitude, using the
+  current solver and matching fingerprints. This is one 12-hour one-of-four
+  GPU branch, a plan-only ceiling of `3.000` node-hours and no smoke. Only if a
+  distinct accepted endpoint survives should a bidirectional `t0` continuation
+  be run; four new coarse branches would add at most `12.000` requested
+  node-hours. The local ledger lacks this newest campaign, so live Perlmutter
+  reconciliation remains authoritative.
+- Reproducible outputs are under the campaign's
+  `analysis/audit_20260903/`, `analysis/spatial_phase_defects_20260903/`, and
+  `analysis/analysis_20260903.md`. Compact artifacts and histories were
+  verified locally; full scratch MPS tensors and live scheduler accounting were
+  not. No HDF5 file or ledger was modified, and Codex performed no Perlmutter
+  operation.
+
+## 2026-09-03: frozen legacy-field one-shot DMRG prepared
+
+- The user supplied the exact legacy endpoint
+  `stateless_data/results_L_64_U_8.0_V_0.0_t0_1.4_t_p_0.1_geometry_square_chi_200_density_0.9375_gpu.h5`
+  and clarified that one fresh DMRG is required, but no mean-field loop or
+  chemical-potential search is needed. The source is read-only and has SHA-256
+  `5d7529713df02b1495b58ae2e9298c0c4da25ea95daf6cb47c43351943c93722`.
+- Offline inspection finds `completed=true`, no saved period-two flag, saved
+  density `0.9374967904`, and a final saved-map residual of `1.34216e-4`
+  absolute and `9.98144e-4` relative. The legacy `E=-281.9204407` is the
+  effective-Hamiltonian eigenvalue and is not itself comparable with the
+  current canonical energies. Reconstructing the current functional from the
+  saved legacy correlations gives a provisional target-density energy
+  `-84.6163371905`, which is `0.0257361851` below the accepted six-state
+  minimum (`2.01064e-4` per site). This is a useful signal but not a formal
+  comparison because it retains the legacy DMRG result, its Float32-saved
+  effective energy, and its unmeasured consistency error; the new solve is
+  required.
+- Added `scripts/prepare_frozen_legacy_energy.jl` and
+  `scripts/run_frozen_legacy_gpu.jl`. The prepared job imports the exact legacy
+  `alpha`, `beta`, `mu_cdw`, and `mu`, starts from a fresh product MPS, performs
+  one `chi=200` Float64-CUDA DMRG, and then measures the outgoing fields,
+  one-step raw-map residual, full current variational energy including double
+  counting and target-density correction, DMRG truncation evidence, and quick
+  charge/spin/entanglement diagnostics.
+- Launcher v1.14.0 adds `plan-frozen-legacy` and
+  `prepare-frozen-legacy SOURCE_RUN LEGACY_H5 NEW_RUN`. Submission remains the
+  existing direct `submit` action, creates no smoke job, reserves one of four
+  GPUs for three hours (`0.750` node-hours), writes the full MPS to scratch,
+  and mirrors a stateless result to CFS. The one-shot campaign cannot use the
+  continuation action.
+- The six current states are rehashed and required to be accepted period-one
+  fixed points with matching model, numerical, implementation, E_p-registry,
+  geometry, and Float64 fingerprints before preparation. Their formal ranking
+  is kept separate. The new result is always saved as a selection-ineligible
+  diagnostic because a single map evaluation is not an SCF acceptance test.
+- The local synchronized ledger reports `40.229027778` effective node-hours but
+  does not yet contain the newest six-job campaign. Conservatively adding its
+  unreconciled `18.000` ceiling and this job's `0.750` request projects
+  `58.979027778` effective node-hours and `341.020972222` remaining under the
+  400-hour cap. Live Perlmutter reconciliation is authoritative.
+- Local validation was intentionally lightweight. The legacy schema and all
+  six compact reference classifications/fingerprints were checked, including
+  the Linux-style implementation hash. This Windows host has no usable Julia
+  runtime or Bash installation, so final Julia loading and launcher syntax
+  validation must occur during the non-submitting Perlmutter preparation step.
+  Codex ran no DMRG, CUDA initialization, transfer, scheduler command, or ledger
+  mutation.

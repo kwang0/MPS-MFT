@@ -18,6 +18,11 @@ Interactive use from the MPS-MFT checkout:
 
 Schema-v7 files additionally store the exact time-zero seed inside the field
 history; schema-v5/v6 files use their equivalent `fields/initial` record.
+In profile/history figures that seed is displayed as MF iteration 1, followed
+by the fields measured after each stored MF update.
+When a locally synced `parent_checkpoint` has a complete measured-field
+history, the profile/history plot prepends that history, removes the duplicated
+handoff field, and marks the start of the continuation segment.
 For older v2 files, the adapter falls back to the saved seed, best
 checkpoint, and final/orbit snapshots and explicitly labels them as sparse
 saved snapshots rather than a continuous MF history.
@@ -185,6 +190,14 @@ function _p1_local_artifact_path(recorded_path::AbstractString)
     if position !== nothing
         relative = normalized[first(position):end]
         candidate = joinpath(@__DIR__, split(relative, '/')...)
+        isfile(candidate) && return candidate
+    end
+
+    marker = "phase1_gpu/"
+    position = findfirst(marker, normalized)
+    if position !== nothing
+        relative = normalized[first(position):end]
+        candidate = joinpath(@__DIR__, "output", split(relative, '/')...)
         isfile(candidate) && return candidate
     end
     return ""
@@ -547,6 +560,106 @@ function _p1_history_index(requested, iterations)
     return index
 end
 
+function _p1_plot_iterations(iterations, include_seed::Bool)
+    include_seed || return iterations
+    isempty(iterations) && throw(ArgumentError("complete MF history is empty"))
+    first(iterations) == 0 || throw(ArgumentError(
+        "complete MF history with a seed must begin at stored iteration zero",
+    ))
+    return collect(1:length(iterations))
+end
+
+function _p1_history_endpoint(history, index::Integer)
+    return (
+        alpha=selectdim(history.alpha, ndims(history.alpha), index),
+        beta=selectdim(history.beta, ndims(history.beta), index),
+        mu_cdw=selectdim(history.mu_cdw, ndims(history.mu_cdw), index),
+    )
+end
+
+function _p1_assert_same_fields(left, right, context::AbstractString)
+    for component in (:alpha, :beta, :mu_cdw)
+        left_values = getproperty(left, component)
+        right_values = getproperty(right, component)
+        size(left_values) == size(right_values) || throw(DimensionMismatch(
+            "$context $(String(component)) shapes differ: $(size(left_values)) versus $(size(right_values))",
+        ))
+        left_values == right_values || throw(ArgumentError(
+            "$context $(String(component)) values differ",
+        ))
+    end
+    return nothing
+end
+
+function _p1_parent_history_path(state_file::AbstractString; parent_path=nothing)
+    recorded = if parent_path !== nothing
+        String(parent_path)
+    else
+        h5open(state_file, "r") do file
+            _p1_string(file, "provenance/parent_checkpoint")
+        end
+    end
+    isempty(recorded) && return nothing
+    local_path = _p1_local_artifact_path(recorded)
+    if isempty(local_path) && parent_path !== nothing
+        throw(ArgumentError(
+            "could not locate the requested parent history '$recorded' locally",
+        ))
+    end
+    return isempty(local_path) ? nothing : local_path
+end
+
+function _p1_stitch_parent_measured_history(
+    state_file::AbstractString,
+    continuation_history;
+    include_seed::Bool,
+    parent_path=nothing,
+)
+    local_parent = _p1_parent_history_path(state_file; parent_path)
+    local_parent === nothing && return nothing
+    parent_history = _p1_complete_history(local_parent, :measured; include_seed)
+    parent_history === nothing && return nothing
+
+    parent_final = _p1_history_endpoint(parent_history, length(parent_history.iterations))
+    continuation_seed = phase1_seed_fields(state_file)
+    _p1_assert_same_fields(
+        parent_final,
+        continuation_seed,
+        "parent terminal measured field and continuation seed",
+    )
+
+    continuation_first = include_seed ? 2 : 1
+    continuation_count = length(continuation_history.iterations)
+    continuation_first <= continuation_count || throw(ArgumentError(
+        "continuation history contains no MF updates after its initial seed",
+    ))
+    function append_component(component::Symbol)
+        parent_values = getproperty(parent_history, component)
+        continuation_values = getproperty(continuation_history, component)
+        trailing = selectdim(
+            continuation_values,
+            ndims(continuation_values),
+            continuation_first:continuation_count,
+        )
+        return cat(parent_values, trailing; dims=ndims(parent_values))
+    end
+
+    alpha = append_component(:alpha)
+    beta = append_component(:beta)
+    mu_cdw = append_component(:mu_cdw)
+    parent_samples = length(parent_history.iterations)
+    iterations = collect(1:size(alpha, ndims(alpha)))
+    parent_updates = parent_samples - (include_seed ? 1 : 0)
+    continuation_updates = continuation_count - (include_seed ? 1 : 0)
+    return (
+        history=(; iterations, alpha, beta, mu_cdw),
+        parent_path=local_parent,
+        parent_samples,
+        parent_updates,
+        continuation_updates,
+    )
+end
+
 function _p1_relabel_complete_histories!(fig, iterations, source::Symbol)
     axes = _p1_relabel_profile_axes!(fig; profile_and_history=true)
     history_axes = [axes[2], axes[4], axes[6], axes[8], axes[10]]
@@ -562,16 +675,40 @@ function _p1_relabel_complete_histories!(fig, iterations, source::Symbol)
     return fig
 end
 
+function _p1_mark_continuation_boundary!(fig, parent_samples::Integer)
+    axes = collect(fig.axes)
+    history_axes = [axes[2], axes[4], axes[6], axes[8], axes[10]]
+    boundary = parent_samples + 0.5
+    for ax in history_axes
+        ax.axvline(boundary; color="0.45", linestyle="--", linewidth=1.1, alpha=0.8)
+    end
+    history_axes[1].text(
+        boundary,
+        0.98,
+        "continuation",
+        transform=history_axes[1].get_xaxis_transform(),
+        rotation=90,
+        va="top",
+        ha="right",
+        color="0.35",
+        fontsize=8,
+    )
+    return fig
+end
+
 """
-Plot Phase 1 profiles and middle-rung values for every field snapshot retained
-by v2. The left column is controlled by a saved-snapshot slider; the right
-column connects only the explicitly labelled retained snapshots.
+Plot Phase 1 profiles and middle-rung values. Complete measured histories are
+stitched to a locally available parent history by default. Set
+`stitch_parent_history=false` to show only the requested state. For v2, the
+left column is controlled by a saved-snapshot slider and the right column
+connects only the explicitly labelled retained snapshots.
 """
 function plot_phase1_mf_profiles_and_middle_histories(
     state_file::AbstractString;
     snapshot=:latest,
     history_source::Symbol=:measured,
     include_seed::Bool=true,
+    stitch_parent_history::Bool=true,
     parent_path=nothing,
     savepath=nothing,
     dpi=nothing,
@@ -581,24 +718,47 @@ function plot_phase1_mf_profiles_and_middle_histories(
     state_file = abspath(state_file)
     complete_history = _p1_complete_history(state_file, history_source; include_seed)
     if complete_history !== nothing
-        selected = _p1_history_index(snapshot, complete_history.iterations)
-        beta_list = _p1_legacy_beta_history(complete_history.beta, complete_history.mu_cdw)
-        update_count = count(!=(0), complete_history.iterations)
-        detail = include_seed ?
-            "complete $(history_source) MF history: time-zero seed plus $update_count updates" :
+        stitched = if stitch_parent_history && history_source == :measured
+            _p1_stitch_parent_measured_history(
+                state_file,
+                complete_history;
+                include_seed,
+                parent_path,
+            )
+        else
+            nothing
+        end
+        plotted_history = stitched === nothing ? complete_history : stitched.history
+        plot_iterations = stitched === nothing ?
+            _p1_plot_iterations(plotted_history.iterations, include_seed) :
+            plotted_history.iterations
+        selected = _p1_history_index(snapshot, plot_iterations)
+        beta_list = _p1_legacy_beta_history(plotted_history.beta, plotted_history.mu_cdw)
+        update_count = length(plotted_history.iterations) - (include_seed ? 1 : 0)
+        detail = if stitched !== nothing
+            seed_detail = include_seed ? "initial seed at MF iteration 1; " : ""
+            continuation_start = stitched.parent_samples + 1
+            "stitched $(history_source) MF history: $(seed_detail)" *
+            "$(stitched.parent_updates) parent updates + $(stitched.continuation_updates) continuation updates; " *
+            "continuation begins at MF iteration $continuation_start"
+        elseif include_seed
+            "complete $(history_source) MF history: initial seed at MF iteration 1 plus $update_count updates"
+        else
             "complete $(history_source) MF history: $update_count updates"
+        end
         title = something(figure_title, _p1_figure_title(state_file, detail))
         fig = plot_mf_profiles_and_middle_histories(
-            complete_history.alpha,
+            plotted_history.alpha,
             beta_list,
-            complete_history.alpha,
+            plotted_history.alpha,
             beta_list;
             iteration=selected,
             figure_title=title,
             savepath=nothing,
             kwargs...,
         )
-        _p1_relabel_complete_histories!(fig, complete_history.iterations, history_source)
+        _p1_relabel_complete_histories!(fig, plot_iterations, history_source)
+        stitched !== nothing && _p1_mark_continuation_boundary!(fig, stitched.parent_samples)
         return _p1_save_after_relabel(fig, savepath; dpi)
     end
 

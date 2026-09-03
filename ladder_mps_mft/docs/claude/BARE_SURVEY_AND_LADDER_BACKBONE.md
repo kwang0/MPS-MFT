@@ -52,10 +52,24 @@ matrices and diagonalize by leg parity. Density channel, from the code:
 | square | 2g [0 1; 1 0] | +2g | -2g |
 
 Pair and exchange channels have the same structure with a 4x4 kernel over leg-pair
-classes (00, 11, 01, 10): frustrated weights 2 same-leg and 1 cross-leg in units of 2g;
-unfrustrated 3 on the swapped leg plus 2 on the cross terms; square 1 on the swapped leg.
-These diagonalize in rung-symmetric versus rung-antisymmetric combinations, which is
-where s-like and d-like pairing form factors separate.
+classes (00, 11, 01, 10), acting bond by bond and never mixing rung bonds with leg
+bonds. It splits into a same-leg block {00, 11}, with leg-symmetric (ky=0) and
+leg-antisymmetric (ky=pi) eigenvectors, and a cross-leg block {01, 10} (rung pairs and
+plaquette diagonals), of which only the member-symmetric combination is physical:
+
+| block, eigenvector | frustrated | unfrustrated | square |
+|---|---:|---:|---:|
+| same-leg, leg-symmetric (ky=0) | +6g | +6g | +2g |
+| same-leg, leg-antisymmetric (ky=pi) | +2g | -6g | -2g |
+| cross-leg, symmetric (rung and diagonal pairs) | +4g | +4g | 0 |
+
+The code's d-wave form factor is leg-symmetric on the leg bonds with the rung bond of
+opposite sign, so it lives in the first and third rows and its rung/leg sign is
+preserved by every kernel. Both cubic geometries feed d-wave back identically (6g on
+leg bonds, 4g on rung pairs); square gives 2g on leg bonds and zero on rung pairs,
+because a rung pair cannot hop to a neighbor ladder as a pair there. Frustrated versus
+unfrustrated is then decided by the competitors (see the sign discussion below), which
+favors `cubic_frustrated` for d-wave.
 
 For a probe direction e with leg parity p and wavevector q, the stability eigenvalue is
 lambda(e) = k_geom(p) . chi(q, p). Its meaning:
@@ -67,8 +81,16 @@ lambda(e) = k_geom(p) . chi(q, p). Its meaning:
 - sign: lambda > 0 is a uniform transverse order (true fixed point); lambda < 0 flips
   sign each update, i.e. a two-sublattice transverse order, which the single-ladder
   iteration shows as a 2-cycle. It is physical only on a bipartite transverse lattice
-  (`cubic_unfrustrated`, `square`). The frustrated kernel has both eigenvalues positive,
-  so a staggered instability has no consistent single-ladder realization there.
+  (`cubic_unfrustrated`, `square`).
+- lambda carries the ladder's response sign, which differs by channel. A pair field
+  induces pairing along itself (delta P = +chi h), so lambda_pair = +k chi and the
+  kernel sign is the lambda sign. A repulsive potential expels density (delta n =
+  -chi h), and likewise for spin, so lambda_density = -k chi: a positive kernel
+  eigenvalue in the density table means a staggered transverse CDW/SDW. Hence in
+  `cubic_unfrustrated` the ky=0 density sector (+6g) is the staggered competitor and
+  ky=pi (-6g) is in phase; in `cubic_frustrated` the ky=0 sector (+6g) also wants to
+  stagger but the transverse lattice is not bipartite, so that instability has no
+  consistent realization and is frustrated, leaving the weaker ky=pi sector (+2g).
 - lambda within a few percent of 1 predicts the slow SCF drift seen in the histories.
 
 Exact sign bookkeeping (response sign of a repulsive Hartree field, the 1/2 reference

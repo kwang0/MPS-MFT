@@ -12,4 +12,17 @@
 7. Label independent seeds, continuations, scan direction, and recurrence status explicitly. Do not relabel a periodic orbit as a fixed point or average its members into one.
 8. Rank branches only through the stored solution canonical energy after fixed-point or unmixed-orbit gates and fingerprint checks pass. Use the orbit phase average for periodic solutions. Never rank saved effective-Hamiltonian eigenvalues directly.
 9. Keep `docs/RUN_LOG.md` append-only. Record commands, job IDs, hashes, validation boundaries, failures, and decisions before handing work to another chat or collaborator.
-10. Run the test suite after source changes. Record whether validation was unit, local DMRG smoke, Phase 0 timing, or scientific convergence.
+10. After source changes, use focused tests during development. Run the full
+    suite at most once before handoff and only when the affected source and
+    risk justify it. Do not rerun unrelated DMRG tests for documentation,
+    report, configuration, launcher-resource, or similarly narrow changes.
+    Record whether validation was unit, local DMRG smoke, Phase 0 timing, or
+    scientific convergence.
+11. Treat an already-implemented workflow as existing work to reuse. Do not
+    broaden a report, analysis, or submission-script request into a source
+    redesign or comprehensive audit without first explaining the added scope,
+    expected benefit, and likely wall-clock cost and obtaining user approval,
+    unless immediate correctness or safety requires the change.
+12. Before starting any local check expected to exceed five minutes, tell the
+    user what is being run and why. Avoid repeating unchanged expensive tests;
+    rerun only the focused checks affected by a late change.
