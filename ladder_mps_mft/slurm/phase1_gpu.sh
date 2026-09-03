@@ -5,7 +5,7 @@
 
 set -euo pipefail
 
-readonly PHASE1_SCRIPT_VERSION="1.14.0"
+readonly PHASE1_SCRIPT_VERSION="1.15.0"
 script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
 project_dir="${PHASE1_PROJECT_DIR:-$(cd "$(dirname "$script_path")/.." && pwd)}"
 repo_root="${PHASE1_REPO_ROOT:-$(cd "$project_dir/.." && pwd)}"
@@ -35,6 +35,7 @@ PHASE1_RECURRENCE_CONFIG="${PHASE1_RECURRENCE_CONFIG:-$project_dir/configs/phase
 PHASE1_MATCHED_SEED_CONFIG="${PHASE1_MATCHED_SEED_CONFIG:-$project_dir/configs/phase1_gpu_matched_seed_pilot_chi400.toml}"
 PHASE1_SQUARE_SEED_CONFIG="${PHASE1_SQUARE_SEED_CONFIG:-$project_dir/configs/phase1_gpu_square_seed_pilot_chi200_loose.toml}"
 PHASE1_SQUARE_V0_SEED_CONFIG="${PHASE1_SQUARE_V0_SEED_CONFIG:-$project_dir/configs/phase1_gpu_square_v0_seed_pilot_chi200_loose.toml}"
+PHASE1_SQUARE_V0_CHI400_COMPARE_CONFIG="${PHASE1_SQUARE_V0_CHI400_COMPARE_CONFIG:-$project_dir/configs/phase1_gpu_square_v0_chi400_tight_compare.toml}"
 
 die() { echo "error: $*" >&2; exit 1; }
 require_command() { command -v "$1" >/dev/null 2>&1 || die "required command not found: $1"; }
@@ -139,6 +140,8 @@ validate_project() {
     "missing Phase 1 square seed-pilot config: $PHASE1_SQUARE_SEED_CONFIG"
   [[ -f "$PHASE1_SQUARE_V0_SEED_CONFIG" ]] || die \
     "missing Phase 1 square V=0 seed-pilot config: $PHASE1_SQUARE_V0_SEED_CONFIG"
+  [[ -f "$PHASE1_SQUARE_V0_CHI400_COMPARE_CONFIG" ]] || die \
+    "missing Phase 1 square V=0 chi=400 comparison config: $PHASE1_SQUARE_V0_CHI400_COMPARE_CONFIG"
   [[ -f "$project_dir/scripts/run_scf_gpu.jl" ]] || die "missing GPU SCF entry point"
   [[ -f "$project_dir/scripts/prepare_phase1_recurrence.jl" ]] || die \
     "missing recurrence preparation entry point"
@@ -152,6 +155,8 @@ validate_project() {
     "missing square tight-five preparation entry point"
   [[ -f "$project_dir/scripts/prepare_frozen_legacy_energy.jl" ]] || die \
     "missing frozen legacy-field preparation entry point"
+  [[ -f "$project_dir/scripts/prepare_phase1_square_v0_chi400_compare.jl" ]] || die \
+    "missing square V=0 chi=400 comparison preparation entry point"
   [[ -f "$project_dir/scripts/run_frozen_legacy_gpu.jl" ]] || die \
     "missing frozen legacy-field GPU entry point"
   [[ -f "$project_dir/scripts/gpu_smoke.jl" ]] || die "missing GPU smoke test"
@@ -424,6 +429,66 @@ EOF
   return 0
 }
 
+print_square_v0_chi400_compare_plan() {
+  validate_project
+  local segment initial ceiling committed projected remaining ceiling_projected ceiling_remaining
+  segment="$(gpu_node_hours "$PHASE1_GPU_TIME")"
+  initial="$(awk -v s="$segment" 'BEGIN {printf "%.9f", 2*s}')"
+  ceiling="$(awk -v s="$segment" -v m="$PHASE1_MAX_SEGMENTS" \
+    'BEGIN {printf "%.9f", 2*m*s}')"
+  committed="$(ledger_total)"
+  projected="$(awk -v c="$committed" -v a="$initial" 'BEGIN {printf "%.9f", c+a}')"
+  remaining="$(awk -v cap="$PHASE1_ADDITIONAL_NODE_HOUR_CAP" -v p="$projected" \
+    'BEGIN {printf "%.9f", cap-p}')"
+  ceiling_projected="$(awk -v c="$committed" -v a="$ceiling" 'BEGIN {printf "%.9f", c+a}')"
+  ceiling_remaining="$(awk -v cap="$PHASE1_ADDITIONAL_NODE_HOUR_CAP" -v p="$ceiling_projected" \
+    'BEGIN {printf "%.9f", cap-p}')"
+  cat <<EOF
+Ladder MPS+MF square V=0 chi=400 tight two-lineage comparison
+
+Point:                L=64, U=8, V=0, t0=1.4, t_perp=0.1, density=0.9375, square
+Pair binding:         exact registry E_p=-0.14653773091916378; no interpolation
+Lineages:             accepted pure d-wave m=0 parent and frozen legacy-like measured-map parent
+Parent contract:      exact chi=200 full scratch MPS plus SHA-256; fresh chi=400 histories
+Legacy sanitation:    restart from the frozen solve's measured fields; inactive onsite beta must be zero
+Numerical control:    chi=400, 16 sweeps, cutoff=1e-11, DMRG energy_tol=1e-9
+Density control:      inner and outer tolerances=1e-4; carried positive dn/dmu within each job
+Fixed-point gates:    field abs=1e-7 OR rel=1e-4; energy/site=1e-7; two stable records
+Physics policy:       initial raw evaluation plus up to 20 unmixed updates before Anderson
+Run ceiling:          up to 80 MF updates in one segment; continuation only after inspecting a timeout
+Interpretation:       matched-resolution basin and chi=200-to-400 convergence comparison, not a phase claim
+GPU request:          one of four GPUs, ${PHASE1_GPU_TIME}, ${PHASE1_GPU_CPUS} CPUs, shared QOS
+GPU constraint:       gpu (hbm80g begins only at chi=${PHASE1_HBM80G_MIN_CHI})
+Per-branch reserve:   ${segment} GPU node-hours
+First-segment envelope: ${initial} node-hours
+Four-segment emergency ceiling: ${ceiling} node-hours (not pre-authorized)
+Hard project cap:     ${PHASE1_ADDITIONAL_NODE_HOUR_CAP} additional node-hours
+Ledger after first segments: ${projected} active; ${remaining} unreserved
+Ledger at emergency ceiling: ${ceiling_projected} active; ${ceiling_remaining} unreserved
+
+Preparation performs no submission or ledger reservation and must run on Perlmutter,
+where both full parent MPS artifacts can be rehashed:
+  PAIRING_RUN=20260902_phase1_square_t014_v000_seed_chi200_loose_cuda130
+  FROZEN_RUN=20260903_phase1_square_t014_v000_legacy_frozen_dmrg_chi200
+  COMPARE_RUN=20260903_phase1_square_t014_v000_pairing_legacy_chi400_tight
+  bash $script_path prepare-square-v0-chi400-compare \
+    "\$PAIRING_RUN" "\$FROZEN_RUN" "\$COMPARE_RUN"
+
+Inspect the prepared manifest and authoritative live budget, then submit both scientific jobs directly:
+  column -ts $'\t' "output/phase1_gpu/\$COMPARE_RUN/manifest.tsv" | less -S
+  bash $script_path budget
+  bash $script_path submit "\$COMPARE_RUN"
+  bash $script_path status "\$COMPARE_RUN"
+
+No standalone smoke job is created.
+EOF
+  print_budget
+  awk -v current="$committed" -v requested="$initial" -v cap="$PHASE1_ADDITIONAL_NODE_HOUR_CAP" \
+    'BEGIN {exit !((current+requested) > cap)}' && die \
+    "square V=0 chi=400 comparison first-segment envelope would exceed the hard cap"
+  return 0
+}
+
 print_recurrence_plan() {
   validate_project
   local segment recurrence_initial competitors_initial combined_initial
@@ -590,6 +655,8 @@ write_environment() {
     printf 'PHASE1_RECURRENCE_CONFIG=%q\n' "$PHASE1_RECURRENCE_CONFIG"
     printf 'PHASE1_MATCHED_SEED_CONFIG=%q\n' "$PHASE1_MATCHED_SEED_CONFIG"
     printf 'PHASE1_SQUARE_SEED_CONFIG=%q\n' "$PHASE1_SQUARE_SEED_CONFIG"
+    printf 'PHASE1_SQUARE_V0_SEED_CONFIG=%q\n' "$PHASE1_SQUARE_V0_SEED_CONFIG"
+    printf 'PHASE1_SQUARE_V0_CHI400_COMPARE_CONFIG=%q\n' "$PHASE1_SQUARE_V0_CHI400_COMPARE_CONFIG"
     printf 'PHASE1_RUN_ROOT=%q\n' "$run_root"
     printf 'PHASE1_SCRATCH_ROOT=%q\n' "$scratch_root"
     printf 'PHASE1_RUN_SCRATCH_DIR=%q\n' "$scratch_run_dir"
@@ -618,7 +685,7 @@ load_environment() {
   # shellcheck disable=SC1090
   source "$run_dir/run.env"
   case "${PHASE1_RUN_SCRIPT_VERSION:-missing}" in
-    1.0.0|1.0.1|1.1.0|1.2.0|1.3.0|1.4.0|1.5.0|1.6.0|1.7.0|1.8.0|1.9.0|1.10.0|1.11.0|1.12.0|1.13.0|1.13.1|1.13.2|1.14.0) ;;
+    1.0.0|1.0.1|1.1.0|1.2.0|1.3.0|1.4.0|1.5.0|1.6.0|1.7.0|1.8.0|1.9.0|1.10.0|1.11.0|1.12.0|1.13.0|1.13.1|1.13.2|1.14.0|1.15.0) ;;
     *) die "unsupported run script version ${PHASE1_RUN_SCRIPT_VERSION:-missing}; current version is $PHASE1_SCRIPT_VERSION";;
   esac
   project_dir="$PHASE1_PROJECT_DIR"
@@ -661,15 +728,15 @@ require_direct_submission_compatible_run_version() {
     1.12.0|1.13.0|1.13.1|1.13.2)
       echo "warning: directly submitting a launcher-v${PHASE1_RUN_SCRIPT_VERSION} campaign with v${PHASE1_SCRIPT_VERSION}; the standalone smoke gate has been retired" >&2
       ;;
-    1.14.0) ;;
+    1.14.0|1.15.0) ;;
     *) die \
-      "direct submission requires a run prepared by launcher v1.12.0 through v1.14.0; found ${PHASE1_RUN_SCRIPT_VERSION:-missing}";;
+      "direct submission requires a run prepared by launcher v1.12.0 through v1.15.0; found ${PHASE1_RUN_SCRIPT_VERSION:-missing}";;
   esac
 }
 
 require_worker_compatible_run_version() {
   case "${PHASE1_RUN_SCRIPT_VERSION:-missing}" in
-    1.2.0|1.3.0|1.4.0|1.5.0|1.6.0|1.7.0|1.8.0|1.9.0|1.10.0|1.11.0|1.12.0|1.13.0|1.13.1|1.13.2|1.14.0) ;;
+    1.2.0|1.3.0|1.4.0|1.5.0|1.6.0|1.7.0|1.8.0|1.9.0|1.10.0|1.11.0|1.12.0|1.13.0|1.13.1|1.13.2|1.14.0|1.15.0) ;;
     *) die "queued worker cannot execute run script ${PHASE1_RUN_SCRIPT_VERSION:-missing} with launcher $PHASE1_SCRIPT_VERSION";;
   esac
 }
@@ -740,6 +807,20 @@ initialize_run() {
       prepare_script="$project_dir/scripts/prepare_frozen_legacy_energy.jl"
       prepare_args=("$source_run_dir" "$source_artifact" "$run_dir" "$scratch_run_dir" "$run_id")
       ;;
+    square_v0_chi400_compare)
+      [[ -n "$source_run_dir" ]] || die "chi=400 comparison requires a pairing source run"
+      [[ -n "$source_artifact" && -d "$source_artifact" ]] || die \
+        "chi=400 comparison requires a frozen legacy source run"
+      prepare_script="$project_dir/scripts/prepare_phase1_square_v0_chi400_compare.jl"
+      prepare_args=(
+        "$PHASE1_SQUARE_V0_CHI400_COMPARE_CONFIG"
+        "$source_run_dir"
+        "$source_artifact"
+        "$run_dir"
+        "$scratch_run_dir"
+        "$run_id"
+      )
+      ;;
     *) die "unknown Phase 1 campaign kind: $campaign_kind";;
   esac
   "$PHASE1_JULIA" --startup-file=no --project="$project_dir" \
@@ -772,40 +853,44 @@ validate_initialized_run() {
     "prepared manifest must contain named label and config columns"
   [[ -f "$run_dir/gpu-Manifest.toml" ]] || die "prepared run is missing its GPU manifest"
   [[ -f "$run_dir/gpu-Manifest.toml.sha256" ]] || die "prepared run is missing its GPU-manifest hash"
-  if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(3|4|5|6|7|8|9|10|11|12|13|14)\.0$ ||
+  if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(3|4|5|6|7|8|9|10|11|12|13|14|15)\.0$ ||
         "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.13\.[12]$ ]]; then
     [[ -d "$(full_run_directory_from_control "$run_dir")/results" ]] || die \
       "prepared run is missing its full-result scratch directory"
   fi
-  if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(5|6|7|8|9|10|11|12|13|14)\.0$ ||
+  if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(5|6|7|8|9|10|11|12|13|14|15)\.0$ ||
         "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.13\.[12]$ ]]; then
     [[ -f "$run_dir/campaign_kind.txt" ]] || die "prepared run is missing campaign_kind.txt"
     campaign_kind="$(<"$run_dir/campaign_kind.txt")"
     case "$campaign_kind" in
       standard|recurrence|recurrence_competitors) ;;
       matched_seed_pilot)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(6|7|8|9|10|11|12|13|14)\.0$ ||
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(6|7|8|9|10|11|12|13|14|15)\.0$ ||
           "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.13\.[12]$ ]] || die \
-          "matched-seed pilot requires launcher v1.6.0 through v1.14.0"
+          "matched-seed pilot requires launcher v1.6.0 through v1.15.0"
         ;;
       square_seed_pilot)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(7|8|9|10|11|12|13|14)\.0$ ||
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(7|8|9|10|11|12|13|14|15)\.0$ ||
           "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.13\.[12]$ ]] || die \
-          "square seed pilot requires launcher v1.7.0 through v1.14.0"
+          "square seed pilot requires launcher v1.7.0 through v1.15.0"
         ;;
       square_seed_pilot_v0)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(11|12|13|14)\.0$ ||
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(11|12|13|14|15)\.0$ ||
           "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.13\.[12]$ ]] || die \
-          "square V=0 seed pilots require launcher v1.11.0 through v1.14.0"
+          "square V=0 seed pilots require launcher v1.11.0 through v1.15.0"
         ;;
       square_tight5)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(10|11|12|13|14)\.0$ ||
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(10|11|12|13|14|15)\.0$ ||
           "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.13\.[12]$ ]] || die \
-          "square tight-five runs require launcher v1.10.0 through v1.14.0"
+          "square tight-five runs require launcher v1.10.0 through v1.15.0"
         ;;
       frozen_legacy_energy)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" == "1.14.0" ]] || die \
-          "frozen legacy-field runs require launcher v1.14.0"
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(14|15)\.0$ ]] || die \
+          "frozen legacy-field runs require launcher v1.14.0 or v1.15.0"
+        ;;
+      square_v0_chi400_compare)
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" == "1.15.0" ]] || die \
+          "square V=0 chi=400 comparisons require launcher v1.15.0"
         ;;
       *) die "invalid prepared campaign kind: $campaign_kind";;
     esac
@@ -1269,6 +1354,7 @@ Read-only:
   plan-square-v0-seed-pilot
   plan-square-tight5
   plan-frozen-legacy
+  plan-square-v0-chi400-compare
   check-gpu-preferences                  Verify merged Julia preferences without loading CUDA
   budget
   status [RUN_ID]
@@ -1290,6 +1376,8 @@ Preparation only (no Slurm submission or budget reservation):
                                         Prepare six accepted-parent tight five-update probes
   prepare-frozen-legacy SOURCE_RUN LEGACY_H5 NEW_RUN
                                         Prepare one frozen legacy-field DMRG diagnostic
+  prepare-square-v0-chi400-compare PAIRING_RUN FROZEN_RUN NEW_RUN
+                                        Prepare the tight chi=400 two-lineage comparison
 
 Submissions:
   submit RUN_ID                         Submit all prepared scientific branches directly
@@ -1313,6 +1401,7 @@ case "$action" in
   plan-square-v0-seed-pilot) print_square_v0_seed_pilot_plan;;
   plan-square-tight5) print_square_tight5_plan;;
   plan-frozen-legacy) print_frozen_legacy_plan;;
+  plan-square-v0-chi400-compare) print_square_v0_chi400_compare_plan;;
   check-gpu-preferences) validate_gpu_runtime_preferences;;
   budget) print_budget;;
   reconcile)
@@ -1393,6 +1482,17 @@ case "$action" in
       "new frozen legacy-field run already exists: $run_root/$4"
     PHASE1_GPU_TIME="$PHASE1_FROZEN_LEGACY_TIME"
     initialize_run "$4" "$source_run_dir" frozen_legacy_energy "$legacy_h5"
+    ;;
+  prepare-square-v0-chi400-compare)
+    [[ $# == 4 ]] || die \
+      "prepare-square-v0-chi400-compare requires PAIRING_RUN_ID FROZEN_RUN_ID NEW_RUN_ID"
+    pairing_run_dir="$(resolve_run_dir "$2")"
+    frozen_run_dir="$(resolve_run_dir "$3")"
+    [[ "$pairing_run_dir" != "$frozen_run_dir" ]] || die \
+      "pairing and frozen parent runs must be distinct"
+    [[ ! -e "$run_root/$4" ]] || die \
+      "new square V=0 chi=400 comparison run already exists: $run_root/$4"
+    initialize_run "$4" "$pairing_run_dir" square_v0_chi400_compare "$frozen_run_dir"
     ;;
   submit-recovery)
     [[ $# == 3 ]] || die "submit-recovery requires SOURCE_RUN_ID NEW_RUN_ID"

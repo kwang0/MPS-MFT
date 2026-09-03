@@ -1686,3 +1686,46 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   test was performed. Its target-density-corrected energy, density, raw-map
   mismatch, truncation evidence, and consistency errors must be read from the
   artifact before any conditional energetic comparison is reported.
+
+## 2026-09-03: square V=0, t0=1.4 chi=400 two-lineage comparison prepared
+
+- Prepared a two-branch bond-dimension/basin control at square `L=64`, `U=8`,
+  `V=0`, `t0=1.4`, `tp=0.1`, and density `0.9375`. The lineages are the
+  accepted pure-d-wave `m=0` branch and the frozen legacy-like diagnostic's
+  measured outgoing map. Both load their exact full `chi=200` scratch MPS
+  checkpoints and start fresh `chi=400` histories.
+- The legacy-like parent deliberately uses `fields/restart`, which the frozen
+  job stored from the measured current map, rather than the applied legacy
+  tensor. Preparation rehashes the full parent and refuses it unless inactive
+  onsite-beta restart entries are zero to `1e-12`; those unused legacy entries
+  caused the misleading `0.90069` all-entry residual but do not enter the MPO
+  or canonical functional.
+- Added `configs/phase1_gpu_square_v0_chi400_tight_compare.toml` with 16 DMRG
+  sweeps, `maxdim=400`, cutoff `1e-11`, DMRG energy tolerance `1e-9`, inner and
+  outer density tolerances `1e-4`, field gates `1e-7` absolute or `1e-4`
+  relative, target-corrected energy stability `1e-7` per site, two stable
+  records, a 20-update raw-map probe, and up to 80 MF updates. Anderson remains
+  downstream of the raw recurrence policy.
+- Added `scripts/prepare_phase1_square_v0_chi400_compare.jl`. It validates both
+  compact-to-full links, full hashes, source classifications, model/numerical/
+  implementation/E_p/scalar provenance, physical restart fields, and common
+  new numerical fingerprint before writing two immutable parent configs and a
+  manifest. The two accepted new states may be ranked within `chi=400`; changes
+  from `chi=200` are convergence diagnostics rather than a cross-fingerprint
+  variational ranking.
+- Launcher v1.15.0 adds read-only
+  `plan-square-v0-chi400-compare` and preparation-only
+  `prepare-square-v0-chi400-compare PAIRING_RUN FROZEN_RUN NEW_RUN`. Direct
+  `submit` creates no smoke and requests two 12-hour one-of-four-GPU jobs. The
+  first-segment ceiling is `6.000` node-hours; four segments for both lineages
+  would be `24.000` node-hours and are not pre-authorized.
+- The last synchronized reconciliation ledgers total `42.024097222` active
+  node-hours. A first submission would project to `48.024097222` active and
+  `351.975902778` unreserved under the 400-hour project cap. Live Perlmutter
+  accounting remains authoritative and must be checked immediately before
+  submission.
+- The handoff and completion gates are documented in
+  `docs/SQUARE_V0_T014_CHI400_COMPARISON_2026-09-03.md`. Codex performed no
+  transfer, Perlmutter login, scheduler action, or ledger mutation. Local
+  validation was limited to static source inspection and TOML parsing because
+  this Windows host has no runnable Julia or Bash installation.

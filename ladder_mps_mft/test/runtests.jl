@@ -731,7 +731,7 @@ end
     @test isempty(gpu_project["preferences"]["MPIPreferences"]["preloads"])
     @test occursin("require_current_run_version", script_source)
     @test occursin("require_worker_compatible_run_version", script_source)
-    @test occursin("PHASE1_SCRIPT_VERSION=\"1.13.2\"", script_source)
+    @test occursin("PHASE1_SCRIPT_VERSION=\"1.15.0\"", script_source)
     @test occursin("check-gpu-preferences)", script_source)
     @test occursin("validate_gpu_runtime_preferences", script_source)
     @test occursin("Base.get_preferences", preference_source)
@@ -749,6 +749,8 @@ end
     @test occursin("plan-square-v0-seed-pilot)", script_source)
     @test occursin("prepare-square-tight5)", script_source)
     @test occursin("plan-square-tight5)", script_source)
+    @test occursin("prepare-square-v0-chi400-compare)", script_source)
+    @test occursin("plan-square-v0-chi400-compare)", script_source)
     @test occursin("prepare-standard)", script_source)
     @test occursin("--licenses=scratch,cfs", script_source)
     @test occursin("compact_results.jl", script_source)
@@ -763,6 +765,22 @@ end
     @test occursin("--prune-cfs", migration_source)
     @test occursin("gpu_linalg_preflight!", read(joinpath(ROOT, "scripts", "gpu_smoke.jl"), String))
     @test occursin("gpu_linalg_preflight!", read(joinpath(ROOT, "scripts", "run_scf_gpu.jl"), String))
+    compare_settings = load_settings(joinpath(
+        ROOT,
+        "configs",
+        "phase1_gpu_square_v0_chi400_tight_compare.toml",
+    ))
+    @test compare_settings.model.geometry == :square
+    @test compare_settings.model.V == 0.0
+    @test compare_settings.model.t0 == 1.4
+    @test compare_settings.dmrg.maxdim == 400
+    @test compare_settings.dmrg.mu_density_tol == 1.0e-4
+    @test compare_settings.convergence.density_tol == 1.0e-4
+    @test compare_settings.convergence.field_abs_tol == 1.0e-7
+    @test compare_settings.convergence.field_rel_tol == 1.0e-4
+    @test compare_settings.convergence.variational_energy_tol == 1.0e-7
+    @test compare_settings.convergence.probe_iterations == 20
+    @test compare_settings.run.max_iterations == 80
     bash_executable = Sys.which("bash")
     if bash_executable === nothing
         @test_skip "bash-only Perlmutter launcher execution tests"
@@ -814,7 +832,7 @@ end
             run_environment_path,
             replace(
                 read(run_environment_path, String),
-                "PHASE1_RUN_SCRIPT_VERSION=1.13.2" => "PHASE1_RUN_SCRIPT_VERSION=1.12.0",
+                "PHASE1_RUN_SCRIPT_VERSION=1.15.0" => "PHASE1_RUN_SCRIPT_VERSION=1.12.0",
             ),
         )
         run(pipeline(

@@ -423,6 +423,35 @@ unused ceiling is released in project-control accounting. Recheck the live
 ledger before submission. The complete scientific and seed contract is in
 `docs/SQUARE_V0_T014_SEED_PLAN_2026-09-01.md`.
 
+## Square V=0, t0=1.4 chi=400 two-lineage comparison
+
+The tighter bond-dimension control continues one representative accepted
+pairing branch and the frozen legacy-like measured-map state from their exact
+full `chi=200` scratch MPS checkpoints. It uses `chi=400`, inner and outer
+density tolerances `1e-4`, field tolerances `1e-7` absolute or `1e-4`
+relative, and target-corrected energy stability `1e-7` per site. The legacy
+restart is required to have zero inactive onsite-beta entries.
+
+```bash
+cd "$CFS/m4863/MPS-MFT/ladder_mps_mft"
+PAIRING_RUN=20260902_phase1_square_t014_v000_seed_chi200_loose_cuda130
+FROZEN_RUN=20260903_phase1_square_t014_v000_legacy_frozen_dmrg_chi200
+COMPARE_RUN=20260903_phase1_square_t014_v000_pairing_legacy_chi400_tight
+
+bash slurm/phase1_gpu.sh plan-square-v0-chi400-compare
+bash slurm/phase1_gpu.sh prepare-square-v0-chi400-compare \
+  "$PAIRING_RUN" "$FROZEN_RUN" "$COMPARE_RUN"
+bash slurm/phase1_gpu.sh budget
+bash slurm/phase1_gpu.sh submit "$COMPARE_RUN"
+bash slurm/phase1_gpu.sh status "$COMPARE_RUN"
+```
+
+Preparation and planning do not submit or reserve. Direct submission creates
+two 12-hour one-of-four-GPU jobs, reserves `6.000` node-hours, and creates no
+smoke job. See `docs/SQUARE_V0_T014_CHI400_COMPARISON_2026-09-03.md` for the
+parent-integrity checks, numerical contract, interpretation boundary, and
+completion gate.
+
 ## Pair-binding interpolation and optional calculations
 
 At the representative point, the registry contains

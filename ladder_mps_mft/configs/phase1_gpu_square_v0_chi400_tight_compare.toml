@@ -1,0 +1,96 @@
+[model]
+L = 64
+t = 1.0
+U = 8.0
+V = 0.0
+t0 = 1.4
+tp = 0.1
+density = 0.9375
+mu_initial = 0.55
+r_range = 4
+geometry = "square"
+
+[pair_binding]
+registry = "data/E_p_values.csv"
+allow_interpolation = false
+
+[dmrg]
+nsweeps = 16
+maxdim = 400
+cutoff = 1.0e-11
+energy_tol = 1.0e-9
+eigsolve_krylovdim = 8
+max_time_seconds = 41400.0
+output_level = 1
+mu_density_tol = 1.0e-4
+mu_max_iterations = 16
+mu_bracket_step = 0.01
+mu_bracket_growth = 3.0
+mu_interval_tol = 1.0e-6
+mu_warm_start_noise = 1.0e-8
+
+[mixing]
+method = "anderson"
+damping = 0.5
+minimum_damping = 0.05
+maximum_damping = 0.8
+memory = 5
+regularization = 1.0e-10
+adaptive = true
+
+[convergence]
+field_abs_tol = 1.0e-7
+field_rel_tol = 1.0e-4
+density_tol = 1.0e-4
+variational_energy_tol = 1.0e-7
+hamiltonian_identity_tol = 1.0e-10
+effective_energy_consistency_tol = 1.0e-8
+stable_iterations = 2
+max_period = 8
+period_repeats = 3
+period_abs_tol = 2.0e-7
+period_rel_tol = 2.0e-4
+period2_oscillation_cosine_max = -0.5
+period2_two_step_ratio_max = 0.5
+slow_mode_cosine_min = 0.9
+unmixed_cycle_probe = true
+probe_max_period = 2
+probe_iterations = 20
+accepted_periods = [1, 2]
+orbit_bulk_fraction = 0.5
+cycle_action = "continue"
+stagnation_window = 10
+stagnation_min_relative_improvement = 1.0e-2
+divergence_factor = 8.0
+
+[runtime]
+backend = "gpu"
+tensor_scalar_type = "float64"
+blas_threads = 1
+strided_threads = 1
+threaded_blocksparse = false
+conserve_sz = false
+conserve_nfparity = false
+
+[run]
+output_directory = "output/phase1_gpu/UNPREPARED_SQUARE_V0_CHI400_TIGHT_COMPARE"
+branch_label = "unprepared"
+preparation = "unprepared_square_v0_chi400_tight_compare"
+direction = "none"
+seed_label = "unprepared"
+random_seed = 1404
+initial_seed = "pairing"
+initial_amplitude = 1.0e-3
+initial_seed_protocol = "matched_mode"
+initial_mode_number = 0
+initial_mode_phase_pi = 0.0
+initial_pairing_form_factor = "d_wave"
+initial_leg_parity = "auto"
+initial_stripe_charge_to_spin_ratio = 0.2
+initial_stripe_pairing_to_spin_ratio = 1.0
+max_iterations = 80
+save_every = 1
+require_accepted_solution = false
+allow_unbound_ep = false
+quick_diagnostics = true
+full_pair_correlations = false
