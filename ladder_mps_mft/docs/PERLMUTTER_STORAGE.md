@@ -208,3 +208,21 @@ first-segment envelope is `18.000` node-hours (six `3.000` branch
 reservations). Recheck the live Perlmutter ledger before direct submission.
 If a smoke was already submitted from the v1.12.0-prepared campaign, its
 existing reservation remains visible until the terminal job is reconciled.
+
+## Field-only legacy seed derivatives
+
+The square `(t0,V)=(1.4,-0.4)` legacy-stripe comparison uses a compact,
+immutable field-only derivative below its new CFS run tree:
+
+```text
+output/phase1_gpu/<run-id>/seeds/legacy_square_t010_v000_terminal_physical_fields.h5
+```
+
+This is intentionally stored on CFS because it contains only `alpha`, `beta`,
+`mu_cdw`, `mu`, and source-provenance scalars—not an MPS. The preparation
+manifest records the exact original legacy path/hash, derived path/hash, and
+the sole transformation (zeroing inactive same-physical-site `beta` entries).
+Generated branch configs inherit this small derivative, while all new MPS
+states and checkpoints remain scratch-first. Preserve the seed and manifest
+together when synchronizing the lightweight run; do not replace the derivative
+with the full legacy history file and do not modify either HDF5 in place.

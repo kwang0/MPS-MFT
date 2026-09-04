@@ -731,7 +731,7 @@ end
     @test isempty(gpu_project["preferences"]["MPIPreferences"]["preloads"])
     @test occursin("require_current_run_version", script_source)
     @test occursin("require_worker_compatible_run_version", script_source)
-    @test occursin("PHASE1_SCRIPT_VERSION=\"1.17.0\"", script_source)
+    @test occursin("PHASE1_SCRIPT_VERSION=\"1.18.0\"", script_source)
     @test occursin("check-gpu-preferences)", script_source)
     @test occursin("validate_gpu_runtime_preferences", script_source)
     @test occursin("Base.get_preferences", preference_source)
@@ -755,6 +755,8 @@ end
     @test occursin("plan-square-smooth-pairing-grid)", script_source)
     @test occursin("prepare-cubic-unfrustrated-smooth-pairing-grid)", script_source)
     @test occursin("plan-cubic-unfrustrated-smooth-pairing-grid)", script_source)
+    @test occursin("prepare-square-legacy-stripe-compare)", script_source)
+    @test occursin("plan-square-legacy-stripe-compare)", script_source)
     @test occursin("require_continuation_compatible_run_version", script_source)
     @test occursin("prepare-standard)", script_source)
     @test occursin("--licenses=scratch,cfs", script_source)
@@ -843,6 +845,31 @@ end
     @test cubic_grid_settings.model.ep_signed == grid_settings.model.ep_signed
     @test numerical_fingerprint(cubic_grid_settings) == numerical_fingerprint(grid_settings)
     @test initial_seed_fingerprint(cubic_grid_settings) == initial_seed_fingerprint(grid_settings)
+    stripe_compare_settings = load_settings(joinpath(
+        ROOT,
+        "configs",
+        "phase1_gpu_square_t014_vm04_legacy_stripe_compare_chi200_loose.toml",
+    ))
+    @test stripe_compare_settings.model.geometry == :square
+    @test stripe_compare_settings.model.V == -0.4
+    @test stripe_compare_settings.model.t0 == 1.4
+    @test stripe_compare_settings.model.ep_mode == :exact
+    @test stripe_compare_settings.model.ep_signed == -0.24962435880865996
+    @test stripe_compare_settings.dmrg.maxdim == 200
+    @test stripe_compare_settings.dmrg.mu_density_tol == 1.0e-3
+    @test stripe_compare_settings.convergence.field_rel_tol == 5.0e-3
+    @test stripe_compare_settings.convergence.probe_iterations == 20
+    @test numerical_fingerprint(stripe_compare_settings) == numerical_fingerprint(grid_settings)
+    stripe_prepare_source = read(joinpath(
+        ROOT,
+        "scripts",
+        "prepare_phase1_square_legacy_stripe_compare.jl",
+    ), String)
+    @test occursin(
+        "ae6a3bfe76ca8f06f2396fd731b18bca8539e0b7ee68df016cc9156fdceeb074",
+        stripe_prepare_source,
+    )
+    @test occursin("zero_inactive_same_physical_site_beta_only_v1", stripe_prepare_source)
     bash_executable = Sys.which("bash")
     if bash_executable === nothing
         @test_skip "bash-only Perlmutter launcher execution tests"
@@ -894,7 +921,7 @@ end
             run_environment_path,
             replace(
                 read(run_environment_path, String),
-                "PHASE1_RUN_SCRIPT_VERSION=1.17.0" => "PHASE1_RUN_SCRIPT_VERSION=1.12.0",
+                "PHASE1_RUN_SCRIPT_VERSION=1.18.0" => "PHASE1_RUN_SCRIPT_VERSION=1.12.0",
             ),
         )
         run(pipeline(

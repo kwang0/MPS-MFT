@@ -5,7 +5,7 @@
 
 set -euo pipefail
 
-readonly PHASE1_SCRIPT_VERSION="1.17.0"
+readonly PHASE1_SCRIPT_VERSION="1.18.0"
 script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
 project_dir="${PHASE1_PROJECT_DIR:-$(cd "$(dirname "$script_path")/.." && pwd)}"
 repo_root="${PHASE1_REPO_ROOT:-$(cd "$project_dir/.." && pwd)}"
@@ -38,6 +38,7 @@ PHASE1_SQUARE_V0_SEED_CONFIG="${PHASE1_SQUARE_V0_SEED_CONFIG:-$project_dir/confi
 PHASE1_SQUARE_V0_CHI400_COMPARE_CONFIG="${PHASE1_SQUARE_V0_CHI400_COMPARE_CONFIG:-$project_dir/configs/phase1_gpu_square_v0_chi400_tight_compare.toml}"
 PHASE1_SQUARE_GRID_SMOOTH_PAIRING_CONFIG="${PHASE1_SQUARE_GRID_SMOOTH_PAIRING_CONFIG:-$project_dir/configs/phase1_gpu_square_grid_smooth_pairing_chi200_loose.toml}"
 PHASE1_CUBIC_UNFRUSTRATED_GRID_SMOOTH_PAIRING_CONFIG="${PHASE1_CUBIC_UNFRUSTRATED_GRID_SMOOTH_PAIRING_CONFIG:-$project_dir/configs/phase1_gpu_cubic_unfrustrated_grid_smooth_pairing_chi200_loose.toml}"
+PHASE1_SQUARE_LEGACY_STRIPE_COMPARE_CONFIG="${PHASE1_SQUARE_LEGACY_STRIPE_COMPARE_CONFIG:-$project_dir/configs/phase1_gpu_square_t014_vm04_legacy_stripe_compare_chi200_loose.toml}"
 
 die() { echo "error: $*" >&2; exit 1; }
 require_command() { command -v "$1" >/dev/null 2>&1 || die "required command not found: $1"; }
@@ -148,6 +149,8 @@ validate_project() {
     "missing Phase 1 square smooth-pairing grid config: $PHASE1_SQUARE_GRID_SMOOTH_PAIRING_CONFIG"
   [[ -f "$PHASE1_CUBIC_UNFRUSTRATED_GRID_SMOOTH_PAIRING_CONFIG" ]] || die \
     "missing Phase 1 cubic-unfrustrated smooth-pairing grid config: $PHASE1_CUBIC_UNFRUSTRATED_GRID_SMOOTH_PAIRING_CONFIG"
+  [[ -f "$PHASE1_SQUARE_LEGACY_STRIPE_COMPARE_CONFIG" ]] || die \
+    "missing Phase 1 square legacy-stripe comparison config: $PHASE1_SQUARE_LEGACY_STRIPE_COMPARE_CONFIG"
   [[ -f "$project_dir/scripts/run_scf_gpu.jl" ]] || die "missing GPU SCF entry point"
   [[ -f "$project_dir/scripts/prepare_phase1_recurrence.jl" ]] || die \
     "missing recurrence preparation entry point"
@@ -165,6 +168,8 @@ validate_project() {
     "missing square V=0 chi=400 comparison preparation entry point"
   [[ -f "$project_dir/scripts/prepare_phase1_square_smooth_pairing_grid.jl" ]] || die \
     "missing square smooth-pairing grid preparation entry point"
+  [[ -f "$project_dir/scripts/prepare_phase1_square_legacy_stripe_compare.jl" ]] || die \
+    "missing square legacy-stripe comparison preparation entry point"
   [[ -f "$project_dir/scripts/run_frozen_legacy_gpu.jl" ]] || die \
     "missing frozen legacy-field GPU entry point"
   [[ -f "$project_dir/scripts/gpu_smoke.jl" ]] || die "missing GPU smoke test"
@@ -646,6 +651,77 @@ EOF
   return 0
 }
 
+print_square_legacy_stripe_compare_plan() {
+  validate_project
+  local segment initial ceiling committed projected remaining ceiling_projected ceiling_remaining
+  segment="$(gpu_node_hours "$PHASE1_GPU_TIME")"
+  initial="$(awk -v s="$segment" 'BEGIN {printf "%.9f", 2*s}')"
+  ceiling="$(awk -v s="$segment" -v m="$PHASE1_MAX_SEGMENTS" \
+    'BEGIN {printf "%.9f", 2*m*s}')"
+  committed="$(ledger_total)"
+  projected="$(awk -v c="$committed" -v a="$initial" 'BEGIN {printf "%.9f", c+a}')"
+  remaining="$(awk -v cap="$PHASE1_ADDITIONAL_NODE_HOUR_CAP" -v p="$projected" \
+    'BEGIN {printf "%.9f", cap-p}')"
+  ceiling_projected="$(awk -v c="$committed" -v a="$ceiling" 'BEGIN {printf "%.9f", c+a}')"
+  ceiling_remaining="$(awk -v cap="$PHASE1_ADDITIONAL_NODE_HOUR_CAP" -v p="$ceiling_projected" \
+    'BEGIN {printf "%.9f", cap-p}')"
+  cat <<EOF
+Ladder MPS+MF square chi=200 legacy-stripe stability and energy comparison
+
+Target:               L=64, U=8, V=-0.4, t0=1.4, t_perp=0.1, density=0.9375
+Pair binding:         exact E_p=-0.24962435880865996; no interpolation or new E_p job
+Branch 1:             fresh smooth pairing control, amplitude=1e-3, RNG seed=1404
+Branch 2:             exact terminal physical fields from the legacy square (t0,V)=(1.0,0.0) stripe
+Legacy source:        \$CFS/m4863/MPS-MFT/stateless_data/results_L_64_U_8.0_V_0.0_t0_1.0_t_p_0.1_geometry_square_chi_200_density_0.9375_gpu.h5
+Required source hash: ae6a3bfe76ca8f06f2396fd731b18bca8539e0b7ee68df016cc9156fdceeb074
+Inheritance:          preserve alpha, all physical beta, mu_cdw, texture, amplitudes, and mu
+Sanitization:         zero only inactive same-physical-site beta entries in a derived field-only seed
+MPS policy:           fresh product MPS for both branches; no legacy MPS is imported
+History policy:       save the exact time-zero field seed before the first MF update
+Numerical control:    chi=200, 12 sweeps, cutoff=1e-10, DMRG energy_tol=1e-6
+Density control:      inner/outer tolerance=1e-3; carried positive dn/dmu
+Field gates:          absolute=1e-6 OR relative=5e-3; preliminary loose threshold
+Physics policy:       20 raw-map updates first; preserve recurrence before Anderson acceleration
+Storage:              full MPS on scratch; compact stateless results and derived field seed on CFS
+
+Energy-ranking gate:  compare the two new final states only if both are accepted and their
+                      model, numerical, implementation, and E_p fingerprints match. The six
+                      older target-point states remain qualitative context because they predate
+                      the current numerical/provenance implementation fingerprints.
+
+Measured old target-point branches used about 0.1067 to 0.1235 node-hours each.
+Two-job analog estimate: 0.2133 to 0.2469 actual node-hours. The inherited stripe can
+take longer if it undergoes slow basin escape; sacct elapsed accounting is authoritative.
+
+GPU request:            one of four GPUs, ${PHASE1_GPU_TIME}, ${PHASE1_GPU_CPUS} CPUs, shared QOS
+GPU constraint:         gpu (hbm80g begins only at chi=${PHASE1_HBM80G_MIN_CHI})
+Per-branch reserve:     ${segment} GPU node-hours
+First-segment envelope: ${initial} node-hours
+Four-segment emergency ceiling: ${ceiling} node-hours (not pre-authorized)
+Hard project cap:       ${PHASE1_ADDITIONAL_NODE_HOUR_CAP} additional node-hours
+Live ledger after first segments: ${projected} active; ${remaining} unreserved
+Live ledger at emergency ceiling: ${ceiling_projected} active; ${ceiling_remaining} unreserved
+
+Preparation creates no job and no reservation:
+  STRIPE_SOURCE="\$CFS/m4863/MPS-MFT/stateless_data/results_L_64_U_8.0_V_0.0_t0_1.0_t_p_0.1_geometry_square_chi_200_density_0.9375_gpu.h5"
+  STRIPE_RUN=20260903_phase1_square_t014_vm04_legacy_stripe_compare_chi200_loose
+  bash $script_path prepare-square-legacy-stripe-compare "\$STRIPE_SOURCE" "\$STRIPE_RUN"
+
+Inspect the immutable two-row manifest and live budget before direct submission:
+  column -ts $'\t' "output/phase1_gpu/\$STRIPE_RUN/manifest.tsv" | less -S
+  bash $script_path budget
+  bash $script_path submit "\$STRIPE_RUN"
+  bash $script_path status "\$STRIPE_RUN"
+
+No standalone smoke job is created.
+EOF
+  print_budget
+  awk -v current="$committed" -v requested="$initial" -v cap="$PHASE1_ADDITIONAL_NODE_HOUR_CAP" \
+    'BEGIN {exit !((current+requested) > cap)}' && die \
+    "square legacy-stripe comparison first-segment envelope would exceed the hard cap"
+  return 0
+}
+
 print_recurrence_plan() {
   validate_project
   local segment recurrence_initial competitors_initial combined_initial
@@ -816,6 +892,7 @@ write_environment() {
     printf 'PHASE1_SQUARE_V0_CHI400_COMPARE_CONFIG=%q\n' "$PHASE1_SQUARE_V0_CHI400_COMPARE_CONFIG"
     printf 'PHASE1_SQUARE_GRID_SMOOTH_PAIRING_CONFIG=%q\n' "$PHASE1_SQUARE_GRID_SMOOTH_PAIRING_CONFIG"
     printf 'PHASE1_CUBIC_UNFRUSTRATED_GRID_SMOOTH_PAIRING_CONFIG=%q\n' "$PHASE1_CUBIC_UNFRUSTRATED_GRID_SMOOTH_PAIRING_CONFIG"
+    printf 'PHASE1_SQUARE_LEGACY_STRIPE_COMPARE_CONFIG=%q\n' "$PHASE1_SQUARE_LEGACY_STRIPE_COMPARE_CONFIG"
     printf 'PHASE1_RUN_ROOT=%q\n' "$run_root"
     printf 'PHASE1_SCRATCH_ROOT=%q\n' "$scratch_root"
     printf 'PHASE1_RUN_SCRATCH_DIR=%q\n' "$scratch_run_dir"
@@ -844,7 +921,7 @@ load_environment() {
   # shellcheck disable=SC1090
   source "$run_dir/run.env"
   case "${PHASE1_RUN_SCRIPT_VERSION:-missing}" in
-    1.0.0|1.0.1|1.1.0|1.2.0|1.3.0|1.4.0|1.5.0|1.6.0|1.7.0|1.8.0|1.9.0|1.10.0|1.11.0|1.12.0|1.13.0|1.13.1|1.13.2|1.14.0|1.15.0|1.16.0|1.17.0) ;;
+    1.0.0|1.0.1|1.1.0|1.2.0|1.3.0|1.4.0|1.5.0|1.6.0|1.7.0|1.8.0|1.9.0|1.10.0|1.11.0|1.12.0|1.13.0|1.13.1|1.13.2|1.14.0|1.15.0|1.16.0|1.17.0|1.18.0) ;;
     *) die "unsupported run script version ${PHASE1_RUN_SCRIPT_VERSION:-missing}; current version is $PHASE1_SCRIPT_VERSION";;
   esac
   project_dir="$PHASE1_PROJECT_DIR"
@@ -887,9 +964,9 @@ require_direct_submission_compatible_run_version() {
     1.12.0|1.13.0|1.13.1|1.13.2)
       echo "warning: directly submitting a launcher-v${PHASE1_RUN_SCRIPT_VERSION} campaign with v${PHASE1_SCRIPT_VERSION}; the standalone smoke gate has been retired" >&2
       ;;
-    1.14.0|1.15.0|1.16.0|1.17.0) ;;
+    1.14.0|1.15.0|1.16.0|1.17.0|1.18.0) ;;
     *) die \
-      "direct submission requires a run prepared by launcher v1.12.0 through v1.17.0; found ${PHASE1_RUN_SCRIPT_VERSION:-missing}";;
+      "direct submission requires a run prepared by launcher v1.12.0 through v1.18.0; found ${PHASE1_RUN_SCRIPT_VERSION:-missing}";;
   esac
 }
 
@@ -897,25 +974,30 @@ require_continuation_compatible_run_version() {
   local run_dir="$1" campaign_kind="standard"
   [[ ! -f "$run_dir/campaign_kind.txt" ]] || campaign_kind="$(<"$run_dir/campaign_kind.txt")"
   case "${PHASE1_RUN_SCRIPT_VERSION:-missing}" in
-    1.17.0) ;;
+    1.18.0) ;;
+    1.17.0)
+      [[ "$campaign_kind" == "cubic_unfrustrated_smooth_pairing_grid" ]] || die \
+        "launcher v1.17.0 continuation compatibility is restricted to the active cubic-unfrustrated smooth-pairing grid"
+      echo "warning: continuing the launcher-v1.17.0 cubic grid with compatible v1.18.0; solver src/ and GPU Manifest are unchanged" >&2
+      ;;
     1.16.0)
       [[ "$campaign_kind" == "square_smooth_pairing_grid" ]] || die \
         "launcher v1.16.0 continuation compatibility is restricted to the active square smooth-pairing grid"
-      echo "warning: continuing the launcher-v1.16.0 square grid with compatible v1.17.0; solver src/ and GPU Manifest are unchanged" >&2
+      echo "warning: continuing the launcher-v1.16.0 square grid with compatible v1.18.0; solver src/ and GPU Manifest are unchanged" >&2
       ;;
     1.15.0)
       [[ "$campaign_kind" == "square_v0_chi400_compare" ]] || die \
         "launcher v1.15.0 continuation compatibility is restricted to the active square chi=400 comparison"
-      echo "warning: continuing the launcher-v1.15.0 chi=400 comparison with compatible v1.17.0; solver src/ and GPU Manifest are unchanged" >&2
+      echo "warning: continuing the launcher-v1.15.0 chi=400 comparison with compatible v1.18.0; solver src/ and GPU Manifest are unchanged" >&2
       ;;
     *) die \
-      "continuation requires launcher v1.17.0, v1.16.0 for the active square grid, or v1.15.0 for the active square chi=400 comparison; found ${PHASE1_RUN_SCRIPT_VERSION:-missing}";;
+      "continuation requires launcher v1.18.0, v1.17.0 for the active cubic grid, v1.16.0 for the active square grid, or v1.15.0 for the active square chi=400 comparison; found ${PHASE1_RUN_SCRIPT_VERSION:-missing}";;
   esac
 }
 
 require_worker_compatible_run_version() {
   case "${PHASE1_RUN_SCRIPT_VERSION:-missing}" in
-    1.2.0|1.3.0|1.4.0|1.5.0|1.6.0|1.7.0|1.8.0|1.9.0|1.10.0|1.11.0|1.12.0|1.13.0|1.13.1|1.13.2|1.14.0|1.15.0|1.16.0|1.17.0) ;;
+    1.2.0|1.3.0|1.4.0|1.5.0|1.6.0|1.7.0|1.8.0|1.9.0|1.10.0|1.11.0|1.12.0|1.13.0|1.13.1|1.13.2|1.14.0|1.15.0|1.16.0|1.17.0|1.18.0) ;;
     *) die "queued worker cannot execute run script ${PHASE1_RUN_SCRIPT_VERSION:-missing} with launcher $PHASE1_SCRIPT_VERSION";;
   esac
 }
@@ -1023,6 +1105,20 @@ initialize_run() {
         "cubic_unfrustrated"
       )
       ;;
+    square_legacy_stripe_compare)
+      [[ -z "$source_run_dir" ]] || die \
+        "square legacy-stripe comparison does not use a refactored source run"
+      [[ -n "$source_artifact" && -f "$source_artifact" ]] || die \
+        "square legacy-stripe comparison requires the exact legacy HDF5 source"
+      prepare_script="$project_dir/scripts/prepare_phase1_square_legacy_stripe_compare.jl"
+      prepare_args=(
+        "$PHASE1_SQUARE_LEGACY_STRIPE_COMPARE_CONFIG"
+        "$source_artifact"
+        "$run_dir"
+        "$scratch_run_dir"
+        "$run_id"
+      )
+      ;;
     *) die "unknown Phase 1 campaign kind: $campaign_kind";;
   esac
   "$PHASE1_JULIA" --startup-file=no --project="$project_dir" \
@@ -1055,52 +1151,56 @@ validate_initialized_run() {
     "prepared manifest must contain named label and config columns"
   [[ -f "$run_dir/gpu-Manifest.toml" ]] || die "prepared run is missing its GPU manifest"
   [[ -f "$run_dir/gpu-Manifest.toml.sha256" ]] || die "prepared run is missing its GPU-manifest hash"
-  if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(3|4|5|6|7|8|9|10|11|12|13|14|15|16|17)\.0$ ||
+  if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18)\.0$ ||
         "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.13\.[12]$ ]]; then
     [[ -d "$(full_run_directory_from_control "$run_dir")/results" ]] || die \
       "prepared run is missing its full-result scratch directory"
   fi
-  if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(5|6|7|8|9|10|11|12|13|14|15|16|17)\.0$ ||
+  if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(5|6|7|8|9|10|11|12|13|14|15|16|17|18)\.0$ ||
         "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.13\.[12]$ ]]; then
     [[ -f "$run_dir/campaign_kind.txt" ]] || die "prepared run is missing campaign_kind.txt"
     campaign_kind="$(<"$run_dir/campaign_kind.txt")"
     case "$campaign_kind" in
       standard|recurrence|recurrence_competitors) ;;
       matched_seed_pilot)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(6|7|8|9|10|11|12|13|14|15|16|17)\.0$ ||
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(6|7|8|9|10|11|12|13|14|15|16|17|18)\.0$ ||
           "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.13\.[12]$ ]] || die \
-          "matched-seed pilot requires launcher v1.6.0 through v1.17.0"
+          "matched-seed pilot requires launcher v1.6.0 through v1.18.0"
         ;;
       square_seed_pilot)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(7|8|9|10|11|12|13|14|15|16|17)\.0$ ||
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(7|8|9|10|11|12|13|14|15|16|17|18)\.0$ ||
           "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.13\.[12]$ ]] || die \
-          "square seed pilot requires launcher v1.7.0 through v1.17.0"
+          "square seed pilot requires launcher v1.7.0 through v1.18.0"
         ;;
       square_seed_pilot_v0)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(11|12|13|14|15|16|17)\.0$ ||
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(11|12|13|14|15|16|17|18)\.0$ ||
           "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.13\.[12]$ ]] || die \
-          "square V=0 seed pilots require launcher v1.11.0 through v1.17.0"
+          "square V=0 seed pilots require launcher v1.11.0 through v1.18.0"
         ;;
       square_tight5)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(10|11|12|13|14|15|16|17)\.0$ ||
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(10|11|12|13|14|15|16|17|18)\.0$ ||
           "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.13\.[12]$ ]] || die \
-          "square tight-five runs require launcher v1.10.0 through v1.17.0"
+          "square tight-five runs require launcher v1.10.0 through v1.18.0"
         ;;
       frozen_legacy_energy)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(14|15|16|17)\.0$ ]] || die \
-          "frozen legacy-field runs require launcher v1.14.0 through v1.17.0"
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(14|15|16|17|18)\.0$ ]] || die \
+          "frozen legacy-field runs require launcher v1.14.0 through v1.18.0"
         ;;
       square_v0_chi400_compare)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(15|16|17)\.0$ ]] || die \
-          "square V=0 chi=400 comparisons require launcher v1.15.0 through v1.17.0"
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(15|16|17|18)\.0$ ]] || die \
+          "square V=0 chi=400 comparisons require launcher v1.15.0 through v1.18.0"
         ;;
       square_smooth_pairing_grid)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(16|17)\.0$ ]] || die \
-          "square smooth-pairing grid runs require launcher v1.16.0 or v1.17.0"
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(16|17|18)\.0$ ]] || die \
+          "square smooth-pairing grid runs require launcher v1.16.0 through v1.18.0"
         ;;
       cubic_unfrustrated_smooth_pairing_grid)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" == "1.17.0" ]] || die \
-          "cubic-unfrustrated smooth-pairing grid runs require launcher v1.17.0"
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(17|18)\.0$ ]] || die \
+          "cubic-unfrustrated smooth-pairing grid runs require launcher v1.17.0 or v1.18.0"
+        ;;
+      square_legacy_stripe_compare)
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" == "1.18.0" ]] || die \
+          "square legacy-stripe comparisons require launcher v1.18.0"
         ;;
       *) die "invalid prepared campaign kind: $campaign_kind";;
     esac
@@ -1567,6 +1667,7 @@ Read-only:
   plan-square-v0-chi400-compare
   plan-square-smooth-pairing-grid
   plan-cubic-unfrustrated-smooth-pairing-grid
+  plan-square-legacy-stripe-compare
   check-gpu-preferences                  Verify merged Julia preferences without loading CUDA
   budget
   status [RUN_ID]
@@ -1594,6 +1695,8 @@ Preparation only (no Slurm submission or budget reservation):
                                         Prepare five missing square-grid points with one smooth pairing seed
   prepare-cubic-unfrustrated-smooth-pairing-grid NEW_RUN
                                         Prepare eight missing cubic-unfrustrated grid points with the same seed
+  prepare-square-legacy-stripe-compare LEGACY_H5 NEW_RUN
+                                        Prepare matched current pairing and inherited legacy-stripe branches
 
 Submissions:
   submit RUN_ID                         Submit all prepared scientific branches directly
@@ -1620,6 +1723,7 @@ case "$action" in
   plan-square-v0-chi400-compare) print_square_v0_chi400_compare_plan;;
   plan-square-smooth-pairing-grid) print_square_smooth_pairing_grid_plan;;
   plan-cubic-unfrustrated-smooth-pairing-grid) print_cubic_unfrustrated_smooth_pairing_grid_plan;;
+  plan-square-legacy-stripe-compare) print_square_legacy_stripe_compare_plan;;
   check-gpu-preferences) validate_gpu_runtime_preferences;;
   budget) print_budget;;
   reconcile)
@@ -1724,6 +1828,15 @@ case "$action" in
     [[ ! -e "$run_root/$2" ]] || die \
       "new cubic-unfrustrated smooth-pairing grid run already exists: $run_root/$2"
     initialize_run "$2" "" cubic_unfrustrated_smooth_pairing_grid
+    ;;
+  prepare-square-legacy-stripe-compare)
+    [[ $# == 3 ]] || die \
+      "prepare-square-legacy-stripe-compare requires LEGACY_H5 NEW_RUN_ID"
+    legacy_h5="$2"
+    [[ -f "$legacy_h5" ]] || die "legacy HDF5 file not found: $legacy_h5"
+    [[ ! -e "$run_root/$3" ]] || die \
+      "new square legacy-stripe comparison run already exists: $run_root/$3"
+    initialize_run "$3" "" square_legacy_stripe_compare "$legacy_h5"
     ;;
   submit-recovery)
     [[ $# == 3 ]] || die "submit-recovery requires SOURCE_RUN_ID NEW_RUN_ID"

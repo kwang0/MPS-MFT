@@ -1843,3 +1843,49 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
 - Full MPS data remain scratch-first with stateless CFS mirrors. Cross-point
   and cross-geometry energy ranking is forbidden. Codex performed no transfer,
   Perlmutter access, submission, cancellation, ledger mutation, or HDF5 write.
+
+## 2026-09-03: square t0=1.4, V=-0.4 legacy-stripe comparison prepared
+
+- Prepared a two-branch square `L=64`, `U=8`, `V=-0.4`, `t0=1.4`, `tp=0.1`,
+  density `0.9375`, `chi=200` loose campaign. One branch imports the exact
+  terminal fields and chemical potential of the legacy square `(1.0,0.0)`
+  stripe; the other is a fresh center-of-mass-uniform smooth pairing control.
+  Both begin from fresh product MPS states and share the current model,
+  numerical, implementation, scalar, and exact-`E_p` contracts.
+- Locked the input to SHA-256
+  `ae6a3bfe76ca8f06f2396fd731b18bca8539e0b7ee68df016cc9156fdceeb074`.
+  The source has active `max|beta|=0.03440698`, `max|mu_cdw|=0.05339365`, and
+  `mu=1.6586343178`, confirming that this is the intended high-amplitude stripe
+  rather than another weak seed.
+- The legacy file also stores 256 inactive same-physical-site `beta` entries,
+  with maximum magnitude `0.12824499`. Current MPO construction, the mean-field
+  map, and the canonical functional omit these entries, but retaining them
+  would create an artificial first-step raw residual. The preparer writes an
+  immutable field-only derivative in the new CFS run directory, zeros only
+  those inactive entries, verifies every physical field unchanged, and records
+  both source hashes and the sanitization policy. The original HDF5 is untouched.
+- Added
+  `configs/phase1_gpu_square_t014_vm04_legacy_stripe_compare_chi200_loose.toml`
+  and `scripts/prepare_phase1_square_legacy_stripe_compare.jl`. Launcher
+  v1.18.0 adds read-only `plan-square-legacy-stripe-compare` and preparation-
+  only `prepare-square-legacy-stripe-compare LEGACY_H5 NEW_RUN`; direct submit
+  creates two scientific jobs and no smoke. Compatibility is retained for the
+  active v1.15.0 chi=400, v1.16.0 square-grid, and v1.17.0 cubic-grid campaigns
+  because solver `src/` and the GPU Manifest are unchanged.
+- Formal energy ranking is limited to the two new endpoints and only if both
+  are accepted with matching fingerprints. The six older `(1.4,-0.4)` states
+  remain qualitative context because their numerical and implementation
+  fingerprints differ. The legacy stored effective energy is not rankable.
+- Two first segments reserve `6.000` node-hours. Historical target-point jobs
+  imply a `0.2133--0.2469` node-hour analog estimate, with extra uncertainty
+  for slow stripe drift or basin escape. Depending on whether the prepared
+  cubic grid has also been submitted, the last synchronized ledger scenario
+  plus known campaign ceilings would project either `69.024097222` or
+  `93.024097222` active node-hours. The live Perlmutter ledger and `sacct`
+  supersede both illustrations.
+- A focused local preparation check passed against the supplied legacy file:
+  exact hash and metadata, derived-seed readback, field-preservation checks,
+  two generated configs, common fingerprints, and manifest construction. No
+  DMRG, CUDA, transfer, Perlmutter access, scheduler action, or ledger mutation
+  was performed. See
+  `docs/SQUARE_T014_VM04_LEGACY_STRIPE_COMPARISON_2026-09-03.md`.
