@@ -4,14 +4,18 @@ using LadderMPSMFT
 using Random
 using TOML
 
-length(ARGS) == 4 || error(
+length(ARGS) in (4, 5) || error(
     "usage: julia --project=. scripts/prepare_phase1_square_smooth_pairing_grid.jl " *
-    "BASE_CONFIG.toml CONTROL_RUN FULL_RUN RUN_ID",
+    "BASE_CONFIG.toml CONTROL_RUN FULL_RUN RUN_ID [square|cubic_unfrustrated]",
 )
 
 const COMMON_RANDOM_SEED = 1404
 const INITIAL_AMPLITUDE = 1.0e-3
-const POINT_CONTRACTS = (
+const TARGET_GEOMETRY = length(ARGS) == 5 ? Symbol(ARGS[5]) : :square
+TARGET_GEOMETRY in (:square, :cubic_unfrustrated) || error(
+    "unsupported smooth-pairing grid geometry: $TARGET_GEOMETRY",
+)
+const SQUARE_POINT_CONTRACTS = (
     (
         point_id="square_t010_vm04",
         label="square__smooth_pairing_t010_vm04_chi200_loose",
@@ -58,18 +62,99 @@ const POINT_CONTRACTS = (
         ep_signed=-0.17989619749147323,
     ),
 )
+const CUBIC_UNFRUSTRATED_POINT_CONTRACTS = (
+    (
+        point_id="cubic_unfrustrated_t010_vm04",
+        label="cubic_unfrustrated__smooth_pairing_t010_vm04_chi200_loose",
+        V=-0.4,
+        t0=1.0,
+        mu_initial=0.55,
+        mu_initial_basis="V_informed_grid_bracket_guide",
+        ep_signed=-0.17882744409052975,
+    ),
+    (
+        point_id="cubic_unfrustrated_t010_vm02",
+        label="cubic_unfrustrated__smooth_pairing_t010_vm02_chi200_loose",
+        V=-0.2,
+        t0=1.0,
+        mu_initial=1.10,
+        mu_initial_basis="V_informed_grid_bracket_guide",
+        ep_signed=-0.1545120066237189,
+    ),
+    (
+        point_id="cubic_unfrustrated_t012_vm04",
+        label="cubic_unfrustrated__smooth_pairing_t012_vm04_chi200_loose",
+        V=-0.4,
+        t0=1.2,
+        mu_initial=0.55,
+        mu_initial_basis="V_informed_grid_bracket_guide",
+        ep_signed=-0.25124588461187614,
+    ),
+    (
+        point_id="cubic_unfrustrated_t012_vm02",
+        label="cubic_unfrustrated__smooth_pairing_t012_vm02_chi200_loose",
+        V=-0.2,
+        t0=1.2,
+        mu_initial=1.10,
+        mu_initial_basis="V_informed_grid_bracket_guide",
+        ep_signed=-0.21453418655934797,
+    ),
+    (
+        point_id="cubic_unfrustrated_t012_v000",
+        label="cubic_unfrustrated__smooth_pairing_t012_v000_chi200_loose",
+        V=0.0,
+        t0=1.2,
+        mu_initial=1.65,
+        mu_initial_basis="V_informed_grid_bracket_guide",
+        ep_signed=-0.17989619749147323,
+    ),
+    (
+        point_id="cubic_unfrustrated_t014_vm04",
+        label="cubic_unfrustrated__smooth_pairing_t014_vm04_chi200_loose",
+        V=-0.4,
+        t0=1.4,
+        mu_initial=0.55,
+        mu_initial_basis="V_informed_grid_bracket_guide",
+        ep_signed=-0.24962435880865996,
+    ),
+    (
+        point_id="cubic_unfrustrated_t014_vm02",
+        label="cubic_unfrustrated__smooth_pairing_t014_vm02_chi200_loose",
+        V=-0.2,
+        t0=1.4,
+        mu_initial=1.10,
+        mu_initial_basis="V_informed_grid_bracket_guide",
+        ep_signed=-0.2068002629740704,
+    ),
+    (
+        point_id="cubic_unfrustrated_t014_v000",
+        label="cubic_unfrustrated__smooth_pairing_t014_v000_chi200_loose",
+        V=0.0,
+        t0=1.4,
+        mu_initial=1.65,
+        mu_initial_basis="V_informed_grid_bracket_guide",
+        ep_signed=-0.14653773091916378,
+    ),
+)
+const POINT_CONTRACTS = if TARGET_GEOMETRY == :square
+    SQUARE_POINT_CONTRACTS
+else
+    CUBIC_UNFRUSTRATED_POINT_CONTRACTS
+end
 
 base_path = abspath(ARGS[1])
 control_run = abspath(ARGS[2])
 full_run = abspath(ARGS[3])
 run_id = ARGS[4]
 
-isfile(base_path) || error("square grid base configuration not found: $base_path")
+isfile(base_path) || error("smooth-pairing grid base configuration not found: $base_path")
 isdir(full_run) || error("full scratch output directory not found: $full_run")
 occursin(r"^[A-Za-z0-9_.-]+$", run_id) || error("unsafe run ID: $run_id")
 
 base = load_settings(base_path)
-base.model.geometry == :square || error("grid campaign must use square geometry")
+base.model.geometry == TARGET_GEOMETRY || error(
+    "grid campaign must use $TARGET_GEOMETRY geometry",
+)
 base.model.L == 64 || error("grid campaign must use L=64")
 base.model.U == 8.0 || error("grid campaign must use U=8")
 base.model.V == -0.4 || error("base grid configuration must use V=-0.4")
@@ -187,7 +272,7 @@ open(manifest_path, "w") do io
         stateless_output_directory = joinpath(control_run, "results", point.label)
         run["output_directory"] = full_output_directory
         run["branch_label"] = "smooth_mixed_pairing_grid_control"
-        run["preparation"] = "square_smooth_mixed_pairing_independent_grid_fill"
+        run["preparation"] = "$(TARGET_GEOMETRY)_smooth_mixed_pairing_independent_grid_fill"
         run["direction"] = "none"
         run["seed_label"] = "smooth_mixed_pairing_common_s$(COMMON_RANDOM_SEED)"
         run["random_seed"] = COMMON_RANDOM_SEED
@@ -215,7 +300,9 @@ open(manifest_path, "w") do io
         settings = load_settings(config_path)
         model = settings.model
         metadata = initial_seed_metadata(model, settings.run)
-        model.geometry == :square || error("prepared point changed geometry: $(point.point_id)")
+        model.geometry == TARGET_GEOMETRY || error(
+            "prepared point changed geometry: $(point.point_id)",
+        )
         model.V == point.V || error("prepared point changed V: $(point.point_id)")
         model.t0 == point.t0 || error("prepared point changed t0: $(point.point_id)")
         model.mu_initial == point.mu_initial || error(
@@ -359,7 +446,7 @@ open(manifest_path, "w") do io
 end
 
 length(unique(model_fingerprints)) == length(POINT_CONTRACTS) || error(
-    "the five distinct physical grid points did not receive distinct model fingerprints",
+    "the $(length(POINT_CONTRACTS)) distinct physical grid points did not receive distinct model fingerprints",
 )
 length(unique(numerical_fingerprints)) == 1 || error(
     "grid points do not share one numerical fingerprint",
@@ -373,6 +460,7 @@ length(unique(implementation_fingerprints)) == 1 || error(
 length(unique(ep_source_hashes)) == 1 || error("grid points do not share one E_p registry")
 
 println("branch_count=$(length(POINT_CONTRACTS))")
+println("geometry=$TARGET_GEOMETRY")
 println("common_random_seed=$COMMON_RANDOM_SEED")
 println("initial_seed=legacy_pairing")
 println("initial_amplitude=$INITIAL_AMPLITUDE")

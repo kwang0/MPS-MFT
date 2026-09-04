@@ -1807,3 +1807,39 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
 - Full MPS artifacts remain scratch-first and only stateless mirrors go to CFS.
   No cross-point energy ranking is authorized. Codex submitted or cancelled no
   job, modified no ledger or HDF5 artifact, and performed no Perlmutter access.
+
+## 2026-09-03: cubic-unfrustrated smooth-pairing eight-point grid prepared
+
+- Defined the eight missing cells of the `cubic_unfrustrated`
+  `t0={1.0,1.2,1.4}` by `V={-0.4,-0.2,0.0}` grid, treating the legacy
+  `(1.0,0.0)` result as the ninth coverage point. All eight have exact signed
+  `E_p` registry rows; no interpolation or additional CPU calculation is
+  required.
+- Reused the square-grid smooth `legacy_pairing` protocol exactly: matched
+  field norm `1e-3`, RNG seed `1404`, relative-bond/leg-pair coefficients
+  copied along every rung, and zero initial `beta` and `mu_cdw`. This opens the
+  pairing sector without center-of-mass seed noise or inherited walls. It is a
+  controlled access seed, not an exhaustive basin comparison.
+- Added
+  `configs/phase1_gpu_cubic_unfrustrated_grid_smooth_pairing_chi200_loose.toml`
+  and generalized the existing grid preparer to validate either square or
+  cubic-unfrustrated point contracts. It checks exact `E_p`, common numerical
+  and seed fingerprints, distinct model fingerprints, zero normal fields,
+  matched norm, center-of-mass uniformity, and absence of lineage before
+  writing eight immutable configs and a manifest.
+- Launcher v1.17.0 adds read-only
+  `plan-cubic-unfrustrated-smooth-pairing-grid` and preparation-only
+  `prepare-cubic-unfrustrated-smooth-pairing-grid NEW_RUN`. Direct `submit`
+  creates eight scientific jobs and no smoke. Worker and continuation support
+  is retained narrowly for the active v1.15.0 `chi=400` comparison and v1.16.0
+  square-grid campaign; solver `src/` and the GPU Manifest are unchanged.
+- Eight 12-hour one-of-four-GPU requests reserve `24.000` node-hours. Prior
+  fresh cubic-unfrustrated `chi=200` campaigns scale to approximately
+  `6.842777776--10.011481480` measured node-hours for eight jobs. The last
+  synchronized ledger plus the active `6.000` chi=400 ceiling, submitted
+  `15.000` square grid, and proposed cubic envelope projects
+  `87.024097222` active and `312.975902778` unreserved. Live Perlmutter
+  accounting remains authoritative.
+- Full MPS data remain scratch-first with stateless CFS mirrors. Cross-point
+  and cross-geometry energy ranking is forbidden. Codex performed no transfer,
+  Perlmutter access, submission, cancellation, ledger mutation, or HDF5 write.

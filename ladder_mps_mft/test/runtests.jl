@@ -731,7 +731,7 @@ end
     @test isempty(gpu_project["preferences"]["MPIPreferences"]["preloads"])
     @test occursin("require_current_run_version", script_source)
     @test occursin("require_worker_compatible_run_version", script_source)
-    @test occursin("PHASE1_SCRIPT_VERSION=\"1.16.0\"", script_source)
+    @test occursin("PHASE1_SCRIPT_VERSION=\"1.17.0\"", script_source)
     @test occursin("check-gpu-preferences)", script_source)
     @test occursin("validate_gpu_runtime_preferences", script_source)
     @test occursin("Base.get_preferences", preference_source)
@@ -753,6 +753,8 @@ end
     @test occursin("plan-square-v0-chi400-compare)", script_source)
     @test occursin("prepare-square-smooth-pairing-grid)", script_source)
     @test occursin("plan-square-smooth-pairing-grid)", script_source)
+    @test occursin("prepare-cubic-unfrustrated-smooth-pairing-grid)", script_source)
+    @test occursin("plan-cubic-unfrustrated-smooth-pairing-grid)", script_source)
     @test occursin("require_continuation_compatible_run_version", script_source)
     @test occursin("prepare-standard)", script_source)
     @test occursin("--licenses=scratch,cfs", script_source)
@@ -830,6 +832,17 @@ end
         ]
         @test maximum(abs.(values .- first(values))) <= 1.0e-14
     end
+    cubic_grid_settings = load_settings(joinpath(
+        ROOT,
+        "configs",
+        "phase1_gpu_cubic_unfrustrated_grid_smooth_pairing_chi200_loose.toml",
+    ))
+    @test cubic_grid_settings.model.geometry == :cubic_unfrustrated
+    @test cubic_grid_settings.model.V == grid_settings.model.V
+    @test cubic_grid_settings.model.t0 == grid_settings.model.t0
+    @test cubic_grid_settings.model.ep_signed == grid_settings.model.ep_signed
+    @test numerical_fingerprint(cubic_grid_settings) == numerical_fingerprint(grid_settings)
+    @test initial_seed_fingerprint(cubic_grid_settings) == initial_seed_fingerprint(grid_settings)
     bash_executable = Sys.which("bash")
     if bash_executable === nothing
         @test_skip "bash-only Perlmutter launcher execution tests"
@@ -881,7 +894,7 @@ end
             run_environment_path,
             replace(
                 read(run_environment_path, String),
-                "PHASE1_RUN_SCRIPT_VERSION=1.16.0" => "PHASE1_RUN_SCRIPT_VERSION=1.12.0",
+                "PHASE1_RUN_SCRIPT_VERSION=1.17.0" => "PHASE1_RUN_SCRIPT_VERSION=1.12.0",
             ),
         )
         run(pipeline(

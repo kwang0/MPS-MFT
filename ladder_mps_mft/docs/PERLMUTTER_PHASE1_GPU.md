@@ -491,6 +491,32 @@ ceiling remains active until authoritative terminal `sacct` reconciliation.
 See `docs/SQUARE_SMOOTH_PAIRING_GRID_2026-09-03.md` for the exact point, seed,
 fingerprint, cost, storage, and interpretation contracts.
 
+## Cubic-unfrustrated smooth-pairing eight-point grid fill
+
+The matching `cubic_unfrustrated` survey fills the eight cells other than the
+legacy `(t0,V)=(1.0,0.0)` point on the same `3x3` grid. It uses the identical
+smooth `legacy_pairing` seed, `chi=200` loose numerical controls, independent
+starts, exact `E_p` rows, scratch-first storage, and stateless CFS mirrors.
+There is no smoke job and no cross-point or cross-geometry energy ranking.
+
+```bash
+cd "$CFS/m4863/MPS-MFT/ladder_mps_mft"
+bash slurm/phase1_gpu.sh plan-cubic-unfrustrated-smooth-pairing-grid
+
+CUBIC_GRID_RUN=20260903_phase1_cubic_unfrustrated_grid_smooth_pairing_chi200_loose
+bash slurm/phase1_gpu.sh prepare-cubic-unfrustrated-smooth-pairing-grid "$CUBIC_GRID_RUN"
+column -ts $'\t' "output/phase1_gpu/$CUBIC_GRID_RUN/manifest.tsv" | less -S
+bash slurm/phase1_gpu.sh budget
+bash slurm/phase1_gpu.sh submit "$CUBIC_GRID_RUN"
+bash slurm/phase1_gpu.sh status "$CUBIC_GRID_RUN"
+```
+
+Eight first segments reserve `24.000` node-hours. Historical fresh cubic-
+unfrustrated `chi=200` campaigns project roughly `6.84--10.01` actual
+node-hours for eight jobs; this is only a planning estimate. See
+`docs/CUBIC_UNFRUSTRATED_SMOOTH_PAIRING_GRID_2026-09-03.md` for the complete
+point, concurrency, ledger, and interpretation contract.
+
 ## Pair-binding interpolation and optional calculations
 
 At the representative point, the registry contains
