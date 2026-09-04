@@ -26,3 +26,14 @@
 12. Before starting any local check expected to exceed five minutes, tell the
     user what is being run and why. Avoid repeating unchanged expensive tests;
     rerun only the focused checks affected by a late change.
+13. Before substantive work, read `docs/README.md`,
+    `docs/PROJECT_STATE.md`, and the relevant active-plan and method documents;
+    then inspect the current Git state and only the latest relevant section of
+    `docs/RUN_LOG.md`.
+14. Treat `docs/PROJECT_STATE.md` as a dated local snapshot, not live scheduler
+    or accounting evidence. A current user report or current Perlmutter output
+    supersedes it; record the source and verification boundary explicitly.
+15. After a meaningful campaign, code, accounting, or scientific-status
+    change, update `docs/PROJECT_STATE.md` and append the durable evidence and
+    decision to `docs/RUN_LOG.md`. Do not copy long run histories into the
+    current-state file.

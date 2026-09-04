@@ -1889,3 +1889,25 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   DMRG, CUDA, transfer, Perlmutter access, scheduler action, or ledger mutation
   was performed. See
   `docs/SQUARE_T014_VM04_LEGACY_STRIPE_COMPARISON_2026-09-03.md`.
+
+## 2026-09-04: durable project-continuity layer added
+
+- Added `docs/README.md` as the stable documentation entry point,
+  `docs/PROJECT_STATE.md` as the short mutable current snapshot,
+  `docs/ARCHITECTURE.md` as the code/data/host map,
+  `docs/decisions/README.md` as an index of established decisions, and
+  `docs/plans/ACTIVE.md` as the current completion sequence.
+- Updated `AGENTS.md`, the project `README.md`, and
+  `docs/NEW_DEVICE_CHAT_PROMPT.md` so a new task reads the current snapshot and
+  relevant documents rather than loading the full append-only run history.
+  Marked `docs/DEVICE_HANDOFF_2026-08-25.md` explicitly historical.
+- User-reported live status at the time of this documentation update: the three
+  latest Perlmutter jobs remain pending. Their job IDs and campaign membership
+  were not supplied with that report and were not inferred from local files.
+- The continuity snapshot records the 400-additional-node-hour boundary and
+  preserves budget for later bond-dimension and length convergence, while
+  treating live Perlmutter ledgers and `sacct` as authoritative.
+- Validation was documentation-only: file presence, links, Git state, and
+  consistency with the latest campaign records were checked locally. No Julia
+  or DMRG run, Perlmutter access, scheduler action, transfer, HDF5 mutation, or
+  ledger change was performed.

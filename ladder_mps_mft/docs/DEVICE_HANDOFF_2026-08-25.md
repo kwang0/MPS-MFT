@@ -1,5 +1,10 @@
 # Device handoff: ladder MPS+MF project
 
+> **Historical snapshot.** This document records the state on 2026-08-25 and
+> is not the current continuation authority. Start with `docs/README.md` and
+> `docs/PROJECT_STATE.md`; consult this file only for the original v2/v3
+> transfer and audit history.
+
 This file is the durable continuation record for moving the project to another
 Codex desktop. Read it together with `AGENTS.md`; the operating rules there are
 mandatory. The handoff was prepared on 2026-08-25 from branch

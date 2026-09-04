@@ -28,6 +28,18 @@ timings and legacy-GPU timing evidence indicated roughly a two-order-of-magnitud
 production disadvantage. Phase 0 is therefore closed without promoting a CPU
 production backend; Phase 1 uses the refactored solver on CUDA.
 
+## Project continuity
+
+For a new conversation, device, or collaborator, begin with
+`docs/README.md`, then read the short current snapshot in
+`docs/PROJECT_STATE.md`, the workflow map in `docs/ARCHITECTURE.md`, and the
+current completion sequence in `docs/plans/ACTIVE.md`. These files point to the
+relevant stable method and campaign documents without requiring the full
+append-only run log in the initial context.
+
+The dated August device handoff remains a historical snapshot. Live user-
+reported Perlmutter status and accounting supersede any dated local copy.
+
 ## Quick start
 
 All Perlmutter commands in this repository are operator handoff commands for
@@ -117,8 +129,9 @@ analysis mirrors, and the one-time migration procedure for older campaigns.
 The v2 data-quality decision and conditional timing observations are recorded
 in `docs/PHASE0_V2_AUDIT.md`. The accepted-state audit of the Float64-history
 campaign is in `docs/PHASE1_V3_AUDIT.md`. For cross-device continuation, begin
-with `docs/DEVICE_HANDOFF_2026-08-25.md` and paste
-`docs/NEW_DEVICE_CHAT_PROMPT.md` into the new Codex task.
+with `docs/README.md` and `docs/PROJECT_STATE.md`, then paste
+`docs/NEW_DEVICE_CHAT_PROMPT.md` into the new Codex task. The older
+`docs/DEVICE_HANDOFF_2026-08-25.md` is retained as historical context.
 
 ## Important interpretation rules
 
