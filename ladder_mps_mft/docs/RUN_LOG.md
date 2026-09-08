@@ -1911,3 +1911,221 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   consistency with the latest campaign records were checked locally. No Julia
   or DMRG run, Perlmutter access, scheduler action, transfer, HDF5 mutation, or
   ledger change was performed.
+
+## 2026-09-04: systematic implementation and scientific-status review
+
+- Reviewed baseline `a744d29` on `codex/mps-mft-phase0-refactor`, including the
+  modular solver and scientific contracts, legacy workflow context, current
+  campaign controls, locally synchronized results, and primary literature.
+  The dated narrative and evidence are in
+  `docs/reports/systematic_review_20260904/`. Recommendations have not been
+  applied to production solver code or campaign controls.
+- Inventoried 52 readable Phase 1 terminal paths. Reused
+  `scripts/audit_scf_numerics.py` for 42 with adequate histories; nine old files
+  lack applied histories and one frozen diagnostic has only one record. The
+  limited screen preserves 17 of 28 stored accepted flags and downgrades 11;
+  it changes three additional already-unaccepted recurrence labels. Passing
+  this screen is not current scientific recertification.
+- All six current square `(t0,V)=(1.4,0)`, chi=200 terminal compact files match
+  their recorded manifest SHA-256 and size and pass the history screen. The
+  exact manifest checks are saved in `current_terminal_hash_checks.csv`.
+  Their target-density-corrected energy spread is `6.0273786395e-7 t/site`;
+  fine ordering is unresolved by the available error budget. Applied density
+  correction magnitudes are not the remaining error after correction.
+- Six focused Julia assertions in four test sets reproduced: omitted CUDA
+  extension in the implementation fingerprint; missing/nonfinite ranking
+  inputs admitted by the reader contract; absent inner-DMRG acceptance gate;
+  and `mu_initial` included in the model fingerprint. The in-memory fixtures
+  execute actual source without ITensor/DMRG. Exact source is preserved in
+  `contract_checks.txt` and `review_notebook.ipynb`; the temporary `.jl` file
+  was removed after execution. The tests establish code gaps, not invalidity
+  of the six current endpoints.
+- Local commands: `python -X utf8
+  ladder_mps_mft/docs/reports/systematic_review_20260904/extract_review.py`
+  (about 3.05 seconds); Julia 1.12.7 `--startup-file=no` on the temporary review
+  contract file (4.77 seconds, six assertions passed); `python -m unittest
+  discover -s ladder_mps_mft/test -p test_spatial_phase_defects.py` (six passed,
+  0.008 seconds test execution). A generated tracked bytecode change was
+  restored exactly to HEAD bytes; no index mutation was needed.
+- Corrected the review interpretation of the even-particle finite-size charge
+  gap: it probes compressibility and is not the eliminated pair-breaking
+  excitation. `tp/|Ep|` remains about 0.6825 at the bare control, so selected
+  weaker-hopping checks are still recommended. Stage 2 remains discovery:
+  maximum omitted-response norm fraction 0.83267, second-amplitude validation
+  absent. Recommend dressed-reference response, basis/amplitude controls,
+  and matched geometry/stripe comparisons before phase claims.
+- Literature synthesis includes the August 2026 Köhler/Kantian mixD preprint
+  as related work, with different-Hamiltonian and finite-size limitations
+  explicit. This review is targeted, not an exhaustive novelty certification.
+- The report artifact passed validation and its MCP handoff returned success.
+  Visual verification limits and final handoff receipts are recorded alongside
+  the report. No full Julia suite, local DMRG solve, CUDA timing, full-scratch
+  validation, Perlmutter access, transfer, scheduler action, reservation, or
+  ledger change occurred. The previously user-reported three pending jobs
+  remain the latest available live-status information; IDs are still unknown.
+
+## 2026-09-05: synchronized chi=400 two-lineage energy analysis
+
+- User synchronized `output/phase1_gpu` and reported the chi=400 comparison
+  finished. Synced jobs `57905744` (pairing) and `57905745` (legacy-like)
+  terminated as `stagnated` after 32 records and `time_limit` after 40 records,
+  respectively. Both are unaccepted, solution kind `none`, period zero; their
+  accepted-solution energy fields are NaN. Job completion is not fixed-point
+  acceptance. Final summaries are dated 2026-09-05 23:51 UTC and
+  2026-09-06 01:31 UTC.
+- At square L=64, U=8, V=0, t0=1.4, tp=0.1, n=0.9375, chi=400, reconstructed
+  target-corrected terminal energies are `-84.5963569761 t` (paired) and
+  `-84.6275072176 t` (stripe). Stripe minus pairing is `-0.0311502415 t`, or
+  `-2.43361262e-4 t/site`. This is a provisional diagnostic difference, not an
+  accepted-only energy ranking. The gap is approximately 347 times the sum of
+  the two last-ten-record energy ranges; that range is not an error bound.
+- The stripe's favorable balance comes from the spin component of the
+  transverse Hartree energy (`-0.00422717 t/site` difference), compensating
+  bare-ladder, pairing, normal-exchange and charge costs. Calling the full
+  spin-resolved Hartree contribution a charge-only gain would be misleading.
+- Pairing passes the final two-record raw field/density checks and the final
+  slow-mode, energy-stability and effective-consistency gates, but its
+  Hamiltonian-identity error `2.68869e-10 t/site` exceeds `1e-10`. The stripe
+  has relative residual `2.49005e-4` against `1e-4` and reaches the solver
+  deadline during its last DMRG. Last-sweep total-energy changes are
+  `2.17364e-9` and `4.29925e-8 t`, both above the `1e-9 t` inner tolerance.
+  Maxlinkdim is 400 for both; final-sweep discarded weights are `1.19241e-6`
+  and `6.20582e-7` (solve-wide maxima `6.35282e-5` and `1.59759e-4`).
+- Distinct textures persist: central-half pairing-field proxy RMS is
+  `0.00441635` versus `6.03183e-10 t`; charge peak-to-peak is `0.00255596`
+  versus `0.14027481`; staggered leg-odd spin RMS is `1.65569e-6` versus
+  `0.18624224`. Chi=200 parent overlays show qualitative survival with modest
+  profile changes. The legacy parent is frozen-field, so parent comparisons
+  are not controlled chi extrapolation or matched-fingerprint rankings.
+- Reused existing SCF audit and spatial-profile definitions in
+  `docs/reports/chi400_comparison_20260905/analyze.py`. All eight compact
+  manifest artifacts pass SHA-256 and size checks; all six HDF5 mirrors pass
+  stateless/no-MPS/recorded-full-hash checks. Model, numerical, implementation,
+  full-tree, GPU Manifest, E_p registry and scalar fingerprints agree. Config
+  and GPU Manifest hashes match provenance; recorded parent identities match
+  the synced parent mirrors. No full scratch existence or hash verification
+  is implied. Exact terminal full hashes are
+  `c92c75428ceb3beec2f324101f784c0a353ebd000ed9d2f626251ef0f83a039c`
+  (pairing) and
+  `f6501c24decfcf25aab1484adc1a121b7aec0cbd3717e441e75b8870e61c276e`
+  (stripe).
+- Local command from repository root: `python -B -X utf8
+  ladder_mps_mft/docs/reports/chi400_comparison_20260905/analyze.py` (about
+  four seconds including assertions and static figure generation). Both final
+  PNG figures were visually inspected. A preliminary inline HDF5 schema read
+  encountered a group/dataset AttributeError; it was corrected before the
+  successful saved analysis. No Julia or expensive DMRG tests were relevant.
+- User identifies the three still-pending campaigns as square grid, cubic
+  unfrustrated grid, and square `(1.4,-0.4)` stripe/control. Their synced
+  submission IDs are `57908558,57908560--57908563` (5),
+  `57909095--57909102` (8), and `57909911--57909912` (2). All have zero local
+  terminal states. Pending is user-reported; jobs.tsv verifies submission
+  identity, not current scheduler state. No reconciled accounting was supplied.
+- Decision: retain the stripe's energy advantage as provisional; diagnose the
+  paired identity failure and complete matched SCF/inner-DMRG convergence
+  before ranking, then use selected higher-chi controls. Do not silently
+  relax gates or relabel endpoints. Updated `PROJECT_STATE.md` and active plan;
+  detailed analysis, CSV evidence and figures are under the dated directory.
+  Preserved pre-existing September 4 review changes. No solver/config edit,
+  acceptance/HDF5 mutation, continuation preparation, transfer, Perlmutter
+  access, scheduler action, or ledger change occurred.
+
+## 2026-09-06: L=96/128 chi=200 pairing/stripe seeds prepared for review
+
+- User direction supersedes the previous next-action recommendation: treat
+  the chi=400 paired endpoint's tiny identity discrepancy as converged for
+  the energetic question; the stripe's falling residual and early plateau
+  support a gap reasonably robust to the tested chi increase. Proceed with
+  limited finite-size scaling. Historical HDF5 status and acceptance flags
+  are unchanged. The user requested a seed snapshot before submission.
+- Prepared exactly four field-only seeds: pairing and stripe at L=96 and 128,
+  chi=200, square U=8,V=0,t0=1.4,tp=0.1,n=0.9375. The source is each latest
+  L=64 chi=400 terminal `fields/measured`, not the original weak access seed
+  or an MPS resize. Original compact hashes are
+  `bfcb03c7b3948a8b0f552fb45860b2fa352ea5a58feecc52ba4e215b7dfb52f1`
+  (pairing) and
+  `229c118bec2f491997db0bf2be2da039863fca7695fdd0c44fdeadef1f2c76ab`
+  (stripe). Sources match their compact manifests.
+- Added `scripts/prepare_phase1_finite_size_seeds.py`. Every signed relative
+  bond separation is retained and extended in its center coordinate. Original
+  left/right 32-rung onsite fields and half-block bonds are exact. Pairing
+  inserts a flat, sublattice-preserving center with eight-rung tapers. Stripes
+  insert one/two 32-rung cells using positive quintic overlaps of the actual
+  central source waveform. No global rescaling, end-to-end bond, range
+  extension or inactive onsite-beta term is introduced.
+- Stripe charge trough counts are 4,6,8 at L=64,96,128. The finite source's
+  approximately periodic texture gives 15/17-rung spacings in the inserted
+  cell; this small phase mismatch is absorbed in the smooth overlap. The
+  maximum charge and staggered-spin neighboring-field steps do not exceed
+  the original. The exact metric rows and plots are stored in
+  `docs/reports/finite_size_seeds_20260906/`.
+- User explicitly selected keeping the L=64 E_p at all lengths. Added the
+  narrow `pair_binding.reference_L` configuration option with exact lookup,
+  explicit fixed-reference mode, reference-length provenance/HDF5 metadata
+  and model-fingerprint inclusion. Default same-length fingerprints remain
+  unchanged. No fabricated registry entries or new pair-binding jobs exist.
+  This changes the local implementation fingerprint; pending Perlmutter
+  campaigns must retain their existing source checkout until finished, or
+  the new comparison must use a separate checkout.
+- Four review configs under `configs/phase1_gpu_square_size_compare_chi200/`
+  use chi=200 and the tight comparison settings, with identity tolerance
+  relaxed to `1e-8 t/site` and explicit fixed L=64 denominator. Target particle
+  numbers are 180/240. Field inheritance retains each source chemical
+  potential and starts a fresh product MPS. Output remains explicitly
+  `UNPREPARED_SIZE_COMPARE`; no scratch/launcher campaign is prepared yet.
+- Seeds live in `output/seed_previews/20260906_square_t014_v0_L96_L128_chi200/`.
+  SHA-256 values: pairing L96
+  `5ee1cfb55d3dbe67f488c4285e5593294c41149de190d60d1526968a21401193`,
+  pairing L128
+  `807eeddbc989ee4fd2f6a03fac4e4d2521a11278d1d87367bc865bf17f9388b8`,
+  stripe L96
+  `e4fe4003735d110a9b843302681cfe2711c784497987a2694f083ae4d86f8601`,
+  stripe L128
+  `0a397db2c74737ffac4e1ff2ef9ac0faf11ccef56383e24c43680657f2438316`.
+- Local validation: preparation and assertions in about four seconds;
+  `python -B -m unittest discover -s ladder_mps_mft/test -p
+  test_finite_size_seeds.py` passed four geometry tests in 0.057 seconds.
+  Julia 1.12.7 with `--startup-file=no --compiled-modules=existing
+  --project=ladder_mps_mft -L ladder_mps_mft/test/test_fixed_reference_length.jl
+  ladder_mps_mft/scripts/verify_phase1_finite_size_seeds.jl` passed 16 config
+  assertions (7.6 seconds) and 83 real-HDF5 readback assertions (5.3 seconds),
+  plus package loading. No local DMRG or expensive full suite was needed.
+  The PNG was visually inspected; regeneration verified identical immutable
+  seed contents and unchanged seed hashes. An exploratory inline profile
+  summary had a Python parenthesis syntax error; the saved metric extraction
+  was corrected and completed successfully.
+- Updated current state, active plan, documentation links and the prior
+  analysis's interpretation addendum. Prepared no extra L=64 run, submission,
+  scheduler reservation, continuation or ledger change; performed no
+  Perlmutter access, transfer or source update on that host. Next step is
+  user seed review, followed by isolated submission preparation and current
+  accounting reconciliation.
+
+## 2026-09-07: Introduction literature review and maintained BibTeX bibliography
+
+- Created `docs/literature/literature_review.tex`, `references.bib`, and a
+  compiled 29-page PDF in response to the user's request. Followed the user's
+  preference for plain LaTeX annotations: 49 papers in eight groups from the
+  Hubbard problem to the closest MPS+MF predecessors, with approximately
+  140-180 words per annotation, persistent links, stable citation keys, and
+  a short introduction outline.
+- Checked bibliographic metadata against publisher/Crossref and arXiv
+  records. The collection contains 46 journal publications and three labeled
+  preprints. `SOURCE_NOTES.md` records the narrative search scope and separates
+  abstract-based summaries from nine papers checked in selected full-text
+  sections. The review does not assert exhaustive coverage or project novelty.
+- The closest comparisons include the repulsive-ladder MPS+MF demonstration
+  published in 2023, the 2025 SC/CDW extension, and the 2026 mixed-dimensional
+  ladder preprint. Model, hopping-symbol, binding-sign, boundary, and
+  correlation-exponent distinctions are stated where relevant.
+- Compiled locally with portable Tectonic 0.17.0 and BibTeX. Focused document
+  checks found 49 unique matching annotation/bibliography keys, no duplicate
+  DOI or arXiv identifiers, no unresolved citations, no BibTeX warnings, no
+  overfull boxes, and no characters outside the checked page margins. All
+  expected DOI/arXiv links are embedded in the PDF (86 distinct external
+  links). Rendered and visually inspected all 29 pages; checked the copied
+  final PDF against the build output by SHA-256.
+- Added build and bibliography-maintenance instructions and a link from the
+  documentation map. Raw metadata and one-time build/QA tools remain in the
+  ignored `output/literature_tools/` directory. No numerical code, campaign
+  state, or Perlmutter operations were needed; no DMRG tests were run.

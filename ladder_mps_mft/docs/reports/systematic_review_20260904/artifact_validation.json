@@ -1,0 +1,11 @@
+{
+  "ok": true,
+  "validation_type": "artifact",
+  "surface": "report",
+  "manifest_title": "MPS–MFT project review — September 4, 2026",
+  "dataset_count": 2,
+  "source_count": 6,
+  "snapshot_status": "ready",
+  "message": "Artifact payload is valid. Follow the selected delivery surface for rendering or export.",
+  "recorded_at": "2026-09-04T22:56:08.310072+00:00"
+}

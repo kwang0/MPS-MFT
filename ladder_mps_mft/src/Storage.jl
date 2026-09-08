@@ -144,6 +144,7 @@ function write_checkpoint(
             "transverse_geometry" => String(settings.model.geometry), "E_p" => settings.model.ep,
             "E_p_signed" => settings.model.ep_signed, "E_p_source" => settings.model.ep_source,
             "E_p_mode" => String(settings.model.ep_mode),
+            "E_p_reference_L" => settings.model.ep_reference_L == 0 ? settings.model.L : settings.model.ep_reference_L,
             "E_p_t0_lower" => settings.model.ep_t0_lower,
             "E_p_t0_upper" => settings.model.ep_t0_upper,
             "E_p_lower_signed" => settings.model.ep_lower_signed,
@@ -675,6 +676,7 @@ function write_run_summary_markdown(path::AbstractString, settings::ProjectSetti
         println(io, "- Signed registry E_p: `$(settings.model.ep_signed)`")
         println(io, "- Denominator |E_p|: `$(settings.model.ep)`")
         println(io, "- E_p mode: `$(settings.model.ep_mode)`")
+        println(io, "- E_p reference length: `$(settings.model.ep_reference_L == 0 ? settings.model.L : settings.model.ep_reference_L)`")
         println(io, "- E_p t0 bracket: `$(settings.model.ep_t0_lower)` to `$(settings.model.ep_t0_upper)` (weight `$(settings.model.ep_interpolation_weight)`)")
         println(io, "- E_p endpoint values: `$(settings.model.ep_lower_signed)` to `$(settings.model.ep_upper_signed)`")
         println(io, "- Effective MF coupling t_perp^2 / |E_p|: `$(settings.model.tp^2 / settings.model.ep)`")

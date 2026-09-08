@@ -1,0 +1,47 @@
+[
+  {
+    "L": 64,
+    "charge_trough_rungs": [
+      10,
+      25,
+      40,
+      55
+    ],
+    "charge_trough_count": 4,
+    "staggered_spin_zero_crossings": 4,
+    "max_charge_neighbor_step": 0.002245776125940932,
+    "max_spin_envelope_neighbor_step": 0.008310141191021808
+  },
+  {
+    "L": 96,
+    "charge_trough_rungs": [
+      10,
+      25,
+      40,
+      57,
+      72,
+      87
+    ],
+    "charge_trough_count": 6,
+    "staggered_spin_zero_crossings": 6,
+    "max_charge_neighbor_step": 0.002245776125940932,
+    "max_spin_envelope_neighbor_step": 0.008310141191021808
+  },
+  {
+    "L": 128,
+    "charge_trough_rungs": [
+      10,
+      25,
+      40,
+      57,
+      72,
+      89,
+      104,
+      119
+    ],
+    "charge_trough_count": 8,
+    "staggered_spin_zero_crossings": 8,
+    "max_charge_neighbor_step": 0.002245776125940932,
+    "max_spin_envelope_neighbor_step": 0.008310141191021808
+  }
+]

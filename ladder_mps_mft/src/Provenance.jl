@@ -63,6 +63,11 @@ function model_fingerprint(model::ModelSettings)
         model.ep_t0_lower, model.ep_t0_upper, model.ep_lower_signed, model.ep_upper_signed,
         model.ep_interpolation_weight, model.ep_lower_chi, model.ep_upper_chi,
     ), "|")
+    # Preserve existing same-length model fingerprints. An explicit different
+    # reference length is part of the model contract, even if E_p happens to match.
+    if model.ep_reference_L > 0 && model.ep_reference_L != model.L
+        payload *= "|ep_reference_L=$(model.ep_reference_L)"
+    end
     return bytes2hex(SHA.sha256(payload))
 end
 
@@ -192,6 +197,7 @@ function collect_provenance(settings::ProjectSettings)
         "ep_source" => settings.model.ep_source,
         "ep_source_sha256" => isfile(settings.model.ep_source) ? sha256_file(settings.model.ep_source) : "",
         "ep_mode" => String(settings.model.ep_mode),
+        "ep_reference_L" => settings.model.ep_reference_L == 0 ? settings.model.L : settings.model.ep_reference_L,
         "ep_signed" => settings.model.ep_signed,
         "ep_denominator" => settings.model.ep,
         "ep_t0_lower" => settings.model.ep_t0_lower,

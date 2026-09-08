@@ -1,0 +1,100 @@
+# Seed-review configuration; scratch output is assigned at campaign preparation.
+[model]
+L = 128
+t = 1.0
+U = 8.0
+V = 0.0
+t0 = 1.4
+tp = 0.1
+density = 0.9375
+mu_initial = 0.55
+r_range = 4
+geometry = "square"
+
+[pair_binding]
+registry = "data/E_p_values.csv"
+allow_interpolation = false
+reference_L = 64
+
+[dmrg]
+nsweeps = 16
+maxdim = 200
+cutoff = 1e-11
+energy_tol = 1e-09
+eigsolve_krylovdim = 8
+max_time_seconds = 41400.0
+output_level = 1
+mu_density_tol = 0.0001
+mu_max_iterations = 16
+mu_bracket_step = 0.01
+mu_bracket_growth = 3.0
+mu_interval_tol = 1e-06
+mu_warm_start_noise = 1e-08
+
+[mixing]
+method = "anderson"
+damping = 0.5
+minimum_damping = 0.05
+maximum_damping = 0.8
+memory = 5
+regularization = 1e-10
+adaptive = true
+
+[convergence]
+field_abs_tol = 1e-07
+field_rel_tol = 0.0001
+density_tol = 0.0001
+variational_energy_tol = 1e-07
+hamiltonian_identity_tol = 1e-08
+effective_energy_consistency_tol = 1e-08
+stable_iterations = 2
+max_period = 8
+period_repeats = 3
+period_abs_tol = 2e-07
+period_rel_tol = 0.0002
+period2_oscillation_cosine_max = -0.5
+period2_two_step_ratio_max = 0.5
+slow_mode_cosine_min = 0.9
+unmixed_cycle_probe = true
+probe_max_period = 2
+probe_iterations = 20
+accepted_periods = [1, 2]
+orbit_bulk_fraction = 0.5
+cycle_action = "continue"
+stagnation_window = 10
+stagnation_min_relative_improvement = 0.01
+divergence_factor = 8.0
+
+[runtime]
+backend = "gpu"
+tensor_scalar_type = "float64"
+blas_threads = 1
+strided_threads = 1
+threaded_blocksparse = false
+conserve_sz = false
+conserve_nfparity = false
+
+[run]
+output_directory = "output/phase1_gpu/UNPREPARED_SIZE_COMPARE/results/square__pairing_L128_t014_v000_chi200"
+branch_label = "pairing_length_control"
+preparation = "square_t014_v0_fixed_coupling_length_comparison"
+direction = "L64_to_L128"
+seed_label = "fixed_edges_center_insert_v1_pairing"
+random_seed = 1404
+initial_seed = "pairing"
+initial_amplitude = 0.001
+initial_seed_protocol = "matched_mode"
+initial_mode_number = 0
+initial_mode_phase_pi = 0.0
+initial_pairing_form_factor = "d_wave"
+initial_leg_parity = "auto"
+initial_stripe_charge_to_spin_ratio = 0.2
+initial_stripe_pairing_to_spin_ratio = 1.0
+max_iterations = 80
+save_every = 1
+require_accepted_solution = false
+allow_unbound_ep = false
+quick_diagnostics = true
+full_pair_correlations = false
+inherit_from = "output/seed_previews/20260906_square_t014_v0_L96_L128_chi200/pairing_L128_fields.h5"
+inherit_sha256 = "807eeddbc989ee4fd2f6a03fac4e4d2521a11278d1d87367bc865bf17f9388b8"

@@ -1,0 +1,15 @@
+{
+  "ok": true,
+  "widget_type": "artifact",
+  "surface": "report",
+  "title": "MPS–MFT project review — September 4, 2026",
+  "recorded_at": "2026-09-04T22:56:08.310072+00:00",
+  "block_count": 14,
+  "chart_count": 1,
+  "table_count": 1,
+  "visual_qa": "Unavailable: MCP response supplies no inspectable URL, and native app access is disabled. Success is a handoff receipt, not proof of visible rendering.",
+  "structural_qa": "Validated complete manifest and bounded datasets. Compared revision: block IDs and evidence datasets preserved; added literature context, trimmed incidental process notes, corrected source metadata.",
+  "markdown_handoff": "REVIEW.md saved and Codex file-open queued.",
+  "sites_published": false,
+  "html_report_created": false
+}

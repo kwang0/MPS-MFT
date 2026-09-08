@@ -1,0 +1,10 @@
+campaign,readable_states,stored_accepted,screened_states,screened_accepted,changed_labels,statuses
+20260823_phase1_gpu_v2,9,0,0,0,0,periodic_candidate:8; stagnated:1
+20260824_phase1_gpu_v3_float64_history,9,8,9,3,6,fixed_point:8; periodic_candidate:1
+20260826_phase1_unfrustrated_pairing_recurrence_chi400,3,0,3,0,2,periodic_candidate:2; time_limit:1
+20260828_phase1_unfrustrated_matched_seed_chi400,3,0,3,0,0,time_limit:3
+20260830_phase1_square_t014_vm04_seed_chi200_loose,6,6,6,5,1,fixed_point:6
+20260831_phase1_square_t014_vm04_chi200_tight5,6,0,6,0,0,maximum_iterations:6
+20260902_phase1_square_t014_v000_seed_chi200_loose_cuda130,6,6,6,6,0,fixed_point:6
+20260903_phase1_square_t014_v000_legacy_frozen_dmrg_chi200,1,0,0,0,0,frozen_field_evaluation:1
+RUN_ID,9,8,9,3,5,fixed_point:8; stagnated:1

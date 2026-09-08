@@ -1,0 +1,67 @@
+# Focused read-only review of actual source contracts; no ITensor or DMRG run.
+using LinearAlgebra, Statistics, SHA, Test
+const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
+for filename in ("Types.jl", "Geometry.jl", "Mixing.jl", "Variational.jl", "Convergence.jl", "Provenance.jl", "Selection.jl")
+    include(joinpath(PROJECT_ROOT, "src", filename))
+end
+
+# In-memory HDF5-shaped read adapter, exercising the real selection functions.
+const REVIEW_FILES = Dict{String,Dict{String,Any}}()
+h5open(reader::Function, path::AbstractString, mode::AbstractString) = reader(REVIEW_FILES[path])
+Base.read(file::Dict{String,Any}, key::AbstractString) = file[key]
+
+@testset "Review: selection without required provenance" begin
+    REVIEW_FILES["missing-provenance"] = Dict{String,Any}(
+        "accepted" => true, "completed" => true, "status" => "fixed_point",
+        "fundamental_period" => 1,
+        "solution_canonical_variational_energy" => -1.0,
+        "solution_target_density_corrected_variational_energy" => -1.0,
+    )
+    result = compare_variational_branches(["missing-provenance"])
+    @test length(result) == 1
+    @test isempty(only(result).fingerprint)
+    println("CONFIRMED: accepted record with all four fingerprints missing is rankable")
+    nonfinite = copy(REVIEW_FILES["missing-provenance"])
+    delete!(nonfinite, "solution_target_density_corrected_variational_energy")
+    merge!(nonfinite, Dict{String,Any}("model/L" => 2, "model/density" => 1.0,
+        "chemical_potential" => 1.0, "correlations/density_down" => [NaN],
+        "correlations/density_up" => [0.5]))
+    REVIEW_FILES["nonfinite-density"] = nonfinite
+    @test isnan(only(compare_variational_branches(["nonfinite-density"])).energy)
+    println("CONFIRMED: reconstructed nonfinite comparison energy is rankable")
+end
+
+@testset "Review: outer convergence with unresolved inner sweep history" begin
+    model = ModelSettings(L=2, density=1.0, ep=1.0)
+    fields = FieldState(zeros(2,2,2,2), zeros(2,2,2,2,2), zeros(2,4))
+    correlations = CorrelationState(zeros(4,4), zeros(4,4), zeros(4,4), fill(0.5,4), fill(0.5,4))
+    energy = variational_energy(-1.0, 0.0, fields, correlations, model; bare_ladder_energy=-1.0)
+    records = [IterationRecord(iteration=i, update_mode=:unmixed_probe,
+        applied=fields, measured=fields, correlations=correlations,
+        density=1.0, chemical_potential=0.0, mu_search_status=:density_tolerance,
+        mu_evaluations=1, mu_density_converged=true, effective_energy=-1.0,
+        variational=energy, field_abs_residual=0.0, field_rel_residual=0.0,
+        wall_seconds=0.0, dmrg_sweep_energies=[-0.5,-0.75,-1.0]) for i in 1:2]
+    @test assess_convergence(records, ConvergenceSettings(), 1.0).accepted
+    println("CONFIRMED: outer acceptance does not gate a final inner sweep change of 0.25")
+end
+
+@testset "Review: CUDA extension coverage in implementation fingerprint" begin
+    fixture = joinpath(@__DIR__, "contract_fixture")
+    mkpath(joinpath(fixture, "src"))
+    mkpath(joinpath(fixture, "ext"))
+    write(joinpath(fixture, "Manifest.toml"), "# review fixture\n")
+    write(joinpath(fixture, "src", "Solver.jl"), "solver_value() = 1\n")
+    extension = joinpath(fixture, "ext", "LadderMPSMFTCUDAExt.jl")
+    write(extension, "cuda_value() = 1\n")
+    before = implementation_fingerprint(fixture)
+    write(extension, "cuda_value() = 2\n")
+    after = implementation_fingerprint(fixture)
+    @test before == after
+    println("CONFIRMED: changing ext/LadderMPSMFTCUDAExt.jl leaves implementation_sha256 unchanged")
+end
+
+@testset "Review: physics fingerprint includes initialization" begin
+    @test model_fingerprint(ModelSettings(mu_initial=0.0)) != model_fingerprint(ModelSettings(mu_initial=1.0))
+    println("CONFIRMED: mu_initial changes the model fingerprint")
+end

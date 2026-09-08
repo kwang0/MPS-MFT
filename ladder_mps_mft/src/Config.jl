@@ -27,17 +27,23 @@ function load_settings(path::AbstractString)
     tp = Float64(_value(model_raw, "tp", 0.1))
     density = Float64(_value(model_raw, "density", 0.9375))
     registry_path = _project_path(String(_value(ep_raw, "registry", "data/E_p_values.csv")))
+    ep_reference_L = Int(_value(ep_raw, "reference_L", L))
+    ep_reference_L >= 2 || throw(ArgumentError("pair_binding.reference_L must be at least 2"))
+    allow_ep_interpolation = Bool(_value(ep_raw, "allow_interpolation", false))
+    ep_reference_L != L && allow_ep_interpolation && throw(ArgumentError(
+        "a fixed reference-length E_p requires an exact registry row; disable t0 interpolation",
+    ))
     allow_unbound = Bool(_value(run_raw, "allow_unbound_ep", false))
     selection = lookup_ep(
         registry_path;
-        L,
+        L=ep_reference_L,
         U,
         V,
         t0,
         density,
         tp,
         require_bound=!allow_unbound,
-        allow_interpolation=Bool(_value(ep_raw, "allow_interpolation", false)),
+        allow_interpolation=allow_ep_interpolation,
     )
 
     model = ModelSettings(;
@@ -54,7 +60,8 @@ function load_settings(path::AbstractString)
         ep=selection.denominator,
         ep_signed=selection.record.E_p,
         ep_source=selection.source_path,
-        ep_mode=selection.mode,
+        ep_mode=ep_reference_L == L ? selection.mode : :fixed_reference_length,
+        ep_reference_L=ep_reference_L,
         ep_t0_lower=selection.lower_record.t0,
         ep_t0_upper=selection.upper_record.t0,
         ep_lower_signed=selection.lower_record.E_p,

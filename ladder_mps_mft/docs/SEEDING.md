@@ -171,3 +171,22 @@ initial fields remain stored in `fields/initial`. Schema-v7 artifacts also
 store that exact field under `history/fields/seed` with
 `history/fields/seed_iteration=0`; the complete-history plotting adapter
 prepends it by default.
+
+## Finite-size field extension
+
+`scripts/prepare_phase1_finite_size_seeds.py` prepares the reviewed square
+L=64 to L=96/128 pairing/stripe extension. It preserves the original edge
+halves, inserts a uniform paired middle or integer 32-rung stripe cells,
+and transforms each retained relative-bond channel as a function of its
+center. It writes field-only derivatives with source SHA-256 provenance,
+not resized MPS states. See
+`docs/reports/finite_size_seeds_20260906/README.md` for the exact mapping,
+seed snapshot and known finite-source phase mismatch.
+
+For a fixed-coupling length comparison, `pair_binding.reference_L=64`
+explicitly selects the exact L=64 registry denominator while retaining the
+target model length. A different reference length is stored as
+`ep_mode=fixed_reference_length` with `E_p_reference_L` metadata and enters
+the model fingerprint. Omission preserves the normal same-length lookup;
+the loader never silently substitutes an available length. Interpolation
+in t0 is disallowed when a different reference length is selected.

@@ -38,6 +38,26 @@ recorded explicitly as user-reported until synchronized evidence is available.
 
 ## Stable scientific references
 
+For introduction background and paper summaries, see the
+[coupled-ladder literature review](literature/README.md). It contains a plain
+LaTeX review, compiled PDF, and maintained BibTeX file covering 49 papers in
+eight broad-to-narrow groups, with source notes dated September 7, 2026.
+
+For the current experiment under review, see the
+[September 6 finite-size seed snapshot](reports/finite_size_seeds_20260906/README.md).
+It contains four chi=200 L=96/128 pairing/stripe seeds with fixed L=64 coupling.
+
+For the newest campaign results, see the
+[September 5 chi=400 comparison](reports/chi400_comparison_20260905/ANALYSIS.md).
+It records a provisional striped-endpoint energy advantage and the unresolved
+acceptance gates for both lineages.
+
+For the latest cross-project assessment, see the
+[September 4 systematic review](reports/systematic_review_20260904/REVIEW.md).
+It records recommendations and local evidence, with reproducible supporting
+files alongside it; the operating rules and live accounting authority remain
+in the documents below.
+
 - Phase plan: `docs/PHASES_0_TO_4.md`
 - Convergence and recurrence: `docs/CONVERGENCE.md`
 - Canonical energy: `docs/VARIATIONAL_FUNCTIONAL.md`
@@ -57,4 +77,3 @@ recorded explicitly as user-reported until synchronized evidence is available.
    user-reported or verified live status, and exact next action.
 4. Append the durable event and validation boundary to `docs/RUN_LOG.md`.
 5. Start the new task with `docs/NEW_DEVICE_CHAT_PROMPT.md`.
-

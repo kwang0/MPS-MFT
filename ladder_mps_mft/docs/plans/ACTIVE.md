@@ -1,17 +1,25 @@
 # Active plan
 
-Last reviewed: 2026-09-04
+Last reviewed: 2026-09-06
 
-Current state: waiting on Perlmutter. The user reports that the three latest
-jobs are pending; their exact IDs and campaign membership have not been
-verified locally. This document is not submission or cancellation authority.
+Current state: the chi=400 comparison is locally analyzed. The user judges its
+energetic result sufficient to proceed with a small finite-size study, despite
+the retained unaccepted solver flags. Four L=96/128 chi=200 seeds and review
+configs are ready. The user reports the square-grid, cubic-grid and
+V=-0.4 stripe campaigns remain pending. Their submission IDs are now synced;
+live scheduler state is not independently verified. This document is not
+submission or cancellation authority.
 
 ## Active scientific questions
 
-1. **Square `chi=400` lineage comparison.** Determine whether pairing and
-   legacy-like parents remain distinct under common tighter controls, and how
-   the observables move from `chi=200` to `chi=400`.
-   See `docs/SQUARE_V0_T014_CHI400_COMPARISON_2026-09-03.md`.
+1. **Square finite-size comparison.** Review the prepared pairing/stripe seeds
+   at L=96 and 128, chi=200. The L=64 energetic advantage of the stripe is
+   `2.43361262e-4 t/site` at chi=400, and the user regards its bond-dimension
+   robustness as sufficient motivation to study length next. Hold the L=64
+   E_p fixed, retain the original edge halves, insert flat paired bulk or
+   complete stripe cells, and compare energy differences within each length.
+   See `docs/reports/finite_size_seeds_20260906/README.md`. No new campaign is
+   submitted; source isolation and accounting precede the eventual handoff.
 2. **Square loose grid completion.** Fill the five missing cells of the square
    `3 x 3` `(t0,V)` grid with one smooth pairing-access seed.
    See `docs/SQUARE_SMOOTH_PAIRING_GRID_2026-09-03.md`.
@@ -25,8 +33,9 @@ verified locally. This document is not submission or cancellation authority.
 
 ## Completion sequence
 
-1. Wait for current jobs; do not create duplicate submissions or blanket
-   continuations.
+1. Show the finite-size seed snapshot for user review. Prepare a submission
+   handoff afterward, preserving the code used by current jobs. Wait for the
+   pending grids and V=-0.4 stripe comparison; do not duplicate them.
 2. After terminal status, reconcile requested ceilings against authoritative
    `sacct` elapsed time before choosing more compute.
 3. Synchronize only the relevant compact results, logs, manifests, `jobs.tsv`,
@@ -52,4 +61,3 @@ possible continuation segments.
 Replace this plan when the synchronized evidence has been audited and the next
 calculation is chosen with a live Perlmutter cost envelope. Preserve the
 completed campaign records and append the transition to `docs/RUN_LOG.md`.
-

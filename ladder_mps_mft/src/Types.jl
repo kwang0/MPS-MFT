@@ -15,6 +15,9 @@ Base.@kwdef struct ModelSettings
     ep_signed::Float64 = NaN
     ep_source::String = ""
     ep_mode::Symbol = :exact
+    # Zero means the model length; a different positive value fixes the
+    # effective coupling to a registry measurement at that reference length.
+    ep_reference_L::Int = 0
     ep_t0_lower::Float64 = NaN
     ep_t0_upper::Float64 = NaN
     ep_lower_signed::Float64 = NaN

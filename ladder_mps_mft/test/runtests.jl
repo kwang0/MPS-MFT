@@ -139,6 +139,8 @@ end
     )
 end
 
+include("test_fixed_reference_length.jl")
+
 @testset "configuration and deterministic seeds" begin
     settings = load_settings(joinpath(ROOT, "configs", "phase0_timing.toml"))
     @test settings.model.geometry == :cubic_frustrated
