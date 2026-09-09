@@ -1,4 +1,4 @@
-"""
+#=
 Plot the mean-field profiles saved by the refactored Phase 1 campaign.
 
 This is an adapter for `../plot_ladder_mf_observables.jl`; it does not change
@@ -30,7 +30,7 @@ saved snapshots rather than a continuous MF history.
 Run this file as a script to render all nine states:
 
     julia ladder_mps_mft/plot_phase1_mf_observables.jl [RUN_DIR] [OUTPUT_DIR]
-"""
+=#
 
 if abspath(PROGRAM_FILE) == abspath(@__FILE__) && !haskey(ENV, "MPLBACKEND")
     ENV["MPLBACKEND"] = "Agg"
@@ -39,7 +39,9 @@ end
 using HDF5
 using Random
 
-include(joinpath(@__DIR__, "..", "plot_ladder_mf_observables.jl"))
+if !isdefined(@__MODULE__, :plot_order_fourier_max_grid)
+    include(joinpath(@__DIR__, "..", "plot_ladder_mf_observables.jl"))
+end
 
 const DEFAULT_PHASE1_RUN_DIRECTORY = joinpath(
     @__DIR__,

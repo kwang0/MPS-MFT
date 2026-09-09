@@ -117,3 +117,31 @@ identify accessible author versions that may differ from the final text.
 The bibliography contains factual citation metadata and links, and the review
 contains original summaries. Full source texts and copied abstracts are not
 included in the deliverable. Keep citation keys stable as records are updated.
+
+## Manuscript note: geometry of the 2023 ladder benchmark
+
+Checked **8 September 2026** against the
+[published paper, Section VI, Eqs. (51)-(58)](https://journals.aps.org/prx/pdf/10.1103/PhysRevX.13.011039)
+and `src/MeanField.jl`, function `mean_fields_from_correlations`.
+Bibliography key: `Bollmark2023`.
+
+The repulsive-ladder mean-field equations match this project's
+`cubic_frustrated` branch. With `p = 2 t_perp^2 / Delta E_p`, their same-leg
+pairing kernel is `p * [2 1; 1 2]`; the cross-leg pairing terms and exchange
+terms also match that branch's coefficients and index orientations.
+The project's `cubic_unfrustrated` same-leg kernel is instead
+`p * [0 3; 3 0]`, and `square` uses `p * [0 1; 1 0]`.
+
+Suggested manuscript wording:
+
+> The repulsive-ladder benchmark of Bollmark et al. (2023) uses the transverse
+> mean-field connectivity denoted frustrated cubic here, as identified by
+> matching its pairing and exchange equations to our geometry-dependent map.
+
+"Frustrated cubic" is **our nomenclature**, not a label attributed to the
+authors. The Fig. 13 temperature example uses this connectivity with
+`U/t = 8`, `n = 0.9375`, `t0/t = 1`, `V = 0`, and `t_perp/t = 0.0489`.
+Its temperature estimate is not a result for all three project geometries.
+Equation numbers above refer to the published version; the arXiv v1 numbering
+differs. This note records an equation-level correspondence, not a new
+finite-temperature calculation or a certification of competing phases.

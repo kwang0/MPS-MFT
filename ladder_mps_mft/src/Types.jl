@@ -61,6 +61,9 @@ Base.@kwdef struct ConvergenceSettings
     hamiltonian_identity_tol::Float64 = 1e-9
     effective_energy_consistency_tol::Float64 = 1e-6
     stable_iterations::Int = 2
+    minimum_iterations::Int = 0
+    channel_residuals::Bool = false
+    dmrg_sweep_energy_tol::Float64 = Inf
     max_period::Int = 8
     period_repeats::Int = 3
     period_abs_tol::Float64 = 2e-6

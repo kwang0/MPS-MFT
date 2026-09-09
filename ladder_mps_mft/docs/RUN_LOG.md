@@ -2129,3 +2129,331 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   documentation map. Raw metadata and one-time build/QA tools remain in the
   ignored `output/literature_tools/` directory. No numerical code, campaign
   state, or Perlmutter operations were needed; no DMRG tests were run.
+
+## 2026-09-08: square chi=200 grid compiled and divergence diagnosed
+
+- User reports the square grid finished, while cubic and the separate
+  `(t0,V)=(1.4,-0.4)` stripe/control runs are still running. Five local square
+  terminal states are synced: four accepted fixed points and one `diverging`
+  endpoint at `(1.0,-0.4)`. Two cubic terminal files were seen during inventory
+  but not analyzed. No live scheduler or accounting verification is implied.
+- User explicitly approved using legacy `(1.0,0)` and `(1.4,-0.2)` coverage,
+  whose seed ancestry is not recorded, and including the new diverging
+  endpoint with a flag and analysis. Requested seed rule excludes inherited
+  converged-stripe states but permits independent small stripe patterns.
+- Added `scripts/compile_square_grid.py` and generated the self-contained
+  40.97-MiB `output/square_grid_chi200_20260908/square_grid_chi200.h5`: six
+  accepted small-seed fixed points, two labeled legacy-completed points, one
+  flagged terminal diagnostic. Terminal fields/correlations, original field
+  snapshots, provenance, config text and all 17 candidate records are embedded;
+  only the divergent point additionally retains its complete field history.
+  No source state or acceptance flag changed. Bundle SHA-256:
+  `36baaf52b7fd44c7cb84796fc600e3be4f2e1c12c358ed58782541aec81fa2cb`.
+- At both `(1.4,-0.4)` and `(1.4,0)`, selected the independent small
+  `stripe_pairing_m004_chi200_loose` seed by corrected canonical solution
+  energy among accepted, history-screened, same-fingerprint candidates. These
+  energy choices are numerically near ties. August 30 pure `stripe_m004`
+  fails the existing slow-mode screen and is excluded. Unaccepted tight-five
+  probes, frozen inherited stripes and chi=400 endpoints were not substituted.
+  All source paths, compact/full hashes and comparisons are in
+  `docs/reports/square_grid_20260908/selection.json` and `selection.csv`.
+- Added `plot_square_grid.jl`, reusing the original Fourier renderer without
+  legacy-source edits. The default uses physical correlations; `source=:mf`
+  uses measured field proxies with Hartree-to-beta-diagonal mapping. Both
+  PNG/PDF variants retain the old five-region layout, default boundary trim
+  and shared log scale, with LEGACY labels and divergence hatching. The
+  snapshot-specific click callback opens terminal profiles and Fourier maps.
+- `scripts/analyze_square_grid_divergence.py` reproduces the exact stop:
+  iteration-30 residual `0.03824999010` exceeds `8 * 0.003551837833 =
+  0.02841470267`, using the best trailing accelerated record (22), a ratio of
+  10.76907. The global residual-best record 5 is an earlier pairing plateau.
+  During unmixed records 2--21, pairing decays and a stripe-like normal texture
+  develops. Record 21 has contraction `0.9994040` and extrapolated relative
+  residual `5.9702`; its low raw residual is not acceptance.
+- Final squared residual is 74.42% Hartree and 25.58% exchange, with negligible
+  pairing. Fields remain finite; density error is `9.2173e-11`. Last corrected
+  energy change is `-1.6535e-4 t/site`; identity/consistency pass, but field and
+  energy-stability gates fail. Last DMRG sweep change `9.6662e-7 t` meets its
+  loose tolerance, with chi=200 and last-sweep discarded weight `2.5142e-5`.
+  Interpretation: unconverged slow striped texture with a spike during
+  acceleration, not proven unbounded growth or a validated physical orbit.
+  Detailed evidence and two static diagnostic figures are in the report.
+- Local commands: `python -B -X utf8 scripts/compile_square_grid.py` (about
+  two seconds), Julia 1.12.7 `--startup-file=no --compiled-modules=existing
+  plot_square_grid.jl` (seconds plus package loading), and
+  `python -B -X utf8 scripts/analyze_square_grid_divergence.py` (about three
+  seconds). The local WindowsApps Julia alias was inaccessible; used the
+  installed `C:/Users/Kevin/.julia/juliaup/julia-1.12.7+0.x64.w64.mingw32/bin/julia.exe`.
+  Corrected an initial new-wrapper docstring parse error before successful
+  rendering; the wrapper includes the legacy renderer directly.
+- Validation: all 17 candidate compact-state SHA-256/size/full-hash/config
+  checks and stateless/no-MPS checks passed. All nine plot snapshots exactly
+  match source arrays after the documented Hartree mapping. A temporary Julia
+  check passed 95 assertions (12.3 seconds): physical profiles and Fourier
+  maxima at all nine points, flag counts, and click-through figures. Both
+  grid variants and both divergence figures were visually inspected. Temporary
+  inspection/test scripts were removed. Updated current state, documentation
+  map and active plan. No expensive full suite, DMRG, full-scratch validation,
+  Perlmutter access, transfer, scheduler action, continuation or ledger change.
+
+## 2026-09-08: restore full histories on square-grid clicks
+
+- User clarified that clicking a grid point must open the former full MF
+  profiles-and-middle-histories plot. The first compilation retained only
+  terminal snapshots for most points; corrected that omission without changing
+  selected runs, source states, convergence flags or Fourier quantities.
+- Rebuilt `output/square_grid_chi200_20260908/square_grid_chi200.h5` as schema
+  v2, now 104.76 MiB. Every selected Phase 1 source retains full original
+  applied/measured field histories, stored seeds and per-update diagnostics;
+  both legacy sources retain all six saved history arrays. Every new history
+  dataset and all original terminal plotting arrays were checked exactly
+  against the source before atomically replacing the compiled bundle. Hash:
+  `389954bf423b859bdeb005a6ffb11580226b5aaecac401dc8f8a1570478ff5cf`.
+- Grid clicks lazily extract the embedded source history and use the existing
+  `plot_phase1_mf_profiles_and_middle_histories` adapter for new results, with
+  the seed at plotted iteration 1. Legacy clicks use the original correlation
+  history view (or Hartree-mapped MF histories for `source=:mf`). The grid and
+  Fourier map still use the selected terminal physical correlations by default.
+  New-run per-update views explicitly display saved measured MF fields.
+- Fixed the Phase 1 adapter's leading free-standing docstring, which Julia
+  otherwise attaches to an `if` expression and rejects. Guarded renderer
+  includes allow loading the grid in a Julia session where the old renderer
+  is already present. Shortened the new MF view's long pairing subplot titles
+  to fit the original two-column figure size.
+- Local validation: Python rebuild about two seconds; all-nine-click Julia
+  check passed 109 assertions in 34.1 seconds. Exact five-channel middle
+  histories and their iteration axes match embedded inputs; plotted sample
+  counts are 13,18,31,7,7,6,26,4,7 in sorted point-ID order. A second focused
+  check passed 10 slider assertions, covering first/final profile changes and
+  history cursor movement in both Phase 1 and legacy views. Rendered and
+  inspected representative new/legacy history figures. Temporary Julia checks
+  removed after validation. Updated report and project snapshot. No DMRG,
+  expensive full suite, Perlmutter action or source-artifact modification.
+
+## 2026-09-08: reassess loose paired endpoints and explain the SDW jump
+
+- User observed growing SDW competing with d-wave pairing in multiple loose
+  histories, including the V=0 six-seed test, and proposed representative
+  uniform d-wave and stripe CDW/SDW starts across the full grid. User regards
+  `(1.4,-0.4)` as the strongest paired-fixed-point candidate while its
+  strong-stripe energetic comparison remains pending. Recorded these as
+  observations and a proposed next direction, not established phase labels
+  or authorization for a new solver/campaign implementation.
+- Added `scripts/analyze_square_basin_stability.py` and durable evidence in
+  `docs/reports/square_grid_20260908/BASIN_ASSESSMENT.md`,
+  `basin_seed_summary.csv`, `sdw_jump_history.csv`, `anderson_replay.json`,
+  `six_seed_sdw_growth.png`, and `sdw_jump.png`. All 17 modern candidate
+  compact-state hashes match the prior selection record. Raw applied inputs
+  match their preceding saved measured outputs. Legacy coverage points are
+  not given a new stability certification.
+- Three V=0 seeds stop after six saved map evaluations. The three longer
+  seeds have coherent late raw spin growth (projection gains about 1.096,
+  input/output cosine >0.9998), followed by Anderson suppression. This revises
+  the earlier apparent-basin-collapse interpretation: the existing global
+  convergence screen alone does not establish a stable paired basin.
+- Selected V=0 `stripe_pairing_m004` source compact hash:
+  `9e7e1680ad0891495df6916908d7230b7e85d065dec96ef4aace701e9d3b20c6`;
+  recorded full hash:
+  `5c37b0667a1dd0bfedefd7963a100d5954dbdb11aafff8ea00f1f61c360dbe59`.
+  Plotted iterations 23-to-24 are stored 22-to-23 because the seed is plotted
+  at 1. First Anderson combines stored inputs 21/22 at damping 0.5 using
+  coefficients `+22.6810987947,-21.6810987947`. Replaying this transition gives
+  maximum absolute input error `1.57e-15`; all four saved mixed transitions
+  match within `1.58e-15`. Bulk spin RMS falls 76.7%; its spatial profile also
+  changes (cosine -0.3394), while the middle-rung trace barely moves. The
+  corrected canonical energy rises `2.72e-7 t/site` across this step.
+- Terminal global relative residual `0.0018425` coexists with spin-only
+  relative residual `0.0374755`. Period-one acceptance may occur before the
+  configured initial 20-step raw probe finishes, and Anderson-accepted fixed
+  points have no mandatory subsequent raw stability check. The terminal
+  profile's spin projection gain is 0.9918; earlier growing profiles do not
+  prove its transverse instability. A controlled competing-order perturbation
+  above the numerical floor is needed. These gains are trajectory diagnostics,
+  not calculated Jacobian eigenvalues or energy curvatures.
+- At `(1.4,-0.4)`, four small stripe/coexistence seeds instead show coherent
+  spin decay (projection gains 0.60–0.61). This supports paired attraction for
+  tested perturbations without ruling out a distinct lower-energy strong
+  stripe. At `(1.0,-0.2)`, pairing decays and a strong stripe settles; the
+  `(1.0,-0.4)` striped trajectory remains diverging as previously documented.
+  Short weak-spin t0=1.2 histories remain inconclusive for basin stability.
+- Recommended first qualifying channel diagnostics and raw perturbed checks
+  on the two t0=1.4 anchors, then filling paired/striped branch slots across
+  the grid with matched model/numerical fingerprints, target-coupling seed
+  transformations, and corrected canonical energies with resolved errors.
+  Allow coexistence and reserve extra chi/length/wavelength checks for close
+  competitions. The four prepared length-study seeds remain available.
+- Local reproduction:
+  `python -B -X utf8 ladder_mps_mft/scripts/analyze_square_basin_stability.py`.
+  Final run completed in 2.94 seconds with hash, raw-closure, and Anderson
+  replay assertions passing; both PNGs visually inspected. An earlier
+  verbose stdout preview piped to `Select-Object -First` closed the pipe early;
+  reduced stdout and reran successfully. Updated current state, documentation
+  index, report introduction, and active plan. This append-only run log is
+  the requested progress ledger. No source-state/bundle/acceptance changes,
+  new DMRG, expensive suite, solver/config changes, Perlmutter access,
+  transfers, scheduler actions, reservations, or accounting-ledger changes.
+
+## 2026-09-08: clarify Anderson timing and its physical interpretation
+
+- User asked why Anderson starts precisely at the selected V=0 jump and how
+  this can be consistent with a growing order. Checked the archived run config
+  and local `Solver.jl`, `Mixing.jl`, and `Convergence.jl` control flow against
+  the already-replayed saved update modes.
+- The initial evaluation is stored record 1, followed by 20 raw probe records
+  2–21. Probe completion clears mixer history. One input/output pair gives a
+  linear startup at stored 22; two pairs enable Anderson at stored 23, plotted
+  24. There is no channel-growth check governing this switch.
+- Added a scalar illustration to the basin assessment: `F(s)=1.1s` has a
+  repelling zero, but ideal signed Anderson combinations can solve for that
+  zero. Numerical root finding does not certify energy minimization; neither
+  raw nor mixed SCF steps should be read as physical time evolution. Actual
+  terminal transverse stability remains untested. Updated the current snapshot;
+  no new phase claim, solver change, DMRG, or scheduler action. Validation was
+  source/config review and elementary algebra; no expensive tests rerun.
+
+## 2026-09-08: prepare the approved raw two-reference square campaign
+
+- User approved the two-basin comparison and specified the converged legacy
+  stripe at `(1.0,0.0)` and uniform d-wave state at `(1.4,-0.4)` as the two
+  references, each perturbed by the other. User explicitly rejected further
+  Anderson use, retained chi=200, requested tighter thresholds and many MF
+  iterations, confirmed the matched canonical-energy comparison, and deferred
+  higher chi, length, and stripe-wavelength work. No scheduler action was
+  requested or performed from this workspace.
+- Prepared 18 square starts: 99% primary plus 1% competing correlations,
+  reconstructed through `mean_fields_from_correlations` at every target
+  `(t0,V)`. The stripe source SHA is
+  `ae6a3bfe76ca8f06f2396fd731b18bca8539e0b7ee68df016cc9156fdceeb074`;
+  the explicit `pairing_dwave_m000_chi200_loose` reference SHA is
+  `8a1cf2d64d2fbe0eb59521192b829cab43e19a4d7ac026519ea847f6ac0778b8`.
+  The latter is the user-requested uniform-pairing lineage, rather than the
+  nearly tied stripe-pairing lineage selected for the earlier Fourier grid.
+  Legacy densities come from diagonal normal correlations. Both references
+  retain their finite-boundary profiles and full retained bond structure.
+- Created immutable-content correlation bundle
+  `output/seed_previews/20260908_square_two_basin/references.h5`, 801747 bytes,
+  SHA `e01a1ea7d6be813110870d26377db0df529d1584816c946af78584e1e1fbddc1`.
+  Local 18-config/seed manifest is in the adjacent `grid/` directory.
+  Derived seeds store both source hashes and epsilon, use target E_p/kernels,
+  zero inactive onsite exchange through the standard constructor, and start
+  fresh product MPS with common RNG 1404. These are explicit inherited field
+  mixtures, not unbiased starts or inherited converged MPS.
+- Added `configs/phase1_gpu_square_two_basin_chi200_raw.toml`: chi=200, up to
+  500 evaluations, at least 50 before acceptance, five stable evaluations,
+  absolute/relative field tolerances 1e-7/1e-4, density 1e-5, corrected-energy
+  window 1e-8 t/site, and 20 DMRG sweeps with 1e-8 total sweep-energy tolerance.
+  Identity and effective-energy consistency gates are 1e-8 t/site. The raw
+  probe covers the full run; fallback is linear with min=damping=max=1 and
+  adaptive=false. No Anderson or reduced damping can occur in this contract.
+- Added opt-in `minimum_iterations`, `channel_residuals`, and
+  `dmrg_sweep_energy_tol` controls. Six full-vector channels separate pairing,
+  spin-even/spin-odd exchange, uniform/modulated charge, and spin Hartree.
+  Channel gates include slow drift and an absolute floor; period-two recurrence
+  remains phase-resolved. Minimum-window and inner-sweep evidence also gate
+  orbit acceptance. Fixed-point energy stability now spans the stable window
+  when the channel option is enabled. Historical defaults retain prior behavior;
+  these controls change the implementation/numerical fingerprints for new work.
+- Canonical and corrected canonical energy histories already existed. Added
+  `history/channels/*` diagnostics and inner-sweep pass flags, a CSV/PNG/PDF
+  energy-history exporter, and a grid comparison that reuses accepted-only
+  canonical selection, requires state/manifest fingerprint agreement, and
+  retains missing, unaccepted, incompatible, or unresolved cases. Seed ancestry
+  is not used as the final phase label. The ten-times-energy-window/tolerance
+  resolution screen is documented as a heuristic, not a rigorous error bound.
+- Launcher v1.19.0 adds `prepare-square-two-basin-raw` with `anchors` (default,
+  four jobs at t0=1.4,V=0/-0.4), `remainder` (14 disjoint starts), and `grid`
+  (all 18, an alternative scope). Reuses existing guarded submission and the
+  same shared live accounting ledger. One-GPU 12-hour first-segment ceilings
+  are 12, 42, and 54 fractional node-hours respectively. No reservations or
+  blanket continuations were created. Pending campaigns keep their old source.
+- Added `docs/reports/two_basin_raw_20260908/README.md`, seed PNG/PDF and
+  amplitude CSV, plus source-bundle tooling and a user-run isolated-snapshot
+  handoff. Updated the project snapshot, active plan, convergence method, and
+  documentation index. Existing square bundle, histories, flags, and source
+  HDF5 artifacts remain unchanged.
+- Validation: 31 existing convergence, 4 mixing, 8 DMRG-observer primitive,
+  52 new convergence/storage/seed-algebra/comparison, 167 prepared-seed/startup/
+  stage-partition, and 122 launcher assertions passed: **384 passes**. One
+  Linux-only launcher integration test is skipped on Windows. Verified real
+  inherited-field/fresh-MPS startup on CPU for all 18 starts, not GPU execution.
+  Bash syntax passed using the detected local Git Bash executable. Both figures
+  were inspected; energy export reproduced 31 stored records from two existing
+  runs, including the older reconstructed density correction. No DMRG ran.
+- Focused commands used the installed Julia 1.12.7 executable with
+  `--startup-file=no --compiled-modules=existing --project=ladder_mps_mft`.
+  Permanent focused tests are `test/test_raw_basin.jl`, also included in the
+  normal suite. Temporary Julia harnesses were removed. Initial checks exposed
+  a test fixture using the old loose orbit tolerance, a CPU harness initially
+  retaining backend=gpu, and a missing explicit import in the extracted launcher
+  test block; corrected the fixtures/harnesses and reran only affected checks.
+  Fixed the plotting adapter's charge-profile key and handled old energy
+  histories without a saved correction array. No expensive full suite rerun.
+
+- Packaged the separate source snapshot as
+  `output/source_bundles/two_basin_raw_20260908.zip`: 121 manifested files,
+  1417719 bytes, SHA-256
+  `ea167c75fecc9e64eb4e4d6ea7e5d77c1002847d0b8843f2c1e8e65af4589452`.
+  Every archived member was read back and checked against its SHA-256; shell
+  scripts use LF endings, machine-local preferences are excluded, and the
+  reference HDF5 is included. Source manifest and checksum sidecars accompany
+  the ZIP. Final `git diff --check` passed. Unrelated concurrent edits in
+  `docs/METHODS_NOTES.tex` and `docs/literature/SOURCE_NOTES.md` were preserved.
+
+## 2026-09-08: record the 2023 benchmark geometry for the manuscript
+
+- At the user's request, recorded the equation-based correspondence between
+  Bollmark et al., Phys. Rev. X 13, 011039 (2023), published Eqs. (51)-(58),
+  and `cubic_frustrated` in `src/MeanField.jl`.
+- Added a dated manuscript note to `docs/literature/SOURCE_NOTES.md`, a cited
+  paragraph and revision entry to `docs/METHODS_NOTES.tex`, and a current-state
+  pointer. Preserved the distinction between project terminology and the
+  authors' terminology, and identified which geometry their Fig. 13 uses.
+- Validation: compared the published equations with the implemented pairing
+  and exchange coefficients/index orientations; reviewed the documentation
+  diff and citation target. Documentation only; no solver changes, DMRG, or
+  Perlmutter actions. The existing literature-review PDF was not modified.
+
+## 2026-09-08: revise the two-basin seeds to 95%/5% and cap at 80 evaluations
+
+- User revision: use 95% of the primary reference correlations plus 5% of the
+  competing reference, and at most 80 MF evaluations to limit compute. Updated
+  the preparer, seed provenance, base config, raw-probe/stagnation windows,
+  seed contract, plot labels, active plan, project snapshot, and handoff.
+  chi=200, at least 50 evaluations before acceptance, five stable records,
+  tighter channel/energy/inner-DMRG gates, per-evaluation energy histories,
+  and raw updates without Anderson remain the approved numerical contract.
+- Regenerated all 18 seeds/configs and paired fingerprint manifests under
+  `output/seed_previews/20260908_square_two_basin/eps005_iter80/grid/`, using
+  the same hash-checked `references.h5`. Each correlation component is exactly
+  the requested convex combination; fields are rebuilt using target couplings.
+  The earlier 18 seed/config hashes and original source-ZIP hash were verified
+  unchanged. Refreshed the seed PNG/PDF and amplitude CSV in the campaign report.
+- The first stage remains four anchors, followed by the fourteen disjoint
+  starts after review. New planned run ID:
+  `20260908_square_two_basin_raw_eps005_iter80_anchors`. The 12-hour Slurm ceiling
+  and shared budget guards are unchanged; the lower iteration cap reduces
+  allowed work, not the reserved ceiling. No automatic continuations, jobs,
+  transfers, scheduler actions, or reservations were performed.
+- Local preparation command, from the repository root (Julia 1.12.7):
+
+  ```powershell
+  & 'C:/Users/Kevin/.julia/juliaup/julia-1.12.7+0.x64.w64.mingw32/bin/julia.exe' --startup-file=no --compiled-modules=existing --project=ladder_mps_mft ladder_mps_mft/scripts/prepare_phase1_two_basin_grid.jl ladder_mps_mft/configs/phase1_gpu_square_two_basin_chi200_raw.toml ladder_mps_mft/output/seed_previews/20260908_square_two_basin/references.h5 ladder_mps_mft/output/seed_previews/20260908_square_two_basin/eps005_iter80/grid ladder_mps_mft/output/seed_previews/20260908_square_two_basin/eps005_iter80/full_preview 20260908_square_two_basin_raw_eps005_iter80_grid grid
+  ```
+
+- Focused validation: ran `test/test_raw_basin.jl` with the same Julia flags:
+  **52 assertions passed** (30.0 seconds in the test body). A read-only Python
+  check verified all 18 exact 95%/5% mixtures, config/seed hashes, 80-evaluation
+  caps, minimum window, chi, raw update controls, seed provenance, and paired
+  fingerprints. Regenerated the figure with
+  `python -B -X utf8 ladder_mps_mft/scripts/plot_two_basin_seeds.py` and visually
+  inspected it. Validation is local configuration, algebra, storage, and unit
+  checking; no DMRG or scientific convergence test ran. No full suite rerun.
+- The revised source ZIP uses the new name
+  `output/source_bundles/two_basin_raw_20260908_eps005_iter80.zip`; the handoff
+  uses a matching fresh snapshot directory. Bundle command:
+  `python -B -X utf8 ladder_mps_mft/scripts/bundle_two_basin_source.py`.
+- Revised ZIP: 121 manifested files, 1418414 bytes, SHA-256
+  `0337f9881a406b60b20110e85f13994d14e4df6f6feab83a6dc0835c271ae9e7`.
+  Archive integrity and every member hash passed; checksum and manifest
+  sidecars accompany it. The ZIP contains this revision entry up to bundle
+  creation; this checksum is appended afterward. `git diff --check` passed.

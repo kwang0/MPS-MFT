@@ -190,6 +190,20 @@ function write_checkpoint(
             ]
             history_group["field_abs_residual"] = [record.field_abs_residual for record in records]
             history_group["field_rel_residual"] = [record.field_rel_residual for record in records]
+            if settings.convergence.channel_residuals
+                channels = create_group(history_group, "channels")
+                diagnostics = [channel_diagnostics(@view(records[1:index]), settings.convergence)
+                               for index in eachindex(records)]
+                for channel in eachindex(first(diagnostics))
+                    group = create_group(channels, String(first(diagnostics)[channel].name))
+                    for key in (:absolute, :relative, :cosine, :contraction, :factor,
+                                :passes, :applied_rms, :measured_rms)
+                        group[String(key)] = [getproperty(rows[channel], key) for rows in diagnostics]
+                    end
+                end
+                history_group["dmrg_sweep_gate_pass"] = [
+                    _dmrg_sweep_pass(record, settings.convergence) for record in records]
+            end
             history_group["wall_seconds"] = [record.wall_seconds for record in records]
             history_group["dmrg_max_discarded_weight"] = [
                 record.dmrg_max_discarded_weight for record in records

@@ -5,7 +5,7 @@
 
 set -euo pipefail
 
-readonly PHASE1_SCRIPT_VERSION="1.18.0"
+readonly PHASE1_SCRIPT_VERSION="1.19.0"
 script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
 project_dir="${PHASE1_PROJECT_DIR:-$(cd "$(dirname "$script_path")/.." && pwd)}"
 repo_root="${PHASE1_REPO_ROOT:-$(cd "$project_dir/.." && pwd)}"
@@ -39,6 +39,7 @@ PHASE1_SQUARE_V0_CHI400_COMPARE_CONFIG="${PHASE1_SQUARE_V0_CHI400_COMPARE_CONFIG
 PHASE1_SQUARE_GRID_SMOOTH_PAIRING_CONFIG="${PHASE1_SQUARE_GRID_SMOOTH_PAIRING_CONFIG:-$project_dir/configs/phase1_gpu_square_grid_smooth_pairing_chi200_loose.toml}"
 PHASE1_CUBIC_UNFRUSTRATED_GRID_SMOOTH_PAIRING_CONFIG="${PHASE1_CUBIC_UNFRUSTRATED_GRID_SMOOTH_PAIRING_CONFIG:-$project_dir/configs/phase1_gpu_cubic_unfrustrated_grid_smooth_pairing_chi200_loose.toml}"
 PHASE1_SQUARE_LEGACY_STRIPE_COMPARE_CONFIG="${PHASE1_SQUARE_LEGACY_STRIPE_COMPARE_CONFIG:-$project_dir/configs/phase1_gpu_square_t014_vm04_legacy_stripe_compare_chi200_loose.toml}"
+PHASE1_TWO_BASIN_CONFIG="${PHASE1_TWO_BASIN_CONFIG:-$project_dir/configs/phase1_gpu_square_two_basin_chi200_raw.toml}"
 
 die() { echo "error: $*" >&2; exit 1; }
 require_command() { command -v "$1" >/dev/null 2>&1 || die "required command not found: $1"; }
@@ -921,7 +922,7 @@ load_environment() {
   # shellcheck disable=SC1090
   source "$run_dir/run.env"
   case "${PHASE1_RUN_SCRIPT_VERSION:-missing}" in
-    1.0.0|1.0.1|1.1.0|1.2.0|1.3.0|1.4.0|1.5.0|1.6.0|1.7.0|1.8.0|1.9.0|1.10.0|1.11.0|1.12.0|1.13.0|1.13.1|1.13.2|1.14.0|1.15.0|1.16.0|1.17.0|1.18.0) ;;
+    1.0.0|1.0.1|1.1.0|1.2.0|1.3.0|1.4.0|1.5.0|1.6.0|1.7.0|1.8.0|1.9.0|1.10.0|1.11.0|1.12.0|1.13.0|1.13.1|1.13.2|1.14.0|1.15.0|1.16.0|1.17.0|1.18.0|1.19.0) ;;
     *) die "unsupported run script version ${PHASE1_RUN_SCRIPT_VERSION:-missing}; current version is $PHASE1_SCRIPT_VERSION";;
   esac
   project_dir="$PHASE1_PROJECT_DIR"
@@ -964,9 +965,9 @@ require_direct_submission_compatible_run_version() {
     1.12.0|1.13.0|1.13.1|1.13.2)
       echo "warning: directly submitting a launcher-v${PHASE1_RUN_SCRIPT_VERSION} campaign with v${PHASE1_SCRIPT_VERSION}; the standalone smoke gate has been retired" >&2
       ;;
-    1.14.0|1.15.0|1.16.0|1.17.0|1.18.0) ;;
+    1.14.0|1.15.0|1.16.0|1.17.0|1.18.0|1.19.0) ;;
     *) die \
-      "direct submission requires a run prepared by launcher v1.12.0 through v1.18.0; found ${PHASE1_RUN_SCRIPT_VERSION:-missing}";;
+      "direct submission requires a run prepared by launcher v1.12.0 through v1.19.0; found ${PHASE1_RUN_SCRIPT_VERSION:-missing}";;
   esac
 }
 
@@ -974,7 +975,7 @@ require_continuation_compatible_run_version() {
   local run_dir="$1" campaign_kind="standard"
   [[ ! -f "$run_dir/campaign_kind.txt" ]] || campaign_kind="$(<"$run_dir/campaign_kind.txt")"
   case "${PHASE1_RUN_SCRIPT_VERSION:-missing}" in
-    1.18.0) ;;
+    1.18.0|1.19.0) ;;
     1.17.0)
       [[ "$campaign_kind" == "cubic_unfrustrated_smooth_pairing_grid" ]] || die \
         "launcher v1.17.0 continuation compatibility is restricted to the active cubic-unfrustrated smooth-pairing grid"
@@ -997,13 +998,14 @@ require_continuation_compatible_run_version() {
 
 require_worker_compatible_run_version() {
   case "${PHASE1_RUN_SCRIPT_VERSION:-missing}" in
-    1.2.0|1.3.0|1.4.0|1.5.0|1.6.0|1.7.0|1.8.0|1.9.0|1.10.0|1.11.0|1.12.0|1.13.0|1.13.1|1.13.2|1.14.0|1.15.0|1.16.0|1.17.0|1.18.0) ;;
+    1.2.0|1.3.0|1.4.0|1.5.0|1.6.0|1.7.0|1.8.0|1.9.0|1.10.0|1.11.0|1.12.0|1.13.0|1.13.1|1.13.2|1.14.0|1.15.0|1.16.0|1.17.0|1.18.0|1.19.0) ;;
     *) die "queued worker cannot execute run script ${PHASE1_RUN_SCRIPT_VERSION:-missing} with launcher $PHASE1_SCRIPT_VERSION";;
   esac
 }
 
 initialize_run() {
   local run_id="$1" source_run_dir="${2:-}" campaign_kind="${3:-standard}" source_artifact="${4:-}"
+  local campaign_scope="${5:-anchors}"
   validate_new_run_id "$run_id"
   [[ -f "$project_dir/gpu/Manifest.toml" ]] || die \
     "GPU environment is not instantiated; run the command printed by plan"
@@ -1119,6 +1121,11 @@ initialize_run() {
         "$run_id"
       )
       ;;
+    square_two_basin_raw)
+      [[ -f "$source_artifact" ]] || die "two-basin comparison requires the reference bundle"
+      prepare_script="$project_dir/scripts/prepare_phase1_two_basin_grid.jl"
+      prepare_args=("$PHASE1_TWO_BASIN_CONFIG" "$source_artifact" "$run_dir" "$scratch_run_dir" "$run_id" "$campaign_scope")
+      ;;
     *) die "unknown Phase 1 campaign kind: $campaign_kind";;
   esac
   "$PHASE1_JULIA" --startup-file=no --project="$project_dir" \
@@ -1151,56 +1158,61 @@ validate_initialized_run() {
     "prepared manifest must contain named label and config columns"
   [[ -f "$run_dir/gpu-Manifest.toml" ]] || die "prepared run is missing its GPU manifest"
   [[ -f "$run_dir/gpu-Manifest.toml.sha256" ]] || die "prepared run is missing its GPU-manifest hash"
-  if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18)\.0$ ||
+  if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19)\.0$ ||
         "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.13\.[12]$ ]]; then
     [[ -d "$(full_run_directory_from_control "$run_dir")/results" ]] || die \
       "prepared run is missing its full-result scratch directory"
   fi
-  if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(5|6|7|8|9|10|11|12|13|14|15|16|17|18)\.0$ ||
+  if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(5|6|7|8|9|10|11|12|13|14|15|16|17|18|19)\.0$ ||
         "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.13\.[12]$ ]]; then
     [[ -f "$run_dir/campaign_kind.txt" ]] || die "prepared run is missing campaign_kind.txt"
     campaign_kind="$(<"$run_dir/campaign_kind.txt")"
     case "$campaign_kind" in
       standard|recurrence|recurrence_competitors) ;;
       matched_seed_pilot)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(6|7|8|9|10|11|12|13|14|15|16|17|18)\.0$ ||
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(6|7|8|9|10|11|12|13|14|15|16|17|18|19)\.0$ ||
           "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.13\.[12]$ ]] || die \
-          "matched-seed pilot requires launcher v1.6.0 through v1.18.0"
+          "matched-seed pilot requires launcher v1.6.0 through v1.19.0"
         ;;
       square_seed_pilot)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(7|8|9|10|11|12|13|14|15|16|17|18)\.0$ ||
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(7|8|9|10|11|12|13|14|15|16|17|18|19)\.0$ ||
           "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.13\.[12]$ ]] || die \
-          "square seed pilot requires launcher v1.7.0 through v1.18.0"
+          "square seed pilot requires launcher v1.7.0 through v1.19.0"
         ;;
       square_seed_pilot_v0)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(11|12|13|14|15|16|17|18)\.0$ ||
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(11|12|13|14|15|16|17|18|19)\.0$ ||
           "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.13\.[12]$ ]] || die \
-          "square V=0 seed pilots require launcher v1.11.0 through v1.18.0"
+          "square V=0 seed pilots require launcher v1.11.0 through v1.19.0"
         ;;
       square_tight5)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(10|11|12|13|14|15|16|17|18)\.0$ ||
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(10|11|12|13|14|15|16|17|18|19)\.0$ ||
           "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.13\.[12]$ ]] || die \
-          "square tight-five runs require launcher v1.10.0 through v1.18.0"
+          "square tight-five runs require launcher v1.10.0 through v1.19.0"
         ;;
       frozen_legacy_energy)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(14|15|16|17|18)\.0$ ]] || die \
-          "frozen legacy-field runs require launcher v1.14.0 through v1.18.0"
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(14|15|16|17|18|19)\.0$ ]] || die \
+          "frozen legacy-field runs require launcher v1.14.0 through v1.19.0"
         ;;
       square_v0_chi400_compare)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(15|16|17|18)\.0$ ]] || die \
-          "square V=0 chi=400 comparisons require launcher v1.15.0 through v1.18.0"
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(15|16|17|18|19)\.0$ ]] || die \
+          "square V=0 chi=400 comparisons require launcher v1.15.0 through v1.19.0"
         ;;
       square_smooth_pairing_grid)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(16|17|18)\.0$ ]] || die \
-          "square smooth-pairing grid runs require launcher v1.16.0 through v1.18.0"
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(16|17|18|19)\.0$ ]] || die \
+          "square smooth-pairing grid runs require launcher v1.16.0 through v1.19.0"
         ;;
       cubic_unfrustrated_smooth_pairing_grid)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(17|18)\.0$ ]] || die \
-          "cubic-unfrustrated smooth-pairing grid runs require launcher v1.17.0 or v1.18.0"
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(17|18|19)\.0$ ]] || die \
+          "cubic-unfrustrated smooth-pairing grid runs require launcher v1.17.0 through v1.19.0"
         ;;
       square_legacy_stripe_compare)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" == "1.18.0" ]] || die \
-          "square legacy-stripe comparisons require launcher v1.18.0"
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(18|19)\.0$ ]] || die \
+          "square legacy-stripe comparisons require launcher v1.18.0 or v1.19.0"
+        ;;
+      square_two_basin_raw)
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" == "1.19.0" ]] || die \
+          "two-basin raw-map comparisons require launcher v1.19.0"
+        [[ -f "$run_dir/seed_contract.toml" ]] || die "missing two-basin seed contract"
         ;;
       *) die "invalid prepared campaign kind: $campaign_kind";;
     esac
@@ -1677,6 +1689,8 @@ Accounting mutation (no submission or cancellation):
   reconcile [RUN_ID]                    Record finalized sacct elapsed charge and release unused ceilings
 
 Preparation only (no Slurm submission or budget reservation):
+  prepare-square-two-basin-raw REFERENCES_H5 NEW_RUN [anchors|remainder|grid]
+                                       Prepare paired/striped chi=200 raw-map branches (default: four anchors)
   prepare-standard NEW_RUN              Prepare the standard nine-branch campaign
   prepare-recovery SOURCE_RUN NEW_RUN   Prepare Float64 warm-start controls
   prepare-recurrence SOURCE_RUN NEW_RUN Prepare phase-resolved chi=400 recurrence controls
@@ -1828,6 +1842,13 @@ case "$action" in
     [[ ! -e "$run_root/$2" ]] || die \
       "new cubic-unfrustrated smooth-pairing grid run already exists: $run_root/$2"
     initialize_run "$2" "" cubic_unfrustrated_smooth_pairing_grid
+    ;;
+  prepare-square-two-basin-raw)
+    [[ $# == 3 || $# == 4 ]] || die "prepare-square-two-basin-raw requires REFERENCES_H5 NEW_RUN [anchors|remainder|grid]"
+    [[ -f "$2" ]] || die "reference HDF5 file not found: $2"
+    [[ -f "$PHASE1_TWO_BASIN_CONFIG" ]] || die "missing two-basin base config"
+    case "${4:-anchors}" in anchors|remainder|grid) ;; *) die "stage must be anchors, remainder, or grid";; esac
+    initialize_run "$3" "" square_two_basin_raw "$2" "${4:-anchors}"
     ;;
   prepare-square-legacy-stripe-compare)
     [[ $# == 3 ]] || die \

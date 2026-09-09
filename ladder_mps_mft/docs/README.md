@@ -48,6 +48,16 @@ For the current experiment under review, see the
 It contains four chi=200 L=96/128 pairing/stripe seeds with fixed L=64 coupling.
 
 For the newest campaign results, see the
+[September 8 square chi=200 grid](reports/square_grid_20260908/README.md).
+It provides a single-file 3 x 3 data bundle, legacy-style Fourier grids,
+explicit selection provenance, and analysis of the flagged diverging point.
+The [basin follow-up](reports/square_grid_20260908/BASIN_ASSESSMENT.md) records
+SDW growth, the reproduced Anderson jump, and the proposed paired/striped
+seed comparison; loose acceptance does not establish basin stability.
+The [approved raw two-basin campaign](reports/two_basin_raw_20260908/README.md)
+supplies all 18 square seeds, tighter chi=200 controls, energy-history tools,
+and a four-anchor-first Perlmutter handoff with Anderson disabled.
+For the preceding bond-dimension comparison, see the
 [September 5 chi=400 comparison](reports/chi400_comparison_20260905/ANALYSIS.md).
 It records a provisional striped-endpoint energy advantage and the unresolved
 acceptance gates for both lineages.

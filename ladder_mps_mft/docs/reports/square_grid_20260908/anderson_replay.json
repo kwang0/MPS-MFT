@@ -1,0 +1,138 @@
+{
+  "source": "ladder_mps_mft/output/phase1_gpu/20260902_phase1_square_t014_v000_seed_chi200_loose_cuda130/results/square__stripe_pairing_m004_chi200_loose/square__coexistence__square_targeted_mode_independent_seed_exploratory__none__targeted_stripe_pairing_m004/20260903T041433_1712511_75954fd2eaab/state.h5",
+  "source_sha256": "9e7e1680ad0891495df6916908d7230b7e85d065dec96ef4aace701e9d3b20c6",
+  "iteration_note": "Plotted iteration = stored iteration + 1 because the seed is displayed at 1.",
+  "jump_spatial_spin_cosine": -0.3393918074693746,
+  "jump_bulk_spin_rms_ratio": 0.23304853521500454,
+  "final_stored_history_screen": {
+    "run": "20260902_phase1_square_t014_v000_seed_chi200_loose_cuda130",
+    "branch": "coexistence",
+    "state_path": "C:\\Users\\Kevin\\Documents\\VS Code\\MPS-MFT\\ladder_mps_mft\\output\\phase1_gpu\\20260902_phase1_square_t014_v000_seed_chi200_loose_cuda130\\results\\square__stripe_pairing_m004_chi200_loose\\square__coexistence__square_targeted_mode_independent_seed_exploratory__none__targeted_stripe_pairing_m004\\20260903T041433_1712511_75954fd2eaab\\state.h5",
+    "config_path": "C:\\Users\\Kevin\\Documents\\VS Code\\MPS-MFT\\ladder_mps_mft\\output\\phase1_gpu\\20260902_phase1_square_t014_v000_seed_chi200_loose_cuda130\\configs\\square__stripe_pairing_m004_chi200_loose.segment-001.toml",
+    "full_artifact_sha256": "5c37b0667a1dd0bfedefd7963a100d5954dbdb11aafff8ea00f1f61c360dbe59",
+    "records": 25,
+    "last_update_mode": "anderson",
+    "stored_status": "fixed_point",
+    "stored_accepted": true,
+    "stored_period": 1,
+    "revised_status": "fixed_point",
+    "revised_accepted": true,
+    "revision_reason": "unchanged",
+    "field_abs_tol": 1e-06,
+    "field_rel_tol": 0.005,
+    "raw_abs_residual": 8.315116375619443e-05,
+    "raw_rel_residual": 0.0018425065211997251,
+    "residual_cosine": 0.9854675077704456,
+    "slow_mode_lambda": 0.4372754374321749,
+    "extrapolation_factor": 1.777068332394803,
+    "extrapolated_abs_residual": 0.0001477652999129076,
+    "extrapolated_rel_residual": 0.0032742599910549454,
+    "extrapolated_gate_pass": true,
+    "period2_oscillation_cosine_max": 0.999975417342721,
+    "period2_two_step_ratio_max": 203.40364722554438,
+    "period2_oscillation_pass": false
+  },
+  "replay": [
+    {
+      "from_stored_iteration": 21,
+      "to_stored_iteration": 22,
+      "to_plotted_iteration": 23,
+      "source_stored_iterations": [
+        21
+      ],
+      "damping": 0.5,
+      "coefficients": [
+        1.0
+      ],
+      "max_abs_replay_error": 1.3552527156068805e-20
+    },
+    {
+      "from_stored_iteration": 22,
+      "to_stored_iteration": 23,
+      "to_plotted_iteration": 24,
+      "source_stored_iterations": [
+        21,
+        22
+      ],
+      "damping": 0.5,
+      "coefficients": [
+        22.681098794743153,
+        -21.681098794743153
+      ],
+      "max_abs_replay_error": 1.5681900222830336e-15
+    },
+    {
+      "from_stored_iteration": 23,
+      "to_stored_iteration": 24,
+      "to_plotted_iteration": 25,
+      "source_stored_iterations": [
+        21,
+        22,
+        23
+      ],
+      "damping": 0.55,
+      "coefficients": [
+        18.77048778762244,
+        -17.937839728275932,
+        0.16735194065349296
+      ],
+      "max_abs_replay_error": 1.5759962779249292e-15
+    },
+    {
+      "from_stored_iteration": 24,
+      "to_stored_iteration": 25,
+      "to_plotted_iteration": 26,
+      "source_stored_iterations": [
+        21,
+        22,
+        23,
+        24
+      ],
+      "damping": 0.55,
+      "coefficients": [
+        8.113491564234764,
+        -7.746044946940009,
+        -4.63449595036335,
+        5.267049333068595
+      ],
+      "max_abs_replay_error": 1.5742615544489524e-15
+    }
+  ],
+  "final_dmrg": {
+    "max_discarded_weight": 0.00023464559085899047,
+    "maximum_link_dimension": 200,
+    "sweep_energy": [
+      -283.49307512118025,
+      -283.4984622347997,
+      -283.50348098187015,
+      -283.5064764310843,
+      -283.50687022128653,
+      -283.5068637214961,
+      -283.5068615349074,
+      -283.5068605056658,
+      -283.5068599129376
+    ],
+    "sweep_max_discarded_weight": [
+      0.00023464559085899047,
+      6.987487484307614e-05,
+      2.2025054370228158e-05,
+      1.0209073734465877e-05,
+      7.8436959588135e-06,
+      7.891566078995034e-06,
+      7.900167224009778e-06,
+      7.903220563390066e-06,
+      7.904867609053438e-06
+    ],
+    "sweep_maxlinkdim": [
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200
+    ]
+  }
+}

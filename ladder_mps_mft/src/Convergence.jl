@@ -80,12 +80,88 @@ _field_pass(record::IterationRecord, settings::ConvergenceSettings) =
     record.field_abs_residual <= settings.field_abs_tol ||
     record.field_rel_residual <= settings.field_rel_tol
 
-function _energy_change(records::AbstractVector{IterationRecord})
+function _energy_change(records::AbstractVector{IterationRecord}; window::Integer=2)
     length(records) >= 2 || return Inf
-    current = records[end].variational.target_density_corrected_variational_energy
-    previous = records[end - 1].variational.target_density_corrected_variational_energy
+    energies = [record.variational.target_density_corrected_variational_energy
+                for record in records[max(1, end - window + 1):end]]
     sites = 2 * size(records[end].applied.alpha, 1)
-    return abs(current - previous) / sites
+    return (maximum(energies) - minimum(energies)) / sites
+end
+
+"""Separate weak spin/charge textures from larger uniform and pairing fields."""
+function field_channels(fields::FieldState)
+    charge = vec(sum(fields.mu_cdw; dims=1)) ./ 2
+    return (
+        pairing=vec(fields.alpha),
+        exchange_charge=vec((fields.beta[1, :, :, :, :] .+ fields.beta[2, :, :, :, :]) ./ 2),
+        exchange_spin=vec((fields.beta[2, :, :, :, :] .- fields.beta[1, :, :, :, :]) ./ 2),
+        charge_uniform=[mean(charge)],
+        charge_modulation=charge .- mean(charge),
+        spin=vec((fields.mu_cdw[2, :] .- fields.mu_cdw[1, :]) ./ 2),
+    )
+end
+
+function channel_diagnostics(records::AbstractVector{IterationRecord}, settings::ConvergenceSettings)
+    current = last(records)
+    applied, measured = field_channels(current.applied), field_channels(current.measured)
+    previous = length(records) >= 2 ? records[end - 1] : nothing
+    previous_applied = previous === nothing ? nothing : field_channels(previous.applied)
+    previous_measured = previous === nothing ? nothing : field_channels(previous.measured)
+    return map(keys(applied)) do name
+        x, y = getproperty(applied, name), getproperty(measured, name)
+        residual = y .- x
+        absolute = maximum(abs, residual)
+        relative = norm(residual) / max(norm(x), norm(y), eps(Float64))
+        amplitude = max(maximum(abs, x), maximum(abs, y))
+        cosine, contraction, factor = NaN, NaN, 1.0
+        if previous !== nothing
+            old = getproperty(previous_measured, name) .- getproperty(previous_applied, name)
+            if norm(residual) > eps(Float64) && norm(old) > eps(Float64)
+                cosine = dot(residual, old) / (norm(residual) * norm(old))
+                contraction = dot(residual, old) / sum(abs2, old)
+                if cosine >= settings.slow_mode_cosine_min && amplitude > settings.field_abs_tol
+                    factor = contraction >= 1 ? Inf : max(1.0, 1 / (1 - contraction))
+                end
+            end
+        end
+        # An entire channel below the absolute floor cannot supply a reliable
+        # relative growth estimate. Above that floor, extrapolate slow drift.
+        passes = amplitude <= settings.field_abs_tol ||
+            absolute * factor <= settings.field_abs_tol || relative * factor <= settings.field_rel_tol
+        (; name, absolute, relative, cosine, contraction, factor, passes,
+           applied_rms=sqrt(mean(abs2, x)), measured_rms=sqrt(mean(abs2, y)))
+    end
+end
+
+function _channel_window_pass(records, settings)
+    settings.channel_residuals || return true
+    first_index = max(1, length(records) - settings.stable_iterations + 1)
+    return all(first_index:length(records)) do index
+        all(row -> row.passes, channel_diagnostics(@view(records[1:index]), settings))
+    end
+end
+
+function _dmrg_sweep_pass(record, settings)
+    isinf(settings.dmrg_sweep_energy_tol) && return true
+    energies = record.dmrg_sweep_energies
+    return length(energies) >= 2 && all(isfinite, energies[end-1:end]) &&
+        abs(energies[end] - energies[end-1]) <= settings.dmrg_sweep_energy_tol
+end
+
+function _channel_orbit_pass(records, settings, period)
+    settings.channel_residuals || return true
+    for offset in 0:(period - 1), repeat in 0:(settings.period_repeats - 1)
+        right = length(records) - offset - repeat * period
+        a = field_channels(records[right].measured)
+        b = field_channels(records[right - period].measured)
+        for name in keys(a)
+            x, y = getproperty(a, name), getproperty(b, name)
+            absolute = maximum(abs, x .- y)
+            relative = norm(x .- y) / max(norm(x), norm(y), eps(Float64))
+            (absolute <= settings.period_abs_tol || relative <= settings.period_rel_tol) || return false
+        end
+    end
+    return true
 end
 
 function _slow_mode_diagnostic(records::AbstractVector{IterationRecord}, settings::ConvergenceSettings)
@@ -213,7 +289,11 @@ function _periodic_diagnostic(
     numerical_gates = density_error <= settings.density_tol &&
         energy_change <= settings.variational_energy_tol &&
         identity_error <= settings.hamiltonian_identity_tol &&
-        effective_error <= settings.effective_energy_consistency_tol
+        effective_error <= settings.effective_energy_consistency_tol &&
+        last(records).iteration >= settings.minimum_iterations &&
+        _channel_orbit_pass(records, settings, period) &&
+        all(record -> _dmrg_sweep_pass(record, settings),
+            records[end - period * (settings.period_repeats + 1) + 1:end])
     accepted = closure_pass && period_allowed && numerical_gates
 
     reason = if !unmixed_probe
@@ -223,7 +303,7 @@ function _periodic_diagnostic(
     elseif !period_allowed
         "validated period-$period orbit is not in accepted_periods=$(settings.accepted_periods)"
     elseif !numerical_gates
-        "period-$period orbit failed density, phase-energy recurrence, or Hamiltonian-consistency gates"
+        "period-$period orbit failed observation-window, channel, DMRG, density, phase-energy, or Hamiltonian-consistency gates"
     else
         "validated unmixed period-$period mean-field solution; every phase and raw-map link passed"
     end
@@ -263,7 +343,8 @@ function assess_convergence(
     isempty(records) && return ConvergenceDiagnostic()
     current = last(records)
     density_error = abs(current.density - target_density)
-    energy_change = _energy_change(records)
+    energy_change = _energy_change(records;
+        window=settings.channel_residuals ? settings.stable_iterations : 2)
     sites = 2 * size(current.applied.alpha, 1)
     identity_error = abs(current.variational.hamiltonian_identity_error) / sites
     effective_error = abs(current.variational.effective_eigenvalue_error) / sites
@@ -271,8 +352,10 @@ function assess_convergence(
     best_iteration = findmin(record.field_rel_residual for record in records)[2]
     stable_count = min(settings.stable_iterations, length(records))
     recent = records[(end - stable_count + 1):end]
-    fixed = length(records) >= settings.stable_iterations &&
+    fixed = length(records) >= max(settings.stable_iterations, settings.minimum_iterations) &&
         all(record -> _field_pass(record, settings), recent) &&
+        _channel_window_pass(records, settings) &&
+        all(record -> _dmrg_sweep_pass(record, settings), recent) &&
         slow_mode.passes &&
         all(record -> abs(record.density - target_density) <= settings.density_tol, recent) &&
         energy_change <= settings.variational_energy_tol &&

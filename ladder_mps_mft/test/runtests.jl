@@ -733,7 +733,7 @@ end
     @test isempty(gpu_project["preferences"]["MPIPreferences"]["preloads"])
     @test occursin("require_current_run_version", script_source)
     @test occursin("require_worker_compatible_run_version", script_source)
-    @test occursin("PHASE1_SCRIPT_VERSION=\"1.18.0\"", script_source)
+    @test occursin("PHASE1_SCRIPT_VERSION=\"1.19.0\"", script_source)
     @test occursin("check-gpu-preferences)", script_source)
     @test occursin("validate_gpu_runtime_preferences", script_source)
     @test occursin("Base.get_preferences", preference_source)
@@ -923,7 +923,7 @@ end
             run_environment_path,
             replace(
                 read(run_environment_path, String),
-                "PHASE1_RUN_SCRIPT_VERSION=1.18.0" => "PHASE1_RUN_SCRIPT_VERSION=1.12.0",
+                "PHASE1_RUN_SCRIPT_VERSION=1.19.0" => "PHASE1_RUN_SCRIPT_VERSION=1.12.0",
             ),
         )
         run(pipeline(
@@ -2441,3 +2441,5 @@ end
         @test_throws ArgumentError compare_variational_branches([path, invalid_periodic_path])
     end
 end
+
+include("test_raw_basin.jl")

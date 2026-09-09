@@ -36,7 +36,7 @@
 
 \title{Ladder MPS+Mean-Field Project: Living Methods Notes}
 \author{Kevin Wang and contributors}
-\date{Living notes --- updated 2 September 2026}
+\date{Living notes --- updated 8 September 2026}
 
 \begin{document}
 
@@ -199,6 +199,16 @@ operator orientation in Eq.~\eqref{eq:linear-fields}; their diagonal on-site
 entries are set to zero.  This component-level map is implemented in
 \path{src/MeanField.jl}; changes to it require a simultaneous audit of the
 variational constants in Sec.~\ref{sec:variational}.
+
+\paragraph{Connection to the published ladder benchmark.}
+The repulsive-ladder equations of Bollmark et al.~\cite{bollmark2023},
+published Eqs.~(51)--(58), match the \texttt{cubic\_frustrated} map above:
+the same-leg kernel is \(p\left(\begin{smallmatrix}2&1\\1&2\end{smallmatrix}\right)\),
+and the cross-leg pairing and exchange terms have matching coefficients and
+index orientations.  ``Frustrated cubic'' is our nomenclature.  This identifies
+the connectivity underlying their Fig.~13 temperature benchmark.
+The dated source comparison and suggested manuscript wording are recorded in
+\path{docs/literature/SOURCE_NOTES.md}.
 
 \subsubsection{Bond-space interpretation of the pair and exchange fields}
 
@@ -1058,6 +1068,8 @@ clearly labeled representative settings.
 \toprule
 Date & Revision & Summary \\
 \midrule
+2026-09-08 & 0.7 & Identified the published 2023 repulsive-ladder benchmark
+with the project's frustrated-cubic mean-field map.\\
 2026-09-02 & 0.6 & Expanded the full-response discussion with symmetry blocks,
 isolated-ladder mixing, a two-component example, and the exact scope of the
 current projected Stage 2 Jacobian.\\
@@ -1077,6 +1089,12 @@ variational functional, convergence gates, diagnostics, and provenance rules.\\
 \end{tabularx}
 
 \begin{thebibliography}{9}
+
+\bibitem{bollmark2023}
+G. Bollmark et al.,
+\emph{Phys. Rev. X} \textbf{13}, 011039 (2023),
+\href{https://doi.org/10.1103/PhysRevX.13.011039}
+{doi:10.1103/PhysRevX.13.011039}.
 
 \bibitem{bollmark2025}
 D. Bollmark, N. Kohler, and A. Kantian,

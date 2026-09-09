@@ -1,0 +1,100 @@
+[model]
+L = 64
+t = 1.0
+U = 8.0
+V = -0.4
+t0 = 1.4
+tp = 0.1
+density = 0.9375
+mu_initial = 0.55
+r_range = 4
+geometry = "square"
+
+[pair_binding]
+registry = "data/E_p_values.csv"
+allow_interpolation = false
+
+[dmrg]
+nsweeps = 20
+maxdim = 200
+cutoff = 1.0e-10
+energy_tol = 1.0e-8
+eigsolve_krylovdim = 8
+max_time_seconds = 41400.0
+output_level = 1
+mu_density_tol = 1.0e-5
+mu_max_iterations = 24
+mu_bracket_step = 0.01
+mu_bracket_growth = 3.0
+mu_interval_tol = 1.0e-7
+mu_warm_start_noise = 1.0e-8
+
+# The raw probe covers the entire run. This fallback is also exactly F(x).
+[mixing]
+method = "linear"
+damping = 1.0
+minimum_damping = 1.0
+maximum_damping = 1.0
+memory = 1
+regularization = 1.0e-10
+adaptive = false
+
+[convergence]
+field_abs_tol = 1.0e-7
+field_rel_tol = 1.0e-4
+density_tol = 1.0e-5
+variational_energy_tol = 1.0e-8
+hamiltonian_identity_tol = 1.0e-8
+effective_energy_consistency_tol = 1.0e-8
+stable_iterations = 5
+minimum_iterations = 50
+channel_residuals = true
+dmrg_sweep_energy_tol = 1.0e-8
+max_period = 8
+period_repeats = 3
+period_abs_tol = 2.0e-7
+period_rel_tol = 2.0e-4
+period2_oscillation_cosine_max = -0.5
+period2_two_step_ratio_max = 0.5
+slow_mode_cosine_min = 0.9
+unmixed_cycle_probe = true
+probe_max_period = 2
+probe_iterations = 80
+accepted_periods = [1, 2]
+orbit_bulk_fraction = 0.5
+cycle_action = "continue"
+stagnation_window = 80
+stagnation_min_relative_improvement = 1.0e-2
+divergence_factor = 8.0
+
+[runtime]
+backend = "gpu"
+tensor_scalar_type = "float64"
+blas_threads = 1
+strided_threads = 1
+threaded_blocksparse = false
+conserve_sz = false
+conserve_nfparity = false
+
+[run]
+output_directory = "output/phase1_gpu/UNPREPARED_TWO_BASIN_RAW"
+branch_label = "unprepared"
+preparation = "square_two_reference_correlations_eps005_raw"
+direction = "none"
+seed_label = "unprepared"
+random_seed = 1404
+initial_seed = "pairing"
+initial_amplitude = 0.001
+initial_seed_protocol = "matched_mode"
+initial_mode_number = 0
+initial_mode_phase_pi = 0.0
+initial_pairing_form_factor = "d_wave"
+initial_leg_parity = "auto"
+initial_stripe_charge_to_spin_ratio = 0.2
+initial_stripe_pairing_to_spin_ratio = 1.0
+max_iterations = 80
+save_every = 1
+require_accepted_solution = false
+allow_unbound_ep = false
+quick_diagnostics = true
+full_pair_correlations = false

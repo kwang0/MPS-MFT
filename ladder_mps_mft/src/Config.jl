@@ -102,6 +102,9 @@ function load_settings(path::AbstractString)
         hamiltonian_identity_tol=Float64(_value(convergence_raw, "hamiltonian_identity_tol", 1e-9)),
         effective_energy_consistency_tol=Float64(_value(convergence_raw, "effective_energy_consistency_tol", 1e-6)),
         stable_iterations=Int(_value(convergence_raw, "stable_iterations", 2)),
+        minimum_iterations=Int(_value(convergence_raw, "minimum_iterations", 0)),
+        channel_residuals=Bool(_value(convergence_raw, "channel_residuals", false)),
+        dmrg_sweep_energy_tol=Float64(_value(convergence_raw, "dmrg_sweep_energy_tol", Inf)),
         max_period=Int(_value(convergence_raw, "max_period", 8)),
         period_repeats=Int(_value(convergence_raw, "period_repeats", 3)),
         period_abs_tol=Float64(_value(convergence_raw, "period_abs_tol", 2e-6)),
@@ -226,6 +229,9 @@ function validate_settings(settings::ProjectSettings)
         throw(ArgumentError("mixing damping values must satisfy 0 < min <= damping <= max <= 1"))
     settings.mixing.memory >= 1 || throw(ArgumentError("Anderson memory must be positive"))
     settings.convergence.max_period >= 1 || throw(ArgumentError("max_period must be positive"))
+    settings.convergence.stable_iterations >= 2 || throw(ArgumentError("stable_iterations must be at least 2"))
+    settings.convergence.minimum_iterations >= 0 || throw(ArgumentError("minimum_iterations must be nonnegative"))
+    settings.convergence.dmrg_sweep_energy_tol > 0 || throw(ArgumentError("dmrg_sweep_energy_tol must be positive"))
     settings.convergence.hamiltonian_identity_tol > 0 || throw(ArgumentError("hamiltonian_identity_tol must be positive"))
     settings.convergence.effective_energy_consistency_tol > 0 || throw(ArgumentError("effective_energy_consistency_tol must be positive"))
     settings.convergence.period_repeats >= 2 || throw(ArgumentError("period_repeats must be at least 2"))

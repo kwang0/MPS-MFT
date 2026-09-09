@@ -20,7 +20,8 @@ III, Eq. (9), Eq. (14), Fig. 2, and Appendix B.
 
 ## Mixer-independent probe
 
-The production-shaped default begins with 20 complete raw mean-field updates:
+The historical production default allows up to 20 raw mean-field updates
+after its initial evaluation (an accepted fixed point or orbit can end it early):
 
 ```text
 x_(k+1) = f(x_k)
@@ -125,6 +126,36 @@ Recurrences can be inspected through `max_period=8`, but only periods in
 `p*(period_repeats+1)` raw records. Such an extension also requires a physical
 mapping between orbit phases and transverse sublattices; numerical recurrence
 alone is not that justification.
+
+## Opt-in raw two-basin contract, September 8
+
+The user-approved square comparison disables Anderson. Its initial raw window
+covers the full 80-evaluation run limit; the fallback is linear with
+`damping=minimum_damping=maximum_damping=1` and `adaptive=false`, also exactly
+the raw map. New `minimum_iterations=50` prevents early period-one or period-two
+acceptance, while `stable_iterations=5` requires a longer settled window.
+
+`channel_residuals=true` checks pairing, spin-even and spin-odd exchange,
+uniform charge Hartree, charge modulation, and spin Hartree separately. Each
+uses the full spatial vector and the field tolerances. Period-one slow-mode
+extrapolation is computed separately for each channel over the stable window;
+a whole channel below the absolute amplitude floor can pass without a relative
+growth estimate. Period-two recurrence is also checked channel by channel.
+These numerical diagnostics do not independently determine energy curvature.
+
+With the channel option, fixed-point energy stability uses the range of the
+corrected canonical energies over the stable window, rather than only the
+last step. `dmrg_sweep_energy_tol` additionally requires the final inner solve's
+last two sweep energies to be present, finite, and separated by at most that
+total-energy threshold. The gate applies throughout the fixed-point window
+or the repeated orbit window. Defaults (`minimum_iterations=0`,
+`channel_residuals=false`, `dmrg_sweep_energy_tol=Inf`) retain historical
+acceptance behavior. New controls enter the numerical fingerprint.
+
+All channel diagnostics and inner-sweep pass flags are saved in `history/`
+when enabled. See `docs/reports/two_basin_raw_20260908/README.md` for the full
+contract, source isolation, and user-run handoff. Earlier configs and immutable
+states are not retroactively relabeled.
 
 ## Mixing after the probe
 
