@@ -16,7 +16,9 @@ cancellation in the loose V=0 six-seed results. The user approved representative
 d-wave/stripe seeds with reciprocal weak perturbations and rejected Anderson
 for new comparisons. All 18 square starts are locally prepared with 95%/5%
 correlation mixtures, chi=200, up to 80 raw evaluations, a minimum of 50,
-and tighter channel/energy/inner-DMRG gates. No jobs or reservations exist.
+and tighter channel/energy/inner-DMRG gates. The latest user report says queued
+runs were canceled. Submission now uses the normal checkout after `git pull`
+and `bash slurm/submit_square_two_basin.sh`; no local submission was performed.
 
 ## Active scientific questions
 
@@ -26,7 +28,8 @@ and tighter channel/energy/inner-DMRG gates. No jobs or reservations exist.
    contract, then the fourteen remaining starts after reviewing the anchors.
    Keep all channels free and compare accepted matching corrected canonical
    energies, retaining unresolved gaps. State ancestry does not determine
-   final order. Use the isolated source snapshot and existing shared budget.
+   final order. Use the current checkout, versioned reference input, and
+   existing shared budget.
 2. **Square finite-size comparison (deferred).** Retain the prepared pairing/stripe seeds
    at L=96 and 128, chi=200. The L=64 energetic advantage of the stripe is
    `2.43361262e-4 t/site` at chi=400, and the user regards its bond-dimension
@@ -50,11 +53,11 @@ and tighter channel/energy/inner-DMRG gates. No jobs or reservations exist.
 
 ## Completion sequence
 
-1. Review the 18 prepared seeds and raw-map contract. The user transfers the
-   source bundle, prepares the four anchors, and submits through the guarded
-   launcher after checking live accounting. Retain the finite-size seeds for
-   future work. Await the cubic grid and V=-0.4 legacy stripe comparison
-   without disturbing their source checkout.
+1. The user pulls the updated checkout and runs
+   `bash slurm/submit_square_two_basin.sh`. This prepares the four anchors,
+   reconciles finalized accounting (including cancellations), and submits
+   through the guarded launcher. Retain the finite-size seeds for future work.
+   Update older campaign status when job-specific results/accounting are synced.
 2. After terminal status, reconcile requested ceilings against authoritative
    `sacct` elapsed time before choosing more compute.
 3. Synchronize only the relevant compact results, logs, manifests, `jobs.tsv`,

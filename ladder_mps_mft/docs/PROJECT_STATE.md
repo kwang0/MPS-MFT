@@ -1,6 +1,6 @@
 # Current project state
 
-Last locally reviewed: 2026-09-08 (two-reference campaign revised to 95%/5%, 80 evaluations)
+Last locally reviewed: 2026-09-08 (direct two-basin submission after git pull)
 
 This is the canonical mutable snapshot for resuming work. It is deliberately
 short. Stable rules belong in `AGENTS.md` and the method documents; durable
@@ -16,7 +16,8 @@ history belongs in `docs/RUN_LOG.md`.
   analysis. The latter adds its own evidence directory and status updates. An
   untracked root `.claude/` directory exists outside this subproject and is not
   part of this work.
-- Local `output/` and all HDF5 files are intentionally excluded from Git.
+- Local `output/` and simulation HDF5 files are excluded from Git. The small
+  `data/two_basin_references.h5` is a versioned seed-input exception.
 - Current local work adds explicit reference-length E_p support and four
   L=96/128 seed-review configs. This changes the implementation fingerprint;
   preserve the old Perlmutter source checkout for pending/running campaigns.
@@ -37,8 +38,10 @@ Recheck the branch, commit, and working tree at the start of each new task.
   acceptance, and tighter channel/energy/inner-DMRG gates. Four anchors precede
   the remaining fourteen. See the
   [prepared campaign and handoff](reports/two_basin_raw_20260908/README.md).
-  No jobs are submitted. Higher chi, length, and stripe-wavelength work is
-  deferred by the user's latest instruction.
+  `slurm/submit_square_two_basin.sh` prepares and submits the four anchors from
+  the normal checkout after `git pull`, using the versioned reference input
+  and existing shared budget gates. The user reports canceling queued runs.
+  Higher chi, length, and stripe-wavelength work remains deferred.
 - At square `(t0,V)=(1.4,0)`, the completed loose `chi=200` six-seed campaign
   produced six software-accepted, pairing-bearing period-one endpoints.
   September 8 full-history review revises the basin interpretation: three
@@ -119,7 +122,7 @@ must not be inferred from the repository.
 
 | Run ID | Local record | Question |
 |---|---|---|
-| `20260908_square_two_basin_raw_eps005_iter80_anchors` (planned ID) | 18 square starts locally previewed; four-anchor handoff ready; no jobs/reservations | Qualify the raw chi=200 comparison before the remaining fourteen starts |
+| `20260908_square_two_basin_95_5_80_anchors` (new default ID) | 18 square starts locally previewed; one-command four-anchor submission prepared; no local submission | Qualify the raw chi=200 comparison before the remaining fourteen starts |
 | `20260903_phase1_square_t014_v000_pairing_legacy_chi400_tight` | synced; 0/2 software-accepted; user accepts energetic comparison as adequate | Retain as the L=64 energy/basin reference; higher-chi checks remain future work |
 | `20260903_phase1_square_grid_smooth_pairing_chi200_loose` | five terminal states synced; 4 accepted, 1 diverging; compiled September 8 | Review Fourier grid and divergence at `(1.0,-0.4)` |
 | `20260903_phase1_cubic_unfrustrated_grid_smooth_pairing_chi200_loose` | user reports still running September 8; two local terminal files seen, not analyzed here | Finish eight-point cubic-unfrustrated fill |
@@ -131,6 +134,10 @@ documents linked from `docs/plans/ACTIVE.md`.
 
 ## Live Perlmutter and accounting boundary
 
+- Latest user report, 2026-09-08: queued runs were canceled (job IDs not
+  provided). The direct submission wrapper reconciles finalized reservations
+  through the existing `sacct`-based accounting before submitting. Cancellation
+  and released compute are not independently verified in this local snapshot.
 - User-reported on 2026-09-08: the square fill finished; cubic-unfrustrated and
   `(1.4,-0.4)` stripe/control runs are still running. Local square artifacts
   confirm five terminal solver outcomes (4 accepted, 1 diverging). This does
@@ -150,11 +157,13 @@ documents linked from `docs/plans/ACTIVE.md`.
 
 ## Exact next action
 
-Review the concrete seeds and numerical contract in
-`docs/reports/two_basin_raw_20260908/README.md`. The source bundle keeps this
-implementation separate from pending campaign code. The user transfers it,
-prepares four anchors at `(1.4,0)` and `(1.4,-0.4)`, and uses the existing
-guarded launcher and shared live ledgers. First-segment ceilings are 12
+The user runs `git pull --ff-only` in
+`$CFS/m4863/MPS-MFT/ladder_mps_mft`, then
+`bash slurm/submit_square_two_basin.sh`. This prepares four anchors at
+`(1.4,0)` and `(1.4,-0.4)`, reconciles terminal reservations, and submits through
+the existing guarded launcher and shared live ledgers. The reference input is
+included in Git. Full contract: `docs/reports/two_basin_raw_20260908/README.md`.
+First-segment ceilings are 12
 fractional node-hours for those four and 42 for the later fourteen, subject
 to the live 400-hour cap. Do not infer current remaining budget locally.
 

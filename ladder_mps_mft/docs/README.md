@@ -56,7 +56,8 @@ SDW growth, the reproduced Anderson jump, and the proposed paired/striped
 seed comparison; loose acceptance does not establish basin stability.
 The [approved raw two-basin campaign](reports/two_basin_raw_20260908/README.md)
 supplies all 18 square seeds, tighter chi=200 controls, energy-history tools,
-and a four-anchor-first Perlmutter handoff with Anderson disabled.
+and `slurm/submit_square_two_basin.sh` for four-anchor-first submission after
+`git pull`, with versioned reference correlations and Anderson disabled.
 For the preceding bond-dimension comparison, see the
 [September 5 chi=400 comparison](reports/chi400_comparison_20260905/ANALYSIS.md).
 It records a provisional striped-endpoint energy advantage and the unresolved

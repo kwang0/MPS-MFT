@@ -4,11 +4,14 @@ The September 8 user-approved plan is prepared locally for all nine square
 coordinates: t0=1.0,1.2,1.4 and V=-0.4,-0.2,0.0, with two seed families each.
 No new DMRG results or Perlmutter submissions are implied by this preparation.
 Higher chi, length, and alternative stripe-wavelength studies are deferred.
-The pending cubic and strong-stripe campaigns remain separate.
+The cubic and strong-stripe campaigns remain separate. In the latest follow-up,
+the user reports canceling queued runs and requests submission from the normal
+Perlmutter checkout after `git pull`.
 
 The latest user revision sets a **95%/5% seed mixture and an 80-evaluation
 ceiling**. The earlier 99%/1%, 500-evaluation preview and source ZIP are retained;
-the revised preview, snapshot, and run IDs below distinguish this preparation.
+the revised preview and new run IDs distinguish this preparation. The current
+handoff uses the Git-versioned reference input and a single submission script.
 
 ## Seeds
 
@@ -46,8 +49,8 @@ its total charge modulation is not solely the added weak stripe. The
 [amplitude table](seed_amplitudes.csv) covers all 18 seeds, with bulk RMS over
 rungs 6–59. The [PDF](seed_profiles.pdf) is suitable for export.
 
-The hash-checked correlation bundle is
-`output/seed_previews/20260908_square_two_basin/references.h5` (about 0.76 MiB),
+The hash-checked correlation bundle is versioned at
+`data/two_basin_references.h5` (about 0.76 MiB),
 SHA-256 `e01a1ea7d6be813110870d26377db0df529d1584816c946af78584e1e1fbddc1`.
 All 18 local configs, derived field seeds, and fingerprint manifests are under
 `output/seed_previews/20260908_square_two_basin/eps005_iter80/grid/`. Their paths are local
@@ -108,8 +111,8 @@ After the user syncs the new results locally, plot and export every energy
 record with:
 
 ```powershell
-python -B -X utf8 ladder_mps_mft/scripts/plot_mf_energy_histories.py --out ladder_mps_mft/output/two_basin_energy_review ladder_mps_mft/output/phase1_gpu/20260908_square_two_basin_raw_eps005_iter80_anchors/results
-julia --startup-file=no --project=ladder_mps_mft ladder_mps_mft/scripts/compare_two_basin_grid.jl ladder_mps_mft/output/phase1_gpu/20260908_square_two_basin_raw_eps005_iter80_anchors ladder_mps_mft/output/two_basin_energy_review/comparison.csv
+python -B -X utf8 ladder_mps_mft/scripts/plot_mf_energy_histories.py --out ladder_mps_mft/output/two_basin_energy_review ladder_mps_mft/output/phase1_gpu/20260908_square_two_basin_95_5_80_anchors/results
+julia --startup-file=no --project=ladder_mps_mft ladder_mps_mft/scripts/compare_two_basin_grid.jl ladder_mps_mft/output/phase1_gpu/20260908_square_two_basin_95_5_80_anchors ladder_mps_mft/output/two_basin_energy_review/comparison.csv
 ```
 
 The energy plotter accepts explicit checkpoint files for unfinished runs and
@@ -133,43 +136,30 @@ specified families at fixed L and chi.
 
 ## Perlmutter handoff (user-run only)
 
-The [source bundle](../../../output/source_bundles/two_basin_raw_20260908_eps005_iter80.zip)
-contains the solver, preparation/analysis tools, configs, environment manifests,
-registry, and small reference bundle. Its manifest and SHA-256 are recorded
-alongside the ZIP. It contains no MPS or new simulation results. The user
-transfers it; Codex does not connect or synchronize with Perlmutter.
-
-Start from the managed checkout, then unpack into a fresh source snapshot to
-preserve code used by pending jobs. Keep the existing shared accounting ledgers
-and campaign output root:
+Run these commands on Perlmutter in the existing configured checkout:
 
 ```bash
 cd "$CFS/m4863/MPS-MFT/ladder_mps_mft"
-
-# BUNDLE is the path where you transferred two_basin_raw_20260908_eps005_iter80.zip.
-BUNDLE="$PWD/output/source_bundles/two_basin_raw_20260908_eps005_iter80.zip"
-SNAPSHOT="$PWD/output/source_snapshots/two_basin_raw_20260908_eps005_iter80"
-test ! -e "$SNAPSHOT" || { echo "Snapshot already exists; inspect it first."; exit 1; }
-mkdir -p "$SNAPSHOT"
-unzip -q "$BUNDLE" -d "$SNAPSHOT"
-export PHASE1_PROJECT_DIR="$SNAPSHOT"
-export PHASE1_REPO_ROOT="$CFS/m4863/MPS-MFT"
-export PHASE1_RUN_ROOT="$CFS/m4863/MPS-MFT/ladder_mps_mft/output/phase1_gpu"
-export PHASE1_BUDGET_ROOT="$CFS/m4863/MPS-MFT/ladder_mps_mft/output/project_budget"
-
-RUN=20260908_square_two_basin_raw_eps005_iter80_anchors
-bash "$SNAPSHOT/slurm/phase1_gpu.sh" budget
-bash "$SNAPSHOT/slurm/phase1_gpu.sh" prepare-square-two-basin-raw "$SNAPSHOT/references.h5" "$RUN" anchors
-column -ts $'\t' "$PHASE1_RUN_ROOT/$RUN/manifest.tsv" | less -S
+git pull --ff-only
+bash slurm/submit_square_two_basin.sh
 ```
 
-Preparation does not submit or reserve. After reviewing the manifest and live
-budget, the existing guarded submission submits four scientific anchor jobs:
+The script uses the current checkout and its versioned reference file, prepares
+the native seed/config paths, reconciles finalized reservations using `sacct`,
+and submits through the existing GPU-preference and shared-budget gates. This
+also releases unused reservations for canceled jobs once accounting confirms
+their terminal state. It retains explicit shared run/scratch/ledger locations
+from the environment and resets the old snapshot source/config overrides.
 
-```bash
-bash "$SNAPSHOT/slurm/phase1_gpu.sh" submit "$RUN"
-bash "$SNAPSHOT/slurm/phase1_gpu.sh" status "$RUN"
-```
+The default run ID is `20260908_square_two_basin_95_5_80_anchors`. Repeating
+the command refuses that existing run directory. To choose a fresh run name
+or the later stage, use `bash slurm/submit_square_two_basin.sh NEW_RUN_ID STAGE`,
+where `STAGE` is `anchors` (default), `remainder`, or `grid`. To inspect the
+default campaign, use
+`bash slurm/phase1_gpu.sh status 20260908_square_two_basin_95_5_80_anchors`.
+If preparation succeeded but submission was interrupted, the existing
+`bash slurm/phase1_gpu.sh submit RUN_ID` submits only branches not already
+recorded in `jobs.tsv`.
 
 These are the two families at `(1.4,0)` and `(1.4,-0.4)`. Each 12-hour one-GPU
 segment reserves 3 fractional node-hours: **12 for the anchors**. After their
@@ -185,7 +175,9 @@ reservation ceiling is unchanged. There are no automatic continuations.
 The launcher checks the existing live 400-additional-node-hour cap under its
 budget lock before submission. Reconcile completed allocations with the existing
 `reconcile "$RUN"` command. This document does not infer remaining budget from
-stale local ledgers.
+stale local ledgers. The earlier source ZIPs remain archival snapshots; no
+separate ZIP transfer, unpacking, or source-snapshot exports are needed for
+this checkout-based submission.
 
 ## Local validation
 

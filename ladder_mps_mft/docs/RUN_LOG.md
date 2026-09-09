@@ -2457,3 +2457,61 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   Archive integrity and every member hash passed; checksum and manifest
   sidecars accompany it. The ZIP contains this revision entry up to bundle
   creation; this checksum is appended afterward. `git diff --check` passed.
+
+## 2026-09-08: simple two-basin submission from the Git checkout
+
+- User reports canceling queued runs and requests a simple submission after
+  `git pull` on Perlmutter. No job IDs or accounting were supplied; this is a
+  user-reported cancellation, not a locally verified scheduler transition.
+- Added `slurm/submit_square_two_basin.sh`. With no arguments it prepares and
+  submits four anchors under `20260908_square_two_basin_95_5_80_anchors`.
+  Optional arguments select a fresh run ID and `anchors`, `remainder`, or
+  `grid`. It uses the checkout containing the script, resets earlier snapshot
+  source/config overrides, and preserves explicit shared run/scratch/ledger
+  paths. Existing run IDs are refused. A nonempty existing reservation ledger
+  is reconciled through the original `sacct`-based command before submission;
+  missing or header-only ledgers skip reconciliation. Failures stop the wrapper.
+  Existing GPU-preference, duplicate-branch, and budget gates remain in force.
+- Versioned the 801747-byte correlation-only reference input at
+  `data/two_basin_references.h5`, with a narrow `.gitignore` exception. Its
+  SHA-256 is unchanged:
+  `e01a1ea7d6be813110870d26377db0df529d1584816c946af78584e1e1fbddc1`.
+  This removes the source-ZIP transfer and snapshot-setup dependency. The old
+  snapshots and derived data remain intact. Added an LF checkout rule for the
+  new shell script and documented the input in `data/README.md`.
+- Numerical controls and solver source are unchanged: 95%/5% mixtures,
+  chi=200, 80 evaluations maximum, minimum 50, no Anderson, and per-iteration
+  energy histories. The first four anchors still precede the other fourteen.
+- Local validation: Bash syntax passed; 22 wrapper-dispatch checks passed in
+  an isolated checkout with a mock launcher, including paths with spaces,
+  stale source overrides, explicit ledger preservation, default/alternate
+  stages, duplicate run refusal, invalid arguments, accounting failure, and
+  missing/header-only ledgers. An initial check identified the missing-ledger
+  edge case; added the guard and reran only the wrapper checks.
+- The real Julia preparer loaded the versioned input and generated four
+  native anchor seeds/configs under
+  `output/seed_previews/20260908_square_two_basin/git_checkout_anchors/`.
+  Verified coordinates, 95%/5% provenance, chi=200, the 80-evaluation cap,
+  reference/seed/config hashes, and the preparer's target-kernel/readback/
+  fingerprint checks. Used Julia 1.12.7 with
+  `--startup-file=no --compiled-modules=existing --project=ladder_mps_mft`
+  and `scripts/prepare_phase1_two_basin_grid.jl` with stage `anchors`.
+  Validation was local preparation and mocked dispatch; no DMRG, GPU,
+  actual Slurm, NERSC connection, transfer, or reservation was performed.
+  No unchanged solver tests or full suite were rerun.
+- Updated the project snapshot, active plan, and campaign handoff. Perlmutter
+  commands for the user, after this change is pushed to the current branch:
+
+  ```bash
+  cd "$CFS/m4863/MPS-MFT/ladder_mps_mft"
+  git pull --ff-only
+  bash slurm/submit_square_two_basin.sh
+  ```
+- Git-index checks confirmed the exact reference SHA-256 and LF bytes for both
+  shell scripts; staged `git diff --check` passed. Committed locally as
+  `Simplify two-basin submission` on `codex/mps-mft-phase0-refactor`.
+  The subsequent push to the configured GitHub origin `kwang0/MPS-MFT` was
+  rejected by automatic approval review before execution: the review requires
+  explicit authorization to export the reference HDF5, configuration, and
+  project documentation to that destination. The remote remains unpublished
+  by this task pending that approval; no alternative transfer was attempted.

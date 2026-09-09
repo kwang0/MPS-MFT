@@ -15,3 +15,20 @@ Isolated-project SHA-256 (LF):
 
 Every run records the isolated-project registry hash. Lookup is exact in
 `(L,U,V,t0,density)`; the solver never interpolates missing values.
+
+## Two-basin reference correlations
+
+`two_basin_references.h5` is the small, versioned input for
+`slurm/submit_square_two_basin.sh`. It contains the selected chi=200 stripe
+correlations at `(t0,V)=(1.0,0.0)` and uniform d-wave correlations at `(1.4,-0.4)`,
+with source paths and SHA-256 provenance. It contains no MPS. The preparer checks
+the bundle and both source hashes before constructing 95%/5% mixtures using
+each target Hamiltonian's couplings.
+
+Bundle SHA-256:
+`e01a1ea7d6be813110870d26377db0df529d1584816c946af78584e1e1fbddc1`.
+
+This is a byte-identical copy of the locally extracted reference bundle under
+`output/seed_previews/20260908_square_two_basin/`. `prepare_two_basin_references.py`
+records its extraction from the immutable source results. The narrow ignore-rule
+exception versions this input; simulation outputs remain excluded from Git.
