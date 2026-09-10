@@ -1,6 +1,6 @@
 # Current project state
 
-Last locally reviewed: 2026-09-08 (direct two-basin submission after git pull)
+Last locally reviewed: 2026-09-10 (40-step remainder prepared and locally qualified)
 
 This is the canonical mutable snapshot for resuming work. It is deliberately
 short. Stable rules belong in `AGENTS.md` and the method documents; durable
@@ -34,13 +34,27 @@ Recheck the branch, commit, and working tree at the start of each new task.
   d-wave lineage at `(1.4,-0.4)` as two reference profiles, each with a weak
   contribution from the other. All 18 square starts are locally prepared as
   95%/5% correlation mixtures rebuilt with target couplings. New comparisons
-  use chi=200 and **no Anderson**: up to 80 raw evaluations, at least 50 before
-  acceptance, and tighter channel/energy/inner-DMRG gates. Four anchors precede
-  the remaining fourteen. See the
+  use chi=200 and **no Anderson**. The four original anchors allow 80 raw
+  evaluations and require at least 50 before acceptance. See the
   [prepared campaign and handoff](reports/two_basin_raw_20260908/README.md).
   `slurm/submit_square_two_basin.sh` prepares and submits the four anchors from
   the normal checkout after `git pull`, using the versioned reference input
-  and existing shared budget gates. The user reports canceling queued runs.
+  and existing shared budget gates. The V=-0.4 pair is now locally analyzed:
+  both reached 80 evaluations and the same d-wave-like pairing basin, but
+  remain unaccepted because of weak-channel noise-floor checks, a scalar
+  charge extrapolation over-sensitivity, and one marginal energy-window miss.
+  User-supplied sacct records give 3.763125 node-hours for this pair. The V=0
+  anchors remain PENDING in the September 10 job-specific output. The user
+  now authorizes the remaining fourteen with a 40-evaluation cap, minimum 30,
+  ten stable records, a 5e-7 channel noise floor plus full-window drift gate,
+  and a 2e-8 t/site energy span. Global/inner-DMRG tolerances are unchanged.
+  Saved-history gates first pass at 35/30 for the stripe/pairing anchors;
+  older growing V=0 raw histories still fail. Missing per-iteration identity
+  errors prevent retrospective acceptance certification. The new scope is
+  locally prepared, not submitted. Its separate-checkout launcher shares
+  existing accounting and leaves pending source paths unchanged. See the
+  [remainder contract](reports/two_basin_remainder_20260910/README.md).
+  See the [V=-0.4 analysis](reports/two_basin_vm04_20260910/README.md).
   Higher chi, length, and stripe-wavelength work remains deferred.
 - At square `(t0,V)=(1.4,0)`, the completed loose `chi=200` six-seed campaign
   produced six software-accepted, pairing-bearing period-one endpoints.
@@ -55,8 +69,11 @@ Recheck the branch, commit, and working tree at the start of each new task.
   terminal instability. Controlled competing-order perturbations are needed.
 - At `(1.4,-0.4)`, tested small stripe/coexistence seeds show coherent spin
   decay (raw projection gains about `0.60–0.61`), supporting attraction toward
-  pairing for those perturbations. The pending strong-stripe comparison is
-  still needed to test a distinct competing solution and its energy. See the
+  pairing for those perturbations. The September 10 raw 95%/5% comparison now
+  shows the strong-stripe seed also relaxing into the paired basin at chi=200:
+  final leg-odd spin Hartree RMS is about 2.5e-8–3.9e-8 and both pairing/charge
+  profiles coincide. Terminal corrected energies differ by only 7.49e-9 t/site;
+  this is numerical agreement, not an accepted-state ranking. See the
   [September 8 basin assessment](reports/square_grid_20260908/BASIN_ASSESSMENT.md).
 - The matched square `(1.4,0)` `chi=400` jobs have terminated, but neither
   endpoint is accepted: pairing is `stagnated` after 32 records and the
@@ -115,14 +132,16 @@ slider. The divergence analysis shows a slow stripe-like trajectory and an
 accelerated residual spike, not an accepted solution. Original statuses remain
 unchanged. A separate saved-history analysis explains the V=0 SDW jump and
 records the motivation for the now-prepared two-family raw comparison.
-Its 18 seeds/configs are local preparation, without new simulation results.
+Two of its 18 prepared starts now have synchronized 80-iteration histories;
+their September 10 analysis is linked above.
 
 These are the newest locally documented campaigns. Their live scheduler state
 must not be inferred from the repository.
 
 | Run ID | Local record | Question |
 |---|---|---|
-| `20260908_square_two_basin_95_5_80_anchors` (new default ID) | 18 square starts locally previewed; one-command four-anchor submission prepared; no local submission | Qualify the raw chi=200 comparison before the remaining fourteen starts |
+| `20260910_square_two_basin_95_5_40_remainder` | 14 seeds/configs locally prepared; 75 Julia assertions and mock launcher test pass; not submitted | Proceed with user-authorized remainder using qualified noise handling; separate checkout and shared ledger |
+| `20260908_square_two_basin_95_5_80_anchors` | V=-0.4: both 80-step states synced/analyzed, unaccepted paired plateaus, 3.763125 node-hours; V=0 PENDING per user | Let original pending anchors finish; review synced outcomes |
 | `20260903_phase1_square_t014_v000_pairing_legacy_chi400_tight` | synced; 0/2 software-accepted; user accepts energetic comparison as adequate | Retain as the L=64 energy/basin reference; higher-chi checks remain future work |
 | `20260903_phase1_square_grid_smooth_pairing_chi200_loose` | five terminal states synced; 4 accepted, 1 diverging; compiled September 8 | Review Fourier grid and divergence at `(1.0,-0.4)` |
 | `20260903_phase1_cubic_unfrustrated_grid_smooth_pairing_chi200_loose` | user reports still running September 8; two local terminal files seen, not analyzed here | Finish eight-point cubic-unfrustrated fill |
@@ -134,7 +153,19 @@ documents linked from `docs/plans/ACTIVE.md`.
 
 ## Live Perlmutter and accounting boundary
 
-- Latest user report, 2026-09-08: queued runs were canceled (job IDs not
+- Latest supplied evidence, 2026-09-10: jobs 58093799 (stripe) and 58093800
+  (pairing) at V=-0.4 are COMPLETED in pasted sacct output, with elapsed
+  seconds 30799 and 23390. Their combined project charge is 3.763125 node-hours.
+  Their local histories confirm maximum_iterations after 80 evaluations each.
+  Jobs 58093802/58093803 at V=0 are PENDING in the user's status output.
+  The latest prose refers to pending `(1.0,0.0)` whereas those job labels are
+  `(1.4,0.0)`; clarification was requested because a separate `(1.0,0.0)`
+  submission would overlap the prepared remainder.
+  No automatic remainder or continuation submission is configured. The local
+  reconciliation ledger has no entries yet for these four jobs; analysis
+  does not modify accounting, and 2.236875 node-hours of the finished pair's
+  6-hour reserved ceiling are eligible for release through normal reconciliation.
+- Earlier user report, 2026-09-08: queued runs were canceled (job IDs not
   provided). The direct submission wrapper reconciles finalized reservations
   through the existing `sacct`-based accounting before submitting. Cancellation
   and released compute are not independently verified in this local snapshot.
@@ -157,15 +188,18 @@ documents linked from `docs/plans/ACTIVE.md`.
 
 ## Exact next action
 
-The user runs `git pull --ff-only` in
-`$CFS/m4863/MPS-MFT/ladder_mps_mft`, then
-`bash slurm/submit_square_two_basin.sh`. This prepares four anchors at
-`(1.4,0)` and `(1.4,-0.4)`, reconciles terminal reservations, and submits through
-the existing guarded launcher and shared live ledgers. The reference input is
-included in Git. Full contract: `docs/reports/two_basin_raw_20260908/README.md`.
-First-segment ceilings are 12
-fractional node-hours for those four and 42 for the later fourteen, subject
-to the live 400-hour cap. Do not infer current remaining budget locally.
+The user authorizes the fourteen remaining starts now. Publish the locally
+validated revision, then use the separate-checkout user-run commands in
+`docs/reports/two_basin_remainder_20260910/README.md`. The source checkout used
+by pending anchors must remain at its submitted revision. Confirm the pending
+coordinate if it is a separate `(1.0,0.0)` submission; the prepared remainder
+excludes only the known `(1.4,-0.4)` and `(1.4,0.0)` anchor pairs.
+No new jobs, live checks, or reservations have been performed locally. The
+14 starts allow at most 560 evaluations and reserve at most 42 fractional
+node-hours under the unchanged 12-hour segment ceiling and live 400-hour cap.
+Actual runtime can be lower. Retain incomplete outcomes at the 40-step limit
+for analysis; no automatic extensions. Let the existing anchors finish and
+analyze their synchronized results under their original provenance.
 
 The four finite-size seeds remain ready for review; their configs keep tight
 comparison controls at chi=200, use an identity gate of 1e-8 t/site, and hold

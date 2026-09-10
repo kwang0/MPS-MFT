@@ -47,7 +47,15 @@ For the current experiment under review, see the
 [September 6 finite-size seed snapshot](reports/finite_size_seeds_20260906/README.md).
 It contains four chi=200 L=96/128 pairing/stripe seeds with fixed L=64 coupling.
 
-For the newest campaign results, see the
+For the newest two-basin result, see the
+[September 10 V=-0.4 anchor analysis](reports/two_basin_vm04_20260910/README.md).
+Both 80-step chi=200 lineages reach a common paired plateau; the report explains
+the weak-channel acceptance failures and records 3.763125 actual node-hours.
+The [September 10 remainder contract](reports/two_basin_remainder_20260910/README.md)
+prepares the other fourteen starts with a 40-step cap, qualified channel noise
+handling, and a separate-checkout submission that preserves pending anchors.
+
+For the square coverage results, see the
 [September 8 square chi=200 grid](reports/square_grid_20260908/README.md).
 It provides a single-file 3 x 3 data bundle, legacy-style Fourier grids,
 explicit selection provenance, and analysis of the flagged diverging point.

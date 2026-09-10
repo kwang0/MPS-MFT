@@ -2515,3 +2515,190 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   explicit authorization to export the reference HDF5, configuration, and
   project documentation to that destination. The remote remains unpublished
   by this task pending that approval; no alternative transfer was attempted.
+
+## 2026-09-08: user reports anchor submission; remainder waits for analysis
+
+- The user reports submitting the four-anchor campaign. Job IDs, exact run ID,
+  scheduler state, results, and reconciled accounting were not supplied; record
+  this as user-reported submission. The wrapper's default run ID is
+  `20260908_square_two_basin_95_5_80_anchors`.
+- Confirmed from `slurm/submit_square_two_basin.sh` that the default scope is
+  only four anchors: both 95%/5% seed families at `(t0,V)=(1.4,0)` and
+  `(1.4,-0.4)`. No dependency or automatic continuation launches the remaining
+  fourteen. Those require a separate explicit `remainder` submission.
+- Next scientific step: inspect full spatial/channel histories for competing
+  order growth and convergence, corrected canonical energy histories, and
+  sufficiency of the 80-evaluation limit before deciding on the remainder.
+  Updated the project snapshot and active plan. Documentation and launcher
+  inspection only; no solver change, tests, remote connection, or scheduler
+  operation was performed.
+
+## 2026-09-10: V=-0.4 anchors reach a common pairing basin; acceptance is noise-limited
+
+- User supplied status for the four-anchor campaign and synchronized the two
+  V=-0.4 terminal histories. Jobs 58093799 (stripe) and 58093800 (pairing) are
+  COMPLETED; each HDF5/log contains all 80 evaluations, with `maximum_iterations`
+  and accepted=false. V=0 jobs 58093802/58093803 remain PENDING in that output.
+- Analyzed the full applied/measured spatial histories, stored channel gates,
+  physical anomalous correlators, corrected canonical energies, and timings.
+  Both lineages reach the same d-wave-like paired basin at L=64, chi=200.
+  Bulk leg-odd spin field RMS drops from 1.9902e-2/1.0475e-3 in the seeds to
+  3.8782e-8/2.4933e-8 at iteration 80 (stripe/pairing). It reaches below 1e-7
+  at iterations 26/20. Final physical leg/rung pair amplitudes have opposite
+  signs and overlap, as do the charge profiles. The full pair matrices differ
+  by 5.8521e-5 relative L2; terminal corrected energies differ by only
+  7.4853e-9 t/site. This is trajectory agreement, not accepted-energy ranking.
+- Final global field, slow-mode, density, inner-DMRG, pairing-channel, and
+  identity checks pass in both runs. Tiny spin/spin-exchange residual maxima
+  around 1e-7–4e-7 exceed the 1e-7 absolute floor. Uniform-charge changes below
+  1.62e-8 in every last-20 record sometimes acquire infinite extrapolation
+  factors: the new channel gate uses the nonzero background amplitude for its
+  floor and interprets same-sign scalar fluctuations as coherent growth.
+  At stripe iteration 80, residual 1.0581e-9 with ratio 3.37484 fails this way.
+  The pairing-seeded run also marginally misses charge modulation and the
+  1e-8 t/site energy window (observed 1.1346e-8). No thresholds were changed.
+- The user supplied allocation-level sacct data after a focused request:
+  elapsed seconds 30799 and 23390, both COMPLETED. At one quarter node these
+  cost 2.138819444 and 1.624305556 node-hours, **3.763125 total**. Saved MF time
+  alone totals 3.714447030 node-hours. The finished pair reserved 6, leaving
+  2.236875 eligible for release through normal reconciliation; all four anchors
+  reserved 12. The synced reconciliation ledger has no rows for these jobs.
+  The pasted 61.883819445 active project total includes other reservations and
+  is not the cost of this point. No live or local accounting ledger was edited.
+- Added `scripts/analyze_two_basin_vm04.py` and
+  `docs/reports/two_basin_vm04_20260910/`: narrative, PNG/PDF figure, analysis
+  JSON, 160 energy/profile records, 960 channel records, and the user-supplied
+  sacct receipt. Updated the current state, active plan, and documentation map.
+  Recommendation: do not extend this pair unchanged solely for acceptance;
+  qualify noise-aware channel gates against V=0 before the remaining fourteen.
+- Validation: compact-state/config/inherited-seed hashes agree with synced
+  manifests and state provenance; all four comparison fingerprints match.
+  Initial applied fields equal the 95%/5% seeds; the next 79 inputs exactly
+  equal previous raw outputs. Recomputed channel absolute/relative residuals
+  from full vectors; checked log/HDF5 record counts, finite iteration energies,
+  output CSV counts, and sacct timestamp differences/exact decimal charge.
+  Visually inspected the scientific figure. Initial analysis assertion assumed
+  all update labels were `unmixed_probe`; corrected it to one `initial` followed
+  by 79 `unmixed_probe` labels. This was an analysis-harness correction.
+- Compact terminal SHA-256: stripe
+  `641277827094e384dbd6bede51334d20c4e00dd86d83d430a7ec8614af5e5f79`;
+  pairing `026b622a94291f03684a287c39f8ec7306dda36e160a72da138ef2158d91e90a`.
+  Full-source hashes are retained in `analysis.json` and stateless manifests.
+  Reproduce locally with
+  `python -B -X utf8 ladder_mps_mft/scripts/analyze_two_basin_vm04.py`.
+  No DMRG, solver changes, source-state relabeling, remote connection, scheduler
+  action, submission, or continuation occurred. Unrelated manuscript edits
+  were preserved.
+
+## 2026-09-10 — Show the beginning of the two-basin energy histories
+
+- At the user's request, extended `scripts/analyze_two_basin_vm04.py` to save
+  `docs/reports/two_basin_vm04_20260910/energy_convergence.png` and `.pdf`:
+  all 80 evaluations, a first-15-evaluation close-up on the same absolute
+  energy scale, and the existing late-time scale expanded to 1e-9 t/site.
+  Added the figure and early-transient description to the report. Iteration 1
+  is the first MF evaluation, not a separate seed-energy measurement.
+- Reused the same immutable states for jobs 58093799/58093800 and the hashes
+  recorded in the preceding analysis entry. The stripe-seeded energy reaches
+  the common plateau in roughly ten evaluations; the pairing-seeded energy
+  is already close after two. Energy settling alone is not field convergence.
+- Local validation: ran
+  `python -B -X utf8 ladder_mps_mft/scripts/analyze_two_basin_vm04.py` (about
+  four seconds), preserving the 160 finite stored energy records, and visually
+  inspected the new figure. No DMRG, acceptance changes, or remote actions.
+
+## 2026-09-10 — Authorize and prepare the 40-evaluation two-basin remainder
+
+- The user authorizes the other fourteen 95%/5% chi=200 starts now, without
+  waiting for the remaining anchors, and asks for a 40-evaluation cap and
+  minimally relaxed convergence checks that still reject growing order.
+  The existing job-specific output identifies the pending anchors as
+  `(t0,V)=(1.4,0.0)`, jobs 58093802/58093803. The latest prose says `(1.0,0.0)`;
+  asked whether this is a separate submission, since that coordinate is in
+  the remainder. Prepared the existing seven-point/fourteen-branch scope;
+  no cancellation, replacement, or live submission was performed.
+- Added the separate `phase1_gpu_square_two_basin_chi200_raw40.toml` base:
+  maximum/probe 40, minimum 30, stable window 10, channel noise floor 5e-7 t,
+  energy range 2e-8 t/site. Global absolute/relative field gates remain
+  1e-7/1e-4; density, inner DMRG, identity, eigenvalue, and period-two
+  recurrence controls are unchanged. The original 80-step base is retained.
+- Added opt-in `channel_noise_floor` (zero preserves historical channel
+  behavior). Two-step channel extrapolation now requires both residuals
+  above the enabled floor, so large uniform-charge background does not
+  amplify tiny scalar jitter. Above-floor coherent growth still fails.
+  Added a componentwise full-profile span check across all applied/measured
+  fields in the stable window: max span <= floor OR L2 span / largest
+  profile norm <= relative tolerance. This rejects accumulated sub-floor
+  drift and intermediate excursions. Saved window diagnostics accompany
+  per-step channel diagnostics. Distinct period-two phases retain their
+  existing orbit checks. The setting enters numerical fingerprints.
+- Replayed the actual Julia field/channel/energy/density/inner-sweep gates
+  on the two synced 80-step anchors and the six older V=0 raw prefixes.
+  Available history gates first pass at iteration 35 for the stripe seed
+  and 30 for pairing. All six older V=0 raw prefixes fail; the three with
+  long coherent SDW growth fail spin gates independently of the minimum.
+  Per-iteration identity/eigenvalue errors are not saved, so the replay
+  cannot certify retrospective acceptance at 30/35. Both terminal identity
+  checks pass at 80. All eight source hashes checked before/after replay;
+  flags and states are unchanged. Evidence is in
+  `docs/reports/two_basin_remainder_20260910/` and reproduced by
+  `scripts/replay_two_basin_convergence.jl`.
+- Prepared all fourteen seeds/configs in
+  `output/seed_previews/20260910_square_two_basin40/final/remainder/` using
+  `scripts/prepare_phase1_two_basin_grid.jl` with the new base and the existing
+  reference bundle. Counts are two starts at each of the seven non-anchor
+  coordinates; reference/derived-seed hashes, readback, target E_p, nonzero
+  competing channels, and within-point fingerprints pass. Contract metadata
+  now derives iteration values from the base instead of hard-coding 80/50.
+- Added `slurm/submit_square_two_basin_remainder.sh`. Pending anchors load
+  their source from the original checkout when they start; the handoff uses
+  a separate Git worktree. The new wrapper reads original anchor `run.env`
+  to share exact account, run/scratch roots, and budget/reconciliation ledgers,
+  then selects only the new source/config. It refuses the original source
+  directory, prepares only `remainder`, reconciles, and submits through the
+  existing cap/duplicate guards. It does not modify the pending jobs.
+- Budget: at most 560 MF evaluations for the fourteen new starts. The existing
+  12-hour one-GPU ceiling still reserves at most 42 fractional node-hours;
+  actual cost may be lower. Solver deadline remains 11.5 h. No automatic
+  continuations or new ledger reservations were created locally.
+- Validation: focused `test/test_raw_basin.jl` passed 52 existing + 23 new
+  assertions (about 31 seconds of reported test execution, plus Julia load).
+  Includes small spin jitter, uniform charge jitter with a growth ratio >1,
+  accumulated weak drift, resolved spin growth, minimum/window gates,
+  energy excursions, failed DMRG, physical period two, and saved diagnostics.
+  `python -B -m unittest discover -s ladder_mps_mft/test -p
+  test_two_basin_remainder_launcher.py -v` passed its local fake-launcher
+  test, confirming exact scope/order, shared accounting, source separation,
+  and refusal in the original checkout. Bash syntax and `git diff --check`
+  passed. No DMRG/full-suite rerun or remote operation was needed.
+- Initial Julia cache writes were denied by the local sandbox; using
+  `--compiled-modules=existing` completed validation without escalation.
+  Corrected two replay-script header/entry-point parsing mistakes before
+  the successful replay. Refreshed final fingerprints and preparation after
+  a source-comment clarification; unchanged solver tests were not repeated.
+  The dated contract records source/config hashes and handoff commands.
+  Updated current state, method notes, and active plan; unrelated manuscript
+  and root `.claude/` changes are preserved.
+- Publication remains pending: an earlier push to `origin`
+  (`https://github.com/kwang0/MPS-MFT.git`) was rejected by automatic approval
+  review for lack of explicit export authorization. No new push was attempted;
+  the validated changes are concrete and ready for the user's publication
+  decision. Local config SHA-256 is
+  `71a00fa3b69d84a22f7676b5b4b16c604516f27f99cdf6a3fe04bab4e7edc35d`;
+  local CPU implementation SHA-256 is
+  `a29d3f9f0ed848454f66d02ff787e157127273171191173bb8e33893edcf2550`.
+  GPU/native-path fingerprints are generated by preparation on Perlmutter.
+
+## 2026-09-10 — User authorizes publication and requests submission commands
+
+- The user explicitly authorizes pushing the validated revision to the
+  configured `kwang0/MPS-MFT` origin. This resolves the earlier export-approval
+  block. Commit scope includes the two-basin analysis, corrected convergence
+  controls, focused tests, fourteen-start launcher, and project documentation;
+  unrelated manuscript and root `.claude/` changes remain outside the commit.
+- Handoff uses `git fetch` and a separate detached worktree on Perlmutter so
+  the original pending anchors continue to load their submitted source.
+  The user performs the fetch/worktree creation and all scheduler actions.
+  The launcher retains shared run/scratch/accounting roots and submits only
+  `20260910_square_two_basin_95_5_40_remainder`. No new solver change or
+  repeated DMRG/test run is needed for publication.

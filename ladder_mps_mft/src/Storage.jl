@@ -194,11 +194,19 @@ function write_checkpoint(
                 channels = create_group(history_group, "channels")
                 diagnostics = [channel_diagnostics(@view(records[1:index]), settings.convergence)
                                for index in eachindex(records)]
+                windows = settings.convergence.channel_noise_floor > 0 ?
+                    [channel_window_diagnostics(@view(records[1:index]), settings.convergence)
+                     for index in eachindex(records)] : nothing
                 for channel in eachindex(first(diagnostics))
                     group = create_group(channels, String(first(diagnostics)[channel].name))
                     for key in (:absolute, :relative, :cosine, :contraction, :factor,
                                 :passes, :applied_rms, :measured_rms)
                         group[String(key)] = [getproperty(rows[channel], key) for rows in diagnostics]
+                    end
+                    if windows !== nothing
+                        for key in (:absolute, :relative, :passes)
+                            group["window_$(key)"] = [getproperty(rows[channel], key) for rows in windows]
+                        end
                     end
                 end
                 history_group["dmrg_sweep_gate_pass"] = [

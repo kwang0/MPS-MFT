@@ -1,0 +1,384 @@
+{
+  "point": {
+    "L": 64,
+    "t0": 1.4,
+    "V": -0.4,
+    "chi": 200
+  },
+  "runs": [
+    {
+      "family": "stripe",
+      "job_id": "58093799",
+      "source": "output\\phase1_gpu\\20260908_square_two_basin_95_5_80_anchors\\results\\square__stripe_weak_other_t014_vm04_chi200_raw\\square__stripe_weak_other__square_two_reference_correlations_eps005_raw__none__stripe_eps005\\20260909T231851_497480_e93552440b67\\state.h5",
+      "source_sha256": "641277827094e384dbd6bede51334d20c4e00dd86d83d430a7ec8614af5e5f79",
+      "full_source_sha256": "ae97780dee31476e45346b4c8c15091292b99dd0656b1f00e240ea992c1e2d30",
+      "config_sha256": "311fbdb0aabf255bc289a95fe7038b3022a14c47157f70168b25ae55420eaf4c",
+      "fingerprints": {
+        "model_fingerprint": "e93552440b67e1070d005f2b5ed7307fe8a0cc97b707b76916dce39aa0bc0482",
+        "numerical_fingerprint": "ccf02ca2cd9bc4bdb7edc576e123d9f3c99f2cdad2b72b37e6871071730441ef",
+        "implementation_sha256": "269a5ceb1f56e2b85b4b7aefe2903901c16d50ae56ecb6f189ebf2605653c377",
+        "ep_source_sha256": "2209bd2ca3c1ad02c0e542d1a9d63ecf90fdfa49120ad9cc3af599a5b4bc1f0e"
+      },
+      "iterations": 80,
+      "status": "maximum_iterations",
+      "accepted": false,
+      "gates_last5": {
+        "minimum_iterations": true,
+        "global_field_window": true,
+        "global_slow_mode": true,
+        "density_window": true,
+        "inner_dmrg_window": true,
+        "corrected_energy_window": true,
+        "identity": true,
+        "effective_energy": true,
+        "charge_modulation": true,
+        "charge_uniform": false,
+        "exchange_charge": true,
+        "exchange_spin": false,
+        "pairing": true,
+        "spin": false
+      },
+      "corrected_energy_per_site": -1.1674048007866273,
+      "corrected_energy_span_last5": 5.149887183364399e-10,
+      "corrected_energy_span_last20": 6.963305931861896e-09,
+      "corrected_energy_span_last40": 7.352787045888931e-09,
+      "global_relative_residual": 1.0370269563610053e-05,
+      "density_error": 7.88167670695561e-06,
+      "identity_error_per_site": 4.150879640008043e-11,
+      "last_dmrg_sweep_delta_total": 6.128288987383712e-09,
+      "last_dmrg_sweep_discarded_weight": 5.010027027795704e-06,
+      "solver_seconds": 30385.77422952652,
+      "solver_node_hours": 2.110123210383786,
+      "reserved_node_hours": 3.0,
+      "pairing_field_rms_final": 0.0028236341197531716,
+      "spin_field_rms_initial": 0.019902103755630274,
+      "spin_field_rms_first": 0.012386586329476165,
+      "spin_field_rms_final": 3.878236664583238e-08,
+      "spin_field_rms_last20_range": [
+        2.214224229535715e-08,
+        5.128294999842272e-08
+      ],
+      "stripe_template_projection_last20_range": [
+        -4.158431722764957e-07,
+        3.640165968989042e-08
+      ],
+      "first_spin_rms_below_1e7": 26,
+      "final_rung_pair_mean": -0.05324169402451914,
+      "final_leg_pair_mean": 0.03521702235085527,
+      "channel_final": {
+        "charge_modulation": {
+          "absolute": 1.1624730593493698e-08,
+          "applied_rms": 0.0004750184301713096,
+          "contraction": 0.6175132449056246,
+          "cosine": 0.6752332065895924,
+          "factor": 1.0,
+          "measured_rms": 0.00047501751112070446,
+          "passes": 1,
+          "relative": 5.429664321388277e-06
+        },
+        "charge_uniform": {
+          "absolute": 1.0581134466877695e-09,
+          "applied_rms": 0.0025040767480360698,
+          "contraction": 3.3748411625599073,
+          "cosine": 1.0,
+          "factor": "inf",
+          "measured_rms": 0.0025040778061495165,
+          "passes": 0,
+          "relative": 4.22556137868102e-07
+        },
+        "exchange_charge": {
+          "absolute": 6.494453291122637e-09,
+          "applied_rms": 0.0010422680740441144,
+          "contraction": 0.4818410331036774,
+          "cosine": 0.5228477453496188,
+          "factor": 1.0,
+          "measured_rms": 0.0010422681336546584,
+          "passes": 1,
+          "relative": 2.161433759923379e-07
+        },
+        "exchange_spin": {
+          "absolute": 1.7262992985502077e-07,
+          "applied_rms": 6.0096619949756184e-09,
+          "contraction": -0.19419374999150085,
+          "cosine": -0.2244002732364475,
+          "factor": 1.0,
+          "measured_rms": 9.202690605832802e-09,
+          "passes": 0,
+          "relative": 0.8582351452561496
+        },
+        "pairing": {
+          "absolute": 1.9445633564442786e-07,
+          "applied_rms": 0.0003559033627244002,
+          "contraction": -0.18712467900650087,
+          "cosine": -0.1777767209143198,
+          "factor": 1.0,
+          "measured_rms": 0.0003559033472379814,
+          "passes": 1,
+          "relative": 2.33375735110281e-05
+        },
+        "spin": {
+          "absolute": 2.2783912377978902e-07,
+          "applied_rms": 4.749241172927065e-08,
+          "contraction": -0.23833214705280428,
+          "cosine": -0.26197395131057083,
+          "factor": 1.0,
+          "measured_rms": 6.563721198857158e-08,
+          "passes": 0,
+          "relative": 0.9767244263895039
+        }
+      },
+      "channel_last20": {
+        "charge_modulation": {
+          "max_absolute": 1.3010663262556788e-07,
+          "max_relative": 0.00011345353347142559,
+          "median_cosine": -0.6814135975661639,
+          "passes": 18
+        },
+        "charge_uniform": {
+          "max_absolute": 1.6179924938481555e-08,
+          "max_relative": 6.4614276461727975e-06,
+          "median_cosine": -1.0,
+          "passes": 16
+        },
+        "exchange_charge": {
+          "max_absolute": 2.2652430825033376e-07,
+          "max_relative": 5.5861324768920776e-06,
+          "median_cosine": -0.640005692125813,
+          "passes": 20
+        },
+        "exchange_spin": {
+          "max_absolute": 3.236757896286841e-07,
+          "max_relative": 1.2437065097702562,
+          "median_cosine": -0.3438981744313563,
+          "passes": 1
+        },
+        "pairing": {
+          "max_absolute": 3.007916088453361e-07,
+          "max_relative": 2.967499648429491e-05,
+          "median_cosine": -0.3207633520783887,
+          "passes": 20
+        },
+        "spin": {
+          "max_absolute": 2.949675860790431e-07,
+          "max_relative": 1.48379340162673,
+          "median_cosine": -0.3537916932248081,
+          "passes": 0
+        }
+      },
+      "allocation_elapsed_seconds": 30799,
+      "allocation_node_hours": 2.1388194444444446
+    },
+    {
+      "family": "pairing",
+      "job_id": "58093800",
+      "source": "output\\phase1_gpu\\20260908_square_two_basin_95_5_80_anchors\\results\\square__pairing_weak_other_t014_vm04_chi200_raw\\square__pairing_weak_other__square_two_reference_correlations_eps005_raw__none__pairing_eps005\\20260910T084630_1156171_e93552440b67\\state.h5",
+      "source_sha256": "026b622a94291f03684a287c39f8ec7306dda36e160a72da138ef2158d91e90a",
+      "full_source_sha256": "57038bae236ae83115ca95731af069bab8380c4fdba56721aa455420936bfb5e",
+      "config_sha256": "51f8b04b206598da83e09edf1d919dcd74bdb4147545d5107794fe4f7f97face",
+      "fingerprints": {
+        "model_fingerprint": "e93552440b67e1070d005f2b5ed7307fe8a0cc97b707b76916dce39aa0bc0482",
+        "numerical_fingerprint": "ccf02ca2cd9bc4bdb7edc576e123d9f3c99f2cdad2b72b37e6871071730441ef",
+        "implementation_sha256": "269a5ceb1f56e2b85b4b7aefe2903901c16d50ae56ecb6f189ebf2605653c377",
+        "ep_source_sha256": "2209bd2ca3c1ad02c0e542d1a9d63ecf90fdfa49120ad9cc3af599a5b4bc1f0e"
+      },
+      "iterations": 80,
+      "status": "maximum_iterations",
+      "accepted": false,
+      "gates_last5": {
+        "minimum_iterations": true,
+        "global_field_window": true,
+        "global_slow_mode": true,
+        "density_window": true,
+        "inner_dmrg_window": true,
+        "corrected_energy_window": false,
+        "identity": true,
+        "effective_energy": true,
+        "charge_modulation": false,
+        "charge_uniform": false,
+        "exchange_charge": true,
+        "exchange_spin": false,
+        "pairing": true,
+        "spin": false
+      },
+      "corrected_energy_per_site": -1.1674048082719386,
+      "corrected_energy_span_last5": 1.1345931305584145e-08,
+      "corrected_energy_span_last20": 1.1345931305584145e-08,
+      "corrected_energy_span_last40": 1.1544161848675571e-08,
+      "global_relative_residual": 1.6364623636551913e-05,
+      "density_error": 5.382784398322293e-06,
+      "identity_error_per_site": 4.147593379855152e-11,
+      "last_dmrg_sweep_delta_total": 7.128591050786781e-09,
+      "last_dmrg_sweep_discarded_weight": 5.009758979017998e-06,
+      "solver_seconds": 23102.26300883293,
+      "solver_node_hours": 1.6043238200578425,
+      "reserved_node_hours": 3.0,
+      "pairing_field_rms_final": 0.002823614646441854,
+      "spin_field_rms_initial": 0.0010474732942458902,
+      "spin_field_rms_first": 0.0006444822966036744,
+      "spin_field_rms_final": 2.49330481343924e-08,
+      "spin_field_rms_last20_range": [
+        1.953839858356689e-08,
+        4.329534089879856e-08
+      ],
+      "stripe_template_projection_last20_range": [
+        -7.5723768575765795e-06,
+        9.114586981366382e-07
+      ],
+      "first_spin_rms_below_1e7": 20,
+      "final_rung_pair_mean": -0.05324131804791833,
+      "final_leg_pair_mean": 0.03521677655097109,
+      "channel_final": {
+        "charge_modulation": {
+          "absolute": 1.1413553839155141e-07,
+          "applied_rms": 0.00047500212760367435,
+          "contraction": 6.85665445217044,
+          "cosine": 0.7928065707696051,
+          "factor": 1.0,
+          "measured_rms": 0.00047501725909747063,
+          "passes": 0,
+          "relative": 0.00011896432472016347
+        },
+        "charge_uniform": {
+          "absolute": 1.2572934361600868e-08,
+          "applied_rms": 0.0025039651271069035,
+          "contraction": 7.7249656869993455,
+          "cosine": 1.0,
+          "factor": "inf",
+          "measured_rms": 0.002503977700041265,
+          "passes": 0,
+          "relative": 5.021184638103473e-06
+        },
+        "exchange_charge": {
+          "absolute": 3.101802386138919e-07,
+          "applied_rms": 0.0010422611944659206,
+          "contraction": 6.9833934765610906,
+          "cosine": 0.5210810262005894,
+          "factor": 1.0,
+          "measured_rms": 0.0010422621277641749,
+          "passes": 1,
+          "relative": 7.644003677227317e-06
+        },
+        "exchange_spin": {
+          "absolute": 3.157601119148365e-07,
+          "applied_rms": 8.868533244679256e-09,
+          "contraction": -0.7661016599215026,
+          "cosine": -0.8924654428301333,
+          "factor": 1.0,
+          "measured_rms": 6.6573378530640265e-09,
+          "passes": 0,
+          "relative": 1.1491867743186661
+        },
+        "pairing": {
+          "absolute": 2.8072973545587535e-07,
+          "applied_rms": 0.0003559047993213524,
+          "contraction": -0.7943666939086986,
+          "cosine": -0.6822570969020468,
+          "factor": 1.0,
+          "measured_rms": 0.00035590036488370634,
+          "passes": 1,
+          "relative": 3.4454632381984376e-05
+        },
+        "spin": {
+          "absolute": 2.9392911178268734e-07,
+          "applied_rms": 5.940133433531009e-08,
+          "contraction": -0.7531588347697972,
+          "cosine": -0.9228299844629864,
+          "factor": 1.0,
+          "measured_rms": 5.345325376031365e-08,
+          "passes": 0,
+          "relative": 1.3833637426179517
+        }
+      },
+      "channel_last20": {
+        "charge_modulation": {
+          "max_absolute": 1.29911499630736e-07,
+          "max_relative": 0.00011896432472016347,
+          "median_cosine": -0.8148889145089131,
+          "passes": 15
+        },
+        "charge_uniform": {
+          "max_absolute": 1.6128293304183694e-08,
+          "max_relative": 6.441064831425252e-06,
+          "median_cosine": -1.0,
+          "passes": 13
+        },
+        "exchange_charge": {
+          "max_absolute": 3.101802386138919e-07,
+          "max_relative": 7.644003677227317e-06,
+          "median_cosine": -0.7845541380420269,
+          "passes": 20
+        },
+        "exchange_spin": {
+          "max_absolute": 3.765853519709359e-07,
+          "max_relative": 1.4275277344168413,
+          "median_cosine": -0.5057407329657324,
+          "passes": 1
+        },
+        "pairing": {
+          "max_absolute": 3.7583557433631395e-07,
+          "max_relative": 3.4454632381984376e-05,
+          "median_cosine": -0.616333709273006,
+          "passes": 20
+        },
+        "spin": {
+          "max_absolute": 3.701066978274107e-07,
+          "max_relative": 1.575053917669915,
+          "median_cosine": -0.5146693098259847,
+          "passes": 2
+        }
+      },
+      "allocation_elapsed_seconds": 23390,
+      "allocation_node_hours": 1.6243055555555554
+    }
+  ],
+  "terminal_agreement": {
+    "density_down": {
+      "max_absolute_difference": 4.316161489659187e-06,
+      "relative_l2_difference": 3.619376982987714e-06
+    },
+    "density_up": {
+      "max_absolute_difference": 3.8766145962210175e-06,
+      "relative_l2_difference": 3.093376458768857e-06
+    },
+    "exchange_down": {
+      "max_absolute_difference": 4.316161490658388e-06,
+      "relative_l2_difference": 6.518644313716938e-06
+    },
+    "exchange_up": {
+      "max_absolute_difference": 3.969365585459626e-06,
+      "relative_l2_difference": 6.0496476214088835e-06
+    },
+    "pair": {
+      "max_absolute_difference": 4.081961558033789e-06,
+      "relative_l2_difference": 5.852062267058625e-05
+    },
+    "corrected_energy_per_site_absolute_difference": 7.485311259713967e-09
+  },
+  "total_solver_seconds": 53488.03723835945,
+  "total_solver_node_hours": 3.7144470304416286,
+  "timing_basis": "Solver: sum of saved MF wall_seconds / 14400, excluding allocation overhead. Allocation: user-supplied sacct ElapsedRaw / 14400, one GPU = quarter node.",
+  "allocations": [
+    {
+      "JobIDRaw": "58093799",
+      "State": "COMPLETED",
+      "ElapsedRaw": "30799",
+      "Start": "2026-09-09T16:14:32",
+      "End": "2026-09-10T00:47:51",
+      "elapsed_seconds": 30799,
+      "node_hours": 2.1388194444444446
+    },
+    {
+      "JobIDRaw": "58093800",
+      "State": "COMPLETED",
+      "ElapsedRaw": "23390",
+      "Start": "2026-09-10T01:44:38",
+      "End": "2026-09-10T08:14:28",
+      "elapsed_seconds": 23390,
+      "node_hours": 1.6243055555555554
+    }
+  ],
+  "total_allocation_node_hours": 3.763125,
+  "allocation_source": "sacct_allocations_supplied.txt; output pasted by user on 2026-09-10; local accounting ledger is not modified",
+  "reservation_node_hours_completed_pair": 6,
+  "reservation_node_hours_all_four_anchors": 12
+}

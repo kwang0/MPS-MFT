@@ -63,6 +63,7 @@ Base.@kwdef struct ConvergenceSettings
     stable_iterations::Int = 2
     minimum_iterations::Int = 0
     channel_residuals::Bool = false
+    channel_noise_floor::Float64 = 0.0
     dmrg_sweep_energy_tol::Float64 = Inf
     max_period::Int = 8
     period_repeats::Int = 3

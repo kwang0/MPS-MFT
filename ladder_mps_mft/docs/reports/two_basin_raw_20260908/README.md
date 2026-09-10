@@ -1,5 +1,10 @@
 # Square two-basin comparison: chi=200, raw MF updates
 
+September 10: the existing anchors retain this 80-evaluation contract. The user
+authorized the remaining fourteen with revised noise handling and a 40-step
+cap; use the [new remainder contract](../two_basin_remainder_20260910/README.md)
+and its separate-checkout launcher for that stage.
+
 The September 8 user-approved plan is prepared locally for all nine square
 coordinates: t0=1.0,1.2,1.4 and V=-0.4,-0.2,0.0, with two seed families each.
 No new DMRG results or Perlmutter submissions are implied by this preparation.

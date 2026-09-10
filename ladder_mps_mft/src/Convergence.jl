@@ -119,26 +119,58 @@ function channel_diagnostics(records::AbstractVector{IterationRecord}, settings:
             if norm(residual) > eps(Float64) && norm(old) > eps(Float64)
                 cosine = dot(residual, old) / (norm(residual) * norm(old))
                 contraction = dot(residual, old) / sum(abs2, old)
-                if cosine >= settings.slow_mode_cosine_min && amplitude > settings.field_abs_tol
+                resolved = settings.channel_noise_floor > 0 ?
+                    min(absolute, maximum(abs, old)) > settings.channel_noise_floor :
+                    amplitude > settings.field_abs_tol
+                if cosine >= settings.slow_mode_cosine_min && resolved
                     factor = contraction >= 1 ? Inf : max(1.0, 1 / (1 - contraction))
                 end
             end
         end
-        # An entire channel below the absolute floor cannot supply a reliable
-        # relative growth estimate. Above that floor, extrapolate slow drift.
-        passes = amplitude <= settings.field_abs_tol ||
-            absolute * factor <= settings.field_abs_tol || relative * factor <= settings.field_rel_tol
+        # Opt-in noise handling resolves residuals, not the background field.
+        # The separate window gate bounds accumulated sub-floor steps.
+        passes = if settings.channel_noise_floor > 0
+            absolute <= settings.channel_noise_floor ||
+                absolute * factor <= settings.field_abs_tol || relative * factor <= settings.field_rel_tol
+        else
+            amplitude <= settings.field_abs_tol ||
+                absolute * factor <= settings.field_abs_tol || relative * factor <= settings.field_rel_tol
+        end
         (; name, absolute, relative, cosine, contraction, factor, passes,
            applied_rms=sqrt(mean(abs2, x)), measured_rms=sqrt(mean(abs2, y)))
+    end
+end
+
+"""Bound accumulated full-profile motion, including steps below the noise floor."""
+function channel_window_diagnostics(records::AbstractVector{IterationRecord}, settings::ConvergenceSettings)
+    recent = @view records[max(1, end - settings.stable_iterations + 1):end]
+    profiles = [field_channels(getproperty(record, source))
+                for record in recent for source in (:applied, :measured)]
+    return map(keys(first(profiles))) do name
+        vectors = [getproperty(profile, name) for profile in profiles]
+        low, high = copy(first(vectors)), copy(first(vectors))
+        scale = 0.0
+        for vector in vectors
+            low .= min.(low, vector)
+            high .= max.(high, vector)
+            scale = max(scale, norm(vector))
+        end
+        span = high .- low
+        absolute = maximum(abs, span)
+        relative = norm(span) / max(scale, eps(Float64))
+        passes = absolute <= settings.channel_noise_floor || relative <= settings.field_rel_tol
+        (; name, absolute, relative, passes)
     end
 end
 
 function _channel_window_pass(records, settings)
     settings.channel_residuals || return true
     first_index = max(1, length(records) - settings.stable_iterations + 1)
-    return all(first_index:length(records)) do index
+    steps_pass = all(first_index:length(records)) do index
         all(row -> row.passes, channel_diagnostics(@view(records[1:index]), settings))
     end
+    return steps_pass && (settings.channel_noise_floor == 0 ||
+        all(row -> row.passes, channel_window_diagnostics(records, settings)))
 end
 
 function _dmrg_sweep_pass(record, settings)

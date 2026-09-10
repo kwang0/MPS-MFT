@@ -143,4 +143,72 @@ end
         @test only(compare_two_basin_grid(directory, output)).status == "energy_unresolved"
     end
 end
+
+@testset "noise-aware raw basin gates" begin
+    base = load_settings(joinpath(@__DIR__, "../configs/phase1_gpu_square_two_basin_chi200_raw40.toml"))
+    settings = base.convergence
+    @test validate_raw_basin_contract(base) === base
+    @test base.run.max_iterations == settings.probe_iterations == 40
+    @test settings.minimum_iterations == 30 && settings.stable_iterations == 10
+    @test settings.field_abs_tol == 1e-7 && settings.field_rel_tol == 1e-4
+    @test settings.channel_noise_floor == 5e-7 && settings.variational_energy_tol == 2e-8
+    @test ConvergenceSettings().channel_noise_floor == 0
+    stable = [record(i) for i in 1:40]
+    @test !assess_convergence(stable[1:29], settings, 1.).accepted
+    @test assess_convergence(stable[1:30], settings, 1.).accepted
+
+    # Realistic near-zero spin jitter and tiny uniform-charge drift should not
+    # be classified by a two-sample scalar extrapolation on a large background.
+    noisy = IterationRecord[]
+    function noisy_fields(i)
+        x = fields(1., isodd(i) ? 1.5e-7 : -1.5e-7)
+        x.mu_cdw .+= .0025 + 1e-9 * 1.05^(i-1)
+        x
+    end
+    for i in 1:40
+        push!(noisy, record(i, noisy_fields(i), noisy_fields(i+1)))
+    end
+    @test assess_convergence(noisy, settings, 1.).accepted
+    uniform = only(filter(r -> r.name == :charge_uniform, LadderMPSMFT.channel_diagnostics(noisy, settings)))
+    @test uniform.contraction > 1 && uniform.factor == 1 && uniform.passes
+
+    # Each step is below the floor, but ten steps accumulate a resolved weak
+    # spin change. A large pairing background must not hide this drift.
+    drift = [record(i, fields(1., 1e-5 + i*1e-7), fields(1., 1e-5 + (i+1)*1e-7)) for i in 1:40]
+    @test all(r -> r.passes, LadderMPSMFT.channel_diagnostics(drift, settings))
+    @test !LadderMPSMFT._channel_window_pass(drift, settings)
+    @test !assess_convergence(drift, settings, 1.).accepted
+    growing = [record(i, fields(1., 1e-5*1.1^i), fields(1., 1e-5*1.1^(i+1))) for i in 1:40]
+    @test !assess_convergence(growing, settings, 1.).accepted
+    @test !only(filter(r -> r.name == :spin, LadderMPSMFT.channel_diagnostics(growing, settings))).passes
+
+    # The ten-record window includes transient excursions, not only endpoints.
+    excursion = copy(stable); excursion[35] = record(35, fields(1., 0.), fields(1., 2e-6))
+    @test !assess_convergence(excursion, settings, 1.).accepted
+    energy = copy(stable); energy[35] = record(35; energy=4*1.5e-8)
+    @test assess_convergence(energy, settings, 1.).accepted
+    energy[35] = record(35; energy=4*2.1e-8)
+    @test !assess_convergence(energy, settings, 1.).accepted
+    bad_inner = copy(stable); bad_inner[35] = record(35; sweeps=[-1., -.999])
+    @test !assess_convergence(bad_inner, settings, 1.).accepted
+
+    # Preserve raw physical period-two acceptance under the revised settings.
+    orbit = [record(i, fields(1., isodd(i) ? .01 : -.01),
+                       fields(1., isodd(i) ? -.01 : .01)) for i in 1:30]
+    @test assess_convergence(orbit, settings, 1.).fundamental_period == 2
+    @test assess_convergence(orbit, settings, 1.).accepted
+
+    project = ProjectSettings(model=ModelSettings(L=2, U=2., density=1., r_range=1, ep=.2, ep_signed=-.2),
+        convergence=settings, runtime=RuntimeSettings(conserve_sz=false, conserve_nfparity=false))
+    psi = MPS(siteinds("Electron", 4), ["Up", "Dn", "Up", "Dn"])
+    mktempdir() do directory
+        path = joinpath(directory, "state.h5")
+        write_checkpoint(path; settings=project, psi, records=noisy,
+            diagnostic=assess_convergence(noisy, settings, 1.), provenance=Dict())
+        h5open(path, "r") do f
+            @test length(read(f, "history/channels/spin/window_absolute")) == 40
+            @test all(read(f, "history/channels/spin/window_passes"))
+        end
+    end
+end
 end

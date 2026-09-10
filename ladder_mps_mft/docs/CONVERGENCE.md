@@ -157,6 +157,30 @@ when enabled. See `docs/reports/two_basin_raw_20260908/README.md` for the full
 contract, source isolation, and user-run handoff. Earlier configs and immutable
 states are not retroactively relabeled.
 
+## Opt-in channel noise floor, September 10
+
+The remaining fourteen two-basin starts use `channel_noise_floor=5e-7`,
+`minimum_iterations=30`, `stable_iterations=10`, a 40-evaluation raw budget,
+and a `2e-8 t/site` corrected-energy span tolerance. The global field and inner
+DMRG thresholds remain unchanged. Zero noise floor preserves the earlier
+channel-gate behavior; the new setting is included in the numerical fingerprint.
+
+With a positive floor, channel slow-mode extrapolation requires both adjacent
+residual maxima to exceed that floor. Residuals below it can pass directly,
+irrespective of the background amplitude. A separate full-window test bounds
+the componentwise span across all recent applied/measured channel profiles:
+maximum span <= noise floor OR L2 span / maximum profile norm <= field_rel_tol.
+This prevents unresolved individual steps from accumulating a resolved drift
+while passing the local residual check. Window diagnostics are saved alongside
+the per-step channel diagnostics. This extra span check applies to period one;
+distinct phases of accepted raw orbits retain the existing recurrence checks.
+
+Saved-history replay passes the available gates at iterations 35/30 for the
+stripe/pairing V=-0.4 anchors and still rejects the older growing V=0 raw
+prefixes. Missing per-iteration consistency errors prevent retroactive
+acceptance certification. See the
+[remainder contract and qualification](reports/two_basin_remainder_20260910/README.md).
+
 ## Mixing after the probe
 
 Linear and Anderson mixing retain their adaptive damping. Damping is reduced

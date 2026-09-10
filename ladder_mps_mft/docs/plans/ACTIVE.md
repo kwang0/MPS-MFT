@@ -1,6 +1,6 @@
 # Active plan
 
-Last reviewed: 2026-09-08
+Last reviewed: 2026-09-10
 
 Current state: the chi=400 comparison is locally analyzed. Four L=96/128
 chi=200 seeds remain available for the now-deferred finite-size study.
@@ -16,16 +16,28 @@ cancellation in the loose V=0 six-seed results. The user approved representative
 d-wave/stripe seeds with reciprocal weak perturbations and rejected Anderson
 for new comparisons. All 18 square starts are locally prepared with 95%/5%
 correlation mixtures, chi=200, up to 80 raw evaluations, a minimum of 50,
-and tighter channel/energy/inner-DMRG gates. The latest user report says queued
-runs were canceled. Submission now uses the normal checkout after `git pull`
-and `bash slurm/submit_square_two_basin.sh`; no local submission was performed.
+and tighter channel/energy/inner-DMRG gates. The V=-0.4 pair now has two synced
+80-evaluation histories: both reach the same paired basin, with acceptance
+blocked chiefly by weak-channel fluctuations and a scalar-extrapolation issue.
+Their user-supplied allocation charge is 3.763125 node-hours. V=0 remains
+PENDING per September 10 job-specific status. The user now authorizes the
+fourteen remaining starts with a 40-step cap and revised noise handling.
+They are locally prepared, not submitted; they do not run automatically.
+The latest prose says pending `(1.0,0.0)`; clarify any separate submission
+because the known pending jobs are at `(1.4,0.0)`.
 
 ## Active scientific questions
 
-1. **Competing basins with raw updates (approved/prepared).** Review the
-   concrete seeds and handoff in `docs/reports/two_basin_raw_20260908/README.md`.
-   First run both families at `(1.4,0)` and `(1.4,-0.4)` under the new raw
-   contract, then the fourteen remaining starts after reviewing the anchors.
+1. **Competing basins with raw updates (V=-0.4 analyzed; V=0 pending).** Review
+   `docs/reports/two_basin_vm04_20260910/README.md`. Both V=-0.4 lineages reach
+   a paired plateau by roughly 20–30 evaluations; late unaccepted flags do not
+   indicate continuing stripe growth. The revised remainder controls require
+   30 evaluations and ten stable records, with a 5e-7 channel noise floor,
+   full-window channel-span guard, and 2e-8 t/site energy range. Global and
+   inner-DMRG gates remain unchanged. Saved-history gates first pass at
+   35/30 for the paired anchors, while old growing V=0 raw histories fail.
+   See `docs/reports/two_basin_remainder_20260910/README.md` for qualification,
+   limitations, and separate-checkout handoff preserving pending anchors.
    Keep all channels free and compare accepted matching corrected canonical
    energies, retaining unresolved gaps. State ancestry does not determine
    final order. Use the current checkout, versioned reference input, and
@@ -53,10 +65,13 @@ and `bash slurm/submit_square_two_basin.sh`; no local submission was performed.
 
 ## Completion sequence
 
-1. The user pulls the updated checkout and runs
-   `bash slurm/submit_square_two_basin.sh`. This prepares the four anchors,
-   reconciles finalized accounting (including cancellations), and submits
-   through the guarded launcher. Retain the finite-size seeds for future work.
+1. Publish the locally qualified 40-step revision and let the user submit the
+   fourteen remaining starts from a separate checkout with shared accounting.
+   Confirm any separately submitted `(1.0,0.0)` run before overlapping scope.
+   Let the two known V=0 anchors finish with their original code and controls;
+   review their full histories once synced. No unchanged V=-0.4 extension is
+   recommended solely to obtain acceptance.
+   Retain the finite-size seeds for future work.
    Update older campaign status when job-specific results/accounting are synced.
 2. After terminal status, reconcile requested ceilings against authoritative
    `sacct` elapsed time before choosing more compute.

@@ -104,6 +104,7 @@ function load_settings(path::AbstractString)
         stable_iterations=Int(_value(convergence_raw, "stable_iterations", 2)),
         minimum_iterations=Int(_value(convergence_raw, "minimum_iterations", 0)),
         channel_residuals=Bool(_value(convergence_raw, "channel_residuals", false)),
+        channel_noise_floor=Float64(_value(convergence_raw, "channel_noise_floor", 0.0)),
         dmrg_sweep_energy_tol=Float64(_value(convergence_raw, "dmrg_sweep_energy_tol", Inf)),
         max_period=Int(_value(convergence_raw, "max_period", 8)),
         period_repeats=Int(_value(convergence_raw, "period_repeats", 3)),
@@ -231,6 +232,10 @@ function validate_settings(settings::ProjectSettings)
     settings.convergence.max_period >= 1 || throw(ArgumentError("max_period must be positive"))
     settings.convergence.stable_iterations >= 2 || throw(ArgumentError("stable_iterations must be at least 2"))
     settings.convergence.minimum_iterations >= 0 || throw(ArgumentError("minimum_iterations must be nonnegative"))
+    isfinite(settings.convergence.channel_noise_floor) && settings.convergence.channel_noise_floor >= 0 ||
+        throw(ArgumentError("channel_noise_floor must be finite and nonnegative"))
+    settings.convergence.channel_noise_floor == 0 || settings.convergence.channel_residuals ||
+        throw(ArgumentError("channel_noise_floor requires channel_residuals"))
     settings.convergence.dmrg_sweep_energy_tol > 0 || throw(ArgumentError("dmrg_sweep_energy_tol must be positive"))
     settings.convergence.hamiltonian_identity_tol > 0 || throw(ArgumentError("hamiltonian_identity_tol must be positive"))
     settings.convergence.effective_energy_consistency_tol > 0 || throw(ArgumentError("effective_energy_consistency_tol must be positive"))

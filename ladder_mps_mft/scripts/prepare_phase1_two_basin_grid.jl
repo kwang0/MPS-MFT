@@ -42,10 +42,17 @@ function validate_raw_basin_contract(settings)
     settings.mixing.minimum_damping == settings.mixing.damping == settings.mixing.maximum_damping == 1 || error("fallback must be raw F(x)")
     settings.convergence.unmixed_cycle_probe || error("raw-map observation is required")
     settings.convergence.probe_iterations >= settings.run.max_iterations || error("probe must cover the entire run")
-    settings.convergence.minimum_iterations >= 50 || error("at least 50 evaluations are required")
+    settings.convergence.minimum_iterations >= 30 || error("at least 30 evaluations are required")
+    settings.convergence.minimum_iterations <= settings.run.max_iterations || error("minimum exceeds run limit")
     settings.convergence.channel_residuals || error("channel gates are required")
     settings.convergence.dmrg_sweep_energy_tol == settings.dmrg.energy_tol || error("inner DMRG acceptance must match its stopping tolerance")
     settings.convergence.stable_iterations >= 5 || error("at least five stable records are required")
+    if settings.convergence.channel_noise_floor > 0
+        settings.convergence.channel_noise_floor <= 5e-7 || error("channel noise floor exceeds qualified value")
+        settings.convergence.stable_iterations >= 10 || error("noise-floor contract requires ten stable records")
+    else
+        settings.convergence.minimum_iterations >= 50 || error("historical contract requires at least 50 evaluations")
+    end
     settings.model.ep_mode == :exact || error("exact E_p is required")
     settings.run.parent_checkpoint === nothing && settings.run.resume_checkpoint === nothing || error("fresh MPS required")
     return settings
@@ -56,7 +63,7 @@ function prepare_two_basin_grid(base_path, reference_path, control_run, full_run
     occursin(r"^[A-Za-z0-9_.-]+$", run_id) || error("unsafe run ID")
     control_run, full_run = abspath(control_run), abspath(full_run)
     raw_base = TOML.parsefile(base_path)
-    validate_raw_basin_contract(load_settings(base_path))
+    base = validate_raw_basin_contract(load_settings(base_path))
     stripe, pairing = two_basin_references(reference_path)
     seeds = (stripe=blend_correlations(stripe, pairing), pairing=blend_correlations(pairing, stripe))
     for name in ("configs", "seeds")
@@ -140,7 +147,10 @@ function prepare_two_basin_grid(base_path, reference_path, control_run, full_run
     open(joinpath(control_run, "seed_contract.toml"), "w") do io
         TOML.print(io, Dict("run_id" => run_id, "stage" => stage, "epsilon" => TWO_BASIN_EPSILON,
             "reference_sha256" => TWO_BASIN_REFERENCE_SHA, "branches" => length(rows),
-            "maximum_iterations" => 80, "minimum_iterations" => 50, "chi" => 200,
+            "maximum_iterations" => base.run.max_iterations,
+            "minimum_iterations" => base.convergence.minimum_iterations, "chi" => base.dmrg.maxdim,
+            "stable_iterations" => base.convergence.stable_iterations,
+            "channel_noise_floor" => base.convergence.channel_noise_floor,
             "update" => "unmixed raw map throughout; no Anderson", "fresh_mps" => true))
     end
     println("Prepared $(length(rows)) branches ($stage), manifest=$manifest_path")

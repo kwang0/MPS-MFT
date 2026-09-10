@@ -1,0 +1,3 @@
+implementation_sha256_local = "a29d3f9f0ed848454f66d02ff787e157127273171191173bb8e33893edcf2550"
+config_sha256 = "71a00fa3b69d84a22f7676b5b4b16c604516f27f99cdf6a3fe04bab4e7edc35d"
+boundary = "History gates only; per-iteration identity and eigenvalue errors unavailable; original flags unchanged."
