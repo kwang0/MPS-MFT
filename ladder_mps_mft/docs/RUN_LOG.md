@@ -2702,3 +2702,11 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   The launcher retains shared run/scratch/accounting roots and submits only
   `20260910_square_two_basin_95_5_40_remainder`. No new solver change or
   repeated DMRG/test run is needed for publication.
+- Publication completed: commit `7443d9d` (`Qualify 40-step two-basin runs`)
+  was pushed normally to `origin/codex/mps-mft-phase0-refactor`; Git confirmed
+  the remote update `0729d52..7443d9d` with exit status zero. Staged whitespace
+  checks passed and only the intended 31 files were committed. The sandbox
+  required escalated Git index access; automatic review allowed staging,
+  commit, and push under the user's explicit authorization. Updated the
+  current snapshot and handoff to record publication; no NERSC connection,
+  transfer, scheduler query, reservation, or submission occurred.

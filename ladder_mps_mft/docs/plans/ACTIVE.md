@@ -65,8 +65,8 @@ because the known pending jobs are at `(1.4,0.0)`.
 
 ## Completion sequence
 
-1. Publish the locally qualified 40-step revision and let the user submit the
-   fourteen remaining starts from a separate checkout with shared accounting.
+1. The qualified 40-step implementation is published as `7443d9d`. The user
+   submits the fourteen remaining starts from a separate checkout with shared accounting.
    Confirm any separately submitted `(1.0,0.0)` run before overlapping scope.
    Let the two known V=0 anchors finish with their original code and controls;
    review their full histories once synced. No unchanged V=-0.4 extension is

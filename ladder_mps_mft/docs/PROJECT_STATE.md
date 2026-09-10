@@ -1,6 +1,6 @@
 # Current project state
 
-Last locally reviewed: 2026-09-10 (40-step remainder prepared and locally qualified)
+Last locally reviewed: 2026-09-10 (40-step remainder published for user submission)
 
 This is the canonical mutable snapshot for resuming work. It is deliberately
 short. Stable rules belong in `AGENTS.md` and the method documents; durable
@@ -188,8 +188,9 @@ documents linked from `docs/plans/ACTIVE.md`.
 
 ## Exact next action
 
-The user authorizes the fourteen remaining starts now. Publish the locally
-validated revision, then use the separate-checkout user-run commands in
+The user authorizes the fourteen remaining starts and GitHub publication.
+The validated implementation was pushed to `origin/codex/mps-mft-phase0-refactor`
+as `7443d9d` (Qualify 40-step two-basin runs). Use the separate-checkout commands in
 `docs/reports/two_basin_remainder_20260910/README.md`. The source checkout used
 by pending anchors must remain at its submitted revision. Confirm the pending
 coordinate if it is a separate `(1.0,0.0)` submission; the prepared remainder

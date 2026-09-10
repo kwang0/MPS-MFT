@@ -111,7 +111,11 @@ the existing ledger and uses the same live 400-node-hour hard cap. The completed
 anchor pair's actual cost remains 3.763125 node-hours. No new local reservation
 or accounting entry has been written.
 
-## Perlmutter handoff — user-run only, after this revision is published
+## Perlmutter handoff — user-run only
+
+The user authorized publication; implementation commit `7443d9d` was pushed
+to `origin/codex/mps-mft-phase0-refactor` on September 10. No scheduler action
+has been performed by Codex.
 
 The pending jobs load solver files from the original checkout when they start.
 Leave that checkout at its submitted source revision. Fetching changes and
