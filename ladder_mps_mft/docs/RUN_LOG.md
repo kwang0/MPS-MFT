@@ -2887,3 +2887,16 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   Verification outputs are in output/manuscript_draft/portability/.
   Existing published PDFs were left unchanged. No live Overleaf session,
   numerical test, remote action, or scientific-status change was involved.
+
+### 2026-09-15 - Make the Overleaf transfer package available through Git
+
+- The manuscript sources, compiled PDF, bibliography, source notes, literature
+  review, and required report figure were already tracked. The original upload
+  ZIP was under ignored output/, so it was unavailable to a remote checkout.
+- Added docs/manuscript/overleaf_upload.zip and a standard-library Python
+  packaging helper beside it. Updated the README to link the tracked archive
+  and explain regeneration. The archive preserves the checked Overleaf layout.
+- Validation: the packaging helper checks ZIP integrity, member names, and
+  byte-for-byte agreement of all six members with the maintained source files.
+  This is a packaging-only change; the prior four compilation checks still
+  cover the unchanged LaTeX sources. No numerical calculation was run.

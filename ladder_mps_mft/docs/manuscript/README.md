@@ -70,9 +70,11 @@ The path handling follows the project-root behavior documented in
 [Overleaf's multi-file guidance](https://www.overleaf.com/learn/latex/Multi-file_LaTeX_projects).
 
 The figure is required, even though it is outside the two source folders.
-An upload snapshot containing these five files plus these instructions is at
-`../../output/manuscript_draft/overleaf_upload.zip`. Regenerate that snapshot
-after later source edits; it is not a second maintained copy of the sources.
+The Git-tracked [Overleaf upload ZIP](overleaf_upload.zip) contains these five
+files plus these instructions, so it can be downloaded from another device.
+Regenerate it after later source edits by running
+`python package_overleaf.py` from this directory (Python standard library only).
+The ZIP is a generated snapshot; edit the original sources, not its contents.
 Appendix links to local analysis files remain local evidence pointers; the
 reports they link to are not required for compilation or included in the ZIP.
 
