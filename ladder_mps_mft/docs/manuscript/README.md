@@ -41,9 +41,40 @@ or:
 
 This draft uses standard LaTeX packages, natbib, and BibTeX. Its bibliography
 combines [the existing bibliography](../literature/references.bib) with the
-five supplemental entries here. The annotated review and its bibliography
-were not edited. Keep both bibliography files and the referenced figure
-available when moving the draft to another checkout.
+five supplemental entries here. Both LaTeX documents now detect whether the
+build starts in their own directory or the parent documentation/project root.
+No path edits are needed when switching between those layouts. The shared
+bibliography and scientific text are unchanged.
+
+## Build on Overleaf
+
+Preserve this layout at the Overleaf project root:
+
+```text
+literature/
+  literature_review.tex
+  references.bib
+manuscript/
+  introduction_and_results.tex
+  additional_references.bib
+reports/
+  two_basin_v000_20260912/
+    profile_evolution.pdf
+```
+
+Set the main document to `manuscript/introduction_and_results.tex`, then
+choose **Recompile from scratch** after replacing an earlier upload. Select
+`literature/literature_review.tex` instead to compile the annotated review.
+Use the normal pdfLaTeX compiler with BibTeX (the documents use natbib).
+The path handling follows the project-root behavior documented in
+[Overleaf's multi-file guidance](https://www.overleaf.com/learn/latex/Multi-file_LaTeX_projects).
+
+The figure is required, even though it is outside the two source folders.
+An upload snapshot containing these five files plus these instructions is at
+`../../output/manuscript_draft/overleaf_upload.zip`. Regenerate that snapshot
+after later source edits; it is not a second maintained copy of the sources.
+Appendix links to local analysis files remain local evidence pointers; the
+reports they link to are not required for compilation or included in the ZIP.
 
 The checked build used the existing repository-local Tectonic 0.17.0 executable.
 Build logs, extracted-text checks, and rendered pages are under the ignored

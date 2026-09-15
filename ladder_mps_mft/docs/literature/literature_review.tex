@@ -330,6 +330,11 @@ The literature supports a focused positioning: extend the repulsive-ladder MPS+M
 \bibliographystyle{unsrtnat}
 \begingroup
 \raggedright
-\bibliography{references}
+% Support both project-root (Overleaf) and literature-directory local builds.
+\IfFileExists{literature/references.bib}{%
+  \bibliography{literature/references}%
+}{%
+  \bibliography{references}%
+}
 \endgroup
 \end{document}

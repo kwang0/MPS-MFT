@@ -1,4 +1,4 @@
-% Working manuscript draft. Compile from this directory.
+% Working manuscript draft. Compile from this directory or the parent docs root.
 % Reuses ../literature/references.bib without changing the annotated review.
 % New references from the September 15 discussion are in additional_references.bib.
 \documentclass[11pt,letterpaper]{article}
@@ -9,6 +9,15 @@
 \usepackage{microtype}
 \usepackage{booktabs,tabularx,array}
 \usepackage{graphicx}
+% Overleaf builds from the project root; local builds may use manuscript/.
+% Keep literature/, manuscript/, and reports/ as sibling folders when uploading.
+\IfFileExists{literature/references.bib}{%
+  \newcommand{\projectdocroot}{.}%
+  \newcommand{\manuscriptroot}{manuscript}%
+}{%
+  \newcommand{\projectdocroot}{..}%
+  \newcommand{\manuscriptroot}{.}%
+}
 \usepackage{needspace}
 \usepackage[numbers,sort&compress]{natbib}
 \usepackage{xurl}
@@ -515,7 +524,7 @@ the deadline-limited final density solve (\ev{zero}).
 
 \begin{figure}[p]
 \centering
-\includegraphics[width=\textwidth]{../reports/two_basin_v000_20260912/profile_evolution.pdf}
+\includegraphics[width=\textwidth]{\projectdocroot/reports/two_basin_v000_20260912/profile_evolution.pdf}
 \caption{Previously generated spatial-history figure for the two $V=0$
 anchor trajectories. The upper row shows the staggered leg-odd spin
 mean field; the lower row shows the leg-even pairing mean field.
@@ -820,6 +829,6 @@ solutions. Those are candidate emphases, not additional results.
 \begingroup
 \setlength{\bibsep}{0.35em}
 \bibliographystyle{unsrtnat}
-\bibliography{../literature/references,additional_references}
+\bibliography{\projectdocroot/literature/references,\manuscriptroot/additional_references}
 \endgroup
 \end{document}

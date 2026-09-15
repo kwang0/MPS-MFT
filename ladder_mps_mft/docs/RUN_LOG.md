@@ -2863,3 +2863,27 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   evidence links and the reused figure path resolve. Poppler rendered every
   page for visual inspection. Build/QA files are in the ignored
   output/manuscript_draft directory. No DMRG or unrelated test suite ran.
+
+### 2026-09-15 - Make LaTeX paths portable between local builds and Overleaf
+
+- The manuscript now detects the shared bibliography at the project root
+  and selects root-relative or source-directory-relative bibliography and
+  figure paths. The literature review uses the same conditional approach
+  for its bibliography. Scientific text and bibliography data are unchanged.
+- Added the exact Overleaf upload layout and main-document instructions to
+  docs/manuscript/README.md. Prepared an ignored transfer snapshot at
+  output/manuscript_draft/overleaf_upload.zip containing the two TeX files,
+  two bibliography files, the required report figure, and the README.
+  Local evidence hyperlinks remain local pointers, not bundled reports.
+- Focused validation: ran the ignored check_portability.py helper using the
+  bundled Python runtime and cached Tectonic 0.17.0. Both documents compiled
+  in their own directories and through project-root input wrappers in an
+  isolated copy of the upload layout. The wrappers prevent Tectonic's
+  source-directory switch from testing the same path branch twice.
+- Checked the actual BibTeX database paths in all four auxiliary files:
+  34 manuscript references and 49 review references resolve in both layouts.
+  All page text and page sizes match the existing 16-page and 29-page PDFs.
+  ZIP integrity and the bytes of every packaged file match the local sources.
+  Verification outputs are in output/manuscript_draft/portability/.
+  Existing published PDFs were left unchanged. No live Overleaf session,
+  numerical test, remote action, or scientific-status change was involved.
