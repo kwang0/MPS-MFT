@@ -34,7 +34,7 @@ function blend_correlations(primary::CorrelationState, perturbation::Correlation
                       for key in fieldnames(CorrelationState))...)
 end
 
-function validate_raw_basin_contract(settings; geometry=:square)
+function validate_raw_basin_contract(settings; geometry=:square, allow_interpolated_ep=false)
     geometry in (:square, :cubic_unfrustrated) || error("unsupported two-basin geometry")
     settings.model.geometry == geometry && settings.model.L == 64 || error("expected $geometry L=64")
     settings.model.U == 8 && settings.model.tp == 0.1 && settings.model.density == 0.9375 || error("model contract changed")
@@ -57,17 +57,21 @@ function validate_raw_basin_contract(settings; geometry=:square)
     else
         settings.convergence.minimum_iterations >= 50 || error("historical contract requires at least 50 evaluations")
     end
-    settings.model.ep_mode == :exact || error("exact E_p is required")
+    allowed_ep_modes = allow_interpolated_ep ? (:exact, :linear_t0, :linear_V) : (:exact,)
+    settings.model.ep_mode in allowed_ep_modes || error("E_p mode is not authorized for this campaign")
     settings.run.parent_checkpoint === nothing && settings.run.resume_checkpoint === nothing || error("fresh MPS required")
     return settings
 end
 
-function prepare_two_basin_grid(base_path, reference_path, control_run, full_run, run_id; stage="anchors", geometry=:square)
-    stage in ("anchors", "remainder", "grid") || error("stage must be anchors, remainder, or grid")
+function prepare_two_basin_grid(base_path, reference_path, control_run, full_run, run_id;
+                               stage="anchors", geometry=:square, coordinates=nothing)
+    stage in ("anchors", "remainder", "grid", "cuts") || error("unknown two-basin stage")
+    (stage == "cuts") == (coordinates !== nothing) || error("custom coordinates require the cuts stage")
+    allow_interpolated_ep = stage == "cuts"
     occursin(r"^[A-Za-z0-9_.-]+$", run_id) || error("unsafe run ID")
     control_run, full_run = abspath(control_run), abspath(full_run)
     raw_base = TOML.parsefile(base_path)
-    base = validate_raw_basin_contract(load_settings(base_path); geometry)
+    base = validate_raw_basin_contract(load_settings(base_path); geometry, allow_interpolated_ep)
     geometry == :square || stage == "grid" || error("cubic two-basin campaign requires the full grid")
     stripe, pairing = two_basin_references(reference_path)
     seeds = (stripe=blend_correlations(stripe, pairing), pairing=blend_correlations(pairing, stripe))
@@ -79,17 +83,27 @@ function prepare_two_basin_grid(base_path, reference_path, control_run, full_run
     mkpath(joinpath(control_run, "configs")); mkpath(joinpath(control_run, "seeds"))
     mkpath(joinpath(full_run, "results"))
     rows = NamedTuple[]
-    for t0 in (1.0, 1.2, 1.4), V in (-0.4, -0.2, 0.0)
+    point_specs = coordinates === nothing ?
+        [(;t0,V) for t0 in (1.0,1.2,1.4) for V in (-0.4,-0.2,0.0)] : coordinates
+    length(unique((p.t0,p.V) for p in point_specs)) == length(point_specs) || error("duplicate coordinates")
+    for spec in point_specs
+        t0, V = spec.t0, spec.V
         anchor = t0 == 1.4 && V in (-0.4, 0.0)
         stage == "anchors" && !anchor && continue
         stage == "remainder" && anchor && continue
-        point = "t0$(round(Int, t0 * 10))_" * (V == 0 ? "v000" : "vm0$(round(Int, -10V))")
+        point = stage == "cuts" ? spec.point :
+            "t0$(round(Int, t0 * 10))_" * (V == 0 ? "v000" : "vm0$(round(Int, -10V))")
         point_fingerprints = NamedTuple[]
         for family in (:stripe, :pairing)
             label = "$(geometry)__$(family)_weak_other_$(point)_chi200_raw"
             raw = deepcopy(raw_base)
             raw["model"]["t0"] = t0; raw["model"]["V"] = V
             raw["model"]["mu_initial"] = V == 0 ? 1.65 : V == -0.2 ? 1.10 : 0.55
+            if stage == "cuts"
+                raw["model"]["mu_initial"] = spec.mu_initial
+                raw["pair_binding"]["allow_interpolation"] = true
+                raw["pair_binding"]["interpolation_axis"] = String(spec.axis)
+            end
             raw["pair_binding"]["registry"] = joinpath(LadderMPSMFT.PROJECT_ROOT, "data", "E_p_values.csv")
             output = joinpath(full_run, "results", label)
             seed_path = joinpath(control_run, "seeds", label * ".h5")
@@ -101,6 +115,11 @@ function prepare_two_basin_grid(base_path, reference_path, control_run, full_run
             # Resolve the target Hamiltonian first; all fields use its kernel.
             open(config_path, "w") do io; TOML.print(io, raw); end
             model = load_settings(config_path).model
+            if stage == "cuts"
+                model.ep_mode == (spec.axis == :t0 ? :linear_t0 : :linear_V) || error("expected interpolated E_p")
+                lower, upper = spec.axis == :t0 ? (model.ep_t0_lower, model.ep_t0_upper) : (model.ep_V_lower, model.ep_V_upper)
+                (lower,upper) == (spec.lower,spec.upper) || error("E_p bracket differs from the requested coarse endpoints")
+            end
             correlations = getproperty(seeds, family)
             fields = LadderMPSMFT.mean_fields_from_correlations(correlations, model)
             h5open(seed_path, "w") do file
@@ -119,6 +138,11 @@ function prepare_two_basin_grid(base_path, reference_path, control_run, full_run
                     "target_t0" => t0, "target_V" => V, "target_ep" => model.ep,
                     "source_L" => 64, "target_L" => 64, "fresh_mps" => true,
                     "source_geometry" => "square", "target_geometry" => String(geometry),
+                    "ep_mode" => String(model.ep_mode),
+                    "ep_t0_lower" => model.ep_t0_lower, "ep_t0_upper" => model.ep_t0_upper,
+                    "ep_V_lower" => model.ep_V_lower, "ep_V_upper" => model.ep_V_upper,
+                    "ep_lower_signed" => model.ep_lower_signed, "ep_upper_signed" => model.ep_upper_signed,
+                    "ep_interpolation_weight" => model.ep_interpolation_weight,
                     "is_scf_solution" => false,
                 ))
             end
@@ -126,7 +150,7 @@ function prepare_two_basin_grid(base_path, reference_path, control_run, full_run
             raw["run"]["inherit_from"] = seed_path
             raw["run"]["inherit_sha256"] = seed_sha
             open(config_path, "w") do io; TOML.print(io, raw); end
-            settings = validate_raw_basin_contract(load_settings(config_path); geometry)
+            settings = validate_raw_basin_contract(load_settings(config_path); geometry, allow_interpolated_ep)
             readback = read_inherited_fields(seed_path)
             for component in (:alpha, :beta, :mu_cdw)
                 getfield(readback.fields, component) == getfield(fields, component) || error("seed readback mismatch")
@@ -140,6 +164,12 @@ function prepare_two_basin_grid(base_path, reference_path, control_run, full_run
             push!(point_fingerprints, fp)
             push!(rows, merge((label=label, config=config_path, config_sha256=LadderMPSMFT.sha256_file(config_path),
                 geometry=String(geometry), t0=t0, V=V, family=String(family), epsilon=TWO_BASIN_EPSILON,
+                cut=stage == "cuts" ? spec.cut : "grid", ep_mode=String(model.ep_mode),
+                ep_signed=model.ep_signed, ep_denominator=model.ep,
+                ep_t0_lower=model.ep_t0_lower, ep_t0_upper=model.ep_t0_upper,
+                ep_V_lower=model.ep_V_lower, ep_V_upper=model.ep_V_upper,
+                ep_lower_signed=model.ep_lower_signed, ep_upper_signed=model.ep_upper_signed,
+                ep_interpolation_weight=model.ep_interpolation_weight,
                 seed=seed_path, seed_sha256=seed_sha, reference_sha256=TWO_BASIN_REFERENCE_SHA,
                 full_output_directory=output, stateless_output_directory=joinpath(control_run, "results", label)), fp))
         end
@@ -157,6 +187,7 @@ function prepare_two_basin_grid(base_path, reference_path, control_run, full_run
             "minimum_iterations" => base.convergence.minimum_iterations, "chi" => base.dmrg.maxdim,
             "stable_iterations" => base.convergence.stable_iterations,
             "channel_noise_floor" => base.convergence.channel_noise_floor,
+            "interpolated_ep" => allow_interpolated_ep,
             "update" => "unmixed raw map throughout; no Anderson", "fresh_mps" => true))
     end
     println("Prepared $(length(rows)) branches ($stage), manifest=$manifest_path")

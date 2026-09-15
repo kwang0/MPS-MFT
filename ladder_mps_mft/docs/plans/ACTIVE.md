@@ -2,7 +2,17 @@
 
 Last reviewed: 2026-09-15
 
-September 15 update: the full square two-basin grid is synchronized and
+Latest September 15 update: the user reports the cubic comparison has been
+submitted. Twelve finer square-cut starts are now prepared with interpolated
+E_p: t0=1.4 at V=-0.05/-0.10/-0.15 and V=-0.4 at t0=1.25/1.30/1.35.
+Use the separate-worktree handoff in
+`docs/reports/two_basin_fine_cuts_20260915/README.md` to preserve submitted
+source. Bare-ladder plots support a preliminary linear approximation, with
+greater interpolation sensitivity on the t0 cut. No new bare jobs are planned.
+Square continuation submission has not been reported; no new scheduler IDs
+or accounting have been synced for these follow-up campaigns.
+
+Earlier September 15 update: the full square two-basin grid is synchronized and
 analyzed in `docs/reports/two_basin_grid_20260915/README.md`. Eighteen runs
 provide 862 MF evaluations and use 26.798333 actual allocation node-hours.
 The preliminary diagram assigns seven stripe points (including the still
@@ -44,13 +54,18 @@ continuation is configured.
 
 ## Active scientific questions
 
-1. **Next two-basin campaigns (prepared, awaiting user submission).** Run
-   `slurm/submit_cubic_unfrustrated_two_basin.sh` and
-   `slurm/submit_square_two_basin_finish.sh` from the normal Perlmutter
-   checkout after pulling. The first spans all nine coordinates with two
-   95%/5% seeds. The second restores both V=0 MPS lineages and retains full
-   plotting ancestry. Combined reservation ceiling: 58 node-hours;
-   shared accounting, one segment each, no automatic further runs.
+1. **Follow-up two-basin campaigns.** Analyze the cubic results after the user
+   synchronizes them; submission is user-reported. The prepared square V=0
+   continuation restores both MPS lineages with full plotting ancestry;
+   its submission status is unreported. Preserve their source checkout.
+   The finer square cuts use a new worktree and
+   `slurm/submit_square_two_basin_fine_cuts.sh`: twelve independent 95%/5%
+   starts, max 60/minimum 40, ten stable records and linearly interpolated
+   E_p. Additional reservation ceiling: 36 node-hours, shared accounting,
+   one segment each. Compare accepted energies and retain unresolved or
+   coexistence classifications; a stopped competitor does not certify a
+   ground-state boundary. Higher chi, length and precise interpolation
+   sensitivity studies remain deferred.
 2. **Competing basins with raw updates (both anchor points analyzed).** Review
    `docs/reports/two_basin_v000_20260912/README.md`: the pairing-dominated
    V=0 start evolves toward a similar stripe texture, but its residual pairing

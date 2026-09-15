@@ -354,6 +354,8 @@ function _model_with_geometry(
         ep_mode=model.ep_mode,
         ep_t0_lower=model.ep_t0_lower,
         ep_t0_upper=model.ep_t0_upper,
+        ep_V_lower=model.ep_V_lower,
+        ep_V_upper=model.ep_V_upper,
         ep_lower_signed=model.ep_lower_signed,
         ep_upper_signed=model.ep_upper_signed,
         ep_interpolation_weight=model.ep_interpolation_weight,

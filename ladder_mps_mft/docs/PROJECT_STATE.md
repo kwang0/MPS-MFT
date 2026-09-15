@@ -1,6 +1,6 @@
 # Current project state
 
-Last locally reviewed: 2026-09-15 (cubic grid and short square continuation prepared)
+Last locally reviewed: 2026-09-15 (square finer cuts prepared; cubic submission user-reported)
 
 This is the canonical mutable snapshot for resuming work. It is deliberately
 short. Stable rules belong in `AGENTS.md` and the method documents; durable
@@ -18,14 +18,29 @@ history belongs in `docs/RUN_LOG.md`.
   part of this work.
 - Local `output/` and simulation HDF5 files are excluded from Git. The small
   `data/two_basin_references.h5` is a versioned seed-input exception.
-- Current local work adds explicit reference-length E_p support and four
-  L=96/128 seed-review configs. This changes the implementation fingerprint;
-  preserve the old Perlmutter source checkout for pending/running campaigns.
+- Current local work adds explicit V-axis E_p interpolation and twelve finer
+  square-cut starts. This changes the implementation fingerprint; preserve
+  the submitted cubic campaign's Perlmutter checkout and use the separate
+  worktree handoff in the fine-cut report.
 
 Recheck the branch, commit, and working tree at the start of each new task.
 
 ## Current scientific position
 
+- Six finer square coordinates are prepared with both 95%/5% reference
+  mixtures: t0=1.4 at V=-0.05/-0.10/-0.15, and V=-0.4 at t0=1.25/1.30/1.35.
+  Controls use chi=200, max 60/minimum 40 raw evaluations and ten stable
+  records, with square field tolerances and the revised 1e-7 energy gates.
+  User-requested linear signed E_p interpolation is explicit and recorded.
+  The [bare-ladder cuts and submission report](reports/two_basin_fine_cuts_20260915/README.md)
+  shows smooth sampled total energies and a broad binding maximum around
+  t0=1.2–1.4. A degree-three shape check changes the inferred coupling by
+  at most 0.62% along V and about 5% along t0; these are sensitivity checks,
+  not uncertainty bounds. No bare measurements exist at the six new points.
+  All twelve starts are locally validated, with a 36-node-hour reservation
+  ceiling and no pair-binding jobs or automatic extensions. Cubic submission
+  is now user-reported; no new IDs/live accounting are locally available.
+  Square continuation submission has not been reported.
 - Following full-grid review, the user authorized the same two-basin cubic
   grid and a short square (1.4,0) extension. Prepared 18 cubic-unfrustrated
   chi=200 starts: reciprocal 95%/5% templates, max 60 raw evaluations,

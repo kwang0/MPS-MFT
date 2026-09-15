@@ -3032,3 +3032,130 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   controls, documentation and preceding full-grid analysis are published
   under the existing push authorization. No job IDs exist for these new
   campaigns in the local evidence at handoff.
+
+### 2026-09-15 — Share the full square energy grid's y-axis
+
+- User requested identical energy scales across all nine full-history
+  panels to help interpret the transition. Updated the reusable plotting
+  function and regenerated only `energy_grid.png` and its PDF companion
+  from the already verified 862-row iteration table. Shared limits are
+  [-1.1995785687934484, -0.49175597421212397] t/site.
+- Verified all nine axis limits agree exactly, all 18 curves remain inside
+  the range, and the source table hash is unchanged. Viewed the PNG:
+  labels and curves are visible without clipping. No simulation or other
+  figure was rerun; the temporary redraw helper was removed.
+- The common absolute scale is dominated by between-Hamiltonian energy
+  differences. MF relaxation trajectories alone do not establish the
+  order of the equilibrium transition; acceptance and phase assignments
+  are unchanged. The late-history grid retains its local energy zooms.
+
+### 2026-09-15 — Restore individual energy-panel scales
+
+- At the user's request, reverted the shared-y-axis change because it hid
+  useful relaxation features. Restored the original `energy_grid.png`, PDF,
+  plotting code and accompanying mutable documentation byte-for-byte from
+  commit d41cdbd. Each panel again uses its individual energy scale.
+- Verified restored bytes against Git. No simulation or redraw was needed;
+  this ledger retains the earlier experiment and records its reversal.
+
+### 2026-09-15 — Expectations for the stripe–pairing transition
+
+- User asked whether transition order is predictable or worth determining.
+  Working interpretation: a direct first-order stripe/paired transition is
+  plausible in a conventional competing-order Landau description, but
+  not established or required for this model. An intermediate state with
+  both orders can instead permit separate continuous boundaries. No Landau
+  coefficients have been fitted to the current data.
+- Reviewed the general two-order free-energy analysis in
+  https://arxiv.org/html/0912.3556v1 (a pnictide application, not this model),
+  the Hubbard stripe/SC coexistence result https://arxiv.org/abs/2303.08376
+  (Science 2024, different hopping/model geometry), and the closest
+  two-channel MPS+MF study https://arxiv.org/abs/2301.08116
+  (PRB 2025, attractive chains rather than repulsive ladders). These support
+  the alternatives, not a prediction or novelty claim for our parameters.
+- The coarse square grid and delayed MF collapse do not determine order.
+  Two stable competing minima at the same parameters have not been
+  demonstrated in this campaign. A candidate future diagnostic is a
+  denser fixed-t0=1.4 cut between V=-0.2 and 0, tracking both continuations,
+  order parameters and comparable corrected energies at each coordinate.
+  First order is associated with a branch crossing and order-parameter
+  discontinuities; energy itself need not jump. Distinguish equilibrium
+  crossing from loss of metastability and incomplete MF convergence.
+- Establishing direct competition versus coexistence, and its geometry
+  dependence, would strengthen the report. Any initial conclusion remains
+  within the static interladder MPS+MF approximation at finite chi and L;
+  thermodynamic robustness and universality need additional work. No new
+  runs, threshold changes or manuscript claims were introduced.
+
+### 2026-09-15 — Prepare finer square cuts and inspect bare-ladder energies
+
+- User requested t0=1.4 at V=-0.05/-0.10/-0.15 and V=-0.4 at
+  t0=1.25/1.30/1.35, using the same two-basin approach as the newly submitted
+  cubic campaign. The user explicitly requested naive linear E_p
+  interpolation between the coarse endpoints, then bare E0 and E_p plots
+  along both cuts to inspect the approximation. Cubic submission is
+  user-reported; no new job IDs/accounting were supplied. Square V=0
+  continuation submission is unreported. No Perlmutter action performed.
+- Added explicit V-axis interpolation while preserving exact/default-t0
+  behavior and historical model fingerprints. It requires a bracket of
+  matching L/U/density/t0, never extrapolates, and rejects sign-crossing
+  endpoints. Configs, seeds, manifest, model provenance and checkpoints
+  record interpolation mode, endpoints and weight. The new preparation
+  pins the registry hash and requested coarse bounds rather than silently
+  selecting new intermediate measurements if the registry later changes.
+- Prepared all twelve independent field starts from the versioned reference
+  correlations: reciprocal 95%/5% mixtures, rebuilt with target couplings,
+  fresh MPS, square geometry, L=64, U=8, n=0.9375, tp=0.1 and chi=200.
+  Raw updates, no Anderson, max 60/minimum 40, ten stable records. Square
+  abs/relative field gates remain 1e-7/1e-4 with a 5e-7 channel floor;
+  energy window is 1e-7 t/site and inner DMRG tolerance 1e-7 t total.
+  Full-window drift and slow-mode gates remain active. These are basin
+  comparisons, not parameter-continuation/hysteresis scans.
+- Linear signed E_p values in requested order are -0.16160336393289043,
+  -0.17666899694661709, -0.19173462996034374, -0.2508405031610721,
+  -0.25043512171026805 and -0.250029740259464. The first three interpolate
+  V=-0.2 to 0 at t0=1.4; the latter interpolate t0=1.2 to 1.4 at V=-0.4.
+  The MF denominator is |E_p|. No additional bare-ladder jobs are prepared.
+- Reused data/E_p_values.csv at bare chi=1000, L=64, n=0.9375 and U=8 to
+  generate the requested cut plots. Five plus four measured rows represent
+  eight unique points; relevant root-registry values agree. No measurements
+  exist at the six new points. Source registry SHA-256 is
+  2209bd2ca3c1ad02c0e542d1a9d63ecf90fdfa49120ad9cc3af599a5b4bc1f0e.
+  Plots and numeric tables are in
+  docs/reports/two_basin_fine_cuts_20260915/, reproduced with
+  scripts/plot_bare_ladder_fine_cuts.py. Existing root figures and restored
+  per-panel MF energy scales are preserved.
+- Total bare energies look smooth at sampled resolution. The binding
+  magnitude has a broad maximum around t0=1.2–1.4 at V=-0.4. A degree-three
+  interpolant through four neighboring measurements changes the inferred
+  coupling by 0.12–0.61% on the V cut and -3.60% to -4.99% on the t0 cut.
+  This is an interpolation-shape sensitivity diagnostic, not measured data
+  or an uncertainty bound, and it is not used by the campaign. Retain the
+  user's straight-line approximation, with its stronger t0 sensitivity
+  documented. Neither sparse bare energies nor unaccepted MF competitors
+  determine transition order or a precise equilibrium boundary.
+- Local unit/preparation checks passed 16 fixed-reference-length, 45
+  interpolation/regression and 171 prepared-branch assertions. Raw-basin
+  regression checks passed 52+23. Five local mocked launcher/guard tests
+  passed, including refusal to use the original source checkout and
+  retention of account/shared ledgers. Bash syntax checks passed. Python
+  plot estimates match the Julia-prepared receipt, and source bytes are
+  unchanged. Viewed the overview and representative separate PNGs; fixed
+  a clipped standalone title. No full suite or DMRG simulation was run.
+  Local provenance Git calls emitted sandbox ownership warnings; numerical
+  and model fingerprints were still verified.
+- Config SHA-256:
+  92aed5482edf8723bd363a61b3e573d951f0532e24e43315f3269771ea55ca63.
+  Numerical fingerprint:
+  d928882239844f67c88e7020a4f1f3bf9ae009060c3dc5256406fcf6b18a8e2e.
+  Implementation fingerprint:
+  c054eb9690ce308e1dfb413bbc82d5e430eeecd3bf7f0b018acce267be9ccc99.
+- Launcher v1.21.0 and slurm/submit_square_two_basin_fine_cuts.sh prepare
+  and submit twelve branches, default run ID
+  20260915_square_two_basin_fine_cuts_95_5_60. Each requests 12 hours at
+  one-quarter GPU-node share (11.5-hour solver limit), reserving at most
+  36 node-hours and 720 MF evaluations total. Shared append-only accounting
+  remains enforced; one segment per branch, no automatic extension.
+  The handoff uses a separate worktree after fetching, preserving submitted
+  cubic source. The original anchor run.env is unchanged. Publication uses
+  the user's existing authorization to push and provide submission commands.

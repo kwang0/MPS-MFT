@@ -51,10 +51,54 @@ full_run_directory_from_control() { printf '%s/full\\n' "$1"; }
 
     def test_syntax(self):
         for name in ('phase1_gpu.sh', 'two_basin_submission_environment.sh',
-                     'submit_cubic_unfrustrated_two_basin.sh', 'submit_square_two_basin_finish.sh'):
+                     'submit_cubic_unfrustrated_two_basin.sh', 'submit_square_two_basin_finish.sh',
+                     'submit_square_two_basin_fine_cuts.sh'):
             result = subprocess.run([BASH, '-n', (ROOT / 'slurm' / name).as_posix()],
                                     capture_output=True, text=True)
             self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_fine_cuts_isolate_source_and_share_accounting(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            original = root / 'original' / 'ladder_mps_mft'
+            new = root / 'fine cuts' / 'ladder_mps_mft'
+            anchor = original / 'output/phase1_gpu/20260908_square_two_basin_95_5_80_anchors'
+            anchor.mkdir(parents=True)
+            environment = '\n'.join(['PHASE1_RUN_SCRIPT_VERSION=1.19.0',
+                'PHASE1_RUN_SCRATCH_DIR=old', 'PHASE1_LEDGER_PATH=shared_ledger',
+                'PHASE1_RECONCILIATION_PATH=shared_reconciliation',
+                'PHASE1_ACCOUNT=existing_account', 'PHASE1_MAX_SEGMENTS=4', ''])
+            (anchor/'run.env').write_text(environment)
+            receipt=root/'receipt.txt'
+            fake='''#!/bin/bash
+set -euo pipefail
+[[ ! -v PHASE1_RUN_SCRIPT_VERSION && ! -v PHASE1_RUN_SCRATCH_DIR ]] || exit 17
+printf '%s|%s|%s|%s|%s|%s|%s|%s\\n' "$*" "$PHASE1_PROJECT_DIR" "$PHASE1_TWO_BASIN_FINE_CUTS_CONFIG" "$PHASE1_LEDGER_PATH" "$PHASE1_RECONCILIATION_PATH" "$PHASE1_ACCOUNT" "$PHASE1_MAX_SEGMENTS" "$PHASE1_GPU_TIME" >> "$TEST_RECEIPT"
+'''
+            for project in (original,new):
+                (project/'slurm').mkdir(parents=True)
+                for name in ('two_basin_submission_environment.sh','submit_square_two_basin_fine_cuts.sh'):
+                    shutil.copyfile(ROOT/'slurm'/name,project/'slurm'/name)
+                (project/'slurm/phase1_gpu.sh').write_text(fake,newline='\n')
+            env=dict(os.environ,TWO_BASIN_ORIGINAL_PROJECT=original.as_posix(),TEST_RECEIPT=receipt.as_posix())
+            blocked=subprocess.run([BASH,(original/'slurm/submit_square_two_basin_fine_cuts.sh').as_posix()],env=env,capture_output=True,text=True)
+            self.assertNotEqual(blocked.returncode,0)
+            self.assertIn('separate checkout',blocked.stderr)
+            self.assertFalse(receipt.exists())
+            result=subprocess.run([BASH,(new/'slurm/submit_square_two_basin_fine_cuts.sh').as_posix()],env=env,capture_output=True,text=True)
+            self.assertEqual(result.returncode,0,result.stderr)
+            calls=[line.split('|') for line in receipt.read_text().splitlines()]
+            self.assertEqual(len(calls),3)
+            run='20260915_square_two_basin_fine_cuts_95_5_60'
+            self.assertTrue(calls[0][0].startswith('prepare-square-two-basin-fine-cuts '))
+            self.assertTrue(calls[0][0].endswith(' '+run))
+            self.assertEqual(calls[1][0],'reconcile')
+            self.assertEqual(calls[2][0],'submit '+run)
+            for call in calls:
+                self.assertTrue(call[1].endswith('/fine cuts/ladder_mps_mft'))
+                self.assertTrue(call[2].endswith('/configs/phase1_gpu_square_two_basin_fine_cuts_chi200_raw60.toml'))
+                self.assertEqual(call[3:],['shared_ledger','shared_reconciliation','existing_account','1','12:00:00'])
+            self.assertEqual((anchor/'run.env').read_text(),environment)
 
     def test_shared_accounting_current_checkout_and_scope(self):
         cases = (

@@ -30,8 +30,9 @@ function load_settings(path::AbstractString)
     ep_reference_L = Int(_value(ep_raw, "reference_L", L))
     ep_reference_L >= 2 || throw(ArgumentError("pair_binding.reference_L must be at least 2"))
     allow_ep_interpolation = Bool(_value(ep_raw, "allow_interpolation", false))
+    ep_interpolation_axis = Symbol(_value(ep_raw, "interpolation_axis", "t0"))
     ep_reference_L != L && allow_ep_interpolation && throw(ArgumentError(
-        "a fixed reference-length E_p requires an exact registry row; disable t0 interpolation",
+        "a fixed reference-length E_p requires an exact registry row; disable pair-binding interpolation",
     ))
     allow_unbound = Bool(_value(run_raw, "allow_unbound_ep", false))
     selection = lookup_ep(
@@ -44,6 +45,7 @@ function load_settings(path::AbstractString)
         tp,
         require_bound=!allow_unbound,
         allow_interpolation=allow_ep_interpolation,
+        interpolation_axis=ep_interpolation_axis,
     )
 
     model = ModelSettings(;
@@ -64,6 +66,8 @@ function load_settings(path::AbstractString)
         ep_reference_L=ep_reference_L,
         ep_t0_lower=selection.lower_record.t0,
         ep_t0_upper=selection.upper_record.t0,
+        ep_V_lower=selection.lower_record.V,
+        ep_V_upper=selection.upper_record.V,
         ep_lower_signed=selection.lower_record.E_p,
         ep_upper_signed=selection.upper_record.E_p,
         ep_interpolation_weight=selection.interpolation_weight,

@@ -60,11 +60,18 @@ two paired assignments, zero formally accepted endpoints, 862 MF evaluations,
 and 26.798333 allocation node-hours. The report includes complete and late
 energy grids, spin/pairing histories, convergence failures and provenance.
 
-The next authorized campaigns are the
+The latest prepared campaign is the
+[six finer square cuts and bare-ladder interpolation check](reports/two_basin_fine_cuts_20260915/README.md).
+It provides E0 and E_p figures along t0=1.4 and V=-0.4, the six requested
+linear estimates, and a separate-worktree launcher for twelve chi=200
+95%/5% starts (max 60, minimum 40, 36-node-hour ceiling).
+
+The preceding authorized campaigns are the
 [cubic two-basin grid and short square (1.4,0) continuation](reports/two_basin_next_campaigns_20260915/README.md):
 18 cubic starts capped at 60 raw evaluations and two square continuations
 capped at 20 additional evaluations. The report documents thresholds,
 saved-history qualification, full-MPS validation and two simple launchers.
+The user now reports cubic submission; preserve that source checkout.
 
 For the preceding V=0 anchor result, see the
 [September 12 V=0 anchor analysis](reports/two_basin_v000_20260912/README.md).

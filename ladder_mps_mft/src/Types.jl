@@ -20,6 +20,8 @@ Base.@kwdef struct ModelSettings
     ep_reference_L::Int = 0
     ep_t0_lower::Float64 = NaN
     ep_t0_upper::Float64 = NaN
+    ep_V_lower::Float64 = NaN
+    ep_V_upper::Float64 = NaN
     ep_lower_signed::Float64 = NaN
     ep_upper_signed::Float64 = NaN
     ep_interpolation_weight::Float64 = 0.0

@@ -48,8 +48,10 @@ function lookup_ep(
     source_path::AbstractString=DEFAULT_EP_REGISTRY,
     require_bound::Bool=true,
     allow_interpolation::Bool=false,
+    interpolation_axis::Symbol=:t0,
     atol::Real=1e-10,
 )
+    interpolation_axis in (:t0, :V) || throw(ArgumentError("E_p interpolation_axis must be t0 or V"))
     matches = filter(records) do record
         record.L == L &&
             _parameter_match(record.U, U; atol) &&
@@ -75,33 +77,36 @@ function lookup_ep(
 
     allow_interpolation || throw(ArgumentError(
         "no exact E_p entry for L=$L U=$U V=$V t0=$t0 density=$density; " *
-        "set pair_binding.allow_interpolation=true to interpolate only within a bracket in t0",
+        "set pair_binding.allow_interpolation=true to interpolate only within a bracket in $interpolation_axis",
     ))
     family = filter(records) do record
         record.L == L &&
             _parameter_match(record.U, U; atol) &&
-            _parameter_match(record.V, V; atol) &&
+            (interpolation_axis == :t0 ? _parameter_match(record.V, V; atol) :
+                _parameter_match(record.t0, t0; atol)) &&
             _parameter_match(record.density, density; atol)
     end
     isempty(family) && throw(ArgumentError(
-        "no E_p family for L=$L U=$U V=$V density=$density; cannot interpolate",
+        "no E_p family for L=$L U=$U V=$V t0=$t0 density=$density along $interpolation_axis; cannot interpolate",
     ))
-    best_by_t0 = Dict{Float64,EpRecord}()
-    for abscissa in unique(record.t0 for record in family)
-        at_abscissa = filter(record -> _parameter_match(record.t0, abscissa; atol), family)
-        best_by_t0[abscissa] = _best_ep_record(at_abscissa)
+    coordinate(record) = getproperty(record, interpolation_axis)
+    target = Float64(interpolation_axis == :t0 ? t0 : V)
+    best_by_coordinate = Dict{Float64,EpRecord}()
+    for abscissa in unique(coordinate(record) for record in family)
+        at_abscissa = filter(record -> _parameter_match(coordinate(record), abscissa; atol), family)
+        best_by_coordinate[abscissa] = _best_ep_record(at_abscissa)
     end
-    lower_values = filter(value -> value < Float64(t0) && !_parameter_match(value, t0; atol), collect(keys(best_by_t0)))
-    upper_values = filter(value -> value > Float64(t0) && !_parameter_match(value, t0; atol), collect(keys(best_by_t0)))
+    lower_values = filter(value -> value < target && !_parameter_match(value, target; atol), collect(keys(best_by_coordinate)))
+    upper_values = filter(value -> value > target && !_parameter_match(value, target; atol), collect(keys(best_by_coordinate)))
     (isempty(lower_values) || isempty(upper_values)) && throw(ArgumentError(
-        "t0=$t0 is not bracketed by E_p data for L=$L U=$U V=$V density=$density; extrapolation is forbidden",
+        "$interpolation_axis=$target is not bracketed by E_p data for L=$L U=$U V=$V t0=$t0 density=$density; extrapolation is forbidden",
     ))
-    lower = _validate_ep_record(best_by_t0[maximum(lower_values)], require_bound)
-    upper = _validate_ep_record(best_by_t0[minimum(upper_values)], require_bound)
+    lower = _validate_ep_record(best_by_coordinate[maximum(lower_values)], require_bound)
+    upper = _validate_ep_record(best_by_coordinate[minimum(upper_values)], require_bound)
     signbit(lower.E_p) == signbit(upper.E_p) || throw(ArgumentError(
-        "E_p changes sign between t0=$(lower.t0) and t0=$(upper.t0); interpolation is not physically controlled",
+        "E_p changes sign across the $interpolation_axis bracket; interpolation is not physically controlled",
     ))
-    weight = (Float64(t0) - lower.t0) / (upper.t0 - lower.t0)
+    weight = (target - coordinate(lower)) / (coordinate(upper) - coordinate(lower))
     ep_signed = muladd(weight, upper.E_p - lower.E_p, lower.E_p)
     iszero(ep_signed) && throw(ArgumentError("interpolated E_p is zero at t0=$t0"))
     require_bound && ep_signed >= 0 && throw(ArgumentError("interpolated E_p=$ep_signed is not bound"))
@@ -119,7 +124,7 @@ function lookup_ep(
         source_path=abspath(source_path),
         bound_pair=ep_signed < 0,
         tp_below_pair_binding=Float64(tp) < denominator,
-        mode=:linear_t0,
+        mode=interpolation_axis == :t0 ? :linear_t0 : :linear_V,
         lower_record=lower,
         upper_record=upper,
         interpolation_weight=weight,

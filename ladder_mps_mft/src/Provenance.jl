@@ -68,6 +68,11 @@ function model_fingerprint(model::ModelSettings)
     if model.ep_reference_L > 0 && model.ep_reference_L != model.L
         payload *= "|ep_reference_L=$(model.ep_reference_L)"
     end
+    # Preserve historical exact/t0 fingerprints; V interpolation has its own
+    # mode and must identify the endpoints defining that approximation.
+    if model.ep_mode == :linear_V
+        payload *= "|ep_V_lower=$(model.ep_V_lower)|ep_V_upper=$(model.ep_V_upper)"
+    end
     return bytes2hex(SHA.sha256(payload))
 end
 
@@ -202,6 +207,8 @@ function collect_provenance(settings::ProjectSettings)
         "ep_denominator" => settings.model.ep,
         "ep_t0_lower" => settings.model.ep_t0_lower,
         "ep_t0_upper" => settings.model.ep_t0_upper,
+        "ep_V_lower" => settings.model.ep_V_lower,
+        "ep_V_upper" => settings.model.ep_V_upper,
         "ep_lower_signed" => settings.model.ep_lower_signed,
         "ep_upper_signed" => settings.model.ep_upper_signed,
         "ep_interpolation_weight" => settings.model.ep_interpolation_weight,
