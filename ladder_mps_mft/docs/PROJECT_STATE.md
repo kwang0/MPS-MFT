@@ -1,6 +1,6 @@
 # Current project state
 
-Last locally reviewed: 2026-09-10 (40-step remainder published for user submission)
+Last locally reviewed: 2026-09-12 (V=0 anchors analyzed)
 
 This is the canonical mutable snapshot for resuming work. It is deliberately
 short. Stable rules belong in `AGENTS.md` and the method documents; durable
@@ -26,6 +26,12 @@ Recheck the branch, commit, and working tree at the start of each new task.
 
 ## Current scientific position
 
+- Manuscript artifact, September 15: the new
+  [introduction/background and results draft](manuscript/README.md) collects
+  the existing literature and analyses through September 13. The 16-page
+  PDF has 34 references, including five additions on stripes and coherence.
+  This is a synthesis artifact; it does not change numerical acceptance,
+  campaign status, or the working phase qualifications below.
 - Manuscript reference: the 2023 repulsive-ladder benchmark's mean-field
   equations match our `cubic_frustrated` geometry. The equation-level evidence
   and wording are in the [literature source notes](literature/SOURCE_NOTES.md#manuscript-note-geometry-of-the-2023-ladder-benchmark).
@@ -44,14 +50,21 @@ Recheck the branch, commit, and working tree at the start of each new task.
   remain unaccepted because of weak-channel noise-floor checks, a scalar
   charge extrapolation over-sensitivity, and one marginal energy-window miss.
   User-supplied sacct records give 3.763125 node-hours for this pair. The V=0
-  anchors remain PENDING in the September 10 job-specific output. The user
+  anchors are now synced and analyzed: stripe reaches 80 evaluations with
+  negligible pairing; the pairing lineage stops at the deadline after 62
+  while spin grows and pairing falls to 15.75% of its first measured value.
+  Both have strong, similar CDW/SDW textures, but neither is self-consistent.
+  Recorded MF time estimates 4.411889 node-hours; exact allocation cost awaits
+  user-supplied sacct. See the [V=0 analysis](reports/two_basin_v000_20260912/README.md).
+  The user
   now authorizes the remaining fourteen with a 40-evaluation cap, minimum 30,
   ten stable records, a 5e-7 channel noise floor plus full-window drift gate,
   and a 2e-8 t/site energy span. Global/inner-DMRG tolerances are unchanged.
   Saved-history gates first pass at 35/30 for the stripe/pairing anchors;
   older growing V=0 raw histories still fail. Missing per-iteration identity
   errors prevent retrospective acceptance certification. The new scope is
-  locally prepared, not submitted. Its separate-checkout launcher shares
+  published and locally prepared; its live submission status is not reviewed
+  in this point analysis. Its separate-checkout launcher shares
   existing accounting and leaves pending source paths unchanged. See the
   [remainder contract](reports/two_basin_remainder_20260910/README.md).
   See the [V=-0.4 analysis](reports/two_basin_vm04_20260910/README.md).
@@ -132,16 +145,16 @@ slider. The divergence analysis shows a slow stripe-like trajectory and an
 accelerated residual spike, not an accepted solution. Original statuses remain
 unchanged. A separate saved-history analysis explains the V=0 SDW jump and
 records the motivation for the now-prepared two-family raw comparison.
-Two of its 18 prepared starts now have synchronized 80-iteration histories;
-their September 10 analysis is linked above.
+All four original anchors now have synchronized terminal histories:
+80/80 evaluations at V=-0.4, and 80/62 at V=0. Their dated analyses are linked above.
 
 These are the newest locally documented campaigns. Their live scheduler state
 must not be inferred from the repository.
 
 | Run ID | Local record | Question |
 |---|---|---|
-| `20260910_square_two_basin_95_5_40_remainder` | 14 seeds/configs locally prepared; 75 Julia assertions and mock launcher test pass; not submitted | Proceed with user-authorized remainder using qualified noise handling; separate checkout and shared ledger |
-| `20260908_square_two_basin_95_5_80_anchors` | V=-0.4: both 80-step states synced/analyzed, unaccepted paired plateaus, 3.763125 node-hours; V=0 PENDING per user | Let original pending anchors finish; review synced outcomes |
+| `20260910_square_two_basin_95_5_40_remainder` | Published, 14 configs prepared; 75 Julia assertions and mock launcher test pass; live status not reviewed here | Retain unresolved 40-step outcomes; review before continuation |
+| `20260908_square_two_basin_95_5_80_anchors` | All four synced/analyzed, none accepted; V=-0.4 paired plateaus (80/80); V=0 stripe retained / pairing collapsing (80/62) | Exact V=0 allocation cost pending; targeted continuation may be needed for self-consistency |
 | `20260903_phase1_square_t014_v000_pairing_legacy_chi400_tight` | synced; 0/2 software-accepted; user accepts energetic comparison as adequate | Retain as the L=64 energy/basin reference; higher-chi checks remain future work |
 | `20260903_phase1_square_grid_smooth_pairing_chi200_loose` | five terminal states synced; 4 accepted, 1 diverging; compiled September 8 | Review Fourier grid and divergence at `(1.0,-0.4)` |
 | `20260903_phase1_cubic_unfrustrated_grid_smooth_pairing_chi200_loose` | user reports still running September 8; two local terminal files seen, not analyzed here | Finish eight-point cubic-unfrustrated fill |
@@ -153,18 +166,23 @@ documents linked from `docs/plans/ACTIVE.md`.
 
 ## Live Perlmutter and accounting boundary
 
-- Latest supplied evidence, 2026-09-10: jobs 58093799 (stripe) and 58093800
+- Allocation evidence supplied on 2026-09-10: jobs 58093799 (stripe) and 58093800
   (pairing) at V=-0.4 are COMPLETED in pasted sacct output, with elapsed
   seconds 30799 and 23390. Their combined project charge is 3.763125 node-hours.
   Their local histories confirm maximum_iterations after 80 evaluations each.
-  Jobs 58093802/58093803 at V=0 are PENDING in the user's status output.
-  The latest prose refers to pending `(1.0,0.0)` whereas those job labels are
-  `(1.4,0.0)`; clarification was requested because a separate `(1.0,0.0)`
-  submission would overlap the prepared remainder.
+  Jobs 58093802/58093803 were PENDING in that output; the September 12
+  synced terminal artifacts supersede that status, as recorded below.
   No automatic remainder or continuation submission is configured. The local
   reconciliation ledger has no entries yet for these four jobs; analysis
   does not modify accounting, and 2.236875 node-hours of the finished pair's
   6-hour reserved ceiling are eligible for release through normal reconciliation.
+- September 12: the user identifies `(1.4,0.0)` as completed. Synced states
+  and logs confirm 58093802 ended `maximum_iterations` at 80 and 58093803
+  ended `time_limit` at 62, both accepted=false and with matching original
+  numerical/implementation fingerprints. Recorded MF times are 22189.829
+  and 41341.378 seconds, or 4.411889 combined fractional node-hours excluding
+  allocation overhead. The synced ledger has only their reservations; exact
+  sacct accounting was requested. No live scheduler check was performed.
 - Earlier user report, 2026-09-08: queued runs were canceled (job IDs not
   provided). The direct submission wrapper reconciles finalized reservations
   through the existing `sacct`-based accounting before submitting. Cancellation
@@ -190,17 +208,20 @@ documents linked from `docs/plans/ACTIVE.md`.
 
 The user authorizes the fourteen remaining starts and GitHub publication.
 The validated implementation was pushed to `origin/codex/mps-mft-phase0-refactor`
-as `7443d9d` (Qualify 40-step two-basin runs). Use the separate-checkout commands in
-`docs/reports/two_basin_remainder_20260910/README.md`. The source checkout used
-by pending anchors must remain at its submitted revision. Confirm the pending
-coordinate if it is a separate `(1.0,0.0)` submission; the prepared remainder
-excludes only the known `(1.4,-0.4)` and `(1.4,0.0)` anchor pairs.
+as `7443d9d` (Qualify 40-step two-basin runs), with handoff `ad5a95e`.
+Commands remain in `docs/reports/two_basin_remainder_20260910/README.md`;
+check the user's actual submission status before duplicating work. That scope
+excludes the known `(1.4,-0.4)` and `(1.4,0.0)` anchor pairs.
 No new jobs, live checks, or reservations have been performed locally. The
 14 starts allow at most 560 evaluations and reserve at most 42 fractional
 node-hours under the unchanged 12-hour segment ceiling and live 400-hour cap.
 Actual runtime can be lower. Retain incomplete outcomes at the 40-step limit
-for analysis; no automatic extensions. Let the existing anchors finish and
-analyze their synchronized results under their original provenance.
+for analysis; no automatic extensions. The V=0 anchor analysis now shows
+resolved slow stripe relaxation and a pairing lineage still losing pairing
+at 62. Keep the revised thresholds: neither saved history ever passes the
+unchanged global field gate. Consider targeted continuation after accounting,
+prioritizing the pairing lineage to resolve its endpoint; no continuation is
+prepared by this analysis. Neither terminal energy is an accepted phase ranking.
 
 The four finite-size seeds remain ready for review; their configs keep tight
 comparison controls at chi=200, use an identity gate of 1e-8 t/site, and hold

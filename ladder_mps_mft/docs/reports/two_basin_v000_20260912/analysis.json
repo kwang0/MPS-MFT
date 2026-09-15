@@ -1,0 +1,576 @@
+{
+  "point": {
+    "t0": 1.4,
+    "V": 0.0,
+    "L": 64,
+    "chi": 200
+  },
+  "runs": [
+    {
+      "family": "stripe",
+      "job_id": "58093802",
+      "source": "output\\phase1_gpu\\20260908_square_two_basin_95_5_80_anchors\\results\\square__stripe_weak_other_t014_v000_chi200_raw\\square__stripe_weak_other__square_two_reference_correlations_eps005_raw__none__stripe_eps005\\20260911T163326_794697_879c440a5602\\state.h5",
+      "source_sha256": "ba38078fd047653251f321d14995e89acc2c63d05cdba8e1e41fac6b2a3b5bb0",
+      "full_source_sha256": "9ad2d9ea1239727e577be2997a7a9f62e1e6aaeae0653bd8591448f55dc58ea5",
+      "config_sha256": "b60b2174e7267fee9f1ea93275544ed3fcf1ca2ccc95e490a1dc55f846872db1",
+      "fingerprints": {
+        "model_fingerprint": "879c440a56028e19184315d58f12f1ee47189b0fadafbccfee60facb63c905a8",
+        "numerical_fingerprint": "ccf02ca2cd9bc4bdb7edc576e123d9f3c99f2cdad2b72b37e6871071730441ef",
+        "implementation_sha256": "269a5ceb1f56e2b85b4b7aefe2903901c16d50ae56ecb6f189ebf2605653c377",
+        "ep_source_sha256": "2209bd2ca3c1ad02c0e542d1a9d63ecf90fdfa49120ad9cc3af599a5b4bc1f0e"
+      },
+      "iterations": 80,
+      "status": "maximum_iterations",
+      "accepted": false,
+      "gates_last5": {
+        "minimum_iterations": true,
+        "global_field_window": false,
+        "global_slow_mode": false,
+        "density_window": true,
+        "inner_dmrg_window": false,
+        "corrected_energy_window": false,
+        "identity": true,
+        "effective_energy": true,
+        "charge_modulation": false,
+        "charge_uniform": true,
+        "exchange_charge": false,
+        "exchange_spin": false,
+        "pairing": true,
+        "spin": false
+      },
+      "corrected_energy_per_site": -0.6611220330815781,
+      "corrected_energy_span_last5": 1.3236773122038414e-08,
+      "corrected_energy_span_last20": 1.1650965414666814e-07,
+      "corrected_energy_span_last40": 2.462043252604573e-07,
+      "global_relative_residual": 0.0005875504165430753,
+      "density_error": 4.9414139446923855e-11,
+      "identity_error_per_site": 2.923661313047887e-11,
+      "last_dmrg_sweep_delta_total": 7.510720934078563e-09,
+      "last_dmrg_sweep_discarded_weight": 7.254994867798711e-06,
+      "solver_seconds": 22189.828914403915,
+      "solver_node_hours": 1.5409603412780497,
+      "reserved_node_hours": 3.0,
+      "pairing_field_rms_final": 1.7462171739294658e-10,
+      "spin_field_rms_initial": 0.03390287168895232,
+      "spin_field_rms_first": 0.02865948826588769,
+      "spin_field_rms_final": 0.024136612949016468,
+      "spin_field_rms_last20_range": [
+        0.024123872975531892,
+        0.024136612949016468
+      ],
+      "stripe_template_projection_last20_range": [
+        0.7068801978554057,
+        0.7076410487825643
+      ],
+      "first_spin_rms_below_1e7": null,
+      "final_rung_pair_mean": -1.5393260752552124e-09,
+      "final_leg_pair_mean": 1.0589726761303983e-09,
+      "channel_final": {
+        "charge_modulation": {
+          "absolute": 1.2446598283036986e-05,
+          "applied_rms": 0.0034997348356088556,
+          "contraction": 0.9928733769853337,
+          "cosine": 0.9998723710977492,
+          "factor": 140.31891373263963,
+          "measured_rms": 0.003499742313029156,
+          "passes": 0,
+          "relative": 0.0014304661170147703
+        },
+        "charge_uniform": {
+          "absolute": 3.088812625812176e-11,
+          "applied_rms": 0.0042651131630064,
+          "contraction": -2.2726449480572812,
+          "cosine": -1.0,
+          "factor": 1.0,
+          "measured_rms": 0.004265113132118274,
+          "passes": 1,
+          "relative": 7.242041436562796e-09
+        },
+        "exchange_charge": {
+          "absolute": 5.666968393533856e-06,
+          "applied_rms": 0.0018775947569598256,
+          "contraction": 0.9934332551588615,
+          "cosine": 0.9988978371975515,
+          "factor": 152.28245107611423,
+          "measured_rms": 0.00187759420668552,
+          "passes": 0,
+          "relative": 0.00022146610437260295
+        },
+        "exchange_spin": {
+          "absolute": 4.794195760743358e-06,
+          "applied_rms": 0.0003669472430058317,
+          "contraction": 0.9900863580061341,
+          "cosine": 0.9989257762691537,
+          "factor": 100.87110273083825,
+          "measured_rms": 0.0003669441666755423,
+          "passes": 0,
+          "relative": 0.000929097995590484
+        },
+        "pairing": {
+          "absolute": 2.807304648977496e-10,
+          "applied_rms": 3.8584740611987696e-11,
+          "contraction": 0.5024268784634501,
+          "cosine": 0.983697307907426,
+          "factor": 1.0,
+          "measured_rms": 2.238203558668832e-11,
+          "passes": 1,
+          "relative": 0.44225707621445365
+        },
+        "spin": {
+          "absolute": 4.490707453838616e-05,
+          "applied_rms": 0.024264670856899314,
+          "contraction": 0.9902291808997989,
+          "cosine": 0.9999399681142894,
+          "factor": 102.34556486461025,
+          "measured_rms": 0.02426465186964309,
+          "passes": 0,
+          "relative": 0.0007296026387391877
+        }
+      },
+      "channel_last20": {
+        "charge_modulation": {
+          "max_absolute": 1.5011121908509867e-05,
+          "max_relative": 0.0018210698941556144,
+          "median_cosine": 0.9998984469922103,
+          "passes": 0
+        },
+        "charge_uniform": {
+          "max_absolute": 3.644711615846674e-11,
+          "max_relative": 8.545404213798279e-09,
+          "median_cosine": -1.0,
+          "passes": 18
+        },
+        "exchange_charge": {
+          "max_absolute": 6.8712985967574365e-06,
+          "max_relative": 0.00028152704940821347,
+          "median_cosine": 0.9989749037054787,
+          "passes": 0
+        },
+        "exchange_spin": {
+          "max_absolute": 5.851584419287563e-06,
+          "max_relative": 0.0011774232553286206,
+          "median_cosine": 0.9990528475520638,
+          "passes": 0
+        },
+        "pairing": {
+          "max_absolute": 9.312838438011344e-08,
+          "max_relative": 1.1086214545713673,
+          "median_cosine": -0.10333713211152457,
+          "passes": 20
+        },
+        "spin": {
+          "max_absolute": 5.376771241001393e-05,
+          "max_relative": 0.0009304745144024628,
+          "median_cosine": 0.999946121914006,
+          "passes": 0
+        }
+      },
+      "residual_geometry": {
+        "channels": {
+          "spin": {
+            "amplitude_fractional_change": -7.825062348087997e-07,
+            "residual_parallel_power_fraction": 2.06586305134103e-06,
+            "shape_relative_l2": 0.0007296024560277026,
+            "residual_power_fraction_rungs_6_to_59": 0.9902448264350953,
+            "largest_residual_rungs": [
+              40,
+              39,
+              41,
+              38,
+              42,
+              37,
+              55,
+              56
+            ]
+          },
+          "charge_modulation": {
+            "amplitude_fractional_change": 2.136567669230871e-06,
+            "residual_parallel_power_fraction": 6.058757820050833e-07,
+            "shape_relative_l2": 0.0014304656836723161,
+            "residual_power_fraction_rungs_6_to_59": 0.9832497197905528,
+            "largest_residual_rungs": [
+              37,
+              42,
+              43,
+              36,
+              38,
+              41,
+              44,
+              35
+            ]
+          },
+          "exchange_charge": {
+            "amplitude_fractional_change": -2.930740531370546e-07,
+            "residual_parallel_power_fraction": 2.0565532881944422e-06,
+            "shape_relative_l2": 0.0002214659415499844
+          },
+          "exchange_spin": {
+            "amplitude_fractional_change": -8.383576516779456e-06,
+            "residual_parallel_power_fraction": 9.001951207095944e-05,
+            "shape_relative_l2": 0.0009290639650540476
+          }
+        },
+        "staggered_spin_zero_crossing_rungs": {
+          "20": [
+            9.494766959432337,
+            24.15247522332436,
+            39.124996642103106,
+            54.81003275955634
+          ],
+          "40": [
+            9.423481084785296,
+            24.224989832135417,
+            39.26919092975679,
+            55.041927385624156
+          ],
+          "60": [
+            9.409606815647575,
+            24.285336109327595,
+            39.39986375862203,
+            55.18301148323153
+          ],
+          "79": [
+            9.413505802059838,
+            24.340022742409854,
+            39.51116666883974,
+            55.264052784386884
+          ],
+          "80": [
+            9.413889061812833,
+            24.342842884254463,
+            39.51648975757759,
+            55.267339040828496
+          ]
+        },
+        "zero_crossing_method": "Linear interpolation between adjacent measured MF rungs; not a fitted physical displacement."
+      },
+      "physical_spin_odd_bulk_rms": 0.17684622468114894,
+      "physical_charge_bulk_rms_about_bulk_mean": 0.05054269863420106,
+      "pairing_peak": {
+        "iteration": 1,
+        "bulk_rms": 0.00010782403649124182,
+        "terminal_fraction": 1.619506402054708e-06
+      },
+      "last5_changes": {
+        "spin_rms_fraction": 8.44847945895566e-05,
+        "pairing_rms_fraction": -0.9092108783774069,
+        "energy_per_site": -1.3236773122038414e-08
+      },
+      "last10_changes": {
+        "spin_rms_fraction": 0.00020761968183524715,
+        "pairing_rms_fraction": -0.9624392967355235,
+        "energy_per_site": -3.139115878347809e-08
+      },
+      "last20_changes": {
+        "spin_rms_fraction": 0.0005281064735127572,
+        "pairing_rms_fraction": -0.9423345261465651,
+        "energy_per_site": -1.1650965414666814e-07
+      },
+      "inner_dmrg_passes_last5": 2,
+      "spin_change_over_published_floor": 89.81414907677232,
+      "energy_at_40": -0.66112176936304,
+      "global_field_gate_passing_iterations": [],
+      "spin_rms_growth_from_first_measurement": 0.8421857614863755,
+      "charge_full_length_dft": {
+        "mode": 4,
+        "q_over_pi": 0.125,
+        "amplitude": 0.03370339241951952
+      },
+      "spin_odd_full_length_dft": {
+        "mode": 30,
+        "q_over_pi": 0.9375,
+        "amplitude": 0.12247359800627766
+      },
+      "final_mu_search_status": "density_tolerance",
+      "final_mu_density_converged": true,
+      "final_mu_evaluations": 1,
+      "global_slow_mode_extrapolated_relative": 0.06241668176489422,
+      "global_slow_mode_lambda": 0.990586644468602
+    },
+    {
+      "family": "pairing",
+      "job_id": "58093803",
+      "source": "output\\phase1_gpu\\20260908_square_two_basin_95_5_80_anchors\\results\\square__pairing_weak_other_t014_v000_chi200_raw\\square__pairing_weak_other__square_two_reference_correlations_eps005_raw__none__pairing_eps005\\20260911T225246_847355_879c440a5602\\state.h5",
+      "source_sha256": "8d18a149ef1b6707f2377b35f9b5ed9ada97f6a287d693b09ede6b0c7e0c5ab9",
+      "full_source_sha256": "d4b2ef33f8d969e23b519f08642f50eacfd158948c0b6710756613fd89344237",
+      "config_sha256": "2adc59a4b22f0e35726e7f3a49667ba900c9c50d8e9421694518ce81a6366ad6",
+      "fingerprints": {
+        "model_fingerprint": "879c440a56028e19184315d58f12f1ee47189b0fadafbccfee60facb63c905a8",
+        "numerical_fingerprint": "ccf02ca2cd9bc4bdb7edc576e123d9f3c99f2cdad2b72b37e6871071730441ef",
+        "implementation_sha256": "269a5ceb1f56e2b85b4b7aefe2903901c16d50ae56ecb6f189ebf2605653c377",
+        "ep_source_sha256": "2209bd2ca3c1ad02c0e542d1a9d63ecf90fdfa49120ad9cc3af599a5b4bc1f0e"
+      },
+      "iterations": 62,
+      "status": "time_limit",
+      "accepted": false,
+      "gates_last5": {
+        "minimum_iterations": true,
+        "global_field_window": false,
+        "global_slow_mode": false,
+        "density_window": false,
+        "inner_dmrg_window": true,
+        "corrected_energy_window": false,
+        "identity": true,
+        "effective_energy": true,
+        "charge_modulation": false,
+        "charge_uniform": false,
+        "exchange_charge": false,
+        "exchange_spin": false,
+        "pairing": false,
+        "spin": false
+      },
+      "corrected_energy_per_site": -0.6610320864082713,
+      "corrected_energy_span_last5": 4.5738433680608814e-05,
+      "corrected_energy_span_last20": 9.415619869501679e-05,
+      "corrected_energy_span_last40": 0.00015195062911110835,
+      "global_relative_residual": 0.02651349260445003,
+      "density_error": 2.44182945000615e-05,
+      "identity_error_per_site": 2.8338220658952196e-11,
+      "last_dmrg_sweep_delta_total": 2.471949755999958e-09,
+      "last_dmrg_sweep_discarded_weight": 7.617470525895584e-06,
+      "solver_seconds": 41341.37764072418,
+      "solver_node_hours": 2.8709290028280683,
+      "reserved_node_hours": 3.0,
+      "pairing_field_rms_final": 0.0007090378222140335,
+      "spin_field_rms_initial": 0.001784351701129898,
+      "spin_field_rms_first": 0.0018161107380921838,
+      "spin_field_rms_final": 0.022509742365200636,
+      "spin_field_rms_last20_range": [
+        0.013770517274855391,
+        0.022509742365200636
+      ],
+      "stripe_template_projection_last20_range": [
+        6.421610449103344,
+        12.246844499437534
+      ],
+      "first_spin_rms_below_1e7": null,
+      "final_rung_pair_mean": -0.006751905259601499,
+      "final_leg_pair_mean": 0.004692962815942758,
+      "channel_final": {
+        "charge_modulation": {
+          "absolute": 0.00030457331641967067,
+          "applied_rms": 0.003295636537033982,
+          "contraction": 0.7929152547805023,
+          "cosine": 0.9963027122287053,
+          "factor": 4.828940919525765,
+          "measured_rms": 0.003365108237474638,
+          "passes": 0,
+          "relative": 0.0352771642446531
+        },
+        "charge_uniform": {
+          "absolute": 1.524351823444653e-06,
+          "applied_rms": 0.004264971131954362,
+          "contraction": -21.271278211944907,
+          "cosine": -1.0,
+          "factor": 1.0,
+          "measured_rms": 0.004263446780130917,
+          "passes": 0,
+          "relative": 0.00035741199090980497
+        },
+        "exchange_charge": {
+          "absolute": 0.00015381520524583234,
+          "applied_rms": 0.0018680542708869696,
+          "contraction": 0.794504715493637,
+          "cosine": 0.9942448442295757,
+          "factor": 4.866291712737747,
+          "measured_rms": 0.0018710184633892663,
+          "passes": 0,
+          "relative": 0.005597418499203639
+        },
+        "exchange_spin": {
+          "absolute": 0.00025790611271317,
+          "applied_rms": 0.00033712759802943207,
+          "contraction": 0.8334187037259585,
+          "cosine": 0.9977596680957862,
+          "factor": 6.003074909171725,
+          "measured_rms": 0.0003467124556897457,
+          "passes": 0,
+          "relative": 0.041767284566683306
+        },
+        "pairing": {
+          "absolute": 0.0006537938322037401,
+          "applied_rms": 0.0001289474698466164,
+          "contraction": 0.9102583497394116,
+          "cosine": 0.9991767131971093,
+          "factor": 11.143097960603994,
+          "measured_rms": 8.801953418492279e-05,
+          "passes": 0,
+          "relative": 0.31842438175373816
+        },
+        "spin": {
+          "absolute": 0.0020140189390789043,
+          "applied_rms": 0.022790253450212787,
+          "contraction": 0.8527435604641301,
+          "cosine": 0.998833337329496,
+          "factor": 6.790874498608343,
+          "measured_rms": 0.023234097044125386,
+          "passes": 0,
+          "relative": 0.03230873666804129
+        }
+      },
+      "channel_last20": {
+        "charge_modulation": {
+          "max_absolute": 0.00040985506308629203,
+          "max_relative": 0.05323982101094229,
+          "median_cosine": 0.9974267439952937,
+          "passes": 0
+        },
+        "charge_uniform": {
+          "max_absolute": 1.524351823444653e-06,
+          "max_relative": 0.00035741199090980497,
+          "median_cosine": 1.0,
+          "passes": 12
+        },
+        "exchange_charge": {
+          "max_absolute": 0.00020493813146890347,
+          "max_relative": 0.0078016423932568794,
+          "median_cosine": 0.9969522544019676,
+          "passes": 0
+        },
+        "exchange_spin": {
+          "max_absolute": 0.00031269139181075347,
+          "max_relative": 0.056630237360052134,
+          "median_cosine": 0.9976133048460641,
+          "passes": 0
+        },
+        "pairing": {
+          "max_absolute": 0.0006934876626744984,
+          "max_relative": 0.31842438175373816,
+          "median_cosine": 0.9983859925669798,
+          "passes": 0
+        },
+        "spin": {
+          "max_absolute": 0.002620734839752302,
+          "max_relative": 0.04180395040789941,
+          "median_cosine": 0.9980951123314401,
+          "passes": 0
+        }
+      },
+      "residual_geometry": {
+        "channels": {
+          "spin": {
+            "amplitude_fractional_change": 0.019475149536279268,
+            "residual_parallel_power_fraction": 0.3370455843610743,
+            "shape_relative_l2": 0.026306423681534526,
+            "residual_power_fraction_rungs_6_to_59": 0.9999324524264037,
+            "largest_residual_rungs": [
+              33,
+              32,
+              34,
+              31,
+              35,
+              30,
+              29,
+              36
+            ]
+          },
+          "charge_modulation": {
+            "amplitude_fractional_change": 0.021079903581594506,
+            "residual_parallel_power_fraction": 0.32875594330406566,
+            "shape_relative_l2": 0.028902399105783995,
+            "residual_power_fraction_rungs_6_to_59": 0.9990013040183877,
+            "largest_residual_rungs": [
+              39,
+              26,
+              25,
+              40,
+              33,
+              32,
+              38,
+              31
+            ]
+          },
+          "exchange_charge": {
+            "amplitude_fractional_change": 0.0015867807207170515,
+            "residual_parallel_power_fraction": 0.07865594586011314,
+            "shape_relative_l2": 0.005372775542790919
+          },
+          "exchange_spin": {
+            "amplitude_fractional_change": 0.02843094933888124,
+            "residual_parallel_power_fraction": 0.42225651114096585,
+            "shape_relative_l2": 0.03174707888110424
+          }
+        },
+        "staggered_spin_zero_crossing_rungs": {
+          "20": [
+            9.91548244405051,
+            23.338036540275446,
+            40.382307787736316,
+            55.00181836294287
+          ],
+          "40": [
+            11.029965581486751,
+            23.54855440509777,
+            41.27876524935095,
+            53.84618654274894
+          ],
+          "60": [
+            10.814725654093424,
+            25.493207773291694,
+            39.36042876258243,
+            54.03671451231452
+          ]
+        },
+        "zero_crossing_method": "Linear interpolation between adjacent measured MF rungs; not a fitted physical displacement."
+      },
+      "physical_spin_odd_bulk_rms": 0.16492632848857358,
+      "physical_charge_bulk_rms_about_bulk_mean": 0.04654779965651954,
+      "pairing_peak": {
+        "iteration": 1,
+        "bulk_rms": 0.004501573221244311,
+        "terminal_fraction": 0.15750889463884885
+      },
+      "last5_changes": {
+        "spin_rms_fraction": 0.1200056706918522,
+        "pairing_rms_fraction": -0.6555987410446505,
+        "energy_per_site": -4.5738433680608814e-05
+      },
+      "last10_changes": {
+        "spin_rms_fraction": 0.27117123176745794,
+        "pairing_rms_fraction": -0.7584483286624228,
+        "energy_per_site": -6.462957489739019e-05
+      },
+      "last20_changes": {
+        "spin_rms_fraction": 0.6346330290949087,
+        "pairing_rms_fraction": -0.8087568509731252,
+        "energy_per_site": -9.415619869501679e-05
+      },
+      "inner_dmrg_passes_last5": 5,
+      "spin_change_over_published_floor": 4028.037878157809,
+      "energy_at_40": -0.6609311771454932,
+      "global_field_gate_passing_iterations": [],
+      "spin_rms_growth_from_first_measurement": 12.394476775599609,
+      "charge_full_length_dft": {
+        "mode": 4,
+        "q_over_pi": 0.125,
+        "amplitude": 0.02568675975704585
+      },
+      "spin_odd_full_length_dft": {
+        "mode": 30,
+        "q_over_pi": 0.9375,
+        "amplitude": 0.11081456707969242
+      },
+      "final_mu_search_status": "time_limit",
+      "final_mu_density_converged": false,
+      "final_mu_evaluations": 4,
+      "global_slow_mode_extrapolated_relative": 0.1853120480644249,
+      "global_slow_mode_lambda": 0.8569251547247891
+    }
+  ],
+  "comparison": {
+    "terminal_corrected_energy_difference_pairing_minus_stripe": 8.994667330686212e-05,
+    "physical_charge": {
+      "cosine": 0.8752973979327213,
+      "relative_l2_difference": 0.026447093737606304,
+      "maximum_difference": 0.043647282937290255
+    },
+    "physical_spin_odd": {
+      "cosine": 0.9651588722297806,
+      "relative_l2_difference": 0.26368292801927584,
+      "maximum_difference": 0.08156263838095704
+    }
+  },
+  "solver_seconds_total": 63531.2065551281,
+  "solver_node_hours_total": 4.411889344106118,
+  "accounting_basis": "Saved MF wall_seconds / 14400; one GPU is quarter node. Allocation overhead excluded; awaiting sacct."
+}

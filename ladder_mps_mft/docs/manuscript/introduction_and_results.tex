@@ -1,0 +1,825 @@
+% Working manuscript draft. Compile from this directory.
+% Reuses ../literature/references.bib without changing the annotated review.
+% New references from the September 15 discussion are in additional_references.bib.
+\documentclass[11pt,letterpaper]{article}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{microtype}
+\usepackage{booktabs,tabularx,array}
+\usepackage{graphicx}
+\usepackage{needspace}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{xurl}
+\usepackage{xcolor}
+\usepackage[colorlinks=true,linkcolor=blue!50!black,
+  citecolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
+\setlength{\parindent}{1.3em}
+\setlength{\parskip}{0.25em}
+\setlength{\emergencystretch}{3em}
+\renewcommand{\arraystretch}{1.18}
+\setcounter{tocdepth}{1}
+\newcommand{\tp}{t_{\perp}}
+\newcommand{\Ep}{E_{\mathrm p}}
+\newcommand{\hc}{\mathrm{H.c.}}
+\newcommand{\avg}[1]{\langle #1\rangle}
+\newcommand{\ev}[1]{\hyperref[ev:#1]{Evidence~\ref*{ev:#1}}}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+
+\title{Pairing, Stripes, and Competing Order\\in Coupled Hubbard Ladders\\
+  \large Introduction, Background, and Current Results}
+\author{Ladder MPS+MF project\\Working manuscript draft}
+\date{15 September 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Weakly coupled two-leg Hubbard ladders provide a setting in which the formation
+of singlet pairs can be studied separately from the collective order selected
+by coupling correlated subsystems. This draft develops the motivation for a
+multichannel matrix-product-state plus mean-field study of superconducting,
+charge, and magnetic order, with particular attention to the relationship
+between stripe-centered pairing proposals and the broader picture of
+intertwined orders. It also collects the project's current local evidence.
+The isolated repulsive ladder exhibits a finite-system spin gap and substantial
+pairing correlations, whereas the latest square-array trajectories at zero
+nearest-neighbor interaction develop strong stripe textures. At an attractive
+interaction, two contrasting initial states instead approach a common paired
+state. These observations motivate a distinction between local pairing
+tendencies and the order selected in an array. The numerical results remain
+finite-length, finite-bond-dimension evidence, with explicit limits on
+self-consistency, response completeness, and thermodynamic interpretation.
+\end{abstract}
+
+\noindent\textbf{Draft scope.}
+Sections~\ref{sec:intro}--\ref{sec:background} are draft manuscript prose.
+Section~\ref{sec:results} is a dated collection of results and interpretation,
+including unresolved points that must remain visible during manuscript
+development. The evidence cutoff is the synchronized analyses through
+13 September 2026; the literature discussion also incorporates the
+15 September synthesis. Appendix~\ref{sec:evidence} identifies the local
+sources. No new many-body calculation is reported here.
+
+\tableofcontents
+\clearpage
+
+\section{Introduction}
+\label{sec:intro}
+
+The relationship between superconductivity, antiferromagnetism, and spatial
+charge organization is a central question in doped Mott insulators.
+The Hubbard model provides a minimal language for studying how kinetic energy
+and local repulsion generate collective behavior, while its extensions allow
+the influence of nonlocal interactions and lattice structure to be examined
+systematically~\citep{Hubbard1963,Anderson1987,Lee2006,Arovas2022}.
+In this setting, strong singlet correlations need not lead directly to
+superconductivity. Charge and spin order can develop from the same interacting
+electrons, and the scales associated with pair formation and collective phase
+coherence can differ. A microscopic account of superconductivity must therefore
+address the competing ways in which a correlated electronic state can organize.
+
+Stripe order makes this issue particularly concrete. Experiments in
+lanthanum-based cuprates established charge modulations accompanied by
+incommensurate magnetic order, with antiferromagnetic domains separated by
+hole-rich regions~\citep{Tranquada1995}. Subsequent measurements found closely
+related magnetic excitation spectra in stripe-ordered and superconducting
+materials, motivating theories in which stripe correlations participate in
+the pairing mechanism~\citep{Tranquada2004}. A complementary view regards
+stripes as a competing organization of a doped Mott insulator whose
+short-distance singlet physics can also support superconductivity without
+requiring a particular stripe arrangement~\citep{Lee2006}. The resulting
+question concerns both the origin of pairing and the consequences of charge
+organization for the coherence of pairs.
+
+The distinction between these views is sharpened by separating the existence
+of stripe correlations from their necessity for superconductivity. In
+stripe-ordered La$_{1.875}$Ba$_{0.125}$CuO$_4$, transport and magnetization
+measurements reveal superconducting correlations within the planes despite
+strong suppression of three-dimensional phase
+coherence~\citep{Li2007}. A spatially sign-changing superconducting order
+parameter can frustrate interplane Josephson coupling and offers a specific
+explanation of this separation~\citep{Berg2007}. Such observations permit
+cooperation at the level of local pairing and competition at the level of
+collective order. They motivate treating superconducting, charge, and spin
+degrees of freedom together, as emphasized in the framework of intertwined
+orders~\citep{Fradkin2015,Agterberg2020}.
+
+Modern Hubbard-model calculations reinforce the dependence of this
+relationship on the microscopic Hamiltonian. Complementary numerical methods
+find stripe order with small energy differences between wavelengths in a
+studied regime of the nearest-neighbor square-lattice
+model~\citep{Zheng2017}. Other calculations find no superconducting ground state
+in specified regimes of that minimal model~\citep{Qin2020}, while additional
+hopping terms can support pairing together with spatial charge
+modulation~\citep{JiangDevereaux2019,Xu2024}. Deliberately imposed hopping
+inhomogeneity can also enhance superconducting correlations on
+cylinders~\citep{JiangKivelson2022}. These results do not give a universal sign
+to the influence of stripes. They instead identify a competition that must be
+resolved at the level of a specified model, geometry, and numerical accuracy.
+
+Two-leg ladders provide useful correlated building blocks for this problem.
+Their magnetic spectrum differs qualitatively from that of a single chain,
+and doped repulsive ladders can support a spin gap, bound holes, and slowly
+decaying singlet-pair correlations~\citep{Dagotto1992,Noack1994,DagottoRice1996}.
+The corresponding low-energy description can contain a gapped spin sector and
+a gapless total-charge mode~\citep{LutherEmery1974,BalentsFisher1996}.
+High-accuracy numerical studies show that the relative decay of pair and
+density correlations requires careful control of open boundaries, bond
+dimension, and fit windows~\citep{Dolfi2015,Shen2023}. Thus a ladder can exhibit
+substantial pairing tendencies while retaining the fluctuations characteristic
+of an effectively one-dimensional system.
+
+Coupling such ladders introduces a second question: which order develops when
+the subsystems reinforce one another? Stripe-centered theories provide an
+explicit route from spin-gap formation to pairing and then to Josephson
+coherence~\citep{Emery1997}. A spatially modulated repulsive Hubbard
+construction demonstrates how nearly decoupled ladders can supply a pairing
+scale while weak interladder coupling establishes superconducting
+order~\citep{Arrigoni2004}. Matrix-product-state plus mean-field methods
+provide a practical numerical realization of the broader coupled-subsystem
+strategy~\citep{Bollmark2020,Bollmark2023}. Their multichannel extension shows
+why charge and superconducting solutions must be retained and compared within
+a common framework~\citep{Bollmark2025}.
+
+The interaction between neighboring densities supplies an additional tuning
+parameter. Calculations on extended Hubbard ladders and cylinders find that
+attraction can enhance pairing over selected parameter ranges, while strong
+attraction can also favor charge segregation~\citep{Zhou2023,Peng2023}.
+Recent cuprate-ladder spectroscopy, interpreted together with DMRG, provides
+experimental motivation for considering attraction beyond the simple onsite
+Hubbard interaction~\citep{Padma2025}. Its implications for a coupled array
+remain to be determined: stronger binding changes both the properties of the
+individual ladder and the effective interladder couplings. Pair mobility,
+susceptibility, and competing order must be considered along with binding.
+
+The present project investigates these issues in arrays of repulsive two-leg
+extended Hubbard ladders, treating the ladder with an MPS ground-state method
+and the transverse environment with a multichannel mean-field construction.
+The principal regime is $U/t=8$ and density $n=15/16$ per physical site.
+Rung hopping, nearest-neighbor interaction, and transverse connectivity are
+varied while pairing, normal exchange, and spin-resolved density fields remain
+available. The immediate objective is to establish reproducible ordered
+solutions and understand how their competition relates to the underlying
+ladder correlations. The current evidence suggests that intrinsic pairing
+tendencies can coexist with an array tendency toward static stripes, and that
+attraction can reverse the observed outcome at a representative square-array
+point. Establishing the extent and thermodynamic stability of these behaviors
+requires the numerical controls discussed below.
+
+\section{Physical background and connection to the model}
+\label{sec:background}
+
+\subsection{Local singlets, pairing correlations, and coherence}
+
+Three observables answer different questions. A spin gap measures the energy
+cost of the lowest accessible spin excitation at fixed particle number.
+A pair-binding energy compares even- and odd-particle sectors. A pair
+correlation function measures how a pair created in one region correlates with
+a pair removed elsewhere. None of these quantities alone establishes a
+nonzero superfluid stiffness or a superconducting transition temperature.
+For example, an isolated number-conserving ladder has zero anomalous
+expectation value even when its pair correlations decay algebraically.
+
+For a spin-singlet bond operator,
+\begin{equation}
+ \Delta_{ab}=\frac{c_{a\uparrow}c_{b\downarrow}
+                   -c_{a\downarrow}c_{b\uparrow}}{\sqrt{2}},
+ \qquad
+ P_{ab,cd}=\avg{\Delta^\dagger_{ab}\Delta_{cd}},
+ \label{eq:pair-op}
+\end{equation}
+the relative signs between different bond orientations characterize the
+internal pair structure. Opposite signs on leg and rung bonds are commonly
+described as $d$-wave-like in a two-leg ladder. The reduced lattice symmetry
+and discrete transverse momentum should be kept in mind when connecting this
+terminology to the gap of a two-dimensional cuprate.
+
+An order parameter with a nonzero center-of-mass wavevector is a different
+property. Schematically,
+\begin{equation}
+ \avg{\Delta_b(R)}=f_b\left[\Psi_0+
+          \Psi_Q\cos(QR+\phi)\right],
+ \label{eq:pdw}
+\end{equation}
+separates the internal bond form factor $f_b$ from the spatial structure of
+the condensate. An internal leg/rung sign change alone is not evidence of a
+pair-density wave. Nor does a boundary-induced modulation of a predominantly
+uniform pair field establish a distinct finite-momentum superconducting
+phase~\citep{Agterberg2020}.
+
+\subsection{Two views of stripes and their modern interpretation}
+
+In a common-Mott-physics interpretation, singlet and magnetic correlations
+provide a shared microscopic starting point for several possible ordered
+states. Static stripes are then one possible competitor, and their presence
+need not be a prerequisite for pairing~\citep{Lee2006}. In a stripe-centered
+interpretation, spatial organization helps create the conditions for pairing.
+The spin-gap proximity mechanism, for example, couples a conducting stripe
+to a magnetically correlated environment; pair hopping transmits a spin gap
+to the mobile carriers, while Josephson coupling acts at a separate stage to
+establish coherence~\citep{Emery1997}.
+
+These interpretations share an emphasis on strong correlations and singlets.
+Their sharper disagreement concerns whether stripe organization is an
+essential intermediate step. The observations of planar superconductivity
+in stripe-ordered LBCO and the associated layer-decoupling proposal show how
+static stripes can coexist with pairing while suppressing a particular route
+to bulk coherence~\citep{Li2007,Berg2007}. Conversely, coexistence in a model
+or material does not establish that stripes caused its pairing.
+
+The relation to the pseudogap remains unresolved. NMR measurements in Eu-LSCO
+find spin-stripe order extending practically to the pseudogap endpoint and
+identify competition with superconductivity, providing evidence for a close
+connection without determining its causal origin~\citep{Missiaen2025}.
+The spin gap of an isolated ladder, an electronic pseudogap in a cuprate, and
+the superconducting quasiparticle gap are different observables. A calculation
+of one should not be presented as a measurement or explanation of the others.
+
+\subsection{What magnetic spectroscopy establishes}
+
+Incommensurate magnetic peaks can be understood through antiphase spin
+domains. With lattice spacing set to one, a schematic stripe texture is
+\begin{equation}
+ \avg{S^z_{x,y}}=m(-1)^{x+y}\cos(\kappa x),
+ \qquad q_{\mathrm c}=2\kappa,\qquad
+ \mathbf q_{\mathrm s}=(\pi\pm\kappa,\pi).
+ \label{eq:stripe-cartoon}
+\end{equation}
+The charge period is half the period of the staggered spin envelope. This
+spatial relation is useful evidence for an antiphase stripe texture, but its
+presence on a finite open ladder does not determine the thermodynamic
+amplitude or preferred wavelength.
+
+The similarity between magnetic spectra in stripe-ordered LBCO and YBCO was
+an important motivation for stripe-centered
+interpretations~\citep{Tranquada2004}. Quantum stripe calculations show that
+low-energy spin-wave-like excitations and higher-energy ladder-like triplet
+excitations can occur within the same ordered model~\citep{Vojta2004}.
+Consequently, a failure of a simple semiclassical intensity pattern does not
+rule out stripes or all low-energy spin waves. The connection between a
+spectral shape and a microscopic pairing mechanism requires more than
+qualitative resemblance.
+
+The magnetic ladders in such spin-only constructions represent magnetic
+regions of a stripe pattern. The present model instead uses doped electronic
+ladders containing mobile charge. Moreover, its current analyses concern
+ground-state profiles and equal-time correlations, rather than a computed
+$S(\mathbf q,\omega)$. They can test the static antiphase relation in
+Eq.~\eqref{eq:stripe-cartoon}, but cannot yet demonstrate an hourglass
+spectrum or identify a neutron resonance.
+
+\subsection{Extended Hubbard ladders and transverse coupling}
+
+Each ladder has $L$ rungs, two legs $\ell=0,1$, and $2L$ physical sites.
+Its Hamiltonian is
+\begin{align}
+ H_{\mathrm{lad}}={}&
+ -t\sum_{x=1}^{L-1}\sum_{\ell,\sigma}
+  (c^\dagger_{x\ell\sigma}c_{x+1,\ell\sigma}+\hc)
+ -t_0\sum_{x,\sigma}
+  (c^\dagger_{x0\sigma}c_{x1\sigma}+\hc)\nonumber\\
+ &+U\sum_{x,\ell}n_{x\ell\uparrow}n_{x\ell\downarrow}
+ +V\sum_{\avg{a,b}_{\mathrm{lad}}}n_a n_b .
+ \label{eq:model}
+\end{align}
+The final sum includes nearest-neighbor leg and rung bonds.
+Thus $V<0$ is attractive in the density channel. Open boundaries are used
+along the ladder; $n=N/(2L)$ is the density per physical site and
+$p_{\mathrm h}=1-n$ the hole density. The rung hopping $t_0$ and interladder
+hopping $\tp$ must not be confused with the next-nearest-neighbor hopping
+$t'$ in two-dimensional Hubbard studies.
+
+The transverse reduction uses the positive scale
+\begin{equation}
+ g=\frac{\tp^2}{|\Ep|},\qquad
+ \Ep^{(h)}=E(N-2,S_z=0)+E(N,S_z=0)
+                -2E(N-1,S_z=\tfrac12),
+ \label{eq:kernel}
+\end{equation}
+where negative $\Ep^{(h)}$ denotes favorable hole binding. Geometry-dependent
+kernels convert anomalous, exchange, and density correlators into fields for
+the next ladder solve. The density is targeted through a chemical potential.
+The present ansatz retains real, spin-diagonal normal fields and real
+anomalous fields; it does not provide unrestricted complex phases or
+noncollinear magnetism (\ev{methods}).
+
+For illustration, define $\gamma=2g$. The same-leg pairing kernels, organized
+by the two leg indices, are
+\begin{equation}
+ K_{\alpha}^{\mathrm{square}}=\gamma
+ \begin{pmatrix}0&1\\1&0\end{pmatrix},\quad
+ K_{\alpha}^{\mathrm{cubic,u}}=\gamma
+ \begin{pmatrix}0&3\\3&0\end{pmatrix},\quad
+ K_{\alpha}^{\mathrm{cubic,f}}=\gamma
+ \begin{pmatrix}2&1\\1&2\end{pmatrix}.
+ \label{eq:geometries}
+\end{equation}
+These matrices summarize one part of the full map, not the entire
+Hamiltonian. An equation-level comparison identifies the repulsive-ladder
+benchmark of Ref.~\citep{Bollmark2023} with the branch called
+\emph{cubic frustrated} in this project. That name is the project's
+nomenclature. Its published result should not be assigned to all three
+geometries (\ev{geometry}).
+
+This construction is conceptually related to coupled-ladder pairing
+mechanisms but does not implement every assumption of the original stripe
+proposals. In particular, the explicit alternating dopings of
+Ref.~\citep{Arrigoni2004} differ from an array of equivalent ladders.
+Longitudinal texture can emerge within the current calculation, while the
+ladder decomposition itself is imposed. Collective transverse quantum
+fluctuations are approximated by static mean fields.
+
+\section{Results and interpretation accumulated to date}
+\label{sec:results}
+
+\subsection{Evidence hierarchy and common parameters}
+
+The strongest current comparison concerns the square geometry at
+$t_0/t=1.4$, $\tp/t=0.1$, $U/t=8$, and $n=15/16$, with $V/t=0$ and
+$-0.4$. The latest paired and striped starts use $L=64$ rungs and bond
+dimension $\chi=200$. A separate $V=0$ comparison tests $\chi=400$, and
+the isolated-ladder backbone reaches $\chi=1200$. These are different
+calculations with different error controls, rather than one uniformly
+converged data set.
+
+It is useful to distinguish an observed texture, a numerically
+self-consistent state, stability against specified perturbations, and a
+thermodynamic ground state. The recent trajectories provide strong texture
+and basin information. Their remaining acceptance failures and the incomplete
+length and bond-dimension studies prevent the last two categories from being
+identified without qualification. Here, \emph{basin} describes access under a
+specified numerical map, not a measured free-energy basin.
+
+\subsection{The isolated ladder already has substantial pairing tendencies}
+\label{sec:bare}
+
+The six-sector backbone at $V=0$ and $t_0/t=1.4$ gives the finite-system
+quantities in Table~\ref{tab:bare}. All six final $\chi=1200$ sectors pass
+their stored numerical gates. Changes from $\chi=800$ are useful sensitivity
+observations, but not all sectors pass at that earlier stage; the comparison
+therefore does not constitute a complete bond-dimension extrapolation
+(\ev{bare}, \ev{review}).
+
+\begin{table}[htbp]
+\centering
+\caption{Isolated-ladder evidence at $L=64$, $U/t=8$, $n=15/16$,
+$t_0/t=1.4$, and $V=0$, from the final $\chi=1200$ backbone.
+Negative binding energies use Eq.~\eqref{eq:kernel}'s convention.}
+\label{tab:bare}
+\begin{tabularx}{\textwidth}{l r Y}
+\toprule
+Quantity & Value & Interpretation \\
+\midrule
+Spin gap $\Delta_s/t$ & $0.1533613$ & Fixed-particle-number spin excitation \\
+Even-particle charge gap $\Delta_{c,2}/t$ & $0.01085830$ & Finite-size charge curvature \\
+Hole binding $\Ep^{(h)}/t$ & $-0.1465102$ & Favorable two-hole binding \\
+Particle binding $\Ep^{(e)}/t$ & $-0.1485427$ & Favorable two-particle binding \\
+Pair decay exponent & $0.7614\pm0.0215$ & Fit to rung-pair correlations \\
+Charge decay exponent & $1.2158\pm0.0830$ & Less reliable fit to charge correlations \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The measured pair correlations decay more slowly than the fitted charge
+correlations. Pair fits have $R^2$ between $0.953$ and $0.982$, while charge
+fits give $0.527$--$0.707$. The quoted fit errors do not include the full
+finite-size, boundary, and truncation uncertainty. These results are
+consistent with a spin-gapped ladder with appreciable pairing correlations,
+but do not by themselves establish its asymptotic exponents or the ordered
+state of an array~\citep{Dolfi2015,Shen2023}.
+
+Two other diagnostics illustrate the importance of conventions and fit
+quality. The stored charge parameter is $1.4247$ with rung normalization and
+$0.7124$ with site normalization. An unqualified symbol $K_\rho$ would
+therefore be ambiguous. A central-charge fit yields approximately $2.009$
+with $R^2=0.155$ and is excluded from physical interpretation. The
+open-boundary density profile has a strong component at $q/\pi=1/8$,
+which can arise as a Friedel response and is not independent proof of
+spontaneous charge order~\citep{WhiteAffleckScalapino2002}.
+
+The Stage~1 equal-time covariance spectra are broad, with participation
+ranks around $48$--$63$. The first bulk spin-odd candidate follows two
+edge-localized modes, and a charge mode at $q/\pi=1/8$ first appears at rank
+11. This motivated combining physically chosen fields with covariance-based
+directions instead of assuming that a handful of leading covariance modes
+would exhaust the relevant response. Equal-time covariance is itself distinct
+from a static susceptibility, which also depends on excitation energies.
+
+\subsection{Response discovery: a strong pairing direction with unresolved controls}
+\label{sec:response}
+
+The Stage~2 pilot reduces fourteen named fields to twelve independent probe
+directions: nine normal and three pairing directions. Its projected
+mean-field response has a leading square pairing multiplier of about
+$4.6688$ and a leading positive normal multiplier of $1.1879$.
+The cubic cases both give a leading pairing multiplier of $24.4730$,
+while their leading normal behavior differs: the largest-magnitude normal
+multiplier is approximately $-1.1879$ for the frustrated construction and
+$+3.5637$ for the unfrustrated one (\ev{response}).
+
+These values show that the isolated ladder supplies strong candidate pairing
+response and that transverse geometry changes the competing normal channels.
+They do not establish which nonlinear state wins. The discovery reciprocity
+error is approximately $0.121\%$ and the normal/pair cross-block ratio
+$0.332\%$, but the maximum omitted-response norm fraction is $0.83267$.
+Small errors within the projected matrix can therefore coexist with a large
+response outside the chosen subspace. The second-amplitude validation was not
+present in the reviewed evidence (\ev{review}).
+
+More fundamentally, the zero-field isolated ladder is not a fixed point of
+the full normal mean-field map: its square-map image has a normalized field
+norm of approximately $0.0306655$, dominated by normal fields. A derivative
+at that reference is a bare-ladder diagnostic, not the stability matrix of a
+self-consistent dressed normal state. The associated square estimate
+$\tp/t\simeq0.04628$ must consequently remain a projected bare-reference
+onset estimate, not a phase boundary.
+
+This resolves the apparent tension between a large bare pairing response and
+the later nonlinear stripe trajectories. They concern different reference
+states, finite-amplitude feedback, and restricted response information.
+Positive or negative multipliers describe growth or alternation of the
+specified iteration. Neither is a physical excitation frequency or a global
+energy criterion. A physical two-sublattice interpretation of a raw two-cycle
+also requires a mapping to the transverse lattice and the appropriate
+partner-field energy~\citep{Bollmark2025}.
+
+\subsection{Why the earlier paired-state interpretation was revised}
+
+The loose six-seed $V=0$ campaign initially produced six software-accepted,
+pairing-bearing endpoints, with a corrected energy spread of only
+$6.0274\times10^{-7}t$ per physical site. This suggested a common paired
+region, but the later history analysis showed that it did not establish
+a unique stable paired basin. Three histories stopped after six evaluations;
+three others showed coherent spin-density growth during raw iteration and
+subsequent suppression under Anderson acceleration. The conspicuous change
+in one trajectory is reproduced by its first Anderson coefficients,
+$+22.6811$ and $-21.6811$ (\ev{basins}).
+
+This finding does not imply that Anderson acceleration changes the
+fixed-point equation or that every accelerated solution is unphysical.
+It shows that short histories and accelerated access do not test stability
+against a resolved competing-order perturbation. The subsequent 95\%/5\%
+two-family experiment addresses that question by using representative paired
+and striped reference fields, adding a finite component of the competing
+order, and retaining raw updates throughout.
+
+A related warning comes from the square $(t_0/t,V/t)=(1.0,-0.4)$ coverage
+point. Its \emph{diverging} outcome is a convergence classification: the fields
+remain bounded while pairing gives way to a stripe-like texture and an
+accelerated residual spike triggers the stop. It is not evidence of a
+divergent physical observable or an accepted phase (\ev{grid}).
+
+\subsection{Attraction: two contrasting starts approach a common paired state}
+\label{sec:attraction}
+
+At $(t_0/t,V/t)=(1.4,-0.4)$, both original 80-evaluation trajectories approach
+the same pairing-dominated state. The initially strong stripe's bulk
+leg-odd spin Hartree RMS decreases from about $1.99\times10^{-2}t$ to
+$3.88\times10^{-8}t$; the pairing start ends near $2.49\times10^{-8}t$.
+Both pairing-field RMS values settle near $2.8236\times10^{-3}t$.
+Bulk RMS here uses rungs 6--59 (\ev{attractive}).
+
+The physical symmetrized anomalous correlators have bulk leg amplitudes near
+$+0.035217$ and rung amplitudes near $-0.053242$, establishing a
+$d$-wave-like internal sign pattern in the stored convention. These are
+not normalized versions of Eq.~\eqref{eq:pair-op} or pair--pair correlators.
+The full anomalous matrices agree to approximately $5.85\times10^{-5}$
+in relative L2 norm, and the largest site-density difference is below
+$6.23\times10^{-6}$. The residual boundary density profile remains visible;
+its survival does not indicate a surviving strong static spin stripe.
+
+The terminal corrected energies differ by only
+$7.49\times10^{-9}t$ per site, supporting agreement of the two trajectories
+at their resolved accuracy. Both historical acceptance flags remain false.
+The principal issues are residual fluctuations in nearly vanishing channels,
+an oversensitive scalar slow-mode check, and a marginal energy-window miss
+in one lineage. The later noise-aware history checks support the plateau
+interpretation, but do not retroactively certify every original gate.
+Thus the result is strong evidence for a common paired attractor at these
+numerical settings, without proof of a global minimum or higher-$\chi$
+stability.
+
+\subsection{Zero attraction: stripe order grows while anomalous pairing recedes}
+\label{sec:zero}
+
+The corresponding $V=0$ trajectories behave differently. The stripe start
+reaches 80 evaluations with bulk leg-pairing field RMS
+$1.75\times10^{-10}t$ and spin Hartree RMS $0.02414t$.
+The pairing start ends at the wall-time limit after 62 evaluations:
+its pairing RMS has fallen from $0.004502t$ to $0.0007090t$, while spin
+RMS has grown from $0.001816t$ to $0.02251t$. Pairing falls by another
+$65.6\%$ across the final five records. The trend is already present before
+the deadline-limited final density solve (\ev{zero}).
+
+\begin{figure}[p]
+\centering
+\includegraphics[width=\textwidth]{../reports/two_basin_v000_20260912/profile_evolution.pdf}
+\caption{Previously generated spatial-history figure for the two $V=0$
+anchor trajectories. The upper row shows the staggered leg-odd spin
+mean field; the lower row shows the leg-even pairing mean field.
+The two lower panels use different vertical scales. The stripe start loses
+pairing, while the pairing start develops a stripe texture and its pairing
+decreases. Curves are self-consistency evaluations, not physical time
+evolution. The final states remain unaccepted for resolved field drift.
+Source: \ev{zero}.}
+\label{fig:zero}
+\end{figure}
+
+The residual anomalous correlators in the pairing-start trajectory still
+have opposite leg/rung signs, but their amplitudes are decreasing rapidly.
+They do not establish settled coexistence. The two spin textures are similar
+but not identical: the bulk physical spin profiles differ by $26.4\%$ in
+relative L2 norm, and the density difference can reach $0.04365$ per site.
+The terminal global relative residuals are about $5.88\times10^{-4}$ and
+$2.65\times10^{-2}$ for the stripe and pairing starts, respectively,
+against a $10^{-4}$ threshold.
+
+The working interpretation is that a robust stripe texture has been
+identified and that the finite competing-order perturbation drives the
+pairing-dominated start toward it under raw iteration. Strict spatial
+self-consistency remains pending. In particular, the stripe amplitude's
+apparent saturation does not eliminate slow rearrangement of the profile.
+These observations support strong competition between static spin/charge
+order and the anomalous pairing solution at this point. They do not prove
+that the final stripe is the global minimum or that all local pairing
+correlations have disappeared.
+
+\subsection{Stripe wavevectors and slow texture relaxation}
+
+Both $V=0$ endpoint profiles have dominant full-length Fourier modes
+$m_{\mathrm c}=4$ for charge and $m_{\mathrm s}=30$ for leg-odd spin.
+With $q_m=2\pi m/L$ and $L=64$,
+\begin{equation}
+ q_{\mathrm c}=\frac{\pi}{8},\qquad
+ q_{\mathrm s}=\frac{15\pi}{16},\qquad
+ \kappa=\pi-q_{\mathrm s}=\frac{\pi}{16}.
+ \label{eq:observed-q}
+\end{equation}
+The observed relation $q_{\mathrm c}=2\kappa$ and the sign reversals of the
+staggered spin envelope near charge-depleted regions support an antiphase
+stripe interpretation. The charge period is 16 rungs and the spin-envelope
+period 32 rungs.
+
+At hole density $p_{\mathrm h}=1/16$, the magnetic displacement in
+reciprocal-lattice units is $\delta_{\mathrm s}=\kappa/(2\pi)=1/32
+=p_{\mathrm h}/2$. It differs from the often discussed cuprate relation
+$\delta_{\mathrm s}\simeq p_{\mathrm h}$. In an ideal domain-wall counting
+picture with stripe filling $\nu$ holes per unit transverse length,
+$p_{\mathrm h}=\nu/d$ and $\delta_{\mathrm s}=1/(2d)$; the present
+wavevectors would correspond to $\nu=1$, rather than the $\nu=1/2$ used
+in the usual half-filled-stripe cartoon. This is a conditional interpretation
+of the finite-system wavelength, not a measurement of wall filling.
+Neither the preferred wavelength nor its scaling with doping has been
+established.
+
+The September~13 follow-up explains why the stripe looks settled while
+failing strict convergence. Its bulk spin RMS changes by only $0.0528\%$
+over the last twenty records, but more than $99.999\%$ of the squared
+final spin residual is orthogonal to an overall rescaling of the applied
+spin field. Approximately $99\%$ of that residual power lies in the bulk.
+The dominant remaining error concerns spatial shape.
+
+For example, interpolated crossings of the staggered spin envelope near the
+third and fourth walls shift from $39.3999$ and $55.1830$ at evaluation 60
+to $39.5165$ and $55.2673$ at evaluation 80. Unequal shifts reveal texture
+rearrangement. They are sub-rung profile diagnostics, not measured motion of
+physical objects. The stopping diagnostic estimates a contraction near
+$0.99059$, suggesting very slow relaxation if that behavior persists;
+the extrapolation is neither a certified error bound nor a physical soft-mode
+eigenvalue (\ev{zero}).
+
+\subsection{Energy comparisons and what the bond-dimension check adds}
+
+The relevant energy is the canonical variational functional, including the
+mean-field double-counting contribution. If $L_{\mathrm{lin}}$ denotes
+the expectation of the applied linear mean-field terms,
+\begin{equation}
+ E_{\mathrm{var}}=E_{\mathrm{eff}}+\mu N+
+          (E_{\perp}-L_{\mathrm{lin}})
+       =\avg{H_{\mathrm{lad}}}+E_{\perp}.
+ \label{eq:energy}
+\end{equation}
+The density-targeted diagnostic is
+$E_\star=E_{\mathrm{var}}+\mu(N_\star-N)$, a leading correction to the
+target density. It does not remove curvature and optimization errors.
+Effective-Hamiltonian eigenvalues alone cannot rank the branches
+(\ev{methods}).
+
+At $V=0$, the separate matched $\chi=400$ comparison gives a stripe endpoint
+lower than the paired endpoint by $2.4336\times10^{-4}t$ per physical
+site, or $0.03115t$ on the 128-site ladder. The September~6 working decision
+treated the available evidence as sufficient to regard the advantage as
+reasonably robust over the tested $\chi=200$ to 400 increase. Neither
+original endpoint satisfies all formal acceptance gates, so the value
+remains a terminal diagnostic difference rather than a fully certified
+fixed-point ranking (\ev{chi}).
+
+The newer raw $\chi=200$ trajectories instead end with a separation
+$8.99\times10^{-5}t$ per site while the pairing lineage is still evolving.
+This is not an independent estimate of the same equilibrium energy gap.
+Similarly, an early low energy on an unconverged trajectory cannot be
+selected as a lower-energy phase. During startup, the functional combines
+the applied partner fields with current correlations; raw self-consistency
+iteration is not guaranteed to minimize a single self-consistent state's
+energy monotonically.
+
+\subsection{Scope of the emerging physical interpretation}
+
+The isolated-ladder and coupled-array observations separate pair formation
+from ordered-state selection. A spin-gapped ladder with slowly decaying pair
+correlations can still feed a static stripe state once transverse normal
+fields are allowed to develop. At the attractive anchor, both tested starts
+instead approach the same pairing-dominated solution. The current evidence
+therefore supports a model-specific competition between collective orders
+within a system that already possesses local pairing tendencies.
+
+This result shares an ingredient with stripe-centered pairing mechanisms:
+correlated low-dimensional subsystems can support pairing before collective
+coherence is established. At the level of the current static textures,
+however, the anchor comparison resembles competition between stripe order
+and superconducting order. It neither establishes that fluctuating stripes
+are necessary for pairing nor excludes their possible beneficial role.
+The approximation treats quantum fluctuations within the ladder, but does
+not resolve the full collective stripe and phase fluctuations of a plane.
+
+The most discriminating open physical question is whether the eventual
+stripe state retains strong pair--pair correlations after its anomalous
+expectation value has vanished. Strong residual pair correlations would
+support a distinction between local pairing and interladder coherence.
+Suppression of those correlations would instead indicate more direct
+competition with pairing. Resolving this requires measurements in the
+converged stripe state; the current source-field history alone does not
+answer it.
+
+Attraction changes more than one ingredient of the coupled problem.
+The prefactor $g=\tp^2/|\Ep|$ decreases when $|\Ep|$ increases at fixed
+$\tp$, even while the ladder's pair response can become stronger.
+This motivates separating the change in the bare ladder from the change
+in the coupling kernel across a $V$ scan. Recent MPS+MF work on a different,
+mixed-dimensional $t$--$J$ model likewise emphasizes the properties of the
+one-dimensional building blocks and the requirements for an ordered
+array~\citep{Kohler2026}. That work is retained as an August~2026 preprint,
+not a result for the present Hamiltonian.
+
+\subsection{Controls needed before stronger claims}
+
+The pair-breaking expansion needs a careful energy-scale comparison.
+The backbone gives $\tp/|\Ep|\simeq0.683$ and
+$\tp/\Delta_s\simeq0.652$ at $\tp/t=0.1$; these ratios are not
+parametrically small. The quantity
+\begin{equation}
+ \Delta_{c,2}=\frac{E(N+2)+E(N-2)-2E(N)}{2}
+\end{equation}
+instead measures even-particle charge curvature. A gapless charge mode can
+coexist with a finite spin or pair-breaking scale, so
+$\tp/\Delta_{c,2}>1$ does not by itself invalidate the projection.
+This corrects the stronger interpretation in the earliest bare-ladder
+report (\ev{review}). The registry and backbone also use slightly different
+binding energies, differing by about $0.0188\%$ in the inferred coupling;
+quantitative response/SCF comparisons should declare a common kernel.
+
+The remaining high-value controls are:
+\begin{enumerate}
+ \item Complete self-consistency at the representative stripe point and
+ compare matched canonical energies only where the states and provenance
+ support it. A converged fixed point and a global minimum remain different
+ claims.
+ \item Test selected lengths, bond dimensions, and stripe wavelengths.
+ The $L=96$ and 128 seeds are prepared, but no result from them is used here.
+ Their planned fixed-$L=64$ binding denominator isolates one finite-size
+ question; it is not a new measurement of the larger ladder's binding
+ (\ev{length}).
+ \item Check sensitivity to the mean-field range cutoff, currently
+ $r_{\mathrm{range}}=4$ in the representative comparisons, and to weaker
+ transverse hopping. These are model/approximation controls, separate from
+ inner-DMRG convergence.
+ \item Complete amplitude and basis checks for the response pilot and measure
+ response about a self-consistent normal reference at fixed density.
+ \item Separate connected fluctuations from disconnected order contributions.
+ Subtracting $\avg{O_i}\avg{O_j}$ removes the elastic mean-field order
+ contribution; both parts are needed to interpret structure factors.
+ Compare pair correlations across bond classes and bulk reference positions.
+\end{enumerate}
+
+The wider square grid supplies coverage and access information, while the
+available cubic coverage is incomplete in the reviewed local record.
+No universal effect of $V$, geometry-wide phase ordering, transition
+temperature, phase stiffness, pair-density-wave state, or dynamical magnetic
+spectrum is claimed. The present contribution is a developing account of
+how local pairing tendencies and competing static orders relate in a
+specified coupled-ladder construction.
+
+\appendix
+\section{Local evidence and drafting notes}
+\label{sec:evidence}
+
+\subsection{Sources for project-specific statements}
+
+The following sources are repository documents and analysis artifacts,
+not external publications. Paths are relative to \path{ladder_mps_mft/docs}.
+The linked reports retain the underlying histories, definitions, and
+provenance checks. Their dated conclusions must be read together: later
+history analyses supersede the early suggestion of a unique paired
+$V=0$ basin.
+
+\begin{enumerate}
+ \item\label{ev:methods}
+ \textbf{Model, fields, and energy.}
+ \href{run:../METHODS_NOTES.tex}{Living methods notes},
+ \href{run:../VARIATIONAL_FUNCTIONAL.md}{variational functional}, and
+ \href{run:../ARCHITECTURE.md}{architecture}.
+ \path{METHODS_NOTES.tex};
+ \path{VARIATIONAL_FUNCTIONAL.md}; \path{ARCHITECTURE.md}.
+
+ \item\label{ev:geometry}
+ \textbf{Literature and equation-level geometry correspondence.}
+ \href{run:../literature/literature_review.pdf}{Literature review} and
+ \href{run:../literature/SOURCE_NOTES.md}{source notes}, including the
+ September~8 comparison with the 2023 benchmark.
+ \path{literature/literature_review.tex};
+ \path{literature/SOURCE_NOTES.md}.
+
+ \item\label{ev:bare}
+ \textbf{Isolated-ladder backbone and covariance survey, September~2.}
+ \href{run:../reports/bare_stage1_t014_v0_20260902/REPORT.md}{Stage 1 report}.
+ \path{reports/bare_stage1_t014_v0_20260902/REPORT.md}.
+
+ \item\label{ev:response}
+ \textbf{Projected response discovery, September~3.}
+ \href{run:../reports/bare_stage2_t014_v0_20260903/report.html}{Stage 2 report},
+ with eigenvalues and reference-field summaries.
+ \path{reports/bare_stage2_t014_v0_20260903/}.
+
+ \item\label{ev:review}
+ \textbf{Cross-project scientific review, September~4.}
+ \href{run:../reports/systematic_review_20260904/REVIEW.md}{Review}.
+ Source for the response limitations, charge-gap correction, and proposed
+ approximation controls; its campaign statuses are historical.
+ \path{reports/systematic_review_20260904/REVIEW.md}.
+
+ \item\label{ev:chi}
+ \textbf{Bond-dimension comparison, September~5--6.}
+ \href{run:../reports/chi400_comparison_20260905/ANALYSIS.md}{Analysis},
+ including the explicitly qualified September~6 energetic interpretation.
+ \path{reports/chi400_comparison_20260905/ANALYSIS.md}.
+
+ \item\label{ev:basins}
+ \textbf{History-based revision of basin interpretation, September~8.}
+ \href{run:../reports/square_grid_20260908/BASIN_ASSESSMENT.md}{Basin assessment}.
+ \path{reports/square_grid_20260908/BASIN_ASSESSMENT.md}.
+
+ \item\label{ev:grid}
+ \textbf{Square coverage and the flagged $(1.0,-0.4)$ endpoint, September~8.}
+ \href{run:../reports/square_grid_20260908/README.md}{Grid description} and
+ \href{run:../reports/square_grid_20260908/ANALYSIS.md}{divergence analysis}.
+ \path{reports/square_grid_20260908/}.
+
+ \item\label{ev:attractive}
+ \textbf{Attractive two-family anchors, September~10.}
+ \href{run:../reports/two_basin_vm04_20260910/README.md}{Analysis};
+ complementary retrospective gate qualification in the
+ \href{run:../reports/two_basin_remainder_20260910/README.md}{remainder contract}.
+ \path{reports/two_basin_vm04_20260910/README.md}.
+
+ \item\label{ev:zero}
+ \textbf{Zero-attraction anchors and slow texture relaxation, September~12--13.}
+ \href{run:../reports/two_basin_v000_20260912/README.md}{Analysis and follow-up}.
+ Figure~\ref{fig:zero} is reused without modifying the underlying data.
+ \path{reports/two_basin_v000_20260912/README.md}.
+
+ \item\label{ev:length}
+ \textbf{Prepared finite-size seeds, September~6.}
+ \href{run:../reports/finite_size_seeds_20260906/README.md}{Seed description}.
+ Preparation evidence only; no larger-length simulation result is inferred.
+ \path{reports/finite_size_seeds_20260906/README.md}.
+\end{enumerate}
+
+\subsection{Reference provenance and manuscript development}
+
+The draft reuses stable keys from \path{../literature/references.bib}.
+Five additional sources are kept in \path{additional_references.bib}:
+Tranquada et al.\ (2004), Vojta and Ulbricht (2004), Li et al.\ (2007),
+Berg et al.\ (2007), and Missiaen et al.\ (2025). Their primary arXiv and
+publisher records were checked on 15 September 2026. These additions
+support the discussion of magnetic spectra, planar coherence, and the
+stripe--pseudogap connection. The existing review's reading-depth limits
+continue to apply to inherited references; this draft is not an exhaustive
+literature or novelty assessment.
+
+The introduction can be shortened for a target journal after the principal
+result and convergence controls are settled. The current results collection
+should retain its date and evidence qualifications until replaced by
+converged comparisons. A future manuscript should decide whether its central
+claim is interaction-driven order selection, geometry dependence, or the
+relation between a dressed normal-state response and the nonlinear ordered
+solutions. Those are candidate emphases, not additional results.
+
+\clearpage
+\begingroup
+\setlength{\bibsep}{0.35em}
+\bibliographystyle{unsrtnat}
+\bibliography{../literature/references,additional_references}
+\endgroup
+\end{document}

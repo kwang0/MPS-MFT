@@ -38,6 +38,12 @@ recorded explicitly as user-reported until synchronized evidence is available.
 
 ## Stable scientific references
 
+For the manuscript starting point, see the
+[introduction, background, and current-results draft](manuscript/README.md),
+created September 15, 2026. It provides editable LaTeX, a checked PDF,
+34 cited references, and an appendix linking the accumulated interpretations
+to their dated local evidence.
+
 For introduction background and paper summaries, see the
 [coupled-ladder literature review](literature/README.md). It contains a plain
 LaTeX review, compiled PDF, and maintained BibTeX file covering 49 papers in
@@ -48,6 +54,12 @@ For the current experiment under review, see the
 It contains four chi=200 L=96/128 pairing/stripe seeds with fixed L=64 coupling.
 
 For the newest two-basin result, see the
+[September 12 V=0 anchor analysis](reports/two_basin_v000_20260912/README.md).
+The stripe start reaches 80 evaluations with negligible pairing; the pairing
+start reaches a deadline at 62 while spin grows and pairing collapses. Both
+remain unaccepted for resolved field drift, not merely noise-floor checks.
+
+For the paired control, see the
 [September 10 V=-0.4 anchor analysis](reports/two_basin_vm04_20260910/README.md).
 Both 80-step chi=200 lineages reach a common paired plateau; the report explains
 the weak-channel acceptance failures and records 3.763125 actual node-hours.

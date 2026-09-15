@@ -1,6 +1,6 @@
 # Active plan
 
-Last reviewed: 2026-09-10
+Last reviewed: 2026-09-12
 
 Current state: the chi=400 comparison is locally analyzed. Four L=96/128
 chi=200 seeds remain available for the now-deferred finite-size study.
@@ -19,16 +19,25 @@ correlation mixtures, chi=200, up to 80 raw evaluations, a minimum of 50,
 and tighter channel/energy/inner-DMRG gates. The V=-0.4 pair now has two synced
 80-evaluation histories: both reach the same paired basin, with acceptance
 blocked chiefly by weak-channel fluctuations and a scalar-extrapolation issue.
-Their user-supplied allocation charge is 3.763125 node-hours. V=0 remains
-PENDING per September 10 job-specific status. The user now authorizes the
+Their user-supplied allocation charge is 3.763125 node-hours. The V=0 pair
+is now synced and analyzed: stripe ends at 80 with negligible pairing;
+the pairing start ends at the deadline at 62 with spin growing and pairing
+collapsing. Both remain unaccepted for resolved field motion. Saved MF time
+estimates 4.411889 node-hours, with actual allocation accounting pending.
+The user authorizes the
 fourteen remaining starts with a 40-step cap and revised noise handling.
-They are locally prepared, not submitted; they do not run automatically.
-The latest prose says pending `(1.0,0.0)`; clarify any separate submission
-because the known pending jobs are at `(1.4,0.0)`.
+They are published and locally prepared; live submission status is not
+reviewed by this analysis, and no automatic continuation is configured.
 
 ## Active scientific questions
 
-1. **Competing basins with raw updates (V=-0.4 analyzed; V=0 pending).** Review
+1. **Competing basins with raw updates (both anchor points analyzed).** Review
+   `docs/reports/two_basin_v000_20260912/README.md`: the pairing-dominated
+   V=0 start evolves toward a similar stripe texture, but its residual pairing
+   is still changing rapidly at the deadline. The stripe start has nearly
+   flat energy but persistent coherent spatial drift. Neither is fixed-point
+   accepted under the original or revised necessary global-field gate.
+   The V=-0.4 paired control remains in
    `docs/reports/two_basin_vm04_20260910/README.md`. Both V=-0.4 lineages reach
    a paired plateau by roughly 20–30 evaluations; late unaccepted flags do not
    indicate continuing stripe growth. The revised remainder controls require
@@ -67,10 +76,11 @@ because the known pending jobs are at `(1.4,0.0)`.
 
 1. The qualified 40-step implementation is published as `7443d9d`. The user
    submits the fourteen remaining starts from a separate checkout with shared accounting.
-   Confirm any separately submitted `(1.0,0.0)` run before overlapping scope.
-   Let the two known V=0 anchors finish with their original code and controls;
-   review their full histories once synced. No unchanged V=-0.4 extension is
-   recommended solely to obtain acceptance.
+   Check actual submission status before repeating work. The V=0 anchors
+   are now analyzed; obtain exact allocation accounting and decide on targeted
+   continuation, especially for the pairing lineage still evolving at 62.
+   Do not loosen the thresholds again to accept these resolved drifts.
+   No unchanged V=-0.4 extension is recommended solely to obtain acceptance.
    Retain the finite-size seeds for future work.
    Update older campaign status when job-specific results/accounting are synced.
 2. After terminal status, reconcile requested ceilings against authoritative

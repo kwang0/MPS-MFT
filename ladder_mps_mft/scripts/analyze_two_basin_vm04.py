@@ -68,8 +68,8 @@ def channel_vectors(fields):
                 spin=((mu[1] - mu[0]) / 2).T)
 
 
-def load(family, manifest, jobs):
-    row = next(r for r in manifest if r['family'] == family and float(r['V']) == -.4 and float(r['t0']) == 1.4)
+def load(family, manifest, jobs, *, V=-.4):
+    row = next(r for r in manifest if r['family'] == family and float(r['V']) == V and float(r['t0']) == 1.4)
     branch_dir = RUN / 'results' / row['label']
     paths = list(branch_dir.rglob('state.h5'))
     assert len(paths) == 1, paths
@@ -85,16 +85,16 @@ def load(family, manifest, jobs):
     job = next(r for r in jobs if r['label'] == row['label'])
     with h5py.File(path) as f:
         text = lambda k: f[k][()].decode()
-        assert (f['model/L'][()], f['model/t0'][()], f['model/V'][()]) == (64, 1.4, -.4)
+        assert (f['model/L'][()], f['model/t0'][()], f['model/V'][()]) == (64, 1.4, V)
         assert text('provenance/slurm_job_id') == job['job_id']
         for key in ('model_fingerprint', 'numerical_fingerprint', 'implementation_sha256', 'ep_source_sha256'):
             assert text('provenance/' + key) == row[key]
         assert text('provenance/config_sha256') == row['config_sha256']
         assert text('provenance/inherit_sha256') == row['seed_sha256']
         h = f['history']; n = len(h['iteration'])
-        np.testing.assert_array_equal(h['iteration'][()], np.arange(1, 81))
+        np.testing.assert_array_equal(h['iteration'][()], np.arange(1, n + 1))
         modes = [x.decode() for x in h['update_mode'][()]]
-        assert modes == ['initial'] + ['unmixed_probe'] * 79
+        assert modes == ['initial'] + ['unmixed_probe'] * (n - 1)
         fields = {s: {k: _julia_array(h[f'fields/{s}/{k}']) for k in ('alpha', 'beta', 'mu_cdw')}
                   for s in ('applied', 'measured')}
         with h5py.File(seed_path) as seed:
@@ -119,7 +119,7 @@ def load(family, manifest, jobs):
                     **{k: clean(v[i]) for k, v in data.items()}))
         history = {k: h[k][()] for k in ('iteration', 'wall_seconds', 'field_abs_residual', 'field_rel_residual',
             'density', 'chemical_potential', 'dmrg_sweep_gate_pass', 'target_density_corrected_variational_energy')}
-        final_dmrg = h['dmrg']['0080']
+        final_dmrg = h['dmrg'][f'{n:04d}']
         final_sweeps = final_dmrg['sweep_energy'][()]
         correlations = {key: _julia_array(value) for key, value in f['correlations'].items()}
         pair = correlations['pair']
@@ -160,7 +160,7 @@ def load(family, manifest, jobs):
             spin_field_rms_first=spin_rms[0], spin_field_rms_final=spin_rms[-1],
             spin_field_rms_last20_range=[spin_rms[-20:].min(), spin_rms[-20:].max()],
             stripe_template_projection_last20_range=[projection[-20:].min(), projection[-20:].max()],
-            first_spin_rms_below_1e7=int(np.flatnonzero(spin_rms<1e-7)[0]+1),
+            first_spin_rms_below_1e7=int(np.flatnonzero(spin_rms<1e-7)[0]+1) if np.any(spin_rms<1e-7) else None,
             final_rung_pair_mean=rung[BULK].mean(), final_leg_pair_mean=leg[5:58].mean(),
             channel_final={name: {key: clean(value[-1]) for key, value in data.items()} for name,data in channel_data.items()},
             channel_last20={name: dict(max_absolute=data['absolute'][-20:].max(),
@@ -170,10 +170,11 @@ def load(family, manifest, jobs):
     _, energy_rows = read_history(path)
     log = (RUN / 'logs' / f"{row['label']}.s1-{job['job_id']}.out").read_text()
     log_iterations = re.findall(r'^MF\s+(\d+)\s', log, flags=re.M)
-    assert [int(i) for i in log_iterations] == list(range(1,81))
+    assert [int(i) for i in log_iterations] == list(range(1,n+1))
     return dict(summary=summary, history=history, profiles=profiles, correlations=correlations,
         initial=initial_profiles, channel_data=channel_data, gate_rows=gate_rows, energy_rows=energy_rows,
-        rung=rung, leg=leg, charge=charge, spin_rms=spin_rms, pairing_rms=pairing_rms, projection=projection)
+        rung=rung, leg=leg, charge=charge, spin_rms=spin_rms, pairing_rms=pairing_rms, projection=projection,
+        vectors=vectors, controls=cfg)
 
 
 def plot_energy_history(data, reference):

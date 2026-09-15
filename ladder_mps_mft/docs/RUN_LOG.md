@@ -2710,3 +2710,156 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   commit, and push under the user's explicit authorization. Updated the
   current snapshot and handoff to record publication; no NERSC connection,
   transfer, scheduler query, reservation, or submission occurred.
+
+## 2026-09-12 — V=0 anchors show stripe growth and loss of pairing
+
+- The user identifies `(t0,V)=(1.4,0.0)` as completed and asks for the same
+  analysis as V=-0.4. Synced states/logs confirm stripe job 58093802 ended
+  `maximum_iterations` at 80 evaluations, pairing job 58093803 ended
+  `time_limit` at 62. Both accepted=false, period=0, with one `initial`
+  followed by raw `unmixed_probe` records. Every next applied field equals
+  the preceding measured field exactly. The jobs retained the original
+  80-step/50-minimum controls and implementation; no Anderson occurred.
+- Stripe start: leg-pairing MF bulk RMS falls from 1.0782e-4 to 1.7462e-10 t;
+  leg-odd spin MF bulk RMS ends at 0.0241366 t. Pairing start: pairing falls
+  from 0.00450157 to 0.000709038 t (15.75% retained); spin grows from
+  0.00181611 to 0.0225097 t (12.39x). In its last five records, pairing
+  drops 65.6% and spin grows 12.0%. This supports a pairing-dominated
+  transient evolving toward a similar stripe texture, not a settled paired
+  or coexistence endpoint. The conclusion is visible before deadline record
+  62, which additionally misses the density target by 2.4418e-5.
+- Both endpoints have dominant full-L charge DFT mode m=4 (q/pi=0.125),
+  and physical leg-odd spin mode m=30 (q/pi=0.9375). Bulk spin profiles
+  still differ by 26.4% relative L2; they cannot be called the same converged
+  state. RMS uses rungs 6–59. Physical spin uses (n_up-n_down)/2, separately
+  from coupling-weighted MF fields; staggered profile figures expose its
+  envelope. The full scalar and selected spatial histories are plotted.
+- Terminal corrected energies/site are -0.661122033082 and -0.661032086408;
+  separation 8.9947e-5 t/site is an unfinished-trajectory diagnostic, not
+  an accepted-state energy ranking. Stripe last-five energy span is
+  1.3237e-8; pairing span is 4.5738e-5. The pronounced stripe startup dip
+  at evaluation 2 is not a selectable low-energy solution: the stored
+  functional uses applied partner fields and current correlations away from
+  self-consistency. The full energy figure includes iterations 1 onward.
+- Global relative residuals remain 5.8755e-4 and 2.6513e-2; extrapolated
+  values are 0.06242 and 0.18531. Stripe spin/charge residual directions
+  are highly coherent, with contraction estimates near 0.990–0.993, so
+  the nearly flat energy masks slow spatial relaxation. Spin residual
+  maxima are 4.4907e-5 and 2.0140e-3 t, about 90x/4028x the revised channel
+  floor. Stripe inner-DMRG gate passes only 2/5 recent records; pairing
+  passes 5/5 but misses density. Both endpoint identity checks are below
+  3e-11 t/site. Neither saved history contains even one passing global
+  field record under the unchanged 1e-7 absolute OR 1e-4 relative gate;
+  therefore neither would pass the revised ten-record fixed-point window.
+  No expensive full replay is necessary for this necessary-gate conclusion.
+- At 40, the pairing start retains 85.6% pairing while spin has grown
+  almost sevenfold; a 40-step cap can leave this point unresolved without
+  falsely accepting it. Keep the revised thresholds. Targeted continuation,
+  especially of the pairing start, is a future decision after accounting;
+  no new controls, continuation, or compute was prepared by this analysis.
+- Recorded MF times are 22189.828914 and 41341.377641 seconds: estimated
+  1.540960 and 2.870929 fractional node-hours, 4.411889 total. This excludes
+  allocation overhead. The synced ledger has only the two 3-hour reservations;
+  requested user-supplied `sacct -n -X -j 58093802,58093803
+  --format=JobIDRaw,State,ElapsedRaw,Start,End -P` for exact allocation cost.
+  No live scheduler query or accounting-ledger edit was performed.
+- Added `scripts/analyze_two_basin_v000.py` and the dated report directory
+  `docs/reports/two_basin_v000_20260912/`: narrative, three PNG/PDF figures,
+  JSON, two source records, 142 energy and scalar rows, 852 channel rows,
+  and 9088 rung/iteration rows. Generalized the existing V=-0.4 loader only
+  for point selection, variable record counts, and absent threshold crossings.
+  Updated the project snapshot, active plan, and documentation index.
+- Local validation: compact/config/seed hashes match manifests and state
+  provenance; all four comparison fingerprints match. Recomputed six-channel
+  residuals from full vectors, verified raw chain and log/HDF5 counts,
+  independently reconstructed target-density-corrected energies from saved
+  canonical energy/mu/density, and rehashed both sources after analysis.
+  The script completed in about five seconds; all three figures were viewed.
+  Both original V=-0.4 loader summaries still match their prior JSON exactly.
+  Output row counts and `git diff --check` pass. No DMRG, solver changes,
+  remote connection, source relabeling, or unrelated manuscript edits.
+- Compact state SHA-256: stripe
+  `ba38078fd047653251f321d14995e89acc2c63d05cdba8e1e41fac6b2a3b5bb0`;
+  pairing `8d18a149ef1b6707f2377b35f9b5ed9ada97f6a287d693b09ede6b0c7e0c5ab9`.
+  Full-source hashes and matching original numerical/implementation/E_p
+  fingerprints are preserved in `analysis.json`. Reproduce locally with
+  `python -B -X utf8 ladder_mps_mft/scripts/analyze_two_basin_v000.py`.
+
+### 2026-09-13 — Explain the visually settled V=0 stripe's tolerance failure
+
+- Followed up on the (t0,V)=(1.4,0.0) stripe-seeded endpoint using the
+  existing immutable 80-record history. Its final spin residual is almost
+  entirely a profile change: projection onto the applied field accounts
+  for only 2.066e-6 of residual power. About 99.0% of spin residual power
+  is in rungs 6–59; the largest changes are around rungs 39–40.
+- Linear interpolation of the staggered spin MF zero crossings shows
+  unequal wall shifts. Between evaluations 60 and 80 the third crossing
+  moves 39.3999 -> 39.5165 and fourth 55.1830 -> 55.2673, while the bulk
+  spin RMS changes only 0.0528% across the final twenty saved values.
+  This diagnoses slow texture rearrangement hidden by an amplitude plot;
+  it is not a fitted physical translation or a new phase identification.
+- Direct global residual 5.8755e-4 still exceeds 1e-4. The separate
+  stopping-only slow-mode estimate has lambda=0.9905866 and residual
+  cosine=0.9998334, giving factor 106.23 and a heuristic 6.24% remaining
+  relative motion if this decay persists. It is not a certified error
+  bound, physical eigenvalue, or Anderson update. Additional original
+  blockers remain the marginal energy span and 2/5 inner-DMRG passes.
+- Interpretation: stripe basin established, strict spatial self-consistency
+  pending. Coherent residuals greatly exceed the revised channel floor;
+  finite-chi bias and ultimate asymptotic decay remain unseparated. No
+  tolerance change, solver run, remote action, or acceptance relabeling.
+- Added residual geometry and zero-crossing diagnostics to the existing
+  V=0 analysis script/JSON and a September 13 subsection in its report.
+  The roughly five-second local rerun passed the existing provenance,
+  raw-chain, energy, and source-hash checks plus an orthogonal-decomposition
+  consistency check. Plot definitions and scientific conclusions from
+  the September 12 analysis remain unchanged.
+
+### 2026-09-13 — Verify the existing Phase 1 plotter with the raw V=0 anchors
+
+- Confirmed `plot_phase1_mf_observables.jl` loads both new compact state
+  files without changes. Explicitly select campaign
+  `20260908_square_two_basin_95_5_80_anchors`; its default still points to
+  `20260823_phase1_gpu_v2`. Accepted=false does not suppress the plots.
+- Local Julia 1.12.7 check used the existing plotting environment,
+  `--startup-file=no --compiled-modules=existing`, and a temporary script
+  with the Agg backend. Verified the full measured-history shapes, all five
+  history rows, slider endpoints, and saved PNGs for stripe/pairing: 81/63
+  samples including the seed at plotted iteration 1. Both checks passed;
+  both images were viewed, and the temporary script was removed.
+- PNGs are in the existing campaign's
+  `plots/mf_profiles/profiles_and_saved_histories/`. Added interactive Julia
+  commands and the `include_seed=false` numbering option to the V=0 report.
+  No plotter/solver changes, DMRG, source-state edits, or remote actions.
+
+### 2026-09-15 - Create an introduction/background and current-results draft
+
+- Created docs/manuscript/introduction_and_results.tex and its compiled PDF
+  at the user's request. The manuscript-style introduction and background
+  connect Mott physics, stripe interpretations, local ladder pairing,
+  interladder coherence, extended interactions, and the multichannel model.
+- The dated results collection covers the isolated-ladder backbone,
+  covariance/response pilot, corrected charge-gap interpretation, revision
+  of the early V=0 paired-basin claim, V=-0.4 and V=0 raw anchors, static
+  stripe wavevectors, numerical wall relaxation, and the qualified chi=400
+  energy comparison. It distinguishes local pairing from anomalous order,
+  iteration from physical dynamics, and provisional textures from
+  thermodynamic conclusions. Larger-length seeds remain preparation only.
+- Reused 29 references from the existing maintained bibliography and added
+  five draft-specific entries in additional_references.bib: Tranquada2004,
+  Vojta2004, Li2007, Berg2007, and Missiaen2025. Primary author/publisher
+  records were checked. The prior literature review and shared bibliography
+  are unchanged. Source notes and eleven groups of local evidence identify
+  the basis and limits of the synthesis.
+- Reused the existing V=0 spatial-history figure without altering its data.
+  Added local build instructions and links from the documentation map and
+  project state. No new simulation, remote action, acceptance relabeling,
+  scheduler operation, or accounting change was made.
+- Validation: compiled with the existing repository-local Tectonic 0.17.0;
+  downloaded missing standard TeX packages into its workspace cache with
+  approved network access, then completed the final build from cache.
+  The 16-page PDF has 34 resolved citations, no undefined cross-references,
+  no overfull boxes, and no text outside checked margins. All sixteen local
+  evidence links and the reused figure path resolve. Poppler rendered every
+  page for visual inspection. Build/QA files are in the ignored
+  output/manuscript_draft directory. No DMRG or unrelated test suite ran.
