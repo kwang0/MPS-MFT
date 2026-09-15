@@ -68,24 +68,24 @@ def channel_vectors(fields):
                 spin=((mu[1] - mu[0]) / 2).T)
 
 
-def load(family, manifest, jobs, *, V=-.4):
-    row = next(r for r in manifest if r['family'] == family and float(r['V']) == V and float(r['t0']) == 1.4)
-    branch_dir = RUN / 'results' / row['label']
+def load(family, manifest, jobs, *, V=-.4, t0=1.4, run_directory=RUN):
+    row = next(r for r in manifest if r['family'] == family and float(r['V']) == V and float(r['t0']) == t0)
+    branch_dir = run_directory / 'results' / row['label']
     paths = list(branch_dir.rglob('state.h5'))
     assert len(paths) == 1, paths
     path = paths[0]
     compact_row = next(r for r in rows(branch_dir / 'stateless_manifest.tsv') if r['relative_path'] == path.relative_to(branch_dir).as_posix())
     assert sha(path) == compact_row['compact_sha256']
-    config_path = RUN / 'configs' / (row['label'] + '.segment-001.toml')
+    config_path = run_directory / 'configs' / (row['label'] + '.segment-001.toml')
     config = tomllib.loads(config_path.read_text())
     assert sha(config_path) == row['config_sha256']
-    seed_path = RUN / 'seeds' / (row['label'] + '.h5')
+    seed_path = run_directory / 'seeds' / (row['label'] + '.h5')
     assert sha(seed_path) == row['seed_sha256'] == config['run']['inherit_sha256']
     cfg = config['convergence']
     job = next(r for r in jobs if r['label'] == row['label'])
     with h5py.File(path) as f:
         text = lambda k: f[k][()].decode()
-        assert (f['model/L'][()], f['model/t0'][()], f['model/V'][()]) == (64, 1.4, V)
+        assert (f['model/L'][()], f['model/t0'][()], f['model/V'][()]) == (64, t0, V)
         assert text('provenance/slurm_job_id') == job['job_id']
         for key in ('model_fingerprint', 'numerical_fingerprint', 'implementation_sha256', 'ep_source_sha256'):
             assert text('provenance/' + key) == row[key]
@@ -168,7 +168,7 @@ def load(family, manifest, jobs, *, V=-.4):
                 passes=int(data['passes'][-20:].sum())) for name,data in channel_data.items()})
         assert np.isfinite(energy).all()
     _, energy_rows = read_history(path)
-    log = (RUN / 'logs' / f"{row['label']}.s1-{job['job_id']}.out").read_text()
+    log = (run_directory / 'logs' / f"{row['label']}.s1-{job['job_id']}.out").read_text()
     log_iterations = re.findall(r'^MF\s+(\d+)\s', log, flags=re.M)
     assert [int(i) for i in log_iterations] == list(range(1,n+1))
     return dict(summary=summary, history=history, profiles=profiles, correlations=correlations,

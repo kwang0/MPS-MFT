@@ -34,8 +34,9 @@ function blend_correlations(primary::CorrelationState, perturbation::Correlation
                       for key in fieldnames(CorrelationState))...)
 end
 
-function validate_raw_basin_contract(settings)
-    settings.model.geometry == :square && settings.model.L == 64 || error("expected square L=64")
+function validate_raw_basin_contract(settings; geometry=:square)
+    geometry in (:square, :cubic_unfrustrated) || error("unsupported two-basin geometry")
+    settings.model.geometry == geometry && settings.model.L == 64 || error("expected $geometry L=64")
     settings.model.U == 8 && settings.model.tp == 0.1 && settings.model.density == 0.9375 || error("model contract changed")
     settings.dmrg.maxdim == 200 || error("expected chi=200")
     settings.mixing.method == :linear && !settings.mixing.adaptive || error("Anderson/adaptive mixing is forbidden")
@@ -48,7 +49,10 @@ function validate_raw_basin_contract(settings)
     settings.convergence.dmrg_sweep_energy_tol == settings.dmrg.energy_tol || error("inner DMRG acceptance must match its stopping tolerance")
     settings.convergence.stable_iterations >= 5 || error("at least five stable records are required")
     if settings.convergence.channel_noise_floor > 0
-        settings.convergence.channel_noise_floor <= 5e-7 || error("channel noise floor exceeds qualified value")
+        # Cubic-unfrustrated density/leg kernels are three times square;
+        # scale the field noise floor, retaining the physical spin resolution.
+        noise_limit = geometry == :square ? 5e-7 : 1.5e-6
+        settings.convergence.channel_noise_floor <= noise_limit || error("channel noise floor exceeds qualified geometry scale")
         settings.convergence.stable_iterations >= 10 || error("noise-floor contract requires ten stable records")
     else
         settings.convergence.minimum_iterations >= 50 || error("historical contract requires at least 50 evaluations")
@@ -58,12 +62,13 @@ function validate_raw_basin_contract(settings)
     return settings
 end
 
-function prepare_two_basin_grid(base_path, reference_path, control_run, full_run, run_id; stage="anchors")
+function prepare_two_basin_grid(base_path, reference_path, control_run, full_run, run_id; stage="anchors", geometry=:square)
     stage in ("anchors", "remainder", "grid") || error("stage must be anchors, remainder, or grid")
     occursin(r"^[A-Za-z0-9_.-]+$", run_id) || error("unsafe run ID")
     control_run, full_run = abspath(control_run), abspath(full_run)
     raw_base = TOML.parsefile(base_path)
-    base = validate_raw_basin_contract(load_settings(base_path))
+    base = validate_raw_basin_contract(load_settings(base_path); geometry)
+    geometry == :square || stage == "grid" || error("cubic two-basin campaign requires the full grid")
     stripe, pairing = two_basin_references(reference_path)
     seeds = (stripe=blend_correlations(stripe, pairing), pairing=blend_correlations(pairing, stripe))
     for name in ("configs", "seeds")
@@ -81,7 +86,7 @@ function prepare_two_basin_grid(base_path, reference_path, control_run, full_run
         point = "t0$(round(Int, t0 * 10))_" * (V == 0 ? "v000" : "vm0$(round(Int, -10V))")
         point_fingerprints = NamedTuple[]
         for family in (:stripe, :pairing)
-            label = "square__$(family)_weak_other_$(point)_chi200_raw"
+            label = "$(geometry)__$(family)_weak_other_$(point)_chi200_raw"
             raw = deepcopy(raw_base)
             raw["model"]["t0"] = t0; raw["model"]["V"] = V
             raw["model"]["mu_initial"] = V == 0 ? 1.65 : V == -0.2 ? 1.10 : 0.55
@@ -101,7 +106,7 @@ function prepare_two_basin_grid(base_path, reference_path, control_run, full_run
             h5open(seed_path, "w") do file
                 file["artifact_kind"] = "two_basin_derived_field_seed"
                 file["chemical_potential"] = model.mu_initial
-                file["model/transverse_geometry"] = "square"
+                file["model/transverse_geometry"] = String(geometry)
                 LadderMPSMFT._write_fields(create_group(file, "fields/restart"), fields)
                 LadderMPSMFT._write_correlations(create_group(file, "template_correlations"), correlations)
                 provenance = create_group(file, "seed_provenance")
@@ -113,6 +118,7 @@ function prepare_two_basin_grid(base_path, reference_path, control_run, full_run
                     "reference_bundle_sha256" => TWO_BASIN_REFERENCE_SHA,
                     "target_t0" => t0, "target_V" => V, "target_ep" => model.ep,
                     "source_L" => 64, "target_L" => 64, "fresh_mps" => true,
+                    "source_geometry" => "square", "target_geometry" => String(geometry),
                     "is_scf_solution" => false,
                 ))
             end
@@ -120,7 +126,7 @@ function prepare_two_basin_grid(base_path, reference_path, control_run, full_run
             raw["run"]["inherit_from"] = seed_path
             raw["run"]["inherit_sha256"] = seed_sha
             open(config_path, "w") do io; TOML.print(io, raw); end
-            settings = validate_raw_basin_contract(load_settings(config_path))
+            settings = validate_raw_basin_contract(load_settings(config_path); geometry)
             readback = read_inherited_fields(seed_path)
             for component in (:alpha, :beta, :mu_cdw)
                 getfield(readback.fields, component) == getfield(fields, component) || error("seed readback mismatch")
@@ -133,7 +139,7 @@ function prepare_two_basin_grid(base_path, reference_path, control_run, full_run
                   ep_source_sha256=LadderMPSMFT.sha256_file(model.ep_source))
             push!(point_fingerprints, fp)
             push!(rows, merge((label=label, config=config_path, config_sha256=LadderMPSMFT.sha256_file(config_path),
-                geometry="square", t0=t0, V=V, family=String(family), epsilon=TWO_BASIN_EPSILON,
+                geometry=String(geometry), t0=t0, V=V, family=String(family), epsilon=TWO_BASIN_EPSILON,
                 seed=seed_path, seed_sha256=seed_sha, reference_sha256=TWO_BASIN_REFERENCE_SHA,
                 full_output_directory=output, stateless_output_directory=joinpath(control_run, "results", label)), fp))
         end
@@ -145,7 +151,7 @@ function prepare_two_basin_grid(base_path, reference_path, control_run, full_run
         for row in rows; println(io, join(values(row), '\t')); end
     end
     open(joinpath(control_run, "seed_contract.toml"), "w") do io
-        TOML.print(io, Dict("run_id" => run_id, "stage" => stage, "epsilon" => TWO_BASIN_EPSILON,
+        TOML.print(io, Dict("run_id" => run_id, "stage" => stage, "geometry" => String(geometry), "epsilon" => TWO_BASIN_EPSILON,
             "reference_sha256" => TWO_BASIN_REFERENCE_SHA, "branches" => length(rows),
             "maximum_iterations" => base.run.max_iterations,
             "minimum_iterations" => base.convergence.minimum_iterations, "chi" => base.dmrg.maxdim,
@@ -158,6 +164,6 @@ function prepare_two_basin_grid(base_path, reference_path, control_run, full_run
 end
 
 if abspath(PROGRAM_FILE) == @__FILE__
-    length(ARGS) == 6 || error("usage: julia --project=. scripts/prepare_phase1_two_basin_grid.jl BASE.toml REFERENCES.h5 CONTROL_RUN FULL_RUN RUN_ID anchors|remainder|grid")
-    prepare_two_basin_grid(ARGS[1:5]...; stage=ARGS[6])
+    length(ARGS) in (6,7) || error("usage: julia --project=. scripts/prepare_phase1_two_basin_grid.jl BASE.toml REFERENCES.h5 CONTROL_RUN FULL_RUN RUN_ID anchors|remainder|grid [square|cubic_unfrustrated]")
+    prepare_two_basin_grid(ARGS[1:5]...; stage=ARGS[6], geometry=length(ARGS)==7 ? Symbol(ARGS[7]) : :square)
 end

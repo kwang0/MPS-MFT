@@ -2900,3 +2900,135 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   byte-for-byte agreement of all six members with the maintained source files.
   This is a packaging-only change; the prior four compilation checks still
   cover the unchanged LaTeX sources. No numerical calculation was run.
+
+### 2026-09-15 — Analyze the complete square two-basin grid
+
+- User reports the full grid complete. Locally verified all 18 unique
+  point/seed histories: four original anchors plus fourteen runs in
+  `20260910_square_two_basin_95_5_40_remainder`, jobs 58172797–58172810.
+  The fourteen all saved 40 evaluations; original anchors saved 80, 80,
+  80 and 62. Total 862 evaluations, 17 maximum_iterations and one time_limit,
+  zero accepted endpoints and no recorded periodic solution. No remote
+  access or scheduler action was performed.
+- Preliminary diagram: both seeds reach stripe CDW/SDW at all six
+  t0=1.0/1.2 points, and paired states at t0=1.4,V=-0.4/-0.2. The seventh
+  stripe assignment, t0=1.4,V=0, is starred because its pairing start is
+  still converting at the deadline. This is a basin/trajectory assignment,
+  not an accepted-energy ranking or an interpolated phase boundary.
+- At the new paired (1.4,-0.2) point, physical leg-pair RMS is 0.0335676
+  from both seeds, rung means are -0.0501517, and spin RMS is only
+  1.16e-6/4.57e-6. Endpoint corrected energies agree within 2.1235e-9 t/site.
+  Pairing-start acceptance fails only the terminal ten-record spin span
+  (1.0742e-6 versus 5e-7 t); the final spin update is already 3.486e-8 t.
+  Stripe-start spin still decays, and its earlier global-field records and
+  several channel spans also fail. No growing instability is inferred.
+- At (1.2,-0.4), the pairing start has an extended paired transient:
+  leg-pair MF RMS 0.00203 at 10, 0.00195 at 20, 0.000639 at 30, and
+  7.83e-8 at 40. Final-ten pairing falls 99.976% while spin grows 13.6%.
+  Its late energy span remains 1.558e-4 t/site. Other stripe points have
+  negligible pairing but persistent profile relaxation; (1.0,-0.4) has
+  particularly resolved ~0.0034 global relative residuals.
+- All twelve t0<=1.2 endpoints have physical spin RMS 0.175–0.261,
+  leg-pair RMS <=9.85e-7, full-L charge DFT m=4 and spin DFT m=30.
+  The two paired points have physical leg-pair RMS 0.0336–0.0352 and
+  opposite rung signs. Finite-boundary modulation and tiny channel noise
+  are not treated as additional ordered phases. Descriptive phase labels
+  are unchanged under a tenfold variation of the amplitude separators.
+- All 18 jobs now have user-synced terminal sacct reconciliations. Actual
+  allocation charges: original V=-0.4 pair 3.763125, original V=0 pair
+  4.444722, fourteen remaining starts 18.590486, total 26.798333 node-hours.
+  Summed saved solver time estimates 26.474287. The V=0 actual charge
+  supersedes its prior estimate; the accounting ledger remains unchanged.
+- Added `scripts/analyze_two_basin_grid.py` and
+  `docs/reports/two_basin_grid_20260915/`: phase diagram, spin/pairing
+  history grids, full/late energy grids (five PNG/PDF pairs), narrative,
+  full JSON, 18 source/summary records, 862 iteration records and 1152
+  terminal rung records. Updated project state, documentation map and
+  active plan. Existing manuscript and unrelated untracked .claude remain
+  untouched. No threshold changes, continuation preparation or DMRG.
+- Reused the anchor loader with optional t0/campaign arguments; both
+  original V=-0.4 default summaries still match their prior report exactly.
+  All 18 compact/config/seed hashes, seed readbacks, raw handoffs, channel
+  residuals and logs agree. Pointwise four-fingerprint comparisons pass.
+  Recomputed terminal configured-window spans, corrected energies,
+  physical-spin/Hartree mapping and allocation arithmetic; rehashed every
+  source after reading. Initial analysis checks exposed an absent numerical
+  HDF5 group and the square kernel's leg-odd minus sign; the analysis now
+  uses the hashed config and documented leg swap. The successful local
+  rerun took under one minute. All five PNGs were viewed; the pairing log
+  range was expanded to retain measured sub-1e-11 values and viewed again.
+- Energy differences remain trajectory diagnostics because no endpoint is
+  accepted. Reproduce locally with
+  `python -B -X utf8 ladder_mps_mft/scripts/analyze_two_basin_grid.py`.
+
+### 2026-09-15 — Prepare cubic two-basin grid and short square V=0 continuation
+
+- User approved the preliminary square diagram and requested the same
+  cubic_unfrustrated grid plus a shorter square (1.4,0) continuation.
+  Prepared two direct Perlmutter entry points, with no remote access,
+  transfer, scheduler action, local reservation or DMRG solve.
+- Cubic: all 18 point/family starts, L=64, chi=200, t0=1/1.2/1.4 and
+  V=-0.4/-0.2/0, reciprocal 95%/5% correlations from the existing versioned
+  square reference bundle. Reconstruct each seed with its target cubic
+  kernel and exact E_p. Fresh MPS, max 60 raw evaluations, minimum 40,
+  ten stable records. No Anderson, damping or automatic further segments.
+  Slurm ceiling 12 h per GPU branch, solver deadline 11.5 h: 54 node-hours.
+- Square: continue both original V=0 MPS lineages from jobs 58093802 and
+  58093803 (80 and 62 evaluations) for at most 20 additional evaluations
+  each. Minimum ten fresh records, ten-record window. Slurm ceiling 8 h
+  per GPU branch, solver deadline 7.5 h: 4 node-hours. The pairing lineage's
+  late 21.6 minutes/evaluation motivates the eight-hour request. Max totals
+  are 100/82; the drift checks may still prevent formal convergence.
+- Energy-window tolerance is 1e-7 t/site; inner-DMRG stopping and gate are
+  both 1e-7 t total. Density 1e-5 and identity/effective-energy consistency
+  1e-8 t/site are unchanged. Relative field tolerance remains 1e-4 and
+  spatial channel/slow-mode guards are retained. Square absolute field
+  tolerance/noise floor remain 1e-7/5e-7 t. Cubic uses 3e-7/1.5e-6 t,
+  scaling with its 6g versus 2g density kernel; this is a provisional
+  transfer of physical spin resolution, not measured cubic noise.
+- The square preparer pins both compact hashes, original configs, full
+  SHA links and E_p registry; checks the source Hamiltonian; and requires
+  the full MPS, matching fields and full-file hash on Perlmutter. Full
+  hashes are 9ad2d9ea1239727e577be2997a7a9f62e1e6aaeae0653bd8591448f55dc58ea5
+  and d4b2ef33f8d969e23b519f08642f50eacfd158948c0b6710756613fd89344237.
+  Same-model parent ancestry restores the checkpoint chemical potential
+  and permits the existing plotting adapter to stitch the entire history.
+  Only compact files are present locally. Preview mode is explicitly
+  non-submittable; the production validation function rejects it.
+- Config SHA-256: cubic
+  7a492c399cff7d9891f3b6430fe4287dadd228e6115a10178d050b6513df222c;
+  square 31817ca8b8efce4dcb8b0a43834e7d0e1d8b9ab9dc5e4cad47ec4a6d539c0428.
+  Qualification implementation fingerprint:
+  a29d3f9f0ed848454f66d02ff787e157127273171191173bb8e33893edcf2550.
+  Provenance and the 36-row saved-history receipt are in
+  `docs/reports/two_basin_next_campaigns_20260915/`.
+- Local preparation passed 182 assertions; existing raw-basin tests passed
+  52+23 assertions. All 18 source histories were hashed before and after
+  replay. Under square extension controls the paired V=-0.4 histories
+  first pass available gates at stripe/pairing iterations 35/27. Both V=0
+  histories and both (1.2,-0.4) histories fail at every eligible prefix.
+  Applying cubic tolerances to unscaled square fields as a permissive
+  stress test also rejects these instabilities; settled V=-0.4 controls
+  pass at forty. Missing per-iteration identity errors preclude relabeling
+  old results as accepted. New inner-DMRG noise must be assessed from new data.
+- Local mock-launcher and production prepared-run-guard tests pass; all
+  four shell files pass Bash syntax. The old remainder wrapper regression
+  also passes. Checks caught and fixed a model-fingerprint change caused
+  by copying the checkpoint mu into model.mu_initial (the solver already
+  restores checkpoint mu), and stale source-campaign version/scratch
+  metadata inherited through run.env. Shared account and budget settings
+  are retained while new campaign metadata is regenerated. Initial test
+  harness failures involved Julia macro syntax, Windows path normalization,
+  and Git Bash PATH/line endings; corrected focused checks pass.
+- Launcher v1.20.0 adds the two preparation modes and retains older-run
+  compatibility. Both wrappers reconcile the existing append-only ledger
+  and submit only through its budget gates. Combined ceiling is 58
+  node-hours. The original anchor run.env remains unchanged. New default
+  IDs: 20260915_cubic_unfrustrated_two_basin_95_5_60 and
+  20260915_square_t014_v000_two_basin_finish20.
+- User handoff from `cd "$CFS/m4863/MPS-MFT/ladder_mps_mft"`: after
+  `git pull --ff-only`, run `bash slurm/submit_square_two_basin_finish.sh`
+  and `bash slurm/submit_cubic_unfrustrated_two_basin.sh`. Prepared source,
+  controls, documentation and preceding full-grid analysis are published
+  under the existing push authorization. No job IDs exist for these new
+  campaigns in the local evidence at handoff.

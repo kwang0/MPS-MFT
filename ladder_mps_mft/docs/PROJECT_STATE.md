@@ -1,6 +1,6 @@
 # Current project state
 
-Last locally reviewed: 2026-09-12 (V=0 anchors analyzed)
+Last locally reviewed: 2026-09-15 (cubic grid and short square continuation prepared)
 
 This is the canonical mutable snapshot for resuming work. It is deliberately
 short. Stable rules belong in `AGENTS.md` and the method documents; durable
@@ -26,6 +26,29 @@ Recheck the branch, commit, and working tree at the start of each new task.
 
 ## Current scientific position
 
+- Following full-grid review, the user authorized the same two-basin cubic
+  grid and a short square (1.4,0) extension. Prepared 18 cubic-unfrustrated
+  chi=200 starts: reciprocal 95%/5% templates, max 60 raw evaluations,
+  minimum 40 and ten stable records. Prepared both square V=0 lineages for
+  up to 20 additional raw evaluations from their pinned full MPS sources;
+  minimum ten fresh records. Energy-window and inner-DMRG tolerances are
+  1e-7 t/site and 1e-7 t total. Relative field/slow-mode checks remain strict;
+  cubic absolute field tolerances scale with its threefold density kernel.
+  User-run launchers share existing accounting and cap reservations at
+  54+4 node-hours, with no automatic extensions. No jobs submitted locally.
+  See the [settings, qualification and two submission commands](reports/two_basin_next_campaigns_20260915/README.md).
+- The full square two-basin grid is locally complete: 18 histories, 862 MF
+  evaluations, and 26.798333 allocation node-hours from synced sacct
+  reconciliations. The [preliminary phase diagram](reports/two_basin_grid_20260915/README.md)
+  assigns stripes to all six t0=1.0/1.2 points and to t0=1.4,V=0 with an
+  ongoing-conversion flag; t0=1.4,V=-0.4/-0.2 are paired from both seeds.
+  No endpoint is formally accepted. At (1.2,-0.4), the pairing start has a
+  long paired transient before collapsing late into stripes. At (1.4,-0.2),
+  both profiles/energies agree closely while small spin order decays; a
+  ten-record span still prevents acceptance. Keep basin assignment separate
+  from converged energetic selection. All pointwise comparison fingerprints
+  match; the original anchors and remainder retain different stopping
+  controls. Original artifacts and their acceptance flags are unchanged.
 - Manuscript artifact, September 15: the new
   [introduction/background and results draft](manuscript/README.md) collects
   the existing literature and analyses through September 13. The 16-page
@@ -54,18 +77,18 @@ Recheck the branch, commit, and working tree at the start of each new task.
   negligible pairing; the pairing lineage stops at the deadline after 62
   while spin grows and pairing falls to 15.75% of its first measured value.
   Both have strong, similar CDW/SDW textures, but neither is self-consistent.
-  Recorded MF time estimates 4.411889 node-hours; exact allocation cost awaits
-  user-supplied sacct. See the [V=0 analysis](reports/two_basin_v000_20260912/README.md).
-  The user
-  now authorizes the remaining fourteen with a 40-evaluation cap, minimum 30,
+  September 15 synced accounting gives 4.444722 actual allocation node-hours
+  for V=0, replacing the earlier 4.411889 solver-time estimate. See the
+  [V=0 analysis](reports/two_basin_v000_20260912/README.md).
+  The remaining fourteen completed with a 40-evaluation cap, minimum 30,
   ten stable records, a 5e-7 channel noise floor plus full-window drift gate,
   and a 2e-8 t/site energy span. Global/inner-DMRG tolerances are unchanged.
   Saved-history gates first pass at 35/30 for the stripe/pairing anchors;
   older growing V=0 raw histories still fail. Missing per-iteration identity
   errors prevent retrospective acceptance certification. The new scope is
-  published and locally prepared; its live submission status is not reviewed
-  in this point analysis. Its separate-checkout launcher shares
-  existing accounting and leaves pending source paths unchanged. See the
+  complete in the synchronized evidence; all fourteen stopped at 40 and
+  remain formally unaccepted. Their allocation cost is 18.590486 node-hours.
+  The separate-checkout launcher shared existing accounting. See the
   [remainder contract](reports/two_basin_remainder_20260910/README.md).
   See the [V=-0.4 analysis](reports/two_basin_vm04_20260910/README.md).
   Higher chi, length, and stripe-wavelength work remains deferred.

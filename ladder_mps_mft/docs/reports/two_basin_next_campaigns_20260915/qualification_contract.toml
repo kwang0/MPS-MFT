@@ -1,0 +1,4 @@
+square_config_sha256 = "31817ca8b8efce4dcb8b0a43834e7d0e1d8b9ab9dc5e4cad47ec4a6d539c0428"
+cubic_config_sha256 = "7a492c399cff7d9891f3b6430fe4287dadd228e6115a10178d050b6513df222c"
+implementation_sha256 = "a29d3f9f0ed848454f66d02ff787e157127273171191173bb8e33893edcf2550"
+boundary = "Saved square histories only; cubic thresholds tested on unscaled square fields as a more permissive stress test, not a cubic convergence forecast. Missing per-iteration identity errors prevent acceptance certification. Original sources and flags unchanged. Square continuation uses a fresh ten-record window, not old acceptance history."

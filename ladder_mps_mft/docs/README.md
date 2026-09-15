@@ -53,7 +53,20 @@ For the current experiment under review, see the
 [September 6 finite-size seed snapshot](reports/finite_size_seeds_20260906/README.md).
 It contains four chi=200 L=96/128 pairing/stripe seeds with fixed L=64 coupling.
 
-For the newest two-basin result, see the
+For the full two-basin grid, see the
+[September 15 preliminary phase diagram](reports/two_basin_grid_20260915/README.md).
+All 18 histories are synced: seven stripe assignments (one still converting),
+two paired assignments, zero formally accepted endpoints, 862 MF evaluations,
+and 26.798333 allocation node-hours. The report includes complete and late
+energy grids, spin/pairing histories, convergence failures and provenance.
+
+The next authorized campaigns are the
+[cubic two-basin grid and short square (1.4,0) continuation](reports/two_basin_next_campaigns_20260915/README.md):
+18 cubic starts capped at 60 raw evaluations and two square continuations
+capped at 20 additional evaluations. The report documents thresholds,
+saved-history qualification, full-MPS validation and two simple launchers.
+
+For the preceding V=0 anchor result, see the
 [September 12 V=0 anchor analysis](reports/two_basin_v000_20260912/README.md).
 The stripe start reaches 80 evaluations with negligible pairing; the pairing
 start reaches a deadline at 62 while spin grows and pairing collapses. Both
