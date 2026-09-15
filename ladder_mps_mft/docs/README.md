@@ -61,6 +61,13 @@ and 26.798333 allocation node-hours. The report includes complete and late
 energy grids, spin/pairing histories, convergence failures and provenance.
 
 The latest prepared campaign is the
+[four-seed positive-V square comparison](reports/square_positive_v_seeds_20260915/README.md)
+at (1.2,+0.2). It adds regular intertwined-order seeds with charge/pair
+periods 8 and 16 to the two established reference mixtures, using the legacy
+shape and target square couplings. The report includes source and seed
+figures, convergence controls and a four-job launcher (12-node-hour ceiling).
+
+The preceding prepared campaign is the
 [six finer square cuts and bare-ladder interpolation check](reports/two_basin_fine_cuts_20260915/README.md).
 It provides E0 and E_p figures along t0=1.4 and V=-0.4, the six requested
 linear estimates, and a separate-worktree launcher for twelve chi=200

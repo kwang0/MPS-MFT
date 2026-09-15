@@ -2,6 +2,17 @@
 
 Last reviewed: 2026-09-15
 
+Positive-V follow-up: four starts at square (1.2,+0.2) are prepared in
+`docs/reports/square_positive_v_seeds_20260915/README.md`. Two retain the
+existing 95%/5% reference mixtures; two regular intertwined textures use
+charge/pair periods 8 and 16 and twice-longer spin envelopes. They test the
+legacy pairing-at-hole-rich-spin-node pattern under square couplings.
+The source is incomplete and is used only to set initial shape amplitudes.
+Use the new-worktree handoff and `slurm/submit_square_positive_v.sh` for
+four chi=200 jobs capped at 60 raw evaluations each, 12 node-hours total.
+Assess stationary coexistence separately from unfinished growth, sliding or
+seed-dependent metastability. No automatic follow-up jobs are configured.
+
 Latest September 15 update: the user reports the cubic comparison has been
 submitted. Twelve finer square-cut starts are now prepared with interpolated
 E_p: t0=1.4 at V=-0.05/-0.10/-0.15 and V=-0.4 at t0=1.25/1.30/1.35.

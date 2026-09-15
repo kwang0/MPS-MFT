@@ -1,6 +1,6 @@
 # Current project state
 
-Last locally reviewed: 2026-09-15 (square finer cuts prepared; cubic submission user-reported)
+Last locally reviewed: 2026-09-15 (four positive-V square seeds prepared)
 
 This is the canonical mutable snapshot for resuming work. It is deliberately
 short. Stable rules belong in `AGENTS.md` and the method documents; durable
@@ -18,15 +18,30 @@ history belongs in `docs/RUN_LOG.md`.
   part of this work.
 - Local `output/` and simulation HDF5 files are excluded from Git. The small
   `data/two_basin_references.h5` is a versioned seed-input exception.
-- Current local work adds explicit V-axis E_p interpolation and twelve finer
-  square-cut starts. This changes the implementation fingerprint; preserve
-  the submitted cubic campaign's Perlmutter checkout and use the separate
-  worktree handoff in the fine-cut report.
+- The finer-cut campaign added explicit V-axis E_p interpolation and changed
+  the solver implementation fingerprint. The new positive-V comparison adds
+  preparation scripts and four seeds without further solver changes. Preserve
+  submitted source checkouts and use each campaign's separate-worktree handoff.
 
 Recheck the branch, commit, and working tree at the start of each new task.
 
 ## Current scientific position
 
+- Four chi=200 starts are now prepared at square (1.2,+0.2): the existing
+  reciprocal 95%/5% reference mixtures plus two regular intertwined textures
+  with charge/pair periods 8/16 and spin-envelope periods 16/32 rungs.
+  A compact recipe extracts the legacy cubic-frustrated run's bulk amplitudes
+  and relative pairing signs, while discarding irregular peak positions and
+  restoring exact target density. The legacy source remains incomplete after
+  60 records; it provides shape guidance, not an energy competitor. Pairing
+  peaks align with holes and spin antiphase nodes. All fields are rebuilt
+  using the square kernel and evolve freely. Max 60/minimum 40, ten stable
+  records and the recent square gates; exact E_p, no new bare jobs, no solver
+  source changes. The [seed report and handoff](reports/square_positive_v_seeds_20260915/README.md)
+  provides previews and a four-job launcher (12-node-hour ceiling), with
+  82 local assertions and six mock/launcher checks passed. No submission
+  performed locally. Cubic submission is user-reported; finer-cut and square
+  V=0 continuation submission status has not been reported.
 - Six finer square coordinates are prepared with both 95%/5% reference
   mixtures: t0=1.4 at V=-0.05/-0.10/-0.15, and V=-0.4 at t0=1.25/1.30/1.35.
   Controls use chi=200, max 60/minimum 40 raw evaluations and ten stable

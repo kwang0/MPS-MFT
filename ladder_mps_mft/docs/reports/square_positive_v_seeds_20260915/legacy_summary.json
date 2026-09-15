@@ -1,0 +1,28 @@
+{
+  "source": "stateless_data/results_L_64_U_8.0_V_0.2_t0_1.2_t_p_0.1_chi_200_density_0.9375_gpu_nodamping.h5",
+  "source_sha256": "8a8f5b917d11259d34ce773cb2860fb20d809f5dccfd252342f69a4596b9fec6",
+  "completed": false,
+  "stored_records": 60,
+  "mean_density": 0.9388028989027974,
+  "target_density": 0.9375,
+  "chemical_potential": 2.1657272840317887,
+  "geometry": "cubic_frustrated (inferred from stored Hartree kernel)",
+  "geometry_max_field_discrepancies": {
+    "square": 0.08371772283239057,
+    "cubic_unfrustrated": 0.1642045746009138,
+    "cubic_frustrated": 1.0969964223533912e-06
+  },
+  "bulk_pair_hole_correlation": 0.9923205682021942,
+  "bulk_pair_abs_spin_correlation": -0.9656792682913881,
+  "hole_peak_rungs": [
+    8,
+    19,
+    30,
+    42,
+    55
+  ],
+  "charge_amplitude": 0.052067839220001744,
+  "spin_sz_amplitude": 0.30615580876142756,
+  "pair_rung_mean": 0.026020164344011887,
+  "pair_rung_modulation": 0.016760165227487446
+}

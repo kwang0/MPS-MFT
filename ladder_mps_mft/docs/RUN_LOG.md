@@ -3159,3 +3159,83 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   The handoff uses a separate worktree after fetching, preserving submitted
   cubic source. The original anchor run.env is unchanged. Publication uses
   the user's existing authorization to push and provide submission commands.
+
+### 2026-09-15 — Positive-V square coexistence test with four seed families
+
+- User proposed square (t0,V)=(1.2,+0.2), retaining the two established
+  stripe/pairing mixtures and adding two legacy-inspired intertwined-order
+  starts at physically motivated wavelengths. Their working picture is
+  predominantly stripe/pairing competition at V<0 and possible coexistence
+  at V>0; the former is not taken as an exclusion of all coexistence and
+  the latter remains to be tested. User identified legacy convergence and
+  positional pinning concerns. No broad scan or new bare jobs were added.
+- Read the local legacy V=+0.2 profiles at t0=1.0/1.2/1.4; used the matching
+  t0=1.2 nodamping file to extract the new shapes. SHA-256:
+  8a8f5b917d11259d34ce773cb2860fb20d809f5dccfd252342f69a4596b9fec6.
+  It is incomplete after 60 records and has mean density 0.9388028989,
+  missing the 0.9375 target. Its geometry label is absent; Hartree-kernel
+  residuals favor cubic_frustrated (max 1.10e-6) over square (0.0837) and
+  cubic_unfrustrated (0.1642). This is recorded as inferred geometry.
+- The final legacy profile has hole peaks at rungs 8,19,30,42,55. In bulk
+  rungs 9–56, |rung pairing| correlates +0.9923 with holes and -0.9657 with
+  |staggered leg-odd Sz|. Rung and leg singlet amplitudes have opposite
+  signs, with no rung-pair sign changes between peaks. No accepted energy
+  or optimal wavelength is inferred from this unfinished trajectory.
+- Added scripts/inspect_positive_v_legacy.py, producing source-hashed
+  evidence and data/positive_v_intertwined_recipe.toml. The recipe uses
+  bulk 5th/95th percentiles for charge/pair amplitudes and 95th-percentile
+  |Sz| for spin, plus translation-averaged relative-bond pairing and normal
+  correlation coefficients at offsets 0–4. Source bytes are unchanged.
+  Recipe SHA: 786fa2e8846820f42aabbabb625c3a645558d25e5388afa4058abf63cf834d35.
+- Added a four-branch preparer and square chi=200 base config. The first
+  two starts reproduce the reciprocal 95%/5% reference mixtures. The new
+  starts use charge/pairing periods 8 and 16 rungs and spin envelopes 16
+  and 32, with common pairing sign between maxima and leg-odd AF spin.
+  At n=15/16, these cells contain one and two holes, motivating half-filled
+  and filled stripe-counting alternatives. The legacy's irregular 11–13
+  rung spacings are discarded. Both new seeds have exact target density,
+  zero total Sz and pairing maxima at hole-rich spin antiphase walls.
+- New seed amplitudes: charge 0.0520678392, Sz envelope 0.3061558088,
+  rung-pair mean 0.0260201643 and modulation 0.0167601652. The nearest-leg
+  pair coefficient is -0.604435 of the rung envelope. These are synthetic
+  initial-correlation templates, not an asserted physical MPS. The square
+  kernel rebuilds all fields, including its zero cross-leg alpha/beta;
+  no legacy MPS, irregular peak positions or persistent external pins enter.
+  All starts use fresh MPS initialization with random_seed=1404.
+- Controls match the recent square finer cuts: max 60/minimum 40 raw
+  evaluations, ten stable records, no Anderson; field abs/rel 1e-7/1e-4,
+  channel floor 5e-7, energy window 1e-7 t/site and inner-DMRG 1e-7 t total.
+  Full drift, slow-mode and identity gates remain unchanged. Exact bare
+  chi=1000 E_p=-0.15307266912955697 is used. No src/ solver files changed.
+- Local focused tests passed 33 shape/kernel and 49 prepared-run assertions
+  (82 total), including density/spin sums, pair/charge locking, antiphase
+  wavelengths, square field reconstruction, reference mixtures, seed
+  hashes and matching fingerprints. The preparation test was made repeatable
+  using a temporary directory and rerun successfully. The durable preview
+  remains in output/seed_previews/20260915_square_positive_v/control.
+  Six local Bash syntax/mock/guard tests passed, including existing
+  wrappers and the new wrapper's source isolation and shared accounting.
+  Both figures were visually checked. No DMRG or full suite was run.
+- Config SHA: f5f859581210324dc388e41250fb28961f5b0f12fa811365cbaf88c4142b0e5a.
+  All four model fingerprints:
+  a994c1ee7bf7b9cbe952f448e20f451520143edecb2432f26c5bcc07e744d50c.
+  Numerical fingerprint:
+  d928882239844f67c88e7020a4f1f3bf9ae009060c3dc5256406fcf6b18a8e2e.
+  Unchanged implementation fingerprint:
+  c054eb9690ce308e1dfb413bbc82d5e430eeecd3bf7f0b018acce267be9ccc99.
+- Launcher v1.22.0 adds prepare-square-positive-v and
+  slurm/submit_square_positive_v.sh. Default ID:
+  20260915_square_t012_vp02_four_seeds_60. Four 12-hour one-GPU jobs
+  reserve at most 12 node-hours (11.5-hour solver limit) and 240 evaluations.
+  Shared append-only accounting remains enforced, with one segment per
+  branch and no automatic extension. The user handoff uses a new worktree
+  to preserve submitted sources. No Perlmutter connection, transfer or
+  scheduler action was performed; publication uses standing push authority.
+- Full source/seed figures, numeric receipts and interpretation boundaries
+  are in docs/reports/square_positive_v_seeds_20260915/README.md. Stable
+  coexistence requires surviving stationary bulk orders and the usual gates.
+  Residual pairing during collapse is not coexistence. Distinct converged
+  wavelength states may be metastable; unresolved evolution remains flagged.
+  Open-boundary and algorithmic pinning are not ruled out by these starts;
+  translated seeds can be considered later if needed. Existing campaign
+  source artifacts, acceptance flags and energy rankings are unchanged.

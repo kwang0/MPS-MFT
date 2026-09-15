@@ -1,0 +1,25 @@
+# Legacy shape input only; not an accepted state or an MPS.
+schema_version = 1
+source = "stateless_data/results_L_64_U_8.0_V_0.2_t0_1.2_t_p_0.1_chi_200_density_0.9375_gpu_nodamping.h5"
+source_sha256 = "8a8f5b917d11259d34ce773cb2860fb20d809f5dccfd252342f69a4596b9fec6"
+source_geometry = "cubic_frustrated"
+source_geometry_evidence = "inferred from stored Hartree kernel"
+source_completed = false
+source_records = 60
+L = 64
+source_chi = 200
+t0 = 1.2
+V = 0.2
+source_mean_density = 0.9388028989027974
+target_density = 0.9375
+bulk_first_rung = 9
+bulk_last_rung = 56
+definition = "5th/95th percentile amplitudes; translation-averaged relative bond coefficients; positions discarded"
+charge_amplitude = 0.052067839220001744
+spin_sz_amplitude = 0.30615580876142756
+pair_rung_mean = 0.026020164344011887
+pair_rung_modulation = 0.016760165227487446
+pair_same_leg = [0.024849021617264152, -0.6044351578720879, 0.21143274373186294, 0.32298740791483344, -0.11087528653309099]
+pair_cross_leg = [1.0, -0.17567735113851715, -0.03093316533232788, -0.022263790323912024, -0.21885447295700672]
+exchange_same_leg = [0.4657780202505513, 0.13247080262334127, 0.005976269144254737, 0.002906348295292767, 0.007634245799939129]
+exchange_cross_leg = [0.16224783005652899, 0.012587223627111293, -0.03720122433781408, -0.012357319204421673, 0.008199864633376469]
