@@ -38,6 +38,13 @@ recorded explicitly as user-reported until synchronized evidence is available.
 
 ## Stable scientific references
 
+The latest synchronized results are the
+[September 16 square continuation and partial cubic grid](reports/two_basin_progress_20260916/README.md).
+Both square continuations finish 20 additional evaluations; the pairing lineage
+now loses its pairing. Eight cubic histories at four coordinates all reach
+stripes after 60 evaluations each. All ten remain unaccepted; complete
+histories, spatial drift diagnostics and available cost evidence are included.
+
 For the manuscript starting point, see the
 [introduction, background, and current-results draft](manuscript/README.md),
 created September 15, 2026. It provides editable LaTeX, a checked PDF,
@@ -55,10 +62,11 @@ It contains four chi=200 L=96/128 pairing/stripe seeds with fixed L=64 coupling.
 
 For the full two-basin grid, see the
 [September 15 preliminary phase diagram](reports/two_basin_grid_20260915/README.md).
-All 18 histories are synced: seven stripe assignments (one still converting),
-two paired assignments, zero formally accepted endpoints, 862 MF evaluations,
-and 26.798333 allocation node-hours. The report includes complete and late
-energy grids, spin/pairing histories, convergence failures and provenance.
+Updated September 16 with both V=0 continuations: seven stripe assignments,
+two paired assignments, zero formally accepted endpoints, 902 MF evaluations,
+and 27.350764 allocation node-hours across 18 lineages / 20 source jobs.
+The report includes complete and late energy grids, spin/pairing histories,
+latest convergence failures and parent/continuation provenance.
 
 The latest prepared campaign is the
 [four-seed positive-V square comparison](reports/square_positive_v_seeds_20260915/README.md)

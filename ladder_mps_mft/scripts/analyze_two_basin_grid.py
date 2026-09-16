@@ -1,4 +1,4 @@
-"""Preliminary square phase assignment from all 18 synced raw 95/5 histories.
+"""Preliminary square phase assignment from 18 raw 95/5 lineages, including continuations.
 
 No DMRG, source mutation, acceptance relabeling, or accepted-energy ranking.
 Run from any directory with the existing Python scientific environment.
@@ -19,6 +19,7 @@ PROJECT = common.PROJECT
 OUT = PROJECT / 'docs/reports/two_basin_grid_20260915'
 CAMPAIGNS = ('20260908_square_two_basin_95_5_80_anchors',
              '20260910_square_two_basin_95_5_40_remainder')
+CONTINUATION = '20260915_square_t014_v000_two_basin_finish20'
 T0 = (1., 1.2, 1.4)
 VS = (0., -.2, -.4)
 PHASE_COLORS = {'S': '#245A9C', 'D': '#A24700', 'S*': '#245A9C', '?': '#60656C'}
@@ -133,6 +134,42 @@ def save(fig, name):
     plt.close(fig)
 
 
+def initialize_lineage(d):
+    """Retain segment-local diagnostics alongside cumulative plotting indices."""
+    s, h = d['summary'], d['history']
+    s.update(cumulative_iterations=s['iterations'], diagnostics_scope='latest source segment',
+             lineage_solver_node_hours=s['solver_node_hours'],
+             lineage_allocation_node_hours=s.get('allocation', {}).get('node_hours', 0))
+    h['source_iteration'] = h['iteration'].copy()
+    h['source_job_id'] = np.full(s['iterations'], s['job_id'])
+    d['segments'] = [s.copy()]
+    return d
+
+
+def append_continuation(parent, child):
+    a, b = parent['summary'], child['summary']
+    assert b['parent_sha256'] == a['full_source_sha256']
+    assert b['parent_compact_sha256'] == a['source_sha256']
+    assert b['parent_job_id'] == a['job_id']
+    assert b['fingerprints']['model_fingerprint'] == a['fingerprints']['model_fingerprint']
+    # Endpoint gates have already been evaluated using only the new segment's
+    # configured window. Concatenation is for histories and totals, not gates.
+    offset = a['cumulative_iterations']
+    for key in child['history']:
+        values = child['history'][key] + offset if key == 'iteration' else child['history'][key]
+        child['history'][key] = np.concatenate((parent['history'][key], values))
+    for key in ('energy', 'spin_rms', 'pairing_rms'):
+        child[key] = np.concatenate((parent[key], child[key]))
+    b['cumulative_iterations'] = offset+b['iterations']
+    child['segments'] = parent['segments']+[child['segments'][0]]
+    b['lineage_solver_node_hours'] = sum(s['solver_node_hours'] for s in child['segments'])
+    b['lineage_allocation_node_hours'] = sum(s.get('allocation', {}).get('node_hours', 0)
+                                            for s in child['segments'])
+    child['segments'][-1] = b.copy()
+    np.testing.assert_array_equal(child['history']['iteration'], np.arange(1, b['cumulative_iterations']+1))
+    return child
+
+
 def figures(data, points):
     plt.rcParams.update({'font.size': 11, 'axes.spines.top': False, 'axes.spines.right': False})
     fig, ax = plt.subplots(figsize=(9, 7.4))
@@ -151,9 +188,9 @@ def figures(data, points):
     legend=[Line2D([],[],marker='o',color='none',markerfacecolor=PHASE_COLORS['S'],markeredgecolor='none',markersize=11,label='S: stripe CDW / SDW'),
             Line2D([],[],marker='s',color='none',markerfacecolor=PHASE_COLORS['D'],markeredgecolor='none',markersize=11,label='D: d-wave-like paired basin')]
     fig.legend(handles=legend,loc='upper center',bbox_to_anchor=(.5,.895),ncol=2,frameon=False,fontsize=11)
-    fig.text(.12,.135,'S*: stripe start has negligible pairing; pairing start is still evolving toward stripes.',fontsize=10)
+    fig.text(.12,.135,'Updated September 16: both V=0 anchor lineages now have negligible pairing.',fontsize=10)
     fig.text(.12,.093,'Labels describe the two observed trajectories. All 18 endpoints remain formally unaccepted.',fontsize=10,fontweight='bold')
-    fig.text(.12,.052,'No interpolated boundary or converged ground-state energy ranking.\n14 starts: 40 updates each; anchors: 80 / 80 at V=-0.4 and 80 / 62 at V=0.',fontsize=10)
+    fig.text(.12,.052,'No interpolated boundary or converged ground-state energy ranking.\n14 starts: 40 updates each; anchors: 80 / 80 at V=-0.4 and 100 / 82 at V=0.',fontsize=10)
     save(fig,'preliminary_phase_diagram')
     # Same coordinate order and axes throughout the supporting 3 x 3 grids.
     for key, title, ylabel, limits in (
@@ -171,14 +208,19 @@ def figures(data, points):
                     y=d['energy'] if key.startswith('energy') else d[key]
                     ax.plot(d['history']['iteration'][sl],y[sl],color=common.COLORS[family],
                             ls='-' if family=='stripe' else '--',label=common.LABELS[family],lw=1.6)
+                    if key!='energy_late' and len(d['segments'])>1:
+                        ax.axvline(d['segments'][0]['iterations']+.5, color=common.COLORS[family],
+                                   ls=':', alpha=.5, lw=1)
                 ax.set_title(f't0={t0:g}, V={v:g}',fontsize=11)
                 if limits: ax.set_yscale('log'); ax.set_ylim(*limits)
                 else: ax.ticklabel_format(axis='y',style='plain',useOffset=False)
                 ax.grid(alpha=.2)
-                if iy==2: ax.set_xlabel('MF evaluation')
+                if iy==2: ax.set_xlabel('MF evaluation (cumulative)')
                 if ix==0: ax.set_ylabel(ylabel)
         axes[0,0].legend(fontsize=8)
         fig.suptitle(title+'\nSquare grid; solid = stripe seed, dashed = pairing seed; no accepted endpoints',fontsize=14)
+        if key!='energy_late':
+            fig.supxlabel('Dotted lines at (1.4,0): continuation begins; original and new histories are joined.', fontsize=10)
         save(fig,key+'_grid')
 
 
@@ -193,10 +235,20 @@ def main():
         for row in manifest:
             key=(float(row['t0']),float(row['V']),row['family'])
             assert key not in data
-            data[key]=analyze_run(row,run,manifest,jobs,accounting)
+            data[key]=initialize_lineage(analyze_run(row,run,manifest,jobs,accounting))
             s=data[key]['summary']
             print(f"Loaded {key}: {s['iterations']} {s['phase_observation']} accepted={s['accepted']}",flush=True)
     assert set(data)=={(t,v,f) for t in T0 for v in VS for f in ('stripe','pairing')}
+    run=PROJECT/'output/phase1_gpu'/CONTINUATION
+    manifest,jobs=common.rows(run/'manifest.tsv'),common.rows(run/'jobs.tsv')
+    assert len(manifest)==2
+    for row in manifest:
+        key=(float(row['t0']),float(row['V']),row['family'])
+        assert key[:2]==(1.4,0.)
+        child=initialize_lineage(analyze_run(row,run,manifest,jobs,accounting))
+        assert int(row['parent_iterations'])==data[key]['summary']['iterations']
+        data[key]=append_continuation(data[key],child)
+        print(f"Continued {key}: {data[key]['summary']['cumulative_iterations']} cumulative evaluations",flush=True)
     points=[]
     for v in VS:
         for t0 in T0:
@@ -209,7 +261,7 @@ def main():
                 phase='S*'
             assert phase in ('S','D','S*','?')
             point=dict(t0=t0,V=v,phase=phase,seed_summary=('both seeds → '+phase) if phase!='S*' else 'pairing seed → stripe (ongoing)',
-                stripe_iterations=sa['iterations'],pairing_iterations=sb['iterations'],
+                stripe_iterations=sa['cumulative_iterations'],pairing_iterations=sb['cumulative_iterations'],
                 accepted_count=int(sa['accepted'])+int(sb['accepted']),
                 endpoint_energy_pairing_minus_stripe=sb['corrected_energy_per_site']-sa['corrected_energy_per_site'],
                 physical_spin_rms_range=sorted([sa['physical_spin_odd_bulk_rms'],sb['physical_spin_odd_bulk_rms']]),
@@ -219,32 +271,40 @@ def main():
                 energy_ranking_eligible=bool(sa['accepted'] and sb['accepted']))
             points.append(point)
     summaries=[d['summary'] for d in data.values()]
-    payload=dict(date='2026-09-15',L=64,chi=200,points=points,runs=summaries,
+    source_summaries=[s for d in data.values() for s in d['segments']]
+    assert len(source_summaries)==20 and len({s['job_id'] for s in source_summaries})==20
+    payload=dict(date='2026-09-16',original_report_date='2026-09-15',L=64,chi=200,points=points,runs=summaries,
+        source_runs=source_summaries, independent_lineages=len(summaries), source_artifacts=len(source_summaries),
+        iteration_scope='runs.iterations counts the latest segment; cumulative_iterations includes parents. All endpoint diagnostics use the latest segment and its archived controls.',
         classification='Observed basins and direction of raw MF evolution, not accepted-energy selection. S/D thresholds are descriptive separators; see script.',
-        total_iterations=sum(s['iterations'] for s in summaries),
+        total_iterations=sum(s['cumulative_iterations'] for s in summaries),
         accepted_count=sum(s['accepted'] for s in summaries),
-        total_solver_node_hours=sum(s['solver_node_hours'] for s in summaries),
-        allocation_jobs_available=sum('allocation' in s for s in summaries),
-        total_allocation_node_hours=sum(s.get('allocation',{}).get('node_hours',0) for s in summaries))
+        total_solver_node_hours=sum(s['solver_node_hours'] for s in source_summaries),
+        allocation_jobs_available=sum('allocation' in s for s in source_summaries),
+        total_allocation_node_hours=sum(s.get('allocation',{}).get('node_hours',0) for s in source_summaries))
+    assert payload['total_iterations']==sum(s['iterations'] for s in source_summaries)
     (OUT/'analysis.json').write_text(json.dumps(common.clean(payload),indent=2,allow_nan=False)+'\n',encoding='utf-8')
-    fields=('t0','V','family','job_id','phase_observation','iterations','status','accepted',
+    fields=('t0','V','family','job_id','phase_observation','iterations','cumulative_iterations','status','accepted',
             'physical_spin_odd_bulk_rms','physical_leg_pair_bulk_rms','final_rung_pair_mean',
             'physical_charge_bulk_std','global_relative_residual','corrected_energy_per_site','energy_span_last10',
-            'density_error','spin_fractional_change_last10','pairing_fractional_change_last10')
+            'density_error','spin_fractional_change_last10','pairing_fractional_change_last10',
+            'lineage_solver_node_hours','lineage_allocation_node_hours')
     write_csv('run_summary.csv',[{**{k:s[k] for k in fields},'failed_gates':'; '.join(s['failed_gates'])} for s in summaries])
-    write_csv('sources.csv',[{k:s[k] for k in ('t0','V','family','job_id','campaign','source','source_sha256','full_source_sha256','config_sha256')} for s in summaries])
+    write_csv('sources.csv',[{**{k:s[k] for k in ('t0','V','family','job_id','campaign','source','source_sha256','full_source_sha256','config_sha256','iterations')},
+        'parent_job_id':s.get('parent_job_id',''),'parent_sha256':s.get('parent_sha256','')} for s in source_summaries])
     write_csv('iteration_history.csv',[dict(t0=t,V=v,family=f,iteration=int(it),
         energy_per_site=d['energy'][i],spin_field_rms=d['spin_rms'][i],pairing_field_rms=d['pairing_rms'][i],
-        global_relative_residual=d['history']['field_rel_residual'][i],density=d['history']['density'][i])
+        global_relative_residual=d['history']['field_rel_residual'][i],density=d['history']['density'][i],
+        source_job_id=d['history']['source_job_id'][i],source_iteration=int(d['history']['source_iteration'][i]))
         for (t,v,f),d in data.items() for i,it in enumerate(d['history']['iteration'])])
     write_csv('terminal_profiles.csv',[dict(t0=t,V=v,family=f,rung=x+1,
         physical_charge=d['charge'][x],physical_spin_odd=d['spin'][x],
         physical_rung_pair=d['pair_rung'][x])
         for (t,v,f),d in data.items() for x in range(64)])
     figures(data,points)
-    for s in summaries:
+    for s in source_summaries:
         assert common.sha(PROJECT/s['source'])==s['source_sha256']
-    print(json.dumps(common.clean({k:v for k,v in payload.items() if k!='runs'}),indent=2))
+    print(json.dumps(common.clean({k:v for k,v in payload.items() if k not in ('runs','source_runs')}),indent=2))
 
 
 if __name__=='__main__':

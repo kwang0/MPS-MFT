@@ -1,6 +1,6 @@
 # Current project state
 
-Last locally reviewed: 2026-09-15 (four positive-V square seeds prepared)
+Last locally reviewed: 2026-09-16 (square continuations and eight cubic results synced)
 
 This is the canonical mutable snapshot for resuming work. It is deliberately
 short. Stable rules belong in `AGENTS.md` and the method documents; durable
@@ -27,6 +27,35 @@ Recheck the branch, commit, and working tree at the start of each new task.
 
 ## Current scientific position
 
+- The [full square-grid report](reports/two_basin_grid_20260915/README.md)
+  is now updated in place with both September 15 continuations. It joins
+  complete V=0 histories to 100/82 evaluations and uses the new endpoint
+  profiles/gates. All nine points now have agreeing phase families across
+  seeds (seven stripe, two paired), with zero accepted endpoints. Totals:
+  902 evaluations, 20 source jobs in 18 independent lineages, 27.350764
+  actual node-hours. The JSON/source inventory retains both original V=0
+  parent endpoints and their distinct controls. All five figures and CSVs
+  were regenerated; the sixteen unaffected endpoint/history/profile data
+  are unchanged. The September 16 progress report remains a separate snapshot.
+
+- The [September 16 progress report](reports/two_basin_progress_20260916/README.md)
+  analyzes 520 new evaluations: both square (1.4,0) continuations finish
+  20 more (100/82 cumulative), and eight cubic starts finish 60 each at
+  (1.0,-0.4/-0.2/0) and (1.2,-0.4). All are maximum_iterations, unaccepted.
+  The square pairing lineage now has leg-pair RMS 4.42e-8 and a stripe texture;
+  its remaining drift concerns stripe profiles/positions. All four available
+  cubic points reach essentially unpaired stripes from both seeds, with
+  stronger physical spin/charge order than on the square. The cubic
+  (1.0,-0.2) stripe start fails only the charge span, 1.31% above its relative
+  threshold; other endpoints have varying residual positional drift and
+  extrapolation failures. No thresholds or acceptance flags changed.
+  Square continuation cost is 0.552431 actual node-hours; cubic saved solver
+  time totals 6.160414 node-hours excluding overhead, with no cubic allocation
+  reconciliation yet. The synced jobs.tsv files confirm submissions for all
+  four September 15 campaigns; no states/stdout are available for the remaining
+  ten cubic, twelve fine-cut or four positive-V starts. Maintenance is
+  user-reported; live scheduler state was not queried.
+
 - Four chi=200 starts are now prepared at square (1.2,+0.2): the existing
   reciprocal 95%/5% reference mixtures plus two regular intertwined textures
   with charge/pair periods 8/16 and spin-envelope periods 16/32 rungs.
@@ -40,8 +69,8 @@ Recheck the branch, commit, and working tree at the start of each new task.
   source changes. The [seed report and handoff](reports/square_positive_v_seeds_20260915/README.md)
   provides previews and a four-job launcher (12-node-hour ceiling), with
   82 local assertions and six mock/launcher checks passed. No submission
-  performed locally. Cubic submission is user-reported; finer-cut and square
-  V=0 continuation submission status has not been reported.
+  performed locally. September 16 synced submission records supersede the
+  original preparation-only status; the four positive-V starts have no results yet.
 - Six finer square coordinates are prepared with both 95%/5% reference
   mixtures: t0=1.4 at V=-0.05/-0.10/-0.15, and V=-0.4 at t0=1.25/1.30/1.35.
   Controls use chi=200, max 60/minimum 40 raw evaluations and ten stable
@@ -54,8 +83,8 @@ Recheck the branch, commit, and working tree at the start of each new task.
   not uncertainty bounds. No bare measurements exist at the six new points.
   All twelve starts are locally validated, with a 36-node-hour reservation
   ceiling and no pair-binding jobs or automatic extensions. Cubic submission
-  is now user-reported; no new IDs/live accounting are locally available.
-  Square continuation submission has not been reported.
+  was user-reported at preparation; September 16 submission records now list
+  all twelve fine-cut jobs, with no results yet. Square continuations are analyzed above.
 - Following full-grid review, the user authorized the same two-basin cubic
   grid and a short square (1.4,0) extension. Prepared 18 cubic-unfrustrated
   chi=200 starts: reciprocal 95%/5% templates, max 60 raw evaluations,
@@ -206,6 +235,10 @@ must not be inferred from the repository.
 
 | Run ID | Local record | Question |
 |---|---|---|
+| `20260915_cubic_unfrustrated_two_basin_95_5_60` | 18 submissions; 8 terminal histories at 4 points analyzed September 16, all stripe-like and unaccepted | Await remaining coordinates, especially t0=1.4 |
+| `20260915_square_t014_v000_two_basin_finish20` | 2 terminal continuations analyzed; 100/82 cumulative, pairing collapses, neither accepted; actual 0.552431 node-hours | Qualitative basin resolved; positional self-consistency still unfinished |
+| `20260915_square_two_basin_fine_cuts_95_5_60` | 12 synced submission records, no result/stdout yet | Resolve the square boundary cuts |
+| `20260915_square_t012_vp02_four_seeds_60` | 4 synced submission records, no result/stdout yet | Test positive-V intertwined order |
 | `20260910_square_two_basin_95_5_40_remainder` | Published, 14 configs prepared; 75 Julia assertions and mock launcher test pass; live status not reviewed here | Retain unresolved 40-step outcomes; review before continuation |
 | `20260908_square_two_basin_95_5_80_anchors` | All four synced/analyzed, none accepted; V=-0.4 paired plateaus (80/80); V=0 stripe retained / pairing collapsing (80/62) | Exact V=0 allocation cost pending; targeted continuation may be needed for self-consistency |
 | `20260903_phase1_square_t014_v000_pairing_legacy_chi400_tight` | synced; 0/2 software-accepted; user accepts energetic comparison as adequate | Retain as the L=64 energy/basin reference; higher-chi checks remain future work |
@@ -218,6 +251,14 @@ Campaign contracts and exact run commands are in the corresponding dated
 documents linked from `docs/plans/ACTIVE.md`.
 
 ## Live Perlmutter and accounting boundary
+
+- September 16 sync: square continuation jobs 58383124/58383125 are COMPLETED
+  in the reconciliation ledger (3930/4025 elapsed seconds, quarter-node
+  charges totaling 0.552431 node-hours). Eight cubic jobs have terminal
+  maximum_iterations artifacts and complete logs but no synced allocation
+  reconciliation. Their 6.160414 solver node-hours exclude overhead. The
+  user reports monthly maintenance; no live scheduler status was checked.
+  Older dated accounting statements below describe their original snapshots.
 
 - Allocation evidence supplied on 2026-09-10: jobs 58093799 (stripe) and 58093800
   (pairing) at V=-0.4 are COMPLETED in pasted sacct output, with elapsed
@@ -259,22 +300,15 @@ documents linked from `docs/plans/ACTIVE.md`.
 
 ## Exact next action
 
-The user authorizes the fourteen remaining starts and GitHub publication.
-The validated implementation was pushed to `origin/codex/mps-mft-phase0-refactor`
-as `7443d9d` (Qualify 40-step two-basin runs), with handoff `ad5a95e`.
-Commands remain in `docs/reports/two_basin_remainder_20260910/README.md`;
-check the user's actual submission status before duplicating work. That scope
-excludes the known `(1.4,-0.4)` and `(1.4,0.0)` anchor pairs.
-No new jobs, live checks, or reservations have been performed locally. The
-14 starts allow at most 560 evaluations and reserve at most 42 fractional
-node-hours under the unchanged 12-hour segment ceiling and live 400-hour cap.
-Actual runtime can be lower. Retain incomplete outcomes at the 40-step limit
-for analysis; no automatic extensions. The V=0 anchor analysis now shows
-resolved slow stripe relaxation and a pairing lineage still losing pairing
-at 62. Keep the revised thresholds: neither saved history ever passes the
-unchanged global field gate. Consider targeted continuation after accounting,
-prioritizing the pairing lineage to resolve its endpoint; no continuation is
-prepared by this analysis. Neither terminal energy is an accepted phase ranking.
+Await user-synchronized results from the remaining cubic coordinates, the
+finer square cuts and positive-V comparison. All have synced submission IDs;
+do not submit duplicates based on this local snapshot. Analyze full raw
+histories and matched physical profiles, retaining incomplete status and
+reserving energetic selection for accepted compatible solutions. The square
+(1.4,0) extension has resolved the observed pairing collapse; further stripe
+position relaxation is a separate decision. No extra runs or threshold
+changes are prepared by the September 16 analysis. Reconcile cubic actual
+allocation costs when the user supplies the updated ledger after maintenance.
 
 The four finite-size seeds remain ready for review; their configs keep tight
 comparison controls at chi=200, use an identity gate of 1e-8 t/site, and hold

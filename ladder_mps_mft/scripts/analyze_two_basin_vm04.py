@@ -79,8 +79,17 @@ def load(family, manifest, jobs, *, V=-.4, t0=1.4, run_directory=RUN):
     config_path = run_directory / 'configs' / (row['label'] + '.segment-001.toml')
     config = tomllib.loads(config_path.read_text())
     assert sha(config_path) == row['config_sha256']
-    seed_path = run_directory / 'seeds' / (row['label'] + '.h5')
-    assert sha(seed_path) == row['seed_sha256'] == config['run']['inherit_sha256']
+    continued = 'parent_sha256' in row
+    if continued:
+        seed_path = PROJECT / row['source_compact_state'].split('/ladder_mps_mft/')[-1]
+        parent_branch = seed_path.parents[2]
+        parent_row = next(r for r in rows(parent_branch/'stateless_manifest.tsv')
+                          if r['relative_path'] == seed_path.relative_to(parent_branch).as_posix())
+        assert sha(seed_path) == row['source_compact_sha256'] == parent_row['compact_sha256']
+        assert row['parent_sha256'] == parent_row['full_sha256'] == config['run']['parent_sha256']
+    else:
+        seed_path = run_directory / 'seeds' / (row['label'] + '.h5')
+        assert sha(seed_path) == row['seed_sha256'] == config['run']['inherit_sha256']
     cfg = config['convergence']
     job = next(r for r in jobs if r['label'] == row['label'])
     with h5py.File(path) as f:
@@ -90,7 +99,10 @@ def load(family, manifest, jobs, *, V=-.4, t0=1.4, run_directory=RUN):
         for key in ('model_fingerprint', 'numerical_fingerprint', 'implementation_sha256', 'ep_source_sha256'):
             assert text('provenance/' + key) == row[key]
         assert text('provenance/config_sha256') == row['config_sha256']
-        assert text('provenance/inherit_sha256') == row['seed_sha256']
+        if continued:
+            assert text('provenance/parent_sha256') == row['parent_sha256']
+        else:
+            assert text('provenance/inherit_sha256') == row['seed_sha256']
         h = f['history']; n = len(h['iteration'])
         np.testing.assert_array_equal(h['iteration'][()], np.arange(1, n + 1))
         modes = [x.decode() for x in h['update_mode'][()]]
@@ -98,7 +110,12 @@ def load(family, manifest, jobs, *, V=-.4, t0=1.4, run_directory=RUN):
         fields = {s: {k: _julia_array(h[f'fields/{s}/{k}']) for k in ('alpha', 'beta', 'mu_cdw')}
                   for s in ('applied', 'measured')}
         with h5py.File(seed_path) as seed:
-            assert seed['seed_provenance/epsilon'][()] == .05
+            if continued:
+                assert seed['provenance/model_fingerprint'][()].decode() == row['model_fingerprint']
+                assert seed['provenance/slurm_job_id'][()].decode() == row['parent_job_id']
+                assert len(seed['history/iteration']) == int(row['parent_iterations'])
+            else:
+                assert seed['seed_provenance/epsilon'][()] == .05
             for key in fields['applied']:
                 np.testing.assert_array_equal(fields['applied'][key][..., 0], _julia_array(seed['fields/restart/' + key]))
         for key in fields['applied']:
@@ -167,6 +184,10 @@ def load(family, manifest, jobs, *, V=-.4, t0=1.4, run_directory=RUN):
                 max_relative=data['relative'][-20:].max(), median_cosine=np.median(data['cosine'][-20:]),
                 passes=int(data['passes'][-20:].sum())) for name,data in channel_data.items()})
         assert np.isfinite(energy).all()
+        if continued:
+            summary.update(parent_sha256=row['parent_sha256'], parent_job_id=row['parent_job_id'],
+                           parent_source=str(seed_path.relative_to(PROJECT)),
+                           parent_compact_sha256=row['source_compact_sha256'])
     _, energy_rows = read_history(path)
     log = (run_directory / 'logs' / f"{row['label']}.s1-{job['job_id']}.out").read_text()
     log_iterations = re.findall(r'^MF\s+(\d+)\s', log, flags=re.M)

@@ -3307,3 +3307,96 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   references or overfull boxes, and no out-of-margin text. All sixteen rendered
   pages were inspected, and the package helper verified every archive member.
   No numerical calculation or change to scientific acceptance was involved.
+
+### 2026-09-16 — Analyze synced square continuations and partial cubic grid
+
+- User reports Perlmutter monthly maintenance and a fresh local output sync.
+  Analyzed ten terminal states: both square finish20 jobs 58383124/58383125
+  and cubic jobs 58383141/58383142, 58383146/58383148,
+  58383153/58383156 and 58383157/58383158. These cover square (1.4,0)
+  and cubic (1.0,-0.4/-0.2/0), (1.2,-0.4). All reached their configured
+  iteration limits: 20 additional per square lineage, 60 per cubic start;
+  520 new MF evaluations. All remain unaccepted, period 0. Logs confirm
+  orderly solver completion rather than a maintenance interruption.
+- Added scripts/analyze_two_basin_progress.py, reusing existing HDF5 axis,
+  field-channel and profile helpers. Report, JSON evidence, 520-record CSV,
+  and three PNG/PDF figure pairs are under
+  docs/reports/two_basin_progress_20260916/. The square figure stitches full
+  100/82-evaluation lineages after exact parent restart-field verification.
+  Cube plots show all available full histories, without filling missing cells.
+- Physical observables are reconstructed using the actual square/cubic
+  kernels and checked against endpoint correlations. Verified compact/full
+  manifest relationships, seed/config hashes, stored model/numerical/source
+  fingerprints, raw-update adjacency, energy density correction, channel
+  window spans and log iteration counts. Full hashes and job-by-job metrics
+  are recorded in analysis.json. Parents retain full SHA-256
+  9ad2d9ea1239727e577be2997a7a9f62e1e6aaeae0653bd8591448f55dc58ea5
+  (stripe) and d4b2ef33f8d969e23b519f08642f50eacfd158948c0b6710756613fd89344237
+  (pairing). Campaign results retain implementation SHA-256
+  d37e6563416286a9257133490f6e9e345960b950c08b157bc66c964eb369b624.
+- Square pairing RMS drops from 0.003307 at cumulative iteration 63 to
+  4.42e-8 at 82; the stripe endpoint has 1.04e-9. The former paired lineage
+  has reached the stripe basin observationally. Stripe-node motion remains
+  resolved (up to 0.043/0.223 rung over the final ten records). The stripe
+  energy range passes 1e-7 but its field/slow/channel gates fail; the pairing
+  lineage still fails the energy range (1.83e-6) as well. Absolute endpoint
+  energy separation is 1.93e-6 t/site; no accepted-energy ranking is made.
+- Cubic starts all reach essentially unpaired stripes: physical spin RMS
+  0.307–0.356 and leg-pair RMS below 9e-12. Pairing-seeded histories stay
+  below 1e-4 pairing by iterations 5–8, much earlier than the corresponding
+  square transient at (1.2,-0.4). Dominant charge/spin modes are 4/30.
+  Physical stripe amplitudes exceed square values at matching coordinates;
+  this is not just the threefold MF-field normalization. The cubic boundary
+  remains unknown because no t0=1.4 results are yet locally available.
+- Cubic energy windows and inner/density/identity checks pass. Closest case,
+  stripe (1.0,-0.2), fails only charge span: 1.01306e-4 vs 1e-4. Others
+  retain channel/slow-mode failures, including near-unit-contraction
+  extrapolation sensitivity and more resolved drift at (1.2,-0.4).
+  Preserve all acceptance flags; no tolerance or solver changes are made.
+- Synced sacct reconciliation records give square elapsed 3930/4025 s,
+  quarter-node charges 0.272916667/0.279513889, total 0.552430556 node-hours.
+  No cubic reconciliation is synced: its saved MF times give 6.160414401
+  solver node-hours excluding overhead, not an exact allocation total.
+  Accounting ledgers were read only. Synced submission records also identify
+  twelve fine-cut jobs 58387972–58387983 and four positive-V jobs
+  58394103–58394106. Those and ten remaining cubic starts have no local
+  state/stdout; no live scheduler state is inferred or queried.
+- Local command: C:/Python313/python.exe -B -X utf8
+  ladder_mps_mft/scripts/analyze_two_basin_progress.py. Runtime about 7 s,
+  with all embedded evidence checks passing and all three PNGs visually
+  inspected. Updated PROJECT_STATE, ACTIVE plan and documentation map.
+  No DMRG, transfer, Perlmutter access, new submission, continuation or
+  acceptance mutation. Next scientific information should come from the
+  already-submitted remaining cubic points, fine cuts and positive-V starts.
+
+### 2026-09-16 — Incorporate continuations into the full square-grid report
+
+- User requested an in-place update of docs/reports/two_basin_grid_20260915/.
+  Updated the existing grid analyzer and shared anchor loader to read the two
+  finish20 parents/children with compact/full hashes, model/job/count checks
+  and exact restart-field handoffs. Continuation jobs 58383124/58383125
+  extend the original 58093802/58093803 histories to 100/82 cumulative
+  evaluations. Acceptance gates use only each latest source segment and
+  its archived controls; no thresholds or acceptance flags change.
+- Regenerated all five PNG/PDF pairs, endpoint/profile tables, source inventory,
+  iteration CSV and analysis JSON. Full histories keep original records and
+  mark continuation starts; late-energy panels use each lineage's final 15
+  records with cumulative indices. Individual energy y scales are preserved.
+  The (1.4,0) label changes from S* to S because both lineages now have tiny
+  pairing; seven stripe/two paired assignments remain preliminary.
+- The report now has 18 independent lineages, 20 source artifacts/jobs,
+  902 unique evaluation records, zero accepted endpoints, 27.350763889
+  actual allocation node-hours and 26.983410572 solver-only node-hours.
+  JSON source_runs retains original endpoint diagnostics and parent controls;
+  CSV source job/iteration columns distinguish source-local and cumulative
+  numbering. Both continuation costs and parent costs are counted once.
+- Ran the existing Python grid analyzer locally with its embedded source,
+  channel, history and accounting checks; visually inspected all five PNGs.
+  A narrow metadata regeneration retained those inspected plots. Compared
+  the 16 unaffected endpoint rows, 720 unaffected history rows and 1024
+  unaffected profile rows against pre-update digests: all unchanged.
+  Checked unique job/iteration pairs, 100/82 continuity, 20-job accounting,
+  and equality of new energies/pair amplitudes/source hashes with the separate
+  September 16 continuation report. git diff --check passes. No DMRG or
+  Perlmutter operations. Updated the report narrative, documentation map,
+  PROJECT_STATE and active plan; the earlier progress report remains intact.

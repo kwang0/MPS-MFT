@@ -1,6 +1,24 @@
 # Active plan
 
-Last reviewed: 2026-09-15
+Last reviewed: 2026-09-16
+
+The full report in `docs/reports/two_basin_grid_20260915/` now includes both
+V=0 continuations: 100/82 cumulative evaluations, both seeds stripe-like,
+902 evaluations and 27.350764 actual node-hours across the square grid.
+Figures and endpoint tables use the new states; parent diagnostics and all
+20 source jobs remain traceable. No endpoint acceptance flag changes.
+
+Latest sync: both square (1.4,0) continuations and eight cubic starts are
+analyzed in `docs/reports/two_basin_progress_20260916/README.md`. Pairing
+collapses in the square lineage by cumulative evaluation 82; the stripe
+lineage reaches 100. All four available cubic coordinates show stronger
+stripes from both seeds, with negligible pairing. All ten endpoints remain
+unaccepted. Keep the remaining submitted runs as the next source of phase
+information; no new extensions or tolerance changes are prepared. Exact
+square continuation cost is 0.552431 node-hours; cubic solver-only estimate
+is 6.160414 node-hours, pending allocation accounting. All four September 15
+campaigns have synced submission records. Missing results do not identify
+their live states during user-reported maintenance.
 
 Positive-V follow-up: four starts at square (1.2,+0.2) are prepared in
 `docs/reports/square_positive_v_seeds_20260915/README.md`. Two retain the
@@ -20,8 +38,8 @@ Use the separate-worktree handoff in
 `docs/reports/two_basin_fine_cuts_20260915/README.md` to preserve submitted
 source. Bare-ladder plots support a preliminary linear approximation, with
 greater interpolation sensitivity on the t0 cut. No new bare jobs are planned.
-Square continuation submission has not been reported; no new scheduler IDs
-or accounting have been synced for these follow-up campaigns.
+That preparation snapshot is superseded by the September 16 sync above:
+all four campaigns have submission IDs and square continuations have costs.
 
 Earlier September 15 update: the full square two-basin grid is synchronized and
 analyzed in `docs/reports/two_basin_grid_20260915/README.md`. Eighteen runs

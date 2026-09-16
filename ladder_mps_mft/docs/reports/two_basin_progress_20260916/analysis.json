@@ -1,0 +1,2502 @@
+{
+  "date": "2026-09-16",
+  "source": "user-synchronized output; no live scheduler access",
+  "inventory": [
+    {
+      "campaign": "20260915_cubic_unfrustrated_two_basin_95_5_60",
+      "label": "cubic_unfrustrated__stripe_weak_other_t010_vm04_chi200_raw",
+      "state_count": 1,
+      "jobs": [
+        "58383141"
+      ]
+    },
+    {
+      "campaign": "20260915_cubic_unfrustrated_two_basin_95_5_60",
+      "label": "cubic_unfrustrated__pairing_weak_other_t010_vm04_chi200_raw",
+      "state_count": 1,
+      "jobs": [
+        "58383142"
+      ]
+    },
+    {
+      "campaign": "20260915_cubic_unfrustrated_two_basin_95_5_60",
+      "label": "cubic_unfrustrated__stripe_weak_other_t010_vm02_chi200_raw",
+      "state_count": 1,
+      "jobs": [
+        "58383146"
+      ]
+    },
+    {
+      "campaign": "20260915_cubic_unfrustrated_two_basin_95_5_60",
+      "label": "cubic_unfrustrated__pairing_weak_other_t010_vm02_chi200_raw",
+      "state_count": 1,
+      "jobs": [
+        "58383148"
+      ]
+    },
+    {
+      "campaign": "20260915_cubic_unfrustrated_two_basin_95_5_60",
+      "label": "cubic_unfrustrated__stripe_weak_other_t010_v000_chi200_raw",
+      "state_count": 1,
+      "jobs": [
+        "58383153"
+      ]
+    },
+    {
+      "campaign": "20260915_cubic_unfrustrated_two_basin_95_5_60",
+      "label": "cubic_unfrustrated__pairing_weak_other_t010_v000_chi200_raw",
+      "state_count": 1,
+      "jobs": [
+        "58383156"
+      ]
+    },
+    {
+      "campaign": "20260915_cubic_unfrustrated_two_basin_95_5_60",
+      "label": "cubic_unfrustrated__stripe_weak_other_t012_vm04_chi200_raw",
+      "state_count": 1,
+      "jobs": [
+        "58383157"
+      ]
+    },
+    {
+      "campaign": "20260915_cubic_unfrustrated_two_basin_95_5_60",
+      "label": "cubic_unfrustrated__pairing_weak_other_t012_vm04_chi200_raw",
+      "state_count": 1,
+      "jobs": [
+        "58383158"
+      ]
+    },
+    {
+      "campaign": "20260915_cubic_unfrustrated_two_basin_95_5_60",
+      "label": "cubic_unfrustrated__stripe_weak_other_t012_vm02_chi200_raw",
+      "state_count": 0,
+      "jobs": [
+        "58383161"
+      ]
+    },
+    {
+      "campaign": "20260915_cubic_unfrustrated_two_basin_95_5_60",
+      "label": "cubic_unfrustrated__pairing_weak_other_t012_vm02_chi200_raw",
+      "state_count": 0,
+      "jobs": [
+        "58383164"
+      ]
+    },
+    {
+      "campaign": "20260915_cubic_unfrustrated_two_basin_95_5_60",
+      "label": "cubic_unfrustrated__stripe_weak_other_t012_v000_chi200_raw",
+      "state_count": 0,
+      "jobs": [
+        "58383165"
+      ]
+    },
+    {
+      "campaign": "20260915_cubic_unfrustrated_two_basin_95_5_60",
+      "label": "cubic_unfrustrated__pairing_weak_other_t012_v000_chi200_raw",
+      "state_count": 0,
+      "jobs": [
+        "58383168"
+      ]
+    },
+    {
+      "campaign": "20260915_cubic_unfrustrated_two_basin_95_5_60",
+      "label": "cubic_unfrustrated__stripe_weak_other_t014_vm04_chi200_raw",
+      "state_count": 0,
+      "jobs": [
+        "58383169"
+      ]
+    },
+    {
+      "campaign": "20260915_cubic_unfrustrated_two_basin_95_5_60",
+      "label": "cubic_unfrustrated__pairing_weak_other_t014_vm04_chi200_raw",
+      "state_count": 0,
+      "jobs": [
+        "58383170"
+      ]
+    },
+    {
+      "campaign": "20260915_cubic_unfrustrated_two_basin_95_5_60",
+      "label": "cubic_unfrustrated__stripe_weak_other_t014_vm02_chi200_raw",
+      "state_count": 0,
+      "jobs": [
+        "58383171"
+      ]
+    },
+    {
+      "campaign": "20260915_cubic_unfrustrated_two_basin_95_5_60",
+      "label": "cubic_unfrustrated__pairing_weak_other_t014_vm02_chi200_raw",
+      "state_count": 0,
+      "jobs": [
+        "58383173"
+      ]
+    },
+    {
+      "campaign": "20260915_cubic_unfrustrated_two_basin_95_5_60",
+      "label": "cubic_unfrustrated__stripe_weak_other_t014_v000_chi200_raw",
+      "state_count": 0,
+      "jobs": [
+        "58383174"
+      ]
+    },
+    {
+      "campaign": "20260915_cubic_unfrustrated_two_basin_95_5_60",
+      "label": "cubic_unfrustrated__pairing_weak_other_t014_v000_chi200_raw",
+      "state_count": 0,
+      "jobs": [
+        "58383176"
+      ]
+    },
+    {
+      "campaign": "20260915_square_t012_vp02_four_seeds_60",
+      "label": "square__stripe_weak_other_t012_vp02_chi200_raw",
+      "state_count": 0,
+      "jobs": [
+        "58394103"
+      ]
+    },
+    {
+      "campaign": "20260915_square_t012_vp02_four_seeds_60",
+      "label": "square__pairing_weak_other_t012_vp02_chi200_raw",
+      "state_count": 0,
+      "jobs": [
+        "58394104"
+      ]
+    },
+    {
+      "campaign": "20260915_square_t012_vp02_four_seeds_60",
+      "label": "square__intertwined_lambda08_t012_vp02_chi200_raw",
+      "state_count": 0,
+      "jobs": [
+        "58394105"
+      ]
+    },
+    {
+      "campaign": "20260915_square_t012_vp02_four_seeds_60",
+      "label": "square__intertwined_lambda16_t012_vp02_chi200_raw",
+      "state_count": 0,
+      "jobs": [
+        "58394106"
+      ]
+    },
+    {
+      "campaign": "20260915_square_t014_v000_two_basin_finish20",
+      "label": "square__stripe_weak_other_t014_v000_chi200_raw_finish20",
+      "state_count": 1,
+      "jobs": [
+        "58383124"
+      ]
+    },
+    {
+      "campaign": "20260915_square_t014_v000_two_basin_finish20",
+      "label": "square__pairing_weak_other_t014_v000_chi200_raw_finish20",
+      "state_count": 1,
+      "jobs": [
+        "58383125"
+      ]
+    },
+    {
+      "campaign": "20260915_square_two_basin_fine_cuts_95_5_60",
+      "label": "square__stripe_weak_other_t01400_vm0050_chi200_raw",
+      "state_count": 0,
+      "jobs": [
+        "58387972"
+      ]
+    },
+    {
+      "campaign": "20260915_square_two_basin_fine_cuts_95_5_60",
+      "label": "square__pairing_weak_other_t01400_vm0050_chi200_raw",
+      "state_count": 0,
+      "jobs": [
+        "58387973"
+      ]
+    },
+    {
+      "campaign": "20260915_square_two_basin_fine_cuts_95_5_60",
+      "label": "square__stripe_weak_other_t01400_vm0100_chi200_raw",
+      "state_count": 0,
+      "jobs": [
+        "58387974"
+      ]
+    },
+    {
+      "campaign": "20260915_square_two_basin_fine_cuts_95_5_60",
+      "label": "square__pairing_weak_other_t01400_vm0100_chi200_raw",
+      "state_count": 0,
+      "jobs": [
+        "58387975"
+      ]
+    },
+    {
+      "campaign": "20260915_square_two_basin_fine_cuts_95_5_60",
+      "label": "square__stripe_weak_other_t01400_vm0150_chi200_raw",
+      "state_count": 0,
+      "jobs": [
+        "58387976"
+      ]
+    },
+    {
+      "campaign": "20260915_square_two_basin_fine_cuts_95_5_60",
+      "label": "square__pairing_weak_other_t01400_vm0150_chi200_raw",
+      "state_count": 0,
+      "jobs": [
+        "58387977"
+      ]
+    },
+    {
+      "campaign": "20260915_square_two_basin_fine_cuts_95_5_60",
+      "label": "square__stripe_weak_other_t01250_vm0400_chi200_raw",
+      "state_count": 0,
+      "jobs": [
+        "58387978"
+      ]
+    },
+    {
+      "campaign": "20260915_square_two_basin_fine_cuts_95_5_60",
+      "label": "square__pairing_weak_other_t01250_vm0400_chi200_raw",
+      "state_count": 0,
+      "jobs": [
+        "58387979"
+      ]
+    },
+    {
+      "campaign": "20260915_square_two_basin_fine_cuts_95_5_60",
+      "label": "square__stripe_weak_other_t01300_vm0400_chi200_raw",
+      "state_count": 0,
+      "jobs": [
+        "58387980"
+      ]
+    },
+    {
+      "campaign": "20260915_square_two_basin_fine_cuts_95_5_60",
+      "label": "square__pairing_weak_other_t01300_vm0400_chi200_raw",
+      "state_count": 0,
+      "jobs": [
+        "58387981"
+      ]
+    },
+    {
+      "campaign": "20260915_square_two_basin_fine_cuts_95_5_60",
+      "label": "square__stripe_weak_other_t01350_vm0400_chi200_raw",
+      "state_count": 0,
+      "jobs": [
+        "58387982"
+      ]
+    },
+    {
+      "campaign": "20260915_square_two_basin_fine_cuts_95_5_60",
+      "label": "square__pairing_weak_other_t01350_vm0400_chi200_raw",
+      "state_count": 0,
+      "jobs": [
+        "58387983"
+      ]
+    }
+  ],
+  "runs": [
+    {
+      "campaign": "20260915_cubic_unfrustrated_two_basin_95_5_60",
+      "label": "cubic_unfrustrated__stripe_weak_other_t010_vm04_chi200_raw",
+      "geometry": "cubic_unfrustrated",
+      "t0": 1.0,
+      "V": -0.4,
+      "family": "stripe",
+      "job_id": "58383141",
+      "source": "output/phase1_gpu/20260915_cubic_unfrustrated_two_basin_95_5_60/results/cubic_unfrustrated__stripe_weak_other_t010_vm04_chi200_raw/cubic_unfrustrated__stripe_weak_other__cubic_unfrustrated_two_reference_correlations_eps005_raw__none__stripe_eps005/20260915T222902_819436_7ec03df9a3ca/state.h5",
+      "compact_sha256": "4078b5b11c8e7561a0ad1679c28fe64f6b5b3b5c81e2aea1cfd2b69e409e2fec",
+      "full_sha256": "2046e3196ff680b10a9fa2a56e89ff20ed7526c0e3820c40825fc9e8d2582930",
+      "config_sha256": "da546e6b437a076c1735fadb7a1cdff28e3268e43f6f78be83cf9591f835b3d0",
+      "fingerprints": {
+        "model_fingerprint": "7ec03df9a3ca48c84904ebdc7802085eaaf11da97e95dfd0bdd88b00046dc02f",
+        "numerical_fingerprint": "40ab627dba588f0ef56433843aa90d53e8cca51affc606246f686f28862fcfde",
+        "implementation_sha256": "d37e6563416286a9257133490f6e9e345960b950c08b157bc66c964eb369b624",
+        "ep_source_sha256": "2209bd2ca3c1ad02c0e542d1a9d63ecf90fdfa49120ad9cc3af599a5b4bc1f0e"
+      },
+      "parent_sha256": null,
+      "status": "maximum_iterations",
+      "accepted": false,
+      "period": 0,
+      "iterations": 60,
+      "parent_iterations": 0,
+      "cumulative_iterations": 60,
+      "controls": {
+        "stagnation_min_relative_improvement": 0.01,
+        "period2_oscillation_cosine_max": -0.5,
+        "stable_iterations": 10,
+        "divergence_factor": 8.0,
+        "max_period": 8,
+        "period2_two_step_ratio_max": 0.5,
+        "probe_iterations": 60,
+        "cycle_action": "continue",
+        "dmrg_sweep_energy_tol": 1e-07,
+        "period_rel_tol": 0.0002,
+        "field_rel_tol": 0.0001,
+        "minimum_iterations": 40,
+        "accepted_periods": [
+          1,
+          2
+        ],
+        "stagnation_window": 40,
+        "period_repeats": 3,
+        "effective_energy_consistency_tol": 1e-08,
+        "density_tol": 1e-05,
+        "variational_energy_tol": 1e-07,
+        "probe_max_period": 2,
+        "channel_noise_floor": 1.5e-06,
+        "period_abs_tol": 6e-07,
+        "slow_mode_cosine_min": 0.9,
+        "hamiltonian_identity_tol": 1e-08,
+        "channel_residuals": true,
+        "orbit_bulk_fraction": 0.5,
+        "unmixed_cycle_probe": true,
+        "field_abs_tol": 3e-07
+      },
+      "energy_final": -1.0452511661583181,
+      "energy_span_last10": 7.219555619997209e-09,
+      "energy_change_segment": -0.010122937490764983,
+      "spin_rms_final": 0.34153852489945297,
+      "pair_rms_final": 8.379691680400884e-12,
+      "pair_rms_first": 0.00042164330247370133,
+      "rung_pair_rms": 1.7287922776836505e-11,
+      "charge_std_final": 0.08264035260007409,
+      "spin_fractional_change_last10": 1.3539384517979869e-06,
+      "spin_profile_max_change_last10": 0.0002285696568303519,
+      "node_positions_first": [
+        9.610501835169453,
+        24.04304350598038,
+        38.994799705937695,
+        54.57328564831913
+      ],
+      "node_positions_final": [
+        9.601523095888403,
+        24.04573884173843,
+        38.99659419102906,
+        54.57795615299451
+      ],
+      "nodes_last10_start": [
+        9.602834604155447,
+        24.045356570774256,
+        38.99632153923646,
+        54.57724734247096
+      ],
+      "global_relative": 1.8857767334714038e-05,
+      "slow_relative": 0.0018102229977003809,
+      "slow_lambda": 0.9895826274670745,
+      "slow_cosine": 0.9950854663926537,
+      "gates": {
+        "minimum": true,
+        "global_field": true,
+        "global_slow": false,
+        "density": true,
+        "inner_dmrg": true,
+        "energy": true,
+        "identity": true,
+        "effective": true,
+        "charge_modulation_steps": false,
+        "charge_modulation_span": false,
+        "charge_uniform_steps": true,
+        "charge_uniform_span": true,
+        "exchange_charge_steps": true,
+        "exchange_charge_span": true,
+        "exchange_spin_steps": false,
+        "exchange_spin_span": false,
+        "pairing_steps": true,
+        "pairing_span": true,
+        "spin_steps": false,
+        "spin_span": false
+      },
+      "failed_gates": [
+        "global_slow",
+        "charge_modulation_steps",
+        "charge_modulation_span",
+        "exchange_spin_steps",
+        "exchange_spin_span",
+        "spin_steps",
+        "spin_span"
+      ],
+      "channels_final": {
+        "charge_modulation": {
+          "absolute": 2.1944803764960275e-06,
+          "applied_rms": 0.013477593039820539,
+          "contraction": 0.999763148527946,
+          "cosine": 0.9999581590382235,
+          "factor": 4222.055245542463,
+          "measured_rms": 0.013477591326234717,
+          "passes": 0,
+          "relative": 4.7401102772920466e-05,
+          "window_absolute": 2.1862807277487142e-05,
+          "window_passes": 0,
+          "window_relative": 0.00047380089374173006
+        },
+        "charge_uniform": {
+          "absolute": 2.8314156574893445e-14,
+          "applied_rms": 0.010484967838547193,
+          "contraction": -0.5512140758501908,
+          "cosine": -1.0,
+          "factor": 1.0,
+          "measured_rms": 0.010484967838518879,
+          "passes": 1,
+          "relative": 2.7004524010840154e-12,
+          "window_absolute": 1.088643064584005e-13,
+          "window_passes": 1,
+          "window_relative": 1.0382893694525506e-11
+        },
+        "exchange_charge": {
+          "absolute": 1.0736795779814345e-06,
+          "applied_rms": 0.006282575326628026,
+          "contraction": 0.9145434150282049,
+          "cosine": 0.9520731275135584,
+          "factor": 1.0,
+          "measured_rms": 0.006282575551168017,
+          "passes": 1,
+          "relative": 9.406373961452302e-06,
+          "window_absolute": 1.05951242530683e-05,
+          "window_passes": 1,
+          "window_relative": 9.384219935866102e-05
+        },
+        "exchange_spin": {
+          "absolute": 1.562327727369639e-06,
+          "applied_rms": 0.002053781062365026,
+          "contraction": 0.9751575894964688,
+          "cosine": 0.9817016547223176,
+          "factor": 40.253742681607164,
+          "measured_rms": 0.0020537805369090978,
+          "passes": 0,
+          "relative": 3.486149713705268e-05,
+          "window_absolute": 1.5556603841546113e-05,
+          "window_passes": 0,
+          "window_relative": 0.00034800308737024965
+        },
+        "pairing": {
+          "absolute": 4.8888433047962406e-11,
+          "applied_rms": 3.1790994211465396e-13,
+          "contraction": -0.016319309443536083,
+          "cosine": -0.07810858276757654,
+          "factor": 1.0,
+          "measured_rms": 6.452556657697996e-13,
+          "passes": 1,
+          "relative": 1.1494275377343912,
+          "window_absolute": 3.9521240094713505e-10,
+          "window_passes": 1,
+          "window_relative": 1.0813049710085123
+        },
+        "spin": {
+          "absolute": 8.551074932593855e-06,
+          "applied_rms": 0.11851715814696842,
+          "contraction": 0.997033485242001,
+          "cosine": 0.9999442350726472,
+          "factor": 337.09591273852936,
+          "measured_rms": 0.11851715447853,
+          "passes": 0,
+          "relative": 1.992437875683564e-05,
+          "window_absolute": 8.521461630929539e-05,
+          "window_passes": 0,
+          "window_relative": 0.0001994269939109974
+        }
+      },
+      "solver_seconds": 10330.566594600677,
+      "solver_node_hours": 0.7174004579583804,
+      "reserved_node_hours": 3.0,
+      "allocation": null,
+      "spin_dft": {
+        "mode": 30,
+        "q_over_pi": 0.9375,
+        "amplitude": 0.23856533901334032
+      },
+      "charge_dft": {
+        "mode": 4,
+        "q_over_pi": 0.125,
+        "amplitude": 0.04455298828180249
+      }
+    },
+    {
+      "campaign": "20260915_cubic_unfrustrated_two_basin_95_5_60",
+      "label": "cubic_unfrustrated__pairing_weak_other_t010_vm04_chi200_raw",
+      "geometry": "cubic_unfrustrated",
+      "t0": 1.0,
+      "V": -0.4,
+      "family": "pairing",
+      "job_id": "58383142",
+      "source": "output/phase1_gpu/20260915_cubic_unfrustrated_two_basin_95_5_60/results/cubic_unfrustrated__pairing_weak_other_t010_vm04_chi200_raw/cubic_unfrustrated__pairing_weak_other__cubic_unfrustrated_two_reference_correlations_eps005_raw__none__pairing_eps005/20260915T222902_819438_7ec03df9a3ca/state.h5",
+      "compact_sha256": "94e4f6573ded6d9f21b9cb09762834c43b7fe3b235d178b14bc7d79b59e85d0f",
+      "full_sha256": "905b4410e72206ebc2d020758fac912e6fea85fb1b9000773d7527c00939aafd",
+      "config_sha256": "70fe4b5649c73288d5b6e63b27dc2a5b885e7efb565986b7f5dd6ef78472a23d",
+      "fingerprints": {
+        "model_fingerprint": "7ec03df9a3ca48c84904ebdc7802085eaaf11da97e95dfd0bdd88b00046dc02f",
+        "numerical_fingerprint": "40ab627dba588f0ef56433843aa90d53e8cca51affc606246f686f28862fcfde",
+        "implementation_sha256": "d37e6563416286a9257133490f6e9e345960b950c08b157bc66c964eb369b624",
+        "ep_source_sha256": "2209bd2ca3c1ad02c0e542d1a9d63ecf90fdfa49120ad9cc3af599a5b4bc1f0e"
+      },
+      "parent_sha256": null,
+      "status": "maximum_iterations",
+      "accepted": false,
+      "period": 0,
+      "iterations": 60,
+      "parent_iterations": 0,
+      "cumulative_iterations": 60,
+      "controls": {
+        "stagnation_min_relative_improvement": 0.01,
+        "period2_oscillation_cosine_max": -0.5,
+        "stable_iterations": 10,
+        "divergence_factor": 8.0,
+        "max_period": 8,
+        "period2_two_step_ratio_max": 0.5,
+        "probe_iterations": 60,
+        "cycle_action": "continue",
+        "dmrg_sweep_energy_tol": 1e-07,
+        "period_rel_tol": 0.0002,
+        "field_rel_tol": 0.0001,
+        "minimum_iterations": 40,
+        "accepted_periods": [
+          1,
+          2
+        ],
+        "stagnation_window": 40,
+        "period_repeats": 3,
+        "effective_energy_consistency_tol": 1e-08,
+        "density_tol": 1e-05,
+        "variational_energy_tol": 1e-07,
+        "probe_max_period": 2,
+        "channel_noise_floor": 1.5e-06,
+        "period_abs_tol": 6e-07,
+        "slow_mode_cosine_min": 0.9,
+        "hamiltonian_identity_tol": 1e-08,
+        "channel_residuals": true,
+        "orbit_bulk_fraction": 0.5,
+        "unmixed_cycle_probe": true,
+        "field_abs_tol": 3e-07
+      },
+      "energy_final": -1.0452512145672135,
+      "energy_span_last10": 1.7530895402018132e-08,
+      "energy_change_segment": -0.02495687022630877,
+      "spin_rms_final": 0.3416168653827049,
+      "pair_rms_final": 2.7890890742982116e-12,
+      "pair_rms_first": 0.021930746755293475,
+      "rung_pair_rms": 5.548941155335864e-12,
+      "charge_std_final": 0.08269571656925526,
+      "spin_fractional_change_last10": 2.2081071040513933e-06,
+      "spin_profile_max_change_last10": 0.0003116511231303354,
+      "node_positions_first": [
+        9.464166838581406,
+        24.059568104712742,
+        39.028451543836695,
+        54.69259805342556
+      ],
+      "node_positions_final": [
+        9.413650267331867,
+        24.068127481410595,
+        39.04219776649132,
+        54.71022649395584
+      ],
+      "nodes_last10_start": [
+        9.415439939914329,
+        24.067778014010788,
+        39.04184809554345,
+        54.709447364282404
+      ],
+      "global_relative": 2.432539863611418e-05,
+      "slow_relative": 0.041973055960317945,
+      "slow_lambda": 0.9994204520476395,
+      "slow_cosine": 0.9996864445797106,
+      "gates": {
+        "minimum": true,
+        "global_field": true,
+        "global_slow": false,
+        "density": true,
+        "inner_dmrg": true,
+        "energy": true,
+        "identity": true,
+        "effective": true,
+        "charge_modulation_steps": false,
+        "charge_modulation_span": false,
+        "charge_uniform_steps": true,
+        "charge_uniform_span": true,
+        "exchange_charge_steps": true,
+        "exchange_charge_span": false,
+        "exchange_spin_steps": false,
+        "exchange_spin_span": false,
+        "pairing_steps": true,
+        "pairing_span": true,
+        "spin_steps": false,
+        "spin_span": false
+      },
+      "failed_gates": [
+        "global_slow",
+        "charge_modulation_steps",
+        "charge_modulation_span",
+        "exchange_charge_span",
+        "exchange_spin_steps",
+        "exchange_spin_span",
+        "spin_steps",
+        "spin_span"
+      ],
+      "channels_final": {
+        "charge_modulation": {
+          "absolute": 2.9950073663145838e-06,
+          "applied_rms": 0.013477494391919923,
+          "contraction": 0.9998484759477605,
+          "cosine": 0.9999812834510073,
+          "factor": 6599.612307222112,
+          "measured_rms": 0.013477494312316908,
+          "passes": 0,
+          "relative": 6.109849979456593e-05,
+          "window_absolute": 2.987812085353432e-05,
+          "window_passes": 0,
+          "window_relative": 0.0006106855746572589
+        },
+        "charge_uniform": {
+          "absolute": 1.014154038525561e-13,
+          "applied_rms": 0.010484967838520378,
+          "contraction": 3.0813260949770727,
+          "cosine": 1.0,
+          "factor": 1.0,
+          "measured_rms": 0.010484967838621793,
+          "passes": 1,
+          "relative": 9.672457313506337e-12,
+          "window_absolute": 3.6944076270417625e-12,
+          "window_passes": 1,
+          "window_relative": 3.523527856887026e-10
+        },
+        "exchange_charge": {
+          "absolute": 1.4415980374160586e-06,
+          "applied_rms": 0.006282579058888155,
+          "contraction": 0.9942119149523252,
+          "cosine": 0.9976090317119308,
+          "factor": 1.0,
+          "measured_rms": 0.006282579046327188,
+          "passes": 1,
+          "relative": 1.2093812456799184e-05,
+          "window_absolute": 1.4401436994507244e-05,
+          "window_passes": 0,
+          "window_relative": 0.000121035384038001
+        },
+        "exchange_spin": {
+          "absolute": 2.1196136590663495e-06,
+          "applied_rms": 0.0020537744055729966,
+          "contraction": 0.9976124973813323,
+          "cosine": 0.9984428688185838,
+          "factor": 418.84770813697577,
+          "measured_rms": 0.0020537743476482313,
+          "passes": 0,
+          "relative": 4.487155685888786e-05,
+          "window_absolute": 2.118515450753866e-05,
+          "window_passes": 0,
+          "window_relative": 0.0004487617514308265
+        },
+        "pairing": {
+          "absolute": 4.2141085393317036e-11,
+          "applied_rms": 5.974153718014302e-13,
+          "contraction": -0.6465451688404749,
+          "cosine": -0.737593695090526,
+          "factor": 1.0,
+          "measured_rms": 5.603406705773833e-13,
+          "passes": 1,
+          "relative": 1.171087919079232,
+          "window_absolute": 5.001296438970443e-09,
+          "window_passes": 1,
+          "window_relative": 1.146034671235886
+        },
+        "spin": {
+          "absolute": 1.1629563251600722e-05,
+          "applied_rms": 0.1185169171485249,
+          "contraction": 1.0000183610710731,
+          "cosine": 0.9999768709342728,
+          "factor": "inf",
+          "measured_rms": 0.11851691694516092,
+          "passes": 0,
+          "relative": 2.5716024917527828e-05,
+          "window_absolute": 0.00011617396000418445,
+          "window_passes": 0,
+          "window_relative": 0.00025704641617325274
+        }
+      },
+      "solver_seconds": 12009.131661653519,
+      "solver_node_hours": 0.8339674765037166,
+      "reserved_node_hours": 3.0,
+      "allocation": null,
+      "spin_dft": {
+        "mode": 30,
+        "q_over_pi": 0.9375,
+        "amplitude": 0.2397510700697839
+      },
+      "charge_dft": {
+        "mode": 4,
+        "q_over_pi": 0.125,
+        "amplitude": 0.04547024960701548
+      }
+    },
+    {
+      "campaign": "20260915_cubic_unfrustrated_two_basin_95_5_60",
+      "label": "cubic_unfrustrated__stripe_weak_other_t010_vm02_chi200_raw",
+      "geometry": "cubic_unfrustrated",
+      "t0": 1.0,
+      "V": -0.2,
+      "family": "stripe",
+      "job_id": "58383146",
+      "source": "output/phase1_gpu/20260915_cubic_unfrustrated_two_basin_95_5_60/results/cubic_unfrustrated__stripe_weak_other_t010_vm02_chi200_raw/cubic_unfrustrated__stripe_weak_other__cubic_unfrustrated_two_reference_correlations_eps005_raw__none__stripe_eps005/20260915T230916_2216131_dcf7fb03060b/state.h5",
+      "compact_sha256": "2dc764ab286044a78994b5c7197e3c0b639b07ed796bc4c9d239b4425d573914",
+      "full_sha256": "d02ebcc202ee11021e6ace3ef8ad9487949c7c58e077596227f5edb551d65873",
+      "config_sha256": "a59866aed23108475f0a82b0911de649fc9776c8f2890fb741e83da78b0798f2",
+      "fingerprints": {
+        "model_fingerprint": "dcf7fb03060b1f6f1317148ac782a0ea555b02c062425e8269f6b8f129d162fd",
+        "numerical_fingerprint": "40ab627dba588f0ef56433843aa90d53e8cca51affc606246f686f28862fcfde",
+        "implementation_sha256": "d37e6563416286a9257133490f6e9e345960b950c08b157bc66c964eb369b624",
+        "ep_source_sha256": "2209bd2ca3c1ad02c0e542d1a9d63ecf90fdfa49120ad9cc3af599a5b4bc1f0e"
+      },
+      "parent_sha256": null,
+      "status": "maximum_iterations",
+      "accepted": false,
+      "period": 0,
+      "iterations": 60,
+      "parent_iterations": 0,
+      "cumulative_iterations": 60,
+      "controls": {
+        "stagnation_min_relative_improvement": 0.01,
+        "period2_oscillation_cosine_max": -0.5,
+        "stable_iterations": 10,
+        "divergence_factor": 8.0,
+        "max_period": 8,
+        "period2_two_step_ratio_max": 0.5,
+        "probe_iterations": 60,
+        "cycle_action": "continue",
+        "dmrg_sweep_energy_tol": 1e-07,
+        "period_rel_tol": 0.0002,
+        "field_rel_tol": 0.0001,
+        "minimum_iterations": 40,
+        "accepted_periods": [
+          1,
+          2
+        ],
+        "stagnation_window": 40,
+        "period_repeats": 3,
+        "effective_energy_consistency_tol": 1e-08,
+        "density_tol": 1e-05,
+        "variational_energy_tol": 1e-07,
+        "probe_max_period": 2,
+        "channel_noise_floor": 1.5e-06,
+        "period_abs_tol": 6e-07,
+        "slow_mode_cosine_min": 0.9,
+        "hamiltonian_identity_tol": 1e-08,
+        "channel_residuals": true,
+        "orbit_bulk_fraction": 0.5,
+        "unmixed_cycle_probe": true,
+        "field_abs_tol": 3e-07
+      },
+      "energy_final": -0.7949666857672084,
+      "energy_span_last10": 3.883205978993942e-09,
+      "energy_change_segment": -0.012837232283161137,
+      "spin_rms_final": 0.34866042270545267,
+      "pair_rms_final": 8.580853237389163e-13,
+      "pair_rms_first": 0.00040604892465057843,
+      "rung_pair_rms": 1.2919736838773675e-12,
+      "charge_std_final": 0.08426348514192035,
+      "spin_fractional_change_last10": 9.750230378635649e-08,
+      "spin_profile_max_change_last10": 3.396272279736819e-05,
+      "node_positions_first": [
+        9.611096740878395,
+        24.042952852323108,
+        38.99479124905818,
+        54.573151280821335
+      ],
+      "node_positions_final": [
+        9.610302948028469,
+        24.04437896428167,
+        38.99601343369097,
+        54.57440484590843
+      ],
+      "nodes_last10_start": [
+        9.610385657397357,
+        24.04418562546336,
+        38.995826431589464,
+        54.574219323723185
+      ],
+      "global_relative": 4.080164124115192e-06,
+      "slow_relative": 6.828340317176328e-05,
+      "slow_lambda": 0.9402466201947821,
+      "slow_cosine": 0.9456264523382601,
+      "gates": {
+        "minimum": true,
+        "global_field": true,
+        "global_slow": true,
+        "density": true,
+        "inner_dmrg": true,
+        "energy": true,
+        "identity": true,
+        "effective": true,
+        "charge_modulation_steps": true,
+        "charge_modulation_span": false,
+        "charge_uniform_steps": true,
+        "charge_uniform_span": true,
+        "exchange_charge_steps": true,
+        "exchange_charge_span": true,
+        "exchange_spin_steps": true,
+        "exchange_spin_span": true,
+        "pairing_steps": true,
+        "pairing_span": true,
+        "spin_steps": true,
+        "spin_span": true
+      },
+      "failed_gates": [
+        "charge_modulation_span"
+      ],
+      "channels_final": {
+        "charge_modulation": {
+          "absolute": 3.777394662687894e-07,
+          "applied_rms": 0.015877010262912192,
+          "contraction": 0.9692329292112437,
+          "cosine": 0.9964299979364286,
+          "factor": 1.0,
+          "measured_rms": 0.01587700923505409,
+          "passes": 1,
+          "relative": 9.982309160568226e-06,
+          "window_absolute": 3.7317670485217946e-06,
+          "window_passes": 0,
+          "window_relative": 0.00010130611604992054
+        },
+        "charge_uniform": {
+          "absolute": 3.535192971693135e-14,
+          "applied_rms": 0.01213497928689114,
+          "contraction": 0.7676284465873136,
+          "cosine": 1.0,
+          "factor": 1.0,
+          "measured_rms": 0.012134979286855788,
+          "passes": 1,
+          "relative": 2.9132253859815333e-12,
+          "window_absolute": 2.6590882273858085e-13,
+          "window_passes": 1,
+          "window_relative": 2.191258974987446e-11
+        },
+        "exchange_charge": {
+          "absolute": 3.0670658458147385e-07,
+          "applied_rms": 0.007277908455753869,
+          "contraction": 0.6640530798582346,
+          "cosine": 0.6630626106323326,
+          "factor": 1.0,
+          "measured_rms": 0.007277908530232794,
+          "passes": 1,
+          "relative": 2.325300658445329e-06,
+          "window_absolute": 1.948469900509009e-06,
+          "window_passes": 1,
+          "window_relative": 2.0560896879893357e-05
+        },
+        "exchange_spin": {
+          "absolute": 3.3440049411779605e-07,
+          "applied_rms": 0.0024607749334839895,
+          "contraction": 0.8340341022085925,
+          "cosine": 0.7880738078331081,
+          "factor": 1.0,
+          "measured_rms": 0.002460774824400426,
+          "passes": 1,
+          "relative": 8.328741439538536e-06,
+          "window_absolute": 2.7668457774215893e-06,
+          "window_passes": 1,
+          "window_relative": 7.517026584277523e-05
+        },
+        "pairing": {
+          "absolute": 6.356259731736533e-11,
+          "applied_rms": 9.559340213071566e-13,
+          "contraction": -0.5124740564190735,
+          "cosine": -0.7327417733139492,
+          "factor": 1.0,
+          "measured_rms": 2.3674355470501674e-13,
+          "passes": 1,
+          "relative": 1.0627824716102152,
+          "window_absolute": 1.2441790461854074e-10,
+          "window_passes": 1,
+          "window_relative": 2.2126492100979687
+        },
+        "spin": {
+          "absolute": 1.4759897007700362e-06,
+          "applied_rms": 0.139921569193328,
+          "contraction": 0.9811644164072355,
+          "cosine": 0.994952369374072,
+          "factor": 1.0,
+          "measured_rms": 0.13992156814769932,
+          "passes": 1,
+          "relative": 4.184468972519427e-06,
+          "window_absolute": 1.4662080386713267e-05,
+          "window_passes": 1,
+          "window_relative": 4.2325406872978694e-05
+        }
+      },
+      "solver_seconds": 9971.429389238358,
+      "solver_node_hours": 0.6924603742526637,
+      "reserved_node_hours": 3.0,
+      "allocation": null,
+      "spin_dft": {
+        "mode": 30,
+        "q_over_pi": 0.9375,
+        "amplitude": 0.24302978463250982
+      },
+      "charge_dft": {
+        "mode": 4,
+        "q_over_pi": 0.125,
+        "amplitude": 0.04497230562452164
+      }
+    },
+    {
+      "campaign": "20260915_cubic_unfrustrated_two_basin_95_5_60",
+      "label": "cubic_unfrustrated__pairing_weak_other_t010_vm02_chi200_raw",
+      "geometry": "cubic_unfrustrated",
+      "t0": 1.0,
+      "V": -0.2,
+      "family": "pairing",
+      "job_id": "58383148",
+      "source": "output/phase1_gpu/20260915_cubic_unfrustrated_two_basin_95_5_60/results/cubic_unfrustrated__pairing_weak_other_t010_vm02_chi200_raw/cubic_unfrustrated__pairing_weak_other__cubic_unfrustrated_two_reference_correlations_eps005_raw__none__pairing_eps005/20260915T231533_1088834_dcf7fb03060b/state.h5",
+      "compact_sha256": "d1c081955e7effb14c109f72c5374f1fec261262181344066751360de14b314f",
+      "full_sha256": "c22584014119ab4a959d7e18f55dbd613c302dcaaac2a587d9a43753104d05d6",
+      "config_sha256": "c0132e927b92a81943a8d5151f5199803857115262a07326a9f2a8e6ae1006a6",
+      "fingerprints": {
+        "model_fingerprint": "dcf7fb03060b1f6f1317148ac782a0ea555b02c062425e8269f6b8f129d162fd",
+        "numerical_fingerprint": "40ab627dba588f0ef56433843aa90d53e8cca51affc606246f686f28862fcfde",
+        "implementation_sha256": "d37e6563416286a9257133490f6e9e345960b950c08b157bc66c964eb369b624",
+        "ep_source_sha256": "2209bd2ca3c1ad02c0e542d1a9d63ecf90fdfa49120ad9cc3af599a5b4bc1f0e"
+      },
+      "parent_sha256": null,
+      "status": "maximum_iterations",
+      "accepted": false,
+      "period": 0,
+      "iterations": 60,
+      "parent_iterations": 0,
+      "cumulative_iterations": 60,
+      "controls": {
+        "stagnation_min_relative_improvement": 0.01,
+        "period2_oscillation_cosine_max": -0.5,
+        "stable_iterations": 10,
+        "divergence_factor": 8.0,
+        "max_period": 8,
+        "period2_two_step_ratio_max": 0.5,
+        "probe_iterations": 60,
+        "cycle_action": "continue",
+        "dmrg_sweep_energy_tol": 1e-07,
+        "period_rel_tol": 0.0002,
+        "field_rel_tol": 0.0001,
+        "minimum_iterations": 40,
+        "accepted_periods": [
+          1,
+          2
+        ],
+        "stagnation_window": 40,
+        "period_repeats": 3,
+        "effective_energy_consistency_tol": 1e-08,
+        "density_tol": 1e-05,
+        "variational_energy_tol": 1e-07,
+        "probe_max_period": 2,
+        "channel_noise_floor": 1.5e-06,
+        "period_abs_tol": 6e-07,
+        "slow_mode_cosine_min": 0.9,
+        "hamiltonian_identity_tol": 1e-08,
+        "channel_residuals": true,
+        "orbit_bulk_fraction": 0.5,
+        "unmixed_cycle_probe": true,
+        "field_abs_tol": 3e-07
+      },
+      "energy_final": -0.7949666917430435,
+      "energy_span_last10": 7.146368830035499e-09,
+      "energy_change_segment": -0.030953787085618023,
+      "spin_rms_final": 0.3486702353200758,
+      "pair_rms_final": 3.748118375451765e-12,
+      "pair_rms_first": 0.020045683095492775,
+      "rung_pair_rms": 6.867216258588272e-12,
+      "charge_std_final": 0.0842708545239507,
+      "spin_fractional_change_last10": 1.222275827217345e-07,
+      "spin_profile_max_change_last10": 3.661160354344328e-05,
+      "node_positions_first": [
+        9.598526003900604,
+        24.063577340800535,
+        39.04264902367701,
+        54.631718030119934
+      ],
+      "node_positions_final": [
+        9.587780385083871,
+        24.075714675140645,
+        39.05262890082273,
+        54.617952272946106
+      ],
+      "nodes_last10_start": [
+        9.587875936764364,
+        24.075525414722176,
+        39.05246038641259,
+        54.617748988516325
+      ],
+      "global_relative": 5.4103519638109996e-06,
+      "slow_relative": 5.4103519638109996e-06,
+      "slow_lambda": 0.7118355688053335,
+      "slow_cosine": 0.5707965287939777,
+      "gates": {
+        "minimum": true,
+        "global_field": true,
+        "global_slow": true,
+        "density": true,
+        "inner_dmrg": true,
+        "energy": true,
+        "identity": true,
+        "effective": true,
+        "charge_modulation_steps": true,
+        "charge_modulation_span": false,
+        "charge_uniform_steps": true,
+        "charge_uniform_span": true,
+        "exchange_charge_steps": true,
+        "exchange_charge_span": true,
+        "exchange_spin_steps": true,
+        "exchange_spin_span": true,
+        "pairing_steps": true,
+        "pairing_span": true,
+        "spin_steps": false,
+        "spin_span": true
+      },
+      "failed_gates": [
+        "charge_modulation_span",
+        "spin_steps"
+      ],
+      "channels_final": {
+        "charge_modulation": {
+          "absolute": 4.26697549002486e-07,
+          "applied_rms": 0.01587700545502079,
+          "contraction": 1.0307341387310562,
+          "cosine": 0.994449180077225,
+          "factor": 1.0,
+          "measured_rms": 0.015877001166673312,
+          "passes": 1,
+          "relative": 1.0363847084765434e-05,
+          "window_absolute": 4.0969359916542825e-06,
+          "window_passes": 0,
+          "window_relative": 0.00010262299790329488
+        },
+        "charge_uniform": {
+          "absolute": 6.402170460440004e-14,
+          "applied_rms": 0.012134979287315733,
+          "contraction": 0.020410872082798258,
+          "cosine": 1.0,
+          "factor": 1.0,
+          "measured_rms": 0.01213497928725171,
+          "passes": 1,
+          "relative": 5.2757984244208545e-12,
+          "window_absolute": 3.747009647003807e-12,
+          "window_passes": 1,
+          "window_relative": 3.0877758892855286e-10
+        },
+        "exchange_charge": {
+          "absolute": 1.787087687039543e-06,
+          "applied_rms": 0.00727790854835264,
+          "contraction": -0.1378635906193114,
+          "cosine": -0.07803412847392142,
+          "factor": 1.0,
+          "measured_rms": 0.007277909119289995,
+          "passes": 1,
+          "relative": 5.396454213887794e-06,
+          "window_absolute": 2.013527571585738e-06,
+          "window_passes": 1,
+          "window_relative": 2.1410695227925275e-05
+        },
+        "exchange_spin": {
+          "absolute": 1.8069252843977424e-06,
+          "applied_rms": 0.0024607752760763962,
+          "contraction": -0.013738520938217195,
+          "cosine": -0.008482824214112523,
+          "factor": 1.0,
+          "measured_rms": 0.0024607739805504116,
+          "passes": 1,
+          "relative": 1.6816544586468222e-05,
+          "window_absolute": 3.025713208010261e-06,
+          "window_passes": 1,
+          "window_relative": 7.756101370653887e-05
+        },
+        "pairing": {
+          "absolute": 1.040956974990212e-09,
+          "applied_rms": 6.706319774417133e-13,
+          "contraction": 0.8965138670240383,
+          "cosine": 0.06332916309136788,
+          "factor": 1.0,
+          "measured_rms": 1.2984124512109416e-11,
+          "passes": 1,
+          "relative": 0.9955570214814103,
+          "window_absolute": 1.172845717462516e-09,
+          "window_passes": 1,
+          "window_relative": 1.141940230818149
+        },
+        "spin": {
+          "absolute": 1.6163775695549054e-06,
+          "applied_rms": 0.13992156003607276,
+          "contraction": 1.0190376767909133,
+          "cosine": 0.9962204820105485,
+          "factor": "inf",
+          "measured_rms": 0.13992155440080473,
+          "passes": 0,
+          "relative": 4.3012807661319115e-06,
+          "window_absolute": 1.5814133752352355e-05,
+          "window_passes": 1,
+          "window_relative": 4.29119648518928e-05
+        }
+      },
+      "solver_seconds": 12724.227752685547,
+      "solver_node_hours": 0.8836269272698296,
+      "reserved_node_hours": 3.0,
+      "allocation": null,
+      "spin_dft": {
+        "mode": 30,
+        "q_over_pi": 0.9375,
+        "amplitude": 0.2433402236430223
+      },
+      "charge_dft": {
+        "mode": 4,
+        "q_over_pi": 0.125,
+        "amplitude": 0.04520950828367882
+      }
+    },
+    {
+      "campaign": "20260915_cubic_unfrustrated_two_basin_95_5_60",
+      "label": "cubic_unfrustrated__stripe_weak_other_t010_v000_chi200_raw",
+      "geometry": "cubic_unfrustrated",
+      "t0": 1.0,
+      "V": 0.0,
+      "family": "stripe",
+      "job_id": "58383153",
+      "source": "output/phase1_gpu/20260915_cubic_unfrustrated_two_basin_95_5_60/results/cubic_unfrustrated__stripe_weak_other_t010_v000_chi200_raw/cubic_unfrustrated__stripe_weak_other__cubic_unfrustrated_two_reference_correlations_eps005_raw__none__stripe_eps005/20260915T235724_1941350_07e90a06dd48/state.h5",
+      "compact_sha256": "a149adb5314ab4ded7575295d23cc8e718040290504d39c4193076cc32ed352a",
+      "full_sha256": "9bcff315ee31291671048d5c79ebf02cafc089b1b7523b835cba978bc76c806e",
+      "config_sha256": "cd7fc8ca4b155a15b4b16531b111565622da6e5c49902ce2b99daf138b3c8369",
+      "fingerprints": {
+        "model_fingerprint": "07e90a06dd4842a474aa9a6d5fd6a84e5996f0c55f33021b27e171cd4ff360c9",
+        "numerical_fingerprint": "40ab627dba588f0ef56433843aa90d53e8cca51affc606246f686f28862fcfde",
+        "implementation_sha256": "d37e6563416286a9257133490f6e9e345960b950c08b157bc66c964eb369b624",
+        "ep_source_sha256": "2209bd2ca3c1ad02c0e542d1a9d63ecf90fdfa49120ad9cc3af599a5b4bc1f0e"
+      },
+      "parent_sha256": null,
+      "status": "maximum_iterations",
+      "accepted": false,
+      "period": 0,
+      "iterations": 60,
+      "parent_iterations": 0,
+      "cumulative_iterations": 60,
+      "controls": {
+        "stagnation_min_relative_improvement": 0.01,
+        "period2_oscillation_cosine_max": -0.5,
+        "stable_iterations": 10,
+        "divergence_factor": 8.0,
+        "max_period": 8,
+        "period2_two_step_ratio_max": 0.5,
+        "probe_iterations": 60,
+        "cycle_action": "continue",
+        "dmrg_sweep_energy_tol": 1e-07,
+        "period_rel_tol": 0.0002,
+        "field_rel_tol": 0.0001,
+        "minimum_iterations": 40,
+        "accepted_periods": [
+          1,
+          2
+        ],
+        "stagnation_window": 40,
+        "period_repeats": 3,
+        "effective_energy_consistency_tol": 1e-08,
+        "density_tol": 1e-05,
+        "variational_energy_tol": 1e-07,
+        "probe_max_period": 2,
+        "channel_noise_floor": 1.5e-06,
+        "period_abs_tol": 6e-07,
+        "slow_mode_cosine_min": 0.9,
+        "hamiltonian_identity_tol": 1e-08,
+        "channel_residuals": true,
+        "orbit_bulk_fraction": 0.5,
+        "unmixed_cycle_probe": true,
+        "field_abs_tol": 3e-07
+      },
+      "energy_final": -0.5462294846160906,
+      "energy_span_last10": 2.5012362181442427e-09,
+      "energy_change_segment": -0.01646728147615617,
+      "spin_rms_final": 0.3562199882224281,
+      "pair_rms_final": 2.7038034286842287e-12,
+      "pair_rms_first": 0.0005307350587381984,
+      "rung_pair_rms": 2.90821847856213e-12,
+      "charge_std_final": 0.08633911836415135,
+      "spin_fractional_change_last10": -1.745453134249786e-07,
+      "spin_profile_max_change_last10": 5.5108202269532613e-05,
+      "node_positions_first": [
+        9.611495639125495,
+        24.042870246660808,
+        38.99478482564419,
+        54.5731096868884
+      ],
+      "node_positions_final": [
+        9.613386077872711,
+        24.043790828489094,
+        38.99554257575209,
+        54.573247823452306
+      ],
+      "nodes_last10_start": [
+        9.613090684047425,
+        24.04366257420979,
+        38.995429801823,
+        54.573240327768865
+      ],
+      "global_relative": 4.220218599659236e-06,
+      "slow_relative": "inf",
+      "slow_lambda": 1.0001870343576633,
+      "slow_cosine": 0.9997162821517542,
+      "gates": {
+        "minimum": true,
+        "global_field": true,
+        "global_slow": false,
+        "density": true,
+        "inner_dmrg": true,
+        "energy": true,
+        "identity": true,
+        "effective": true,
+        "charge_modulation_steps": true,
+        "charge_modulation_span": false,
+        "charge_uniform_steps": true,
+        "charge_uniform_span": true,
+        "exchange_charge_steps": true,
+        "exchange_charge_span": true,
+        "exchange_spin_steps": true,
+        "exchange_spin_span": true,
+        "pairing_steps": true,
+        "pairing_span": true,
+        "spin_steps": false,
+        "spin_span": true
+      },
+      "failed_gates": [
+        "global_slow",
+        "charge_modulation_span",
+        "spin_steps"
+      ],
+      "channels_final": {
+        "charge_modulation": {
+          "absolute": 7.292622675111882e-07,
+          "applied_rms": 0.018927248649593102,
+          "contraction": 0.9996401620551342,
+          "cosine": 0.9999663997058509,
+          "factor": 1.0,
+          "measured_rms": 0.018927248916428434,
+          "passes": 1,
+          "relative": 1.0570117353311505e-05,
+          "window_absolute": 7.322486427985275e-06,
+          "window_passes": 0,
+          "window_relative": 0.0001060281959481241
+        },
+        "charge_uniform": {
+          "absolute": 5.671157987663378e-14,
+          "applied_rms": 0.014149102410723846,
+          "contraction": -0.739203183647628,
+          "cosine": -1.0,
+          "factor": 1.0,
+          "measured_rms": 0.014149102410780557,
+          "passes": 1,
+          "relative": 4.0081397554535894e-12,
+          "window_absolute": 1.9131744799505412e-13,
+          "window_passes": 1,
+          "window_relative": 1.3521525425348852e-11
+        },
+        "exchange_charge": {
+          "absolute": 3.607044843090268e-07,
+          "applied_rms": 0.008471406300404414,
+          "contraction": 1.0005061776181299,
+          "cosine": 0.9978078745344294,
+          "factor": 1.0,
+          "measured_rms": 0.008471406288043918,
+          "passes": 1,
+          "relative": 2.186951732758445e-06,
+          "window_absolute": 3.6227679303252325e-06,
+          "window_passes": 1,
+          "window_relative": 2.201882580720571e-05
+        },
+        "exchange_spin": {
+          "absolute": 5.55205444053436e-07,
+          "applied_rms": 0.002972882074725043,
+          "contraction": 0.9975660771285808,
+          "cosine": 0.9987263792493332,
+          "factor": 1.0,
+          "measured_rms": 0.0029728821195371016,
+          "passes": 1,
+          "relative": 7.898805503135971e-06,
+          "window_absolute": 5.568626742245841e-06,
+          "window_passes": 1,
+          "window_relative": 7.968045070691613e-05
+        },
+        "pairing": {
+          "absolute": 4.471532472906719e-11,
+          "applied_rms": 2.8848754256262627e-13,
+          "contraction": -0.04276595618261697,
+          "cosine": -0.04439270712398361,
+          "factor": 1.0,
+          "measured_rms": 7.695904977366614e-13,
+          "passes": 1,
+          "relative": 0.986572923429701,
+          "window_absolute": 1.7285095511887396e-10,
+          "window_passes": 1,
+          "window_relative": 1.8942541711287282
+        },
+        "spin": {
+          "absolute": 2.7678990228360845e-06,
+          "applied_rms": 0.16650480615680063,
+          "contraction": 1.0005503050844773,
+          "cosine": 0.9999862116377585,
+          "factor": "inf",
+          "measured_rms": 0.16650480640429433,
+          "passes": 0,
+          "relative": 4.384361780087754e-06,
+          "window_absolute": 2.7721125602522823e-05,
+          "window_passes": 1,
+          "window_relative": 4.39661727242196e-05
+        }
+      },
+      "solver_seconds": 9356.260196447372,
+      "solver_node_hours": 0.6497402914199564,
+      "reserved_node_hours": 3.0,
+      "allocation": null,
+      "spin_dft": {
+        "mode": 30,
+        "q_over_pi": 0.9375,
+        "amplitude": 0.247668135714975
+      },
+      "charge_dft": {
+        "mode": 4,
+        "q_over_pi": 0.125,
+        "amplitude": 0.04551932042829848
+      }
+    },
+    {
+      "campaign": "20260915_cubic_unfrustrated_two_basin_95_5_60",
+      "label": "cubic_unfrustrated__pairing_weak_other_t010_v000_chi200_raw",
+      "geometry": "cubic_unfrustrated",
+      "t0": 1.0,
+      "V": 0.0,
+      "family": "pairing",
+      "job_id": "58383156",
+      "source": "output/phase1_gpu/20260915_cubic_unfrustrated_two_basin_95_5_60/results/cubic_unfrustrated__pairing_weak_other_t010_v000_chi200_raw/cubic_unfrustrated__pairing_weak_other__cubic_unfrustrated_two_reference_correlations_eps005_raw__none__pairing_eps005/20260916T000012_1985827_07e90a06dd48/state.h5",
+      "compact_sha256": "4ea7da25bf3bf83f43668e9b8c47c5346a48028bd47886d0ca7f651d5538ff14",
+      "full_sha256": "65ae965e704f7d45b63e42ea3d2ea03f3d399e31b6761f4e06121e3e0e886244",
+      "config_sha256": "b64ab9d23f985a9426c8abfba89ad666e3c3343ed3b3623cddb83ae08605c1eb",
+      "fingerprints": {
+        "model_fingerprint": "07e90a06dd4842a474aa9a6d5fd6a84e5996f0c55f33021b27e171cd4ff360c9",
+        "numerical_fingerprint": "40ab627dba588f0ef56433843aa90d53e8cca51affc606246f686f28862fcfde",
+        "implementation_sha256": "d37e6563416286a9257133490f6e9e345960b950c08b157bc66c964eb369b624",
+        "ep_source_sha256": "2209bd2ca3c1ad02c0e542d1a9d63ecf90fdfa49120ad9cc3af599a5b4bc1f0e"
+      },
+      "parent_sha256": null,
+      "status": "maximum_iterations",
+      "accepted": false,
+      "period": 0,
+      "iterations": 60,
+      "parent_iterations": 0,
+      "cumulative_iterations": 60,
+      "controls": {
+        "stagnation_min_relative_improvement": 0.01,
+        "period2_oscillation_cosine_max": -0.5,
+        "stable_iterations": 10,
+        "divergence_factor": 8.0,
+        "max_period": 8,
+        "period2_two_step_ratio_max": 0.5,
+        "probe_iterations": 60,
+        "cycle_action": "continue",
+        "dmrg_sweep_energy_tol": 1e-07,
+        "period_rel_tol": 0.0002,
+        "field_rel_tol": 0.0001,
+        "minimum_iterations": 40,
+        "accepted_periods": [
+          1,
+          2
+        ],
+        "stagnation_window": 40,
+        "period_repeats": 3,
+        "effective_energy_consistency_tol": 1e-08,
+        "density_tol": 1e-05,
+        "variational_energy_tol": 1e-07,
+        "probe_max_period": 2,
+        "channel_noise_floor": 1.5e-06,
+        "period_abs_tol": 6e-07,
+        "slow_mode_cosine_min": 0.9,
+        "hamiltonian_identity_tol": 1e-08,
+        "channel_residuals": true,
+        "orbit_bulk_fraction": 0.5,
+        "unmixed_cycle_probe": true,
+        "field_abs_tol": 3e-07
+      },
+      "energy_final": -0.5462294896395004,
+      "energy_span_last10": 1.516596626061073e-09,
+      "energy_change_segment": -0.03861211543742893,
+      "spin_rms_final": 0.3562085351648925,
+      "pair_rms_final": 3.5672390510240964e-12,
+      "pair_rms_first": 0.018189751204100588,
+      "rung_pair_rms": 3.667844651092076e-12,
+      "charge_std_final": 0.08633019053983643,
+      "spin_fractional_change_last10": -1.5543600384582135e-07,
+      "spin_profile_max_change_last10": 5.2392753670062187e-05,
+      "node_positions_first": [
+        9.671446174467107,
+        24.07211582239083,
+        39.055429112963274,
+        54.588567288906304
+      ],
+      "node_positions_final": [
+        9.669212312010231,
+        24.084448627112018,
+        39.06268235567993,
+        54.571930688697485
+      ],
+      "nodes_last10_start": [
+        9.668931706695528,
+        24.084309348215573,
+        39.062575772640315,
+        54.57191948064975
+      ],
+      "global_relative": 4.099373171631274e-06,
+      "slow_relative": 0.0005508206926581644,
+      "slow_lambda": 0.9925576993996932,
+      "slow_cosine": 0.995539563311142,
+      "gates": {
+        "minimum": true,
+        "global_field": true,
+        "global_slow": false,
+        "density": true,
+        "inner_dmrg": true,
+        "energy": true,
+        "identity": true,
+        "effective": true,
+        "charge_modulation_steps": true,
+        "charge_modulation_span": false,
+        "charge_uniform_steps": true,
+        "charge_uniform_span": true,
+        "exchange_charge_steps": true,
+        "exchange_charge_span": true,
+        "exchange_spin_steps": true,
+        "exchange_spin_span": true,
+        "pairing_steps": true,
+        "pairing_span": true,
+        "spin_steps": false,
+        "spin_span": true
+      },
+      "failed_gates": [
+        "global_slow",
+        "charge_modulation_span",
+        "spin_steps"
+      ],
+      "channels_final": {
+        "charge_modulation": {
+          "absolute": 6.914269279484353e-07,
+          "applied_rms": 0.01892724097848425,
+          "contraction": 0.9988621565954867,
+          "cosine": 0.9998649199667724,
+          "factor": 1.0,
+          "measured_rms": 0.018927240193023612,
+          "passes": 1,
+          "relative": 1.0270764441806996e-05,
+          "window_absolute": 6.901361584127352e-06,
+          "window_passes": 0,
+          "window_relative": 0.00010286478517085235
+        },
+        "charge_uniform": {
+          "absolute": 1.2852566233512164e-14,
+          "applied_rms": 0.014149102410821499,
+          "contraction": -0.6021618985695709,
+          "cosine": -1.0,
+          "factor": 1.0,
+          "measured_rms": 0.014149102410834351,
+          "passes": 1,
+          "relative": 9.083661889160266e-13,
+          "window_absolute": 1.2772248536574438e-13,
+          "window_passes": 1,
+          "window_relative": 9.026896665010815e-12
+        },
+        "exchange_charge": {
+          "absolute": 3.5359335560924965e-07,
+          "applied_rms": 0.008471406282488504,
+          "contraction": 0.9567188640267753,
+          "cosine": 0.9691279681688699,
+          "factor": 1.0,
+          "measured_rms": 0.008471406347927875,
+          "passes": 1,
+          "relative": 2.1299491995739385e-06,
+          "window_absolute": 3.5021676729335427e-06,
+          "window_passes": 1,
+          "window_relative": 2.12690799011209e-05
+        },
+        "exchange_spin": {
+          "absolute": 5.320104593947717e-07,
+          "applied_rms": 0.0029728811438997876,
+          "contraction": 0.981178945239797,
+          "cosine": 0.9777367599424263,
+          "factor": 1.0,
+          "measured_rms": 0.0029728810896100092,
+          "passes": 1,
+          "relative": 7.771791215135296e-06,
+          "window_absolute": 5.320511971256686e-06,
+          "window_passes": 1,
+          "window_relative": 7.689528870847492e-05
+        },
+        "pairing": {
+          "absolute": 2.1911606461525844e-11,
+          "applied_rms": 4.366794888906042e-13,
+          "contraction": -0.40029720373151756,
+          "cosine": -0.7190146354631963,
+          "factor": 1.0,
+          "measured_rms": 4.1517446144535193e-13,
+          "passes": 1,
+          "relative": 1.2837903471885235,
+          "window_absolute": 1.3023851478855434e-10,
+          "window_passes": 1,
+          "window_relative": 2.1789246613522106
+        },
+        "spin": {
+          "absolute": 2.674184344297892e-06,
+          "applied_rms": 0.16650479510450716,
+          "contraction": 0.9966559422878701,
+          "cosine": 0.999852410055605,
+          "factor": 299.03790128164064,
+          "measured_rms": 0.16650479401961538,
+          "passes": 0,
+          "relative": 4.250437308506789e-06,
+          "window_absolute": 2.6393654081507262e-05,
+          "window_passes": 1,
+          "window_relative": 4.2647342127424495e-05
+        }
+      },
+      "solver_seconds": 11971.38228726387,
+      "solver_node_hours": 0.831345992171102,
+      "reserved_node_hours": 3.0,
+      "allocation": null,
+      "spin_dft": {
+        "mode": 30,
+        "q_over_pi": 0.9375,
+        "amplitude": 0.24752083943311176
+      },
+      "charge_dft": {
+        "mode": 4,
+        "q_over_pi": 0.125,
+        "amplitude": 0.04540767902819579
+      }
+    },
+    {
+      "campaign": "20260915_cubic_unfrustrated_two_basin_95_5_60",
+      "label": "cubic_unfrustrated__stripe_weak_other_t012_vm04_chi200_raw",
+      "geometry": "cubic_unfrustrated",
+      "t0": 1.2,
+      "V": -0.4,
+      "family": "stripe",
+      "job_id": "58383157",
+      "source": "output/phase1_gpu/20260915_cubic_unfrustrated_two_basin_95_5_60/results/cubic_unfrustrated__stripe_weak_other_t012_vm04_chi200_raw/cubic_unfrustrated__stripe_weak_other__cubic_unfrustrated_two_reference_correlations_eps005_raw__none__stripe_eps005/20260916T003106_1891951_1981c9c3faad/state.h5",
+      "compact_sha256": "b8245d0b777363a283e11cf3739789cc99d45f07196f2e9312129c801daecf8d",
+      "full_sha256": "f9fda0d1a8de5656eb1a4a6d4a0ef12a6d44b97e7f53883d516983e40ef2a166",
+      "config_sha256": "6fd57c21aa95acac1ab85726294f693c388f653c6ad235967b3814aec8d79825",
+      "fingerprints": {
+        "model_fingerprint": "1981c9c3faad33a934c956a540dde024b01ecd693f215a53ea78f2945e715d48",
+        "numerical_fingerprint": "40ab627dba588f0ef56433843aa90d53e8cca51affc606246f686f28862fcfde",
+        "implementation_sha256": "d37e6563416286a9257133490f6e9e345960b950c08b157bc66c964eb369b624",
+        "ep_source_sha256": "2209bd2ca3c1ad02c0e542d1a9d63ecf90fdfa49120ad9cc3af599a5b4bc1f0e"
+      },
+      "parent_sha256": null,
+      "status": "maximum_iterations",
+      "accepted": false,
+      "period": 0,
+      "iterations": 60,
+      "parent_iterations": 0,
+      "cumulative_iterations": 60,
+      "controls": {
+        "stagnation_min_relative_improvement": 0.01,
+        "period2_oscillation_cosine_max": -0.5,
+        "stable_iterations": 10,
+        "divergence_factor": 8.0,
+        "max_period": 8,
+        "period2_two_step_ratio_max": 0.5,
+        "probe_iterations": 60,
+        "cycle_action": "continue",
+        "dmrg_sweep_energy_tol": 1e-07,
+        "period_rel_tol": 0.0002,
+        "field_rel_tol": 0.0001,
+        "minimum_iterations": 40,
+        "accepted_periods": [
+          1,
+          2
+        ],
+        "stagnation_window": 40,
+        "period_repeats": 3,
+        "effective_energy_consistency_tol": 1e-08,
+        "density_tol": 1e-05,
+        "variational_energy_tol": 1e-07,
+        "probe_max_period": 2,
+        "channel_noise_floor": 1.5e-06,
+        "period_abs_tol": 6e-07,
+        "slow_mode_cosine_min": 0.9,
+        "hamiltonian_identity_tol": 1e-08,
+        "channel_residuals": true,
+        "orbit_bulk_fraction": 0.5,
+        "unmixed_cycle_probe": true,
+        "field_abs_tol": 3e-07
+      },
+      "energy_final": -1.09351657934785,
+      "energy_span_last10": 9.163831471425965e-09,
+      "energy_change_segment": -0.003806839351745861,
+      "spin_rms_final": 0.3073150852650431,
+      "pair_rms_final": 2.1700339396416555e-12,
+      "pair_rms_first": 0.0006123981096302828,
+      "rung_pair_rms": 3.663969861449747e-12,
+      "charge_std_final": 0.07665214510203458,
+      "spin_fractional_change_last10": 1.1490909557654305e-05,
+      "spin_profile_max_change_last10": 0.001062994116023619,
+      "node_positions_first": [
+        9.61002454984448,
+        24.04294119322252,
+        38.994832376548345,
+        54.57354170359953
+      ],
+      "node_positions_final": [
+        9.563189192249808,
+        24.04805973883533,
+        38.9995693954804,
+        54.59460953511443
+      ],
+      "nodes_last10_start": [
+        9.570450626770707,
+        24.047328962881714,
+        38.99885248943352,
+        54.59138464880847
+      ],
+      "global_relative": 9.207011495978546e-05,
+      "slow_relative": "inf",
+      "slow_lambda": 1.0026647870484835,
+      "slow_cosine": 0.9998407634953745,
+      "gates": {
+        "minimum": true,
+        "global_field": true,
+        "global_slow": false,
+        "density": true,
+        "inner_dmrg": true,
+        "energy": true,
+        "identity": true,
+        "effective": true,
+        "charge_modulation_steps": false,
+        "charge_modulation_span": false,
+        "charge_uniform_steps": true,
+        "charge_uniform_span": true,
+        "exchange_charge_steps": false,
+        "exchange_charge_span": false,
+        "exchange_spin_steps": false,
+        "exchange_spin_span": false,
+        "pairing_steps": true,
+        "pairing_span": true,
+        "spin_steps": false,
+        "spin_span": false
+      },
+      "failed_gates": [
+        "global_slow",
+        "charge_modulation_steps",
+        "charge_modulation_span",
+        "exchange_charge_steps",
+        "exchange_charge_span",
+        "exchange_spin_steps",
+        "exchange_spin_span",
+        "spin_steps",
+        "spin_span"
+      ],
+      "channels_final": {
+        "charge_modulation": {
+          "absolute": 7.1943122929366e-06,
+          "applied_rms": 0.008961049583541556,
+          "contraction": 1.0031446323618953,
+          "cosine": 0.9999836858874113,
+          "factor": "inf",
+          "measured_rms": 0.00896104647986944,
+          "passes": 0,
+          "relative": 0.00023028517420803422,
+          "window_absolute": 7.161786164906411e-05,
+          "window_passes": 0,
+          "window_relative": 0.0022911221576735145
+        },
+        "charge_uniform": {
+          "absolute": 1.4375133028377007e-13,
+          "applied_rms": 0.007462808804957703,
+          "contraction": -1.6190178475485264,
+          "cosine": -1.0,
+          "factor": 1.0,
+          "measured_rms": 0.007462808804813952,
+          "passes": 1,
+          "relative": 1.926236274313674e-11,
+          "window_absolute": 1.6119050538776492e-13,
+          "window_passes": 1,
+          "window_relative": 2.159917393042183e-11
+        },
+        "exchange_charge": {
+          "absolute": 3.3333125730242164e-06,
+          "applied_rms": 0.004501156337477729,
+          "contraction": 1.0030515386789969,
+          "cosine": 0.9989216049601548,
+          "factor": "inf",
+          "measured_rms": 0.004501156404735068,
+          "passes": 0,
+          "relative": 4.3202818678924366e-05,
+          "window_absolute": 3.309888523999466e-05,
+          "window_passes": 0,
+          "window_relative": 0.000429715899993581
+        },
+        "exchange_spin": {
+          "absolute": 4.59163549542535e-06,
+          "applied_rms": 0.0013843704060020566,
+          "contraction": 1.0035337065898458,
+          "cosine": 0.999082036261278,
+          "factor": "inf",
+          "measured_rms": 0.0013843702007052521,
+          "passes": 0,
+          "relative": 0.00016317061535400706,
+          "window_absolute": 4.5577540931913615e-05,
+          "window_passes": 0,
+          "window_relative": 0.0016220508605025673
+        },
+        "pairing": {
+          "absolute": 6.325165437228587e-12,
+          "applied_rms": 2.663608513941231e-13,
+          "contraction": -1.1947728780658706,
+          "cosine": -0.7835715943273512,
+          "factor": 1.0,
+          "measured_rms": 1.1001977257361083e-13,
+          "passes": 1,
+          "relative": 1.122207907201804,
+          "window_absolute": 3.5290302396707035e-11,
+          "window_passes": 1,
+          "window_relative": 2.097024544910946
+        },
+        "spin": {
+          "absolute": 2.8335515687451934e-05,
+          "applied_rms": 0.07577959804482079,
+          "contraction": 1.0025007098110468,
+          "cosine": 0.9999917192843689,
+          "factor": "inf",
+          "measured_rms": 0.0757795932472394,
+          "passes": 0,
+          "relative": 0.00010072798609501655,
+          "window_absolute": 0.0002817044682804533,
+          "window_passes": 0,
+          "window_relative": 0.0010019863017875033
+        }
+      },
+      "solver_seconds": 9513.007157802582,
+      "solver_node_hours": 0.6606254970696237,
+      "reserved_node_hours": 3.0,
+      "allocation": null,
+      "spin_dft": {
+        "mode": 30,
+        "q_over_pi": 0.9375,
+        "amplitude": 0.21500624670520302
+      },
+      "charge_dft": {
+        "mode": 4,
+        "q_over_pi": 0.125,
+        "amplitude": 0.042988866398819096
+      }
+    },
+    {
+      "campaign": "20260915_cubic_unfrustrated_two_basin_95_5_60",
+      "label": "cubic_unfrustrated__pairing_weak_other_t012_vm04_chi200_raw",
+      "geometry": "cubic_unfrustrated",
+      "t0": 1.2,
+      "V": -0.4,
+      "family": "pairing",
+      "job_id": "58383158",
+      "source": "output/phase1_gpu/20260915_cubic_unfrustrated_two_basin_95_5_60/results/cubic_unfrustrated__pairing_weak_other_t012_vm04_chi200_raw/cubic_unfrustrated__pairing_weak_other__cubic_unfrustrated_two_reference_correlations_eps005_raw__none__pairing_eps005/20260916T003559_684539_1981c9c3faad/state.h5",
+      "compact_sha256": "43a1c9726ae897bd9a1ea9d0b8719e5a86bfa7f9eee5316d2aaaf7a674585fbc",
+      "full_sha256": "3cc095fb798b84365159f2c82f2ec6b79b82832a60b2bd770f5e6b6fb401ace7",
+      "config_sha256": "97503bfc22a34aeaeff166ce26a1f04d4f3a15d7314dd6ff9e3ccdcb1600241b",
+      "fingerprints": {
+        "model_fingerprint": "1981c9c3faad33a934c956a540dde024b01ecd693f215a53ea78f2945e715d48",
+        "numerical_fingerprint": "40ab627dba588f0ef56433843aa90d53e8cca51affc606246f686f28862fcfde",
+        "implementation_sha256": "d37e6563416286a9257133490f6e9e345960b950c08b157bc66c964eb369b624",
+        "ep_source_sha256": "2209bd2ca3c1ad02c0e542d1a9d63ecf90fdfa49120ad9cc3af599a5b4bc1f0e"
+      },
+      "parent_sha256": null,
+      "status": "maximum_iterations",
+      "accepted": false,
+      "period": 0,
+      "iterations": 60,
+      "parent_iterations": 0,
+      "cumulative_iterations": 60,
+      "controls": {
+        "stagnation_min_relative_improvement": 0.01,
+        "period2_oscillation_cosine_max": -0.5,
+        "stable_iterations": 10,
+        "divergence_factor": 8.0,
+        "max_period": 8,
+        "period2_two_step_ratio_max": 0.5,
+        "probe_iterations": 60,
+        "cycle_action": "continue",
+        "dmrg_sweep_energy_tol": 1e-07,
+        "period_rel_tol": 0.0002,
+        "field_rel_tol": 0.0001,
+        "minimum_iterations": 40,
+        "accepted_periods": [
+          1,
+          2
+        ],
+        "stagnation_window": 40,
+        "period_repeats": 3,
+        "effective_energy_consistency_tol": 1e-08,
+        "density_tol": 1e-05,
+        "variational_energy_tol": 1e-07,
+        "probe_max_period": 2,
+        "channel_noise_floor": 1.5e-06,
+        "period_abs_tol": 6e-07,
+        "slow_mode_cosine_min": 0.9,
+        "hamiltonian_identity_tol": 1e-08,
+        "channel_residuals": true,
+        "orbit_bulk_fraction": 0.5,
+        "unmixed_cycle_probe": true,
+        "field_abs_tol": 3e-07
+      },
+      "energy_final": -1.093516690550483,
+      "energy_span_last10": 6.9850092376810835e-09,
+      "energy_change_segment": -0.011787499738266316,
+      "spin_rms_final": 0.30741294568896144,
+      "pair_rms_final": 2.824102527490243e-12,
+      "pair_rms_first": 0.032079549372729006,
+      "rung_pair_rms": 4.1712166373045505e-12,
+      "charge_std_final": 0.0767225626196268,
+      "spin_fractional_change_last10": 1.6988232330206188e-05,
+      "spin_profile_max_change_last10": 0.001358311619687906,
+      "node_positions_first": [
+        9.546571587852359,
+        24.049271731520445,
+        39.00188165439972,
+        54.61942816529918
+      ],
+      "node_positions_final": [
+        9.391174196634836,
+        24.065486886036748,
+        39.024228413470574,
+        54.7034456973455
+      ],
+      "nodes_last10_start": [
+        9.400432722786311,
+        24.064899824522055,
+        39.02356275595229,
+        54.6997858823476
+      ],
+      "global_relative": 0.00011473754185264588,
+      "slow_relative": "inf",
+      "slow_lambda": 1.0009348688109159,
+      "slow_cosine": 0.9993561164694353,
+      "gates": {
+        "minimum": true,
+        "global_field": false,
+        "global_slow": false,
+        "density": true,
+        "inner_dmrg": true,
+        "energy": true,
+        "identity": true,
+        "effective": true,
+        "charge_modulation_steps": false,
+        "charge_modulation_span": false,
+        "charge_uniform_steps": true,
+        "charge_uniform_span": true,
+        "exchange_charge_steps": false,
+        "exchange_charge_span": false,
+        "exchange_spin_steps": false,
+        "exchange_spin_span": false,
+        "pairing_steps": true,
+        "pairing_span": true,
+        "spin_steps": false,
+        "spin_span": false
+      },
+      "failed_gates": [
+        "global_field",
+        "global_slow",
+        "charge_modulation_steps",
+        "charge_modulation_span",
+        "exchange_charge_steps",
+        "exchange_charge_span",
+        "exchange_spin_steps",
+        "exchange_spin_span",
+        "spin_steps",
+        "spin_span"
+      ],
+      "channels_final": {
+        "charge_modulation": {
+          "absolute": 9.233767986695923e-06,
+          "applied_rms": 0.008960846345805304,
+          "contraction": 1.0027117374460384,
+          "cosine": 0.9999455108660033,
+          "factor": "inf",
+          "measured_rms": 0.008960841592735792,
+          "passes": 0,
+          "relative": 0.000287206777677858,
+          "window_absolute": 9.164766789202146e-05,
+          "window_passes": 0,
+          "window_relative": 0.0028542433068972643
+        },
+        "charge_uniform": {
+          "absolute": 5.3306317693291305e-14,
+          "applied_rms": 0.007462808804911395,
+          "contraction": 2.5086945873132502,
+          "cosine": 1.0,
+          "factor": 1.0,
+          "measured_rms": 0.007462808804964701,
+          "passes": 1,
+          "relative": 7.142929570677034e-12,
+          "window_absolute": 1.9939258577572616e-13,
+          "window_passes": 1,
+          "window_relative": 2.6718168853659218e-11
+        },
+        "exchange_charge": {
+          "absolute": 4.273387553224706e-06,
+          "applied_rms": 0.00450115965943243,
+          "contraction": 0.9960551963066862,
+          "cosine": 0.9953009112620754,
+          "factor": 253.49803887451398,
+          "measured_rms": 0.004501159619035982,
+          "passes": 0,
+          "relative": 5.3836507041889504e-05,
+          "window_absolute": 4.2345342485039517e-05,
+          "window_passes": 0,
+          "window_relative": 0.0005350625452231564
+        },
+        "exchange_spin": {
+          "absolute": 5.846405703710533e-06,
+          "applied_rms": 0.0013843537761050817,
+          "contraction": 0.9982194289437306,
+          "cosine": 0.9965562905139214,
+          "factor": 561.6175757092099,
+          "measured_rms": 0.0013843538201344901,
+          "passes": 0,
+          "relative": 0.00020344068036228473,
+          "window_absolute": 5.8026864921635266e-05,
+          "window_passes": 0,
+          "window_relative": 0.002021907745624436
+        },
+        "pairing": {
+          "absolute": 5.790001450389732e-11,
+          "applied_rms": 2.8247938572584836e-13,
+          "contraction": -0.5939672441934718,
+          "cosine": -0.3110076249511502,
+          "factor": 1.0,
+          "measured_rms": 6.288009905571274e-13,
+          "passes": 1,
+          "relative": 1.0674630987074156,
+          "window_absolute": 5.790922205793369e-11,
+          "window_passes": 1,
+          "window_relative": 1.7553715837755637
+        },
+        "spin": {
+          "absolute": 3.631118020148809e-05,
+          "applied_rms": 0.07577905542381223,
+          "contraction": 1.0015158410630685,
+          "cosine": 0.9999644748384164,
+          "factor": "inf",
+          "measured_rms": 0.07577904873209365,
+          "passes": 0,
+          "relative": 0.00012551395108372597,
+          "window_absolute": 0.00036023406097978987,
+          "window_passes": 0,
+          "window_relative": 0.0012486811786298604
+        }
+      },
+      "solver_seconds": 12833.96234178543,
+      "solver_node_hours": 0.8912473848462105,
+      "reserved_node_hours": 3.0,
+      "allocation": null,
+      "spin_dft": {
+        "mode": 30,
+        "q_over_pi": 0.9375,
+        "amplitude": 0.21592016834492925
+      },
+      "charge_dft": {
+        "mode": 4,
+        "q_over_pi": 0.125,
+        "amplitude": 0.04373955378942117
+      }
+    },
+    {
+      "campaign": "20260915_square_t014_v000_two_basin_finish20",
+      "label": "square__stripe_weak_other_t014_v000_chi200_raw_finish20",
+      "geometry": "square",
+      "t0": 1.4,
+      "V": 0.0,
+      "family": "stripe",
+      "job_id": "58383124",
+      "source": "output/phase1_gpu/20260915_square_t014_v000_two_basin_finish20/results/square__stripe_weak_other_t014_v000_chi200_raw_finish20/square__stripe_weak_other_finish20__same_model_two_basin_continuation20__none__stripe_eps005_continued/20260915T213827_1956488_879c440a5602/state.h5",
+      "compact_sha256": "cff5b176b4543e717441ab98736c6310e2b752219c99d9edead2d149bf38f2ec",
+      "full_sha256": "c28197eafcdd7e536e2e881a5dd99aa8774e839da8aa52ba2c8e1a23e9e6376e",
+      "config_sha256": "7de19f9a90e107992c95a757061b03ad74f5c7d9a690bb99f0a6845a08b7e5ec",
+      "fingerprints": {
+        "model_fingerprint": "879c440a56028e19184315d58f12f1ee47189b0fadafbccfee60facb63c905a8",
+        "numerical_fingerprint": "7cff580da44eeb9acb2ec59cd66042087a2c3d9586b05de1b92d1e95b8823dd8",
+        "implementation_sha256": "d37e6563416286a9257133490f6e9e345960b950c08b157bc66c964eb369b624",
+        "ep_source_sha256": "2209bd2ca3c1ad02c0e542d1a9d63ecf90fdfa49120ad9cc3af599a5b4bc1f0e"
+      },
+      "parent_sha256": "9ad2d9ea1239727e577be2997a7a9f62e1e6aaeae0653bd8591448f55dc58ea5",
+      "status": "maximum_iterations",
+      "accepted": false,
+      "period": 0,
+      "iterations": 20,
+      "parent_iterations": 80,
+      "cumulative_iterations": 100,
+      "controls": {
+        "accepted_periods": [
+          1,
+          2
+        ],
+        "channel_noise_floor": 5e-07,
+        "channel_residuals": true,
+        "cycle_action": "continue",
+        "density_tol": 1e-05,
+        "divergence_factor": 8.0,
+        "dmrg_sweep_energy_tol": 1e-07,
+        "effective_energy_consistency_tol": 1e-08,
+        "field_abs_tol": 1e-07,
+        "field_rel_tol": 0.0001,
+        "hamiltonian_identity_tol": 1e-08,
+        "max_period": 8,
+        "minimum_iterations": 10,
+        "orbit_bulk_fraction": 0.5,
+        "period2_oscillation_cosine_max": -0.5,
+        "period2_two_step_ratio_max": 0.5,
+        "period_abs_tol": 2e-07,
+        "period_rel_tol": 0.0002,
+        "period_repeats": 3,
+        "probe_iterations": 20,
+        "probe_max_period": 2,
+        "slow_mode_cosine_min": 0.9,
+        "stable_iterations": 10,
+        "stagnation_min_relative_improvement": 0.01,
+        "stagnation_window": 40,
+        "unmixed_cycle_probe": true,
+        "variational_energy_tol": 1e-07
+      },
+      "energy_final": -0.6611220745702532,
+      "energy_span_last10": 3.458069530726249e-08,
+      "energy_change_segment": -3.459959496687759e-08,
+      "spin_rms_final": 0.17689778488661467,
+      "pair_rms_final": 1.0405644587228863e-09,
+      "pair_rms_first": 6.274107806512223e-10,
+      "rung_pair_rms": 1.465924303499282e-09,
+      "charge_std_final": 0.05057101054207481,
+      "spin_fractional_change_last10": 0.00010496481464650209,
+      "spin_profile_max_change_last10": 0.0026485826991204144,
+      "node_positions_first": [
+        9.414321488519098,
+        24.345670197234398,
+        39.5217360985565,
+        55.27053675553559
+      ],
+      "node_positions_final": [
+        9.423681728023013,
+        24.400058443498754,
+        39.61453210040573,
+        55.31813129776152
+      ],
+      "nodes_last10_start": [
+        9.419026546982664,
+        24.374141519434744,
+        39.571733999906435,
+        55.29835153010483
+      ],
+      "global_relative": 0.0005057829425948888,
+      "slow_relative": 0.13558523959342036,
+      "slow_lambda": 0.9962696312363235,
+      "slow_cosine": 0.9998884910474908,
+      "gates": {
+        "minimum": true,
+        "global_field": false,
+        "global_slow": false,
+        "density": true,
+        "inner_dmrg": true,
+        "energy": true,
+        "identity": true,
+        "effective": true,
+        "charge_modulation_steps": false,
+        "charge_modulation_span": false,
+        "charge_uniform_steps": true,
+        "charge_uniform_span": true,
+        "exchange_charge_steps": false,
+        "exchange_charge_span": false,
+        "exchange_spin_steps": false,
+        "exchange_spin_span": false,
+        "pairing_steps": true,
+        "pairing_span": true,
+        "spin_steps": false,
+        "spin_span": false
+      },
+      "failed_gates": [
+        "global_field",
+        "global_slow",
+        "charge_modulation_steps",
+        "charge_modulation_span",
+        "exchange_charge_steps",
+        "exchange_charge_span",
+        "exchange_spin_steps",
+        "exchange_spin_span",
+        "spin_steps",
+        "spin_span"
+      ],
+      "channels_final": {
+        "charge_modulation": {
+          "absolute": 1.0782231818835808e-05,
+          "applied_rms": 0.003499729047289089,
+          "contraction": 0.9988374241792957,
+          "cosine": 0.9998523362811491,
+          "factor": 860.1589523805495,
+          "measured_rms": 0.0034997484051312337,
+          "passes": 0,
+          "relative": 0.0012320642962016055,
+          "window_absolute": 0.00011167598984077216,
+          "window_passes": 0,
+          "window_relative": 0.012571486231179494
+        },
+        "charge_uniform": {
+          "absolute": 8.810464510733418e-12,
+          "applied_rms": 0.004265113148383599,
+          "contraction": 0.2946297073639458,
+          "cosine": 1.0,
+          "factor": 1.0,
+          "measured_rms": 0.004265113139573134,
+          "passes": 1,
+          "relative": 2.0657047548838008e-09,
+          "window_absolute": 5.343404451546574e-11,
+          "window_passes": 1,
+          "window_relative": 1.252816565407679e-08
+        },
+        "exchange_charge": {
+          "absolute": 4.951495568900153e-06,
+          "applied_rms": 0.0018775897739361537,
+          "contraction": 0.9990967572718185,
+          "cosine": 0.9995905605753925,
+          "factor": 1107.1221154619818,
+          "measured_rms": 0.0018775887314665422,
+          "passes": 0,
+          "relative": 0.00019062071318348507,
+          "window_absolute": 5.123438332184068e-05,
+          "window_passes": 0,
+          "window_relative": 0.0019466580230589907
+        },
+        "exchange_spin": {
+          "absolute": 4.181478006810152e-06,
+          "applied_rms": 0.00036691558445819326,
+          "contraction": 0.995383850391282,
+          "cosine": 0.9995784317080562,
+          "factor": 216.63076043103231,
+          "measured_rms": 0.0003669147334546601,
+          "passes": 0,
+          "relative": 0.000802700754056065,
+          "window_absolute": 4.33448924261658e-05,
+          "window_passes": 0,
+          "window_relative": 0.00817820414951671
+        },
+        "pairing": {
+          "absolute": 1.9503195698002875e-09,
+          "applied_rms": 5.4135402926841435e-11,
+          "contraction": 0.020337615734493917,
+          "cosine": 0.07268991495072855,
+          "factor": 1.0,
+          "measured_rms": 1.858060650461618e-11,
+          "passes": 1,
+          "relative": 0.7455479296690292,
+          "window_absolute": 3.644969039424028e-08,
+          "window_passes": 1,
+          "window_relative": 1.4343260690715873
+        },
+        "spin": {
+          "absolute": 3.9162921786180076e-05,
+          "applied_rms": 0.024264506691139578,
+          "contraction": 0.9959093361247698,
+          "cosine": 0.9999278861048178,
+          "factor": 244.45909771643977,
+          "measured_rms": 0.0242645037331828,
+          "passes": 0,
+          "relative": 0.00062793840903733,
+          "window_absolute": 0.0004024077280678313,
+          "window_passes": 0,
+          "window_relative": 0.006399218288125649
+        }
+      },
+      "solver_seconds": 3612.7290003299713,
+      "solver_node_hours": 0.250883958356248,
+      "reserved_node_hours": 2.0,
+      "allocation": {
+        "seconds": 3930,
+        "node_hours": 0.27291666666666664,
+        "reconciled_utc": "2026-09-15T23:45:33Z",
+        "source": "output/project_budget/additional_node_hours_reconciliations.tsv"
+      },
+      "spin_dft": {
+        "mode": 30,
+        "q_over_pi": 0.9375,
+        "amplitude": 0.12255818605796331
+      },
+      "charge_dft": {
+        "mode": 4,
+        "q_over_pi": 0.125,
+        "amplitude": 0.03380643178299039
+      }
+    },
+    {
+      "campaign": "20260915_square_t014_v000_two_basin_finish20",
+      "label": "square__pairing_weak_other_t014_v000_chi200_raw_finish20",
+      "geometry": "square",
+      "t0": 1.4,
+      "V": 0.0,
+      "family": "pairing",
+      "job_id": "58383125",
+      "source": "output/phase1_gpu/20260915_square_t014_v000_two_basin_finish20/results/square__pairing_weak_other_t014_v000_chi200_raw_finish20/square__pairing_weak_other_finish20__same_model_two_basin_continuation20__none__pairing_eps005_continued/20260915T213815_939164_879c440a5602/state.h5",
+      "compact_sha256": "d3beb7017fda46d9026128e821dd6650e08f3bebf38a3dd372e0f19b6ff48991",
+      "full_sha256": "44286c39b6e62f7b30c3e4e7700ca4bd4f61bfd3a766fa95ecffa3e4e365d14a",
+      "config_sha256": "55d25c703c9bf63718eb394e2051bbc003a5172efb7f0989a3765b438d2063b9",
+      "fingerprints": {
+        "model_fingerprint": "879c440a56028e19184315d58f12f1ee47189b0fadafbccfee60facb63c905a8",
+        "numerical_fingerprint": "7cff580da44eeb9acb2ec59cd66042087a2c3d9586b05de1b92d1e95b8823dd8",
+        "implementation_sha256": "d37e6563416286a9257133490f6e9e345960b950c08b157bc66c964eb369b624",
+        "ep_source_sha256": "2209bd2ca3c1ad02c0e542d1a9d63ecf90fdfa49120ad9cc3af599a5b4bc1f0e"
+      },
+      "parent_sha256": "d4b2ef33f8d969e23b519f08642f50eacfd158948c0b6710756613fd89344237",
+      "status": "maximum_iterations",
+      "accepted": false,
+      "period": 0,
+      "iterations": 20,
+      "parent_iterations": 62,
+      "cumulative_iterations": 82,
+      "controls": {
+        "accepted_periods": [
+          1,
+          2
+        ],
+        "channel_noise_floor": 5e-07,
+        "channel_residuals": true,
+        "cycle_action": "continue",
+        "density_tol": 1e-05,
+        "divergence_factor": 8.0,
+        "dmrg_sweep_energy_tol": 1e-07,
+        "effective_energy_consistency_tol": 1e-08,
+        "field_abs_tol": 1e-07,
+        "field_rel_tol": 0.0001,
+        "hamiltonian_identity_tol": 1e-08,
+        "max_period": 8,
+        "minimum_iterations": 10,
+        "orbit_bulk_fraction": 0.5,
+        "period2_oscillation_cosine_max": -0.5,
+        "period2_two_step_ratio_max": 0.5,
+        "period_abs_tol": 2e-07,
+        "period_rel_tol": 0.0002,
+        "period_repeats": 3,
+        "probe_iterations": 20,
+        "probe_max_period": 2,
+        "slow_mode_cosine_min": 0.9,
+        "stable_iterations": 10,
+        "stagnation_min_relative_improvement": 0.01,
+        "stagnation_window": 40,
+        "unmixed_cycle_probe": true,
+        "variational_energy_tol": 1e-07
+      },
+      "energy_final": -0.6611201413002853,
+      "energy_span_last10": 1.830659288271086e-06,
+      "energy_change_segment": -6.663487730695916e-05,
+      "spin_rms_final": 0.17510563242072907,
+      "pair_rms_final": 4.4214764201916826e-08,
+      "pair_rms_first": 0.0033071701019252936,
+      "rung_pair_rms": 6.362542589160354e-08,
+      "charge_std_final": 0.04956085174204069,
+      "spin_fractional_change_last10": 0.002217563464460559,
+      "spin_profile_max_change_last10": 0.013613533204876429,
+      "node_positions_first": [
+        10.737198143462829,
+        25.576964735588472,
+        39.27784558385271,
+        54.11788541507845
+      ],
+      "node_positions_final": [
+        10.265977063330073,
+        25.30554620355932,
+        39.55788697536027,
+        54.61740123984697
+      ],
+      "nodes_last10_start": [
+        10.4749383373629,
+        25.428943239439768,
+        39.43114885501366,
+        54.394104245258696
+      ],
+      "global_relative": 0.0030988139915219476,
+      "slow_relative": 0.15524878560904903,
+      "slow_lambda": 0.9800396893324148,
+      "slow_cosine": 0.9999519475972967,
+      "gates": {
+        "minimum": true,
+        "global_field": false,
+        "global_slow": false,
+        "density": true,
+        "inner_dmrg": true,
+        "energy": false,
+        "identity": true,
+        "effective": true,
+        "charge_modulation_steps": false,
+        "charge_modulation_span": false,
+        "charge_uniform_steps": true,
+        "charge_uniform_span": true,
+        "exchange_charge_steps": false,
+        "exchange_charge_span": false,
+        "exchange_spin_steps": false,
+        "exchange_spin_span": false,
+        "pairing_steps": false,
+        "pairing_span": false,
+        "spin_steps": false,
+        "spin_span": false
+      },
+      "failed_gates": [
+        "global_field",
+        "global_slow",
+        "energy",
+        "charge_modulation_steps",
+        "charge_modulation_span",
+        "exchange_charge_steps",
+        "exchange_charge_span",
+        "exchange_spin_steps",
+        "exchange_spin_span",
+        "pairing_steps",
+        "pairing_span",
+        "spin_steps",
+        "spin_span"
+      ],
+      "channels_final": {
+        "charge_modulation": {
+          "absolute": 5.358470747031385e-05,
+          "applied_rms": 0.0035010681033689805,
+          "contraction": 0.9780599673149125,
+          "cosine": 0.9999130248412706,
+          "factor": 45.57878351200882,
+          "measured_rms": 0.0035007425194213573,
+          "passes": 0,
+          "relative": 0.007501438795288029,
+          "window_absolute": 0.0005753336075338513,
+          "window_passes": 0,
+          "window_relative": 0.08210381573362736
+        },
+        "charge_uniform": {
+          "absolute": 6.904928018247602e-13,
+          "applied_rms": 0.004265113127709316,
+          "contraction": 0.039066487974336615,
+          "cosine": 1.0,
+          "factor": 1.0,
+          "measured_rms": 0.0042651131270188235,
+          "passes": 1,
+          "relative": 1.618931974720226e-10,
+          "window_absolute": 1.234938800526164e-10,
+          "window_passes": 1,
+          "window_relative": 2.8954420293909356e-08
+        },
+        "exchange_charge": {
+          "absolute": 2.4635216773225086e-05,
+          "applied_rms": 0.0018778181896963806,
+          "contraction": 0.9777418331383261,
+          "cosine": 0.9997779648344663,
+          "factor": 44.92732965003908,
+          "measured_rms": 0.001877809543538257,
+          "passes": 0,
+          "relative": 0.0011585500534279467,
+          "window_absolute": 0.00026092232078661366,
+          "window_passes": 0,
+          "window_relative": 0.012683671318377845
+        },
+        "exchange_spin": {
+          "absolute": 2.044935270753296e-05,
+          "applied_rms": 0.00036823507116636264,
+          "contraction": 0.9811464124243223,
+          "cosine": 0.9997628309113114,
+          "factor": 53.04030312459276,
+          "measured_rms": 0.0003681915403186783,
+          "passes": 0,
+          "relative": 0.004776462416277282,
+          "window_absolute": 0.00022129544955405353,
+          "window_passes": 0,
+          "window_relative": 0.05221294396196651
+        },
+        "pairing": {
+          "absolute": 7.451436142120677e-09,
+          "applied_rms": 1.378806332814174e-09,
+          "contraction": 0.5459338546794359,
+          "cosine": 0.9944327832032326,
+          "factor": 1.0,
+          "measured_rms": 7.597859036673512e-10,
+          "passes": 1,
+          "relative": 0.45313391424298777,
+          "window_absolute": 3.876097592976583e-06,
+          "window_passes": 0,
+          "window_relative": 0.9975759551880939
+        },
+        "spin": {
+          "absolute": 0.00019380926970861403,
+          "applied_rms": 0.024275596626085395,
+          "contraction": 0.9803060187790147,
+          "cosine": 0.9999760082438562,
+          "factor": 50.776934779161365,
+          "measured_rms": 0.024274414043453648,
+          "passes": 0,
+          "relative": 0.003855640274540803,
+          "window_absolute": 0.002082235939943185,
+          "window_passes": 0,
+          "window_relative": 0.04219560300595867
+        }
+      },
+      "solver_seconds": 3718.656314134598,
+      "solver_node_hours": 0.25824002181490263,
+      "reserved_node_hours": 2.0,
+      "allocation": {
+        "seconds": 4025,
+        "node_hours": 0.2795138888888889,
+        "reconciled_utc": "2026-09-15T23:45:33Z",
+        "source": "output/project_budget/additional_node_hours_reconciliations.tsv"
+      },
+      "spin_dft": {
+        "mode": 30,
+        "q_over_pi": 0.9375,
+        "amplitude": 0.11937388229791028
+      },
+      "charge_dft": {
+        "mode": 4,
+        "q_over_pi": 0.125,
+        "amplitude": 0.03030621376866763
+      }
+    }
+  ],
+  "comparisons": [
+    {
+      "geometry": "cubic_unfrustrated",
+      "t0": 1.0,
+      "V": -0.4,
+      "absolute_endpoint_energy_difference": 4.840889533674897e-08,
+      "max_charge_difference": 0.016804389824227273,
+      "max_spin_difference": 0.032480270510557574,
+      "max_pair_difference": 4.0913165598670937e-11
+    },
+    {
+      "geometry": "cubic_unfrustrated",
+      "t0": 1.0,
+      "V": -0.2,
+      "absolute_endpoint_energy_difference": 5.9758350490213274e-09,
+      "max_charge_difference": 0.0047048022093243436,
+      "max_spin_difference": 0.009907643967576193,
+      "max_pair_difference": 1.6527858808594537e-11
+    },
+    {
+      "geometry": "cubic_unfrustrated",
+      "t0": 1.0,
+      "V": 0.0,
+      "absolute_endpoint_energy_difference": 5.023409799242984e-09,
+      "max_charge_difference": 0.0058727716322004575,
+      "max_spin_difference": 0.012210254323552569,
+      "max_pair_difference": 2.755484689616434e-11
+    },
+    {
+      "geometry": "cubic_unfrustrated",
+      "t0": 1.2,
+      "V": -0.4,
+      "absolute_endpoint_energy_difference": 1.1120263287978105e-07,
+      "max_charge_difference": 0.012729426431576263,
+      "max_spin_difference": 0.025090576338478554,
+      "max_pair_difference": 7.438024883960706e-12
+    },
+    {
+      "geometry": "square",
+      "t0": 1.4,
+      "V": 0.0,
+      "absolute_endpoint_energy_difference": 1.9332699678908938e-06,
+      "max_charge_difference": 0.03018026999048129,
+      "max_spin_difference": 0.05604009457040238,
+      "max_pair_difference": 6.393469126138299e-08
+    }
+  ],
+  "new_mf_evaluations": 520,
+  "square_actual_node_hours": 0.5524305555555555,
+  "cubic_solver_node_hours": 6.160414401491484
+}
