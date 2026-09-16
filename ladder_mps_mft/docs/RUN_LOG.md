@@ -3239,3 +3239,71 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   Open-boundary and algorithmic pinning are not ruled out by these starts;
   translated seeds can be considered later if needed. Existing campaign
   source artifacts, acceptance flags and energy rankings are unchanged.
+
+### 2026-09-15 — Physical interpretation of the possible V-sign contrast
+
+- User asked whether negative-V stripe/pairing competition versus positive-V
+  intertwining has a simple physical interpretation, conditional on transfer
+  of the legacy pattern to square geometry. Working explanation, not a
+  established mechanism: local magnetic/pairing competition can remain
+  positive on both sides while spatial organization permits coexistence.
+  A phenomenological positive gamma |Delta(x)|^2 M(x)^2 term favors pairing
+  at weak-spin domain walls and magnetism between them. Observed spatial
+  anticorrelation does not require the local coupling to become cooperative.
+- In the implemented Hamiltonian, V multiplies nearest-neighbor n_i n_j
+  on both ladder legs and rungs. Writing n_i=1-h_i leaves a V h_i h_j
+  interaction plus constant and one-body terms (the latter are boundary
+  dependent on the open ladder). Attraction favors neighboring-hole
+  association; repulsion penalizes it. A possible mechanism is a change
+  in stripe localization/filling and carrier mobility that allows pairing
+  on the walls. This does not imply that repulsion generically creates
+  long-wavelength stripes, or that attraction precludes intertwining.
+- Primary-source checks: https://arxiv.org/abs/2303.14723 reports attraction
+  enhancing SC and eventually causing phase separation at stronger coupling
+  in a different extended two-leg model; https://arxiv.org/abs/2206.03486
+  reports enhanced SC and suppressed CDW on four-leg cylinders;
+  https://arxiv.org/abs/2109.00213 finds attraction-enhanced short-distance
+  d-wave correlations in striped states. These illustrate competing
+  tendencies and rule out treating the proposed sign contrast as universal.
+- Rechecked the repository E_p registry at t0=1.2: signed E_p is
+  -0.25124588461187614 at V=-0.4 and -0.15307266912955697 at V=+0.2.
+  Thus g=tp^2/|E_p| rises from 0.03980164696 to 0.06532844862, about 64%.
+  In this effective model V changes both the bare ladder and interladder
+  coupling; g rescales spin/charge/exchange as well as pairing. An eventual
+  fixed-g comparison could separate those effects, but no new runs or
+  implementation changes are authorized or prepared by this discussion.
+- Proposed interpretation remains conditional on stationary square results.
+  Useful later checks are stripe width/filling, pair/spin spatial overlap,
+  comparable accepted energies and response with the interladder scale held
+  fixed. No phase classification, acceptance flag or campaign status changed.
+
+### 2026-09-15 — Verify the Zhou2023 literature-review entry
+
+- User asked whether the previously linked two-leg ladder study is included.
+  Confirmed existing key Zhou2023 in literature/literature_review.tex:207,
+  literature/references.bib:420 and literature/SOURCE_NOTES.md:82, with
+  selected-full-text reading depth S. The manuscript already cites it at
+  introduction_and_results.tex:158. No duplicate entry or rebuild is needed.
+- Rechecked the published paper, https://doi.org/10.1103/PhysRevB.108.195136,
+  for the requested chat summary. Its repulsion results support persistence
+  of pairing alongside stripe correlations, but do not substantiate the
+  previously proposed stripe-delocalization mechanism. Retain that mechanism
+  as untested. Distinguish isolated-ladder correlations from array mean-field
+  order, and match density and diagonal hopping before comparing boundaries.
+
+### 2026-09-15 - Clarify stripe orientation in the manuscript
+
+- At the user's request, added the agreed statement to manuscript section
+  2.4: equivalent ladders are the prescribed microscopic geometry, while the
+  observed stripe texture is an additional longitudinal charge/spin modulation
+  whose domain walls extend transverse to the ladder axes in the repeated-
+  ladder embedding. Explicitly qualified transverse alignment as an embedding
+  restriction, not an independently optimized arrangement of distinct ladders.
+- Refined the adjacent Arrigoni2004 comparison: alternating dopings characterize
+  its period-four construction; the paper also studies equivalent ladders in
+  its period-two limit. Reused the existing citation, with no bibliography change.
+- Rebuilt the manuscript PDF with cached Tectonic and refreshed the tracked
+  Overleaf ZIP. The PDF remains 16 pages with 34 references, no undefined
+  references or overfull boxes, and no out-of-margin text. All sixteen rendered
+  pages were inspected, and the package helper verified every archive member.
+  No numerical calculation or change to scientific acceptance was involved.
