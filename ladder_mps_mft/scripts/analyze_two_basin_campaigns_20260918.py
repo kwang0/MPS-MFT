@@ -417,6 +417,108 @@ def variational_energy_cuts():
     print('Verified 20 endpoint sources and density corrections; wrote full energy curves and 16 interval slopes.',flush=True)
 
 
+def geometry_comparison_figures():
+    """Matched square/cubic panels, reusing audited histories and phase labels."""
+    out = PROJECT/'docs/reports/campaign_review_20260918'
+    square = PROJECT/'docs/reports/two_basin_grid_20260915'
+    cubic = PROJECT/'docs/reports/cubic_two_basin_grid_20260918'
+    summaries = {g: json.loads((p/'analysis.json').read_text(encoding='utf-8'))
+                 for g,p in (('Square',square),('Cubic unfrustrated',cubic))}
+    data, exported, sources = {}, [], []
+    # The old square CSV stores MF fields with bonds averaged onto rungs for
+    # the pairing RMS. Reuse the physical-correlation reader for an exact common
+    # convention, not a scalar rescaling of that CSV's pairing RMS.
+    segments = {}
+    for s in summaries['Square']['source_runs']:
+        path = PROJECT/s['source'].replace('\\','/')
+        assert base.common.sha(path) == s['source_sha256']
+        d = base.read_arrays(path)
+        segments[str(s['job_id'])] = {k:d[k] for k in ('energy','spin_rms','pair_rms')}
+    for geom, directory in (('Square',square),('Cubic unfrustrated',cubic)):
+        for name in ('analysis.json','iteration_history.csv'):
+            sources.append(dict(geometry=geom,source=(directory/name).relative_to(PROJECT).as_posix(),sha256=base.common.sha(directory/name)))
+        with (directory/'iteration_history.csv').open(encoding='utf-8',newline='') as stream:
+            history = list(csv.DictReader(stream))
+        for s in summaries[geom]['runs']:
+            key = (geom,s['t0'],s['V'],s['family'])
+            rr = sorted([r for r in history if (float(r['t0']),float(r['V']),r['family'])==key[1:]],key=lambda r:int(r['iteration']))
+            it = np.array([int(r['iteration']) for r in rr])
+            np.testing.assert_array_equal(it,np.arange(1,len(rr)+1))
+            assert len(rr)==s.get('cumulative_iterations',s['iterations'])
+            energy = np.array([float(r['energy_per_site']) for r in rr])
+            if geom=='Square':
+                spin = np.array([segments[r['source_job_id']]['spin_rms'][int(r['source_iteration'])-1] for r in rr])
+                pair = np.array([segments[r['source_job_id']]['pair_rms'][int(r['source_iteration'])-1] for r in rr])
+                np.testing.assert_allclose(energy,[segments[r['source_job_id']]['energy'][int(r['source_iteration'])-1] for r in rr],atol=1e-14,rtol=0)
+                seams = [it[i]-.5 for i in range(1,len(rr)) if rr[i]['source_job_id']!=rr[i-1]['source_job_id']]
+                expected = [s['corrected_energy_per_site'],s['physical_spin_odd_bulk_rms'],s['physical_leg_pair_bulk_rms']]
+            else:
+                spin = np.array([float(r['spin_rms']) for r in rr])
+                pair = np.array([float(r['pair_rms']) for r in rr]); seams=[]
+                expected = [s['energy_final'],s['spin_rms_final'],s['pair_rms_final']]
+            np.testing.assert_allclose([energy[-1],spin[-1],pair[-1]],expected,atol=1e-13,rtol=0)
+            assert np.isfinite([energy,spin,pair]).all() and np.all(spin>0) and np.all(pair>0)
+            assert not s['accepted']
+            data[key] = dict(iteration=it,energy=energy,spin=spin,pairing=pair,seams=seams,phase=s['phase_observation'])
+            exported.extend(dict(geometry=geom,t0=s['t0'],V=s['V'],family=s['family'],iteration=int(i),
+                                 energy_per_site=e,physical_spin_rms=m,physical_leg_pair_rms=p,
+                                 source_job_id=r.get('source_job_id',r.get('job_id')),source_iteration=int(r.get('source_iteration',i)))
+                            for i,e,m,p,r in zip(it,energy,spin,pair,rr))
+    assert len(data)==36 and len(exported)==902+1080
+    coordinates=[(t,v) for v in (0.,-.2,-.4) for t in (1.,1.2,1.4)]
+    with plt.rc_context({'font.size':8.5,'axes.spines.top':False,'axes.spines.right':False}):
+        fig,axes=plt.subplots(1,2,figsize=(10.5,4.4),layout='constrained')
+        for ax,geom in zip(axes,('Square','Cubic unfrustrated')):
+            for t,v in coordinates:
+                phases={data[(geom,t,v,f)]['phase'] for f in ('stripe','pairing')}
+                assert len(phases)==1 and phases<={'S','D'}
+                phase=next(iter(phases));color=COLORS['stripe' if phase=='S' else 'pairing']
+                ax.scatter(t,v,s=680,marker='o' if phase=='S' else 's',color=color,zorder=3)
+                ax.text(t,v,phase,color='white',fontsize=16,weight='bold',ha='center',va='center')
+            ax.set(title=geom,xlabel=r'$t_0/t$',ylabel=r'$V/t$',xlim=(.93,1.47),ylim=(-.46,.06),xticks=[1,1.2,1.4],yticks=[-.4,-.2,0])
+            ax.grid(alpha=.2)
+        fig.suptitle('Square and cubic: preliminary phase diagrams',fontsize=13)
+        fig.supxlabel('S: stripe CDW/SDW; D: d-wave-like pairing. Both seeds agree at each coordinate.\n'
+                      r'$L=64$, $\chi=200$; raw 95%/5% seeds. All endpoints unaccepted; no interpolated boundary.',fontsize=9)
+        save(fig,out,'square_cubic_phase_diagrams')
+        for metric,title,ylabel in (('energy','Full variational-energy histories','Corrected energy per site [t]'),
+                                    ('spin','Physical spin RMS histories','Bulk leg-odd spin RMS'),
+                                    ('pairing','Physical pairing RMS histories','Bulk leg-pair RMS')):
+            fig=plt.figure(figsize=(13.8,7.4),layout='constrained')
+            subfigures=fig.subfigures(1,2,wspace=.035)
+            lower = None if metric=='energy' else 10**np.floor(np.log10(min(d[metric].min() for d in data.values())))
+            for sub,geom in zip(subfigures,('Square','Cubic unfrustrated')):
+                axes=sub.subplots(3,3)
+                for ax,(t,v) in zip(axes.flat,coordinates):
+                    xmax=max(len(data[(g,t,v,f)]['iteration']) for g in ('Square','Cubic unfrustrated') for f in ('stripe','pairing'))
+                    for family in ('stripe','pairing'):
+                        d=data[(geom,t,v,family)]
+                        ax.plot(d['iteration'],d[metric],**style(family))
+                        for seam in d['seams']:ax.axvline(seam,color=COLORS[family],ls=':',lw=.9,alpha=.6)
+                    ax.set(title=f't0={t:g}, V={v:g}',xlim=(0,xmax+1),xticks=[0,xmax//2,xmax])
+                    ax.grid(alpha=.2);ax.tick_params(labelsize=8)
+                    if metric=='energy':
+                        ax.ticklabel_format(axis='y',style='plain',useOffset=False)
+                        ax.locator_params(axis='y',nbins=3)
+                    else:
+                        ax.set_yscale('log');ax.set_ylim(lower,.5 if metric=='spin' else .1)
+                        ax.yaxis.set_major_locator(plt.LogLocator(base=10,numticks=4));ax.minorticks_off()
+                sub.suptitle(geom,fontsize=12);sub.supxlabel('MF evaluation (cumulative)',fontsize=9)
+                sub.supylabel(ylabel,fontsize=9)
+            fig.suptitle(title+' | solid blue: stripe seed; dashed orange: pairing seed',fontsize=13)
+            note='Energy y scales vary by panel to retain early-history structure.' if metric=='energy' else 'Common physical RMS definitions and logarithmic y scale for both geometries.'
+            fig.supxlabel(note+'\nAll saved evaluations shown; dotted lines mark square continuations. All endpoints unaccepted.',fontsize=9)
+            save(fig,out,f'square_cubic_{metric}_grids')
+    write_csv(out/'square_cubic_histories.csv',exported)
+    (out/'square_cubic_comparison_sources.json').write_text(json.dumps(dict(sources=sources,
+        square_source_states=[dict(source=s['source'].replace('\\','/'),sha256=s['source_sha256']) for s in summaries['Square']['source_runs']],
+        histories=36,square_evaluations=902,cubic_evaluations=1080,
+        spin_definition='Physical leg-odd spin RMS over rungs 6-59',
+        pairing_definition='Physical leg-even nearest-neighbor leg-pair RMS over bonds 6-58',
+        energy_definition='Stored target-density-corrected canonical variational energy per physical site'),indent=2)+'\n',encoding='utf-8')
+    print('Rebuilt four square/cubic comparisons: 36 histories, 1982 evaluations, common physical RMS conventions.',flush=True)
+
+
 def main():
     plt.rcParams.update({'font.size':10,'axes.spines.top':False,'axes.spines.right':False})
     accounting=base.common.rows(PROJECT/'output/project_budget/additional_node_hours_reconciliations.tsv')
@@ -447,10 +549,13 @@ def main():
                 if m['records']:write_csv(out/(m['family']+'_log_history.csv'),m['records'])
         print(json.dumps({k:v for k,v in payload.items() if k not in ('runs','missing','points')},indent=2),flush=True)
         for d in data:assert base.common.sha(PROJECT/d['summary']['source'])==d['summary']['compact_sha256']
+    geometry_comparison_figures()
 
 
 if __name__=='__main__':
     if sys.argv[1:] == ['--energy-cuts-only']:
         variational_energy_cuts()
+    elif sys.argv[1:] == ['--geometry-comparison-only']:
+        geometry_comparison_figures()
     else:
         main()

@@ -1,0 +1,112 @@
+{
+  "sources": [
+    {
+      "geometry": "Square",
+      "source": "docs/reports/two_basin_grid_20260915/analysis.json",
+      "sha256": "b495f3a5d08996615c1448f2b86e6c1d8422b2e2e7c172410c0432a657ca5dbd"
+    },
+    {
+      "geometry": "Square",
+      "source": "docs/reports/two_basin_grid_20260915/iteration_history.csv",
+      "sha256": "447c29fded0d56f1504c9e1773d1b02d9a9fc8118206b12d17c46b4a08063b3c"
+    },
+    {
+      "geometry": "Cubic unfrustrated",
+      "source": "docs/reports/cubic_two_basin_grid_20260918/analysis.json",
+      "sha256": "22ac39164db69dfd500a76b1d26db79863c6f84e3922bdeb26397642722e9340"
+    },
+    {
+      "geometry": "Cubic unfrustrated",
+      "source": "docs/reports/cubic_two_basin_grid_20260918/iteration_history.csv",
+      "sha256": "5720821b14f00e64e7aa995c57e3844ad3c50acdafedc6cfbe8ada7225ce3521"
+    }
+  ],
+  "square_source_states": [
+    {
+      "source": "output/phase1_gpu/20260908_square_two_basin_95_5_80_anchors/results/square__stripe_weak_other_t014_vm04_chi200_raw/square__stripe_weak_other__square_two_reference_correlations_eps005_raw__none__stripe_eps005/20260909T231851_497480_e93552440b67/state.h5",
+      "sha256": "641277827094e384dbd6bede51334d20c4e00dd86d83d430a7ec8614af5e5f79"
+    },
+    {
+      "source": "output/phase1_gpu/20260908_square_two_basin_95_5_80_anchors/results/square__pairing_weak_other_t014_vm04_chi200_raw/square__pairing_weak_other__square_two_reference_correlations_eps005_raw__none__pairing_eps005/20260910T084630_1156171_e93552440b67/state.h5",
+      "sha256": "026b622a94291f03684a287c39f8ec7306dda36e160a72da138ef2158d91e90a"
+    },
+    {
+      "source": "output/phase1_gpu/20260908_square_two_basin_95_5_80_anchors/results/square__stripe_weak_other_t014_v000_chi200_raw/square__stripe_weak_other__square_two_reference_correlations_eps005_raw__none__stripe_eps005/20260911T163326_794697_879c440a5602/state.h5",
+      "sha256": "ba38078fd047653251f321d14995e89acc2c63d05cdba8e1e41fac6b2a3b5bb0"
+    },
+    {
+      "source": "output/phase1_gpu/20260915_square_t014_v000_two_basin_finish20/results/square__stripe_weak_other_t014_v000_chi200_raw_finish20/square__stripe_weak_other_finish20__same_model_two_basin_continuation20__none__stripe_eps005_continued/20260915T213827_1956488_879c440a5602/state.h5",
+      "sha256": "cff5b176b4543e717441ab98736c6310e2b752219c99d9edead2d149bf38f2ec"
+    },
+    {
+      "source": "output/phase1_gpu/20260908_square_two_basin_95_5_80_anchors/results/square__pairing_weak_other_t014_v000_chi200_raw/square__pairing_weak_other__square_two_reference_correlations_eps005_raw__none__pairing_eps005/20260911T225246_847355_879c440a5602/state.h5",
+      "sha256": "8d18a149ef1b6707f2377b35f9b5ed9ada97f6a287d693b09ede6b0c7e0c5ab9"
+    },
+    {
+      "source": "output/phase1_gpu/20260915_square_t014_v000_two_basin_finish20/results/square__pairing_weak_other_t014_v000_chi200_raw_finish20/square__pairing_weak_other_finish20__same_model_two_basin_continuation20__none__pairing_eps005_continued/20260915T213815_939164_879c440a5602/state.h5",
+      "sha256": "d3beb7017fda46d9026128e821dd6650e08f3bebf38a3dd372e0f19b6ff48991"
+    },
+    {
+      "source": "output/phase1_gpu/20260910_square_two_basin_95_5_40_remainder/results/square__stripe_weak_other_t010_vm04_chi200_raw/square__stripe_weak_other__square_two_reference_correlations_eps005_raw__none__stripe_eps005/20260912T173923_1536447_a1d8bf414c7d/state.h5",
+      "sha256": "26c658924f2232d8d491df1947037a19910cb122f00836307fa848c55b0df3bd"
+    },
+    {
+      "source": "output/phase1_gpu/20260910_square_two_basin_95_5_40_remainder/results/square__pairing_weak_other_t010_vm04_chi200_raw/square__pairing_weak_other__square_two_reference_correlations_eps005_raw__none__pairing_eps005/20260912T190813_1459091_a1d8bf414c7d/state.h5",
+      "sha256": "80f777ce99b180190f130e2825919d7f98d4a41affd6e79703c7ffa0c456622c"
+    },
+    {
+      "source": "output/phase1_gpu/20260910_square_two_basin_95_5_40_remainder/results/square__stripe_weak_other_t010_vm02_chi200_raw/square__stripe_weak_other__square_two_reference_correlations_eps005_raw__none__stripe_eps005/20260913T013837_1707188_aa99161dab34/state.h5",
+      "sha256": "fbfde1cbba0d7f1958d31540cd2c24816e08f2cf217d1ad9530e7191f3c1e629"
+    },
+    {
+      "source": "output/phase1_gpu/20260910_square_two_basin_95_5_40_remainder/results/square__pairing_weak_other_t010_vm02_chi200_raw/square__pairing_weak_other__square_two_reference_correlations_eps005_raw__none__pairing_eps005/20260913T013837_377777_aa99161dab34/state.h5",
+      "sha256": "4e911d497cc13082adda7ed02c804e50e18137895b3438fd2fe0121ebdc56f10"
+    },
+    {
+      "source": "output/phase1_gpu/20260910_square_two_basin_95_5_40_remainder/results/square__stripe_weak_other_t010_v000_chi200_raw/square__stripe_weak_other__square_two_reference_correlations_eps005_raw__none__stripe_eps005/20260914T091752_1435932_24f85329a6cd/state.h5",
+      "sha256": "aa2e81395e9be1939f1b2b0fb3990263d5b12b455f7926315b07f6ec73c59f40"
+    },
+    {
+      "source": "output/phase1_gpu/20260910_square_two_basin_95_5_40_remainder/results/square__pairing_weak_other_t010_v000_chi200_raw/square__pairing_weak_other__square_two_reference_correlations_eps005_raw__none__pairing_eps005/20260914T111920_99881_24f85329a6cd/state.h5",
+      "sha256": "a39c70fb204fb4eab46bca54a523f268c9aef6555e2bb7f021e191bb2688ecab"
+    },
+    {
+      "source": "output/phase1_gpu/20260910_square_two_basin_95_5_40_remainder/results/square__stripe_weak_other_t012_vm04_chi200_raw/square__stripe_weak_other__square_two_reference_correlations_eps005_raw__none__stripe_eps005/20260915T064933_273999_9bc2a45ffc54/state.h5",
+      "sha256": "40a1fe9803d61578acdfa15419469f37b06b79a3b5558ba9b48ad472c36ca4cd"
+    },
+    {
+      "source": "output/phase1_gpu/20260910_square_two_basin_95_5_40_remainder/results/square__pairing_weak_other_t012_vm04_chi200_raw/square__pairing_weak_other__square_two_reference_correlations_eps005_raw__none__pairing_eps005/20260915T070450_1576258_9bc2a45ffc54/state.h5",
+      "sha256": "52067a103397353854e7280480a542db2b11a6521165ad627a27dadf0ba66372"
+    },
+    {
+      "source": "output/phase1_gpu/20260910_square_two_basin_95_5_40_remainder/results/square__stripe_weak_other_t012_vm02_chi200_raw/square__stripe_weak_other__square_two_reference_correlations_eps005_raw__none__stripe_eps005/20260915T093424_1664109_0bb6393e4cf8/state.h5",
+      "sha256": "f4091a2a6aa3aa1d70f6fdfab68db8eeb65fab989cc7ce34327bd492356168f0"
+    },
+    {
+      "source": "output/phase1_gpu/20260910_square_two_basin_95_5_40_remainder/results/square__pairing_weak_other_t012_vm02_chi200_raw/square__pairing_weak_other__square_two_reference_correlations_eps005_raw__none__pairing_eps005/20260915T093423_1664108_0bb6393e4cf8/state.h5",
+      "sha256": "24371474f9983185b4d7ee67e4f93b5a312051e99f018e52ce9fb162d0635dbd"
+    },
+    {
+      "source": "output/phase1_gpu/20260910_square_two_basin_95_5_40_remainder/results/square__stripe_weak_other_t012_v000_chi200_raw/square__stripe_weak_other__square_two_reference_correlations_eps005_raw__none__stripe_eps005/20260915T120942_1924286_a1fcc10a3139/state.h5",
+      "sha256": "857dac047e4ba9d84ae3cc7025bdb345406baf0657a08e04911575ae288a6965"
+    },
+    {
+      "source": "output/phase1_gpu/20260910_square_two_basin_95_5_40_remainder/results/square__pairing_weak_other_t012_v000_chi200_raw/square__pairing_weak_other__square_two_reference_correlations_eps005_raw__none__pairing_eps005/20260915T120952_1924284_a1fcc10a3139/state.h5",
+      "sha256": "54f4d4cb1598891163d824a9e56f346a2b4ba79bb06554d568cc748dd246e435"
+    },
+    {
+      "source": "output/phase1_gpu/20260910_square_two_basin_95_5_40_remainder/results/square__stripe_weak_other_t014_vm02_chi200_raw/square__stripe_weak_other__square_two_reference_correlations_eps005_raw__none__stripe_eps005/20260915T133344_530806_e88a894f07dc/state.h5",
+      "sha256": "d9f752489b0ee8e89ef64db018f6a0c28e401c9a85f0e1d6a3218907d604e97d"
+    },
+    {
+      "source": "output/phase1_gpu/20260910_square_two_basin_95_5_40_remainder/results/square__pairing_weak_other_t014_vm02_chi200_raw/square__pairing_weak_other__square_two_reference_correlations_eps005_raw__none__pairing_eps005/20260915T134211_1900090_e88a894f07dc/state.h5",
+      "sha256": "ea59e1b2ae21a1007739603693f9bf312301bbf1c8e7bcc326fa969184785423"
+    }
+  ],
+  "histories": 36,
+  "square_evaluations": 902,
+  "cubic_evaluations": 1080,
+  "spin_definition": "Physical leg-odd spin RMS over rungs 6-59",
+  "pairing_definition": "Physical leg-even nearest-neighbor leg-pair RMS over bonds 6-58",
+  "energy_definition": "Stored target-density-corrected canonical variational energy per physical site"
+}

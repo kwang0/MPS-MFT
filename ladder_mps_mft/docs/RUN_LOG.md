@@ -3683,3 +3683,49 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   acceptance change, threshold change or allocation-ledger mutation occurred.
 - Final checks: 96 local Markdown links resolve, the run-log update is strictly
   append-only, and the configured Git whitespace check passes.
+
+### 2026-09-18 — Side-by-side square/cubic figures in report and manuscript
+
+- User requested matching square/cubic phase diagrams, full energy grids
+  (not late-only energies), spin/pairing RMS grids, and figure references
+  in the text. Baseline: 72a4359; unrelated `.claude/` left outside scope.
+- Added `--geometry-comparison-only` to the existing campaign analysis script.
+  Four paired figures keep square left and cubic right with the same point
+  order. Every saved evaluation is retained: 902 square and 1080 cubic,
+  across 36 independent seed lineages. Square continuation joins retain
+  dotted markers after evaluations 80/62 at (1.4,0). Matching coordinates
+  share iteration limits; each series stops at its own saved endpoint.
+  Energy panels preserve individual y scales as previously requested.
+- For the RMS comparisons, both geometries now use physical leg-odd spin
+  on rungs 6–59 and physical leg-pair correlations on bonds 6–58, with common
+  logarithmic y scales. The older square CSV instead records MF fields and
+  averages leg bonds onto rungs before its pairing RMS. Reused the existing
+  `read_arrays` correlation reader for all 20 square source artifacts,
+  checking their compact hashes, raw-map adjacency, canonical corrections
+  and endpoint physical RMS against the existing analysis. Cubic physical
+  histories come from the existing audited CSV. No source data were edited.
+- Saved four PNG/PDF pairs, the 1982-row `square_cubic_histories.csv`, and
+  `square_cubic_comparison_sources.json` under the combined-report folder.
+  The latter records source-table and square state hashes plus definitions.
+  Initial CSV loading used a TSV helper and failed before plotting; fixed
+  it to use csv.DictReader. The successful narrow run took about 8 seconds.
+- Updated the combined Markdown report with numbered Figures 1–9 and prose
+  references. In the LaTeX manuscript, Figure 2 now compares both phase
+  diagrams and Figures 3–5 compare full energy, spin and pairing histories.
+  All four are referenced in the scientific discussion. History figures
+  occupy landscape pages; remaining results and acceptance statements are
+  unchanged. Updated manuscript README/source notes, PROJECT_STATE and ACTIVE.
+- Rebuilt the 24-page manuscript with seven figures and 34 references.
+  The cached compiler lacked pdflscape/lscape; an approved TeX-resource
+  download supplied them, after which compilation completed. No undefined
+  references, missing characters, overfull or underfull text boxes remain.
+  Checked all 27 manuscript evidence links and seven figures, and visually
+  inspected each added comparison and its placement on PDF pages 12–15.
+  Updated the Overleaf packaging list to include all comparison PDFs.
+- Validation is local plotting/document validation only; no DMRG, numerical
+  control changes, new acceptance decisions, Perlmutter access, transfers,
+  scheduler actions or allocation-ledger updates were performed.
+- Final checks confirm 36 complete plotted histories / 1982 evaluations,
+  four prose figure references, 48 local Markdown links, an append-only ledger
+  and a clean whitespace diff. The 13-file Overleaf bundle compiles from its
+  root with all 24 pages matching the delivered manuscript PDF text.

@@ -30,6 +30,10 @@ The [coarse square grid](../reports/two_basin_grid_20260915/README.md) already
 includes both V=0 continuations: 100/82 cumulative evaluations, seven stripe
 and two paired coordinates, 902 total evaluations, 27.350764 actual node-hours.
 Its underlying data and historical parent controls remain unchanged.
+The combined report and LaTeX manuscript now compare square and cubic phase
+diagrams, full energy grids and physical spin/pairing RMS grids side by side.
+The 1982 plotted evaluations retain the square continuations. This is a
+presentation update with matched RMS conventions, not a new phase selection.
 
 ## Next evidence and decisions
 

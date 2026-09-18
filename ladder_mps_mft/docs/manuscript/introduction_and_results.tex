@@ -9,6 +9,7 @@
 \usepackage{microtype}
 \usepackage{booktabs,tabularx,array}
 \usepackage{graphicx}
+\usepackage{pdflscape}
 % Overleaf builds from the project root; local builds may use manuscript/.
 % Keep literature/, manuscript/, and reports/ as sibling folders when uploading.
 \IfFileExists{literature/references.bib}{%
@@ -658,7 +659,9 @@ with raw MF updates, without Anderson acceleration. All phase descriptions
 below refer to finite-run physical correlations, not certified minima
 (\ev{campaign}).
 
-After including both $(1.4,0)$ continuations, the coarse square grid has
+Figure~\ref{fig:square-cubic-phase} places the two phase diagrams side by
+side with the same coordinate axes. After including both $(1.4,0)$
+continuations, the coarse square grid has
 seven stripe coordinates and two paired coordinates, $(1.4,-0.4)$ and
 $(1.4,-0.2)$. Both seed families now reach the same qualitative basin at
 each coordinate. At $(1.4,0)$ the stripe and pairing lineages contain
@@ -681,13 +684,76 @@ cubic basin.
 
 \begin{figure}[htbp]
  \centering
- \includegraphics[width=\textwidth]{\projectdocroot/reports/cubic_two_basin_grid_20260918/preliminary_phase_diagram.pdf}
- \caption{Unfrustrated-cubic grid from the two reference seed families.
- Both starts reach stripe-like endpoints at every tested coordinate.
- These are observed finite-run outcomes at $\chi=200$; none is an accepted
- fixed point. Source: \ev{campaign}.}
- \label{fig:cubic-grid}
+ \includegraphics[width=\textwidth]{\projectdocroot/reports/campaign_review_20260918/square_cubic_phase_diagrams.pdf}
+ \caption{Preliminary square (left) and unfrustrated-cubic (right) phase
+ diagrams. Both seeds reach the same observed family at every coordinate:
+ seven stripe and two paired points on square, nine stripe points in cubic.
+ S denotes CDW/SDW stripes and D opposite-sign leg/rung pairing.
+ All endpoints remain unaccepted at $\chi=200$; no boundary is interpolated.
+ Sources: \ev{square-complete} and \ev{campaign}.}
+ \label{fig:square-cubic-phase}
 \end{figure}
+
+The full energy histories in Fig.~\ref{fig:square-cubic-energy} retain the
+startup and delayed conversions. In particular, square $(1.2,-0.4)$ has an
+extended pairing-seed energy plateau before its late decrease; square
+$(1.4,0)$ evolves slowly into its continuation. Cubic energy histories
+generally settle earlier. All plotted energies use the stored canonical
+functional with target-density correction, and each panel keeps its own
+vertical scale. The comparison is between numerical trajectories under
+different geometries, not a ranking of their absolute energies as phases
+of one Hamiltonian. Early off-self-consistent energy dips and late flat
+energies do not establish stationary minima.
+
+Figures~\ref{fig:square-cubic-spin} and \ref{fig:square-cubic-pairing}
+show the complementary physical spin and pairing RMS histories. They use
+the same definitions and logarithmic scales in both geometries, unlike the
+older standalone square plots of MF-field amplitudes. Spin is the RMS of
+the physical leg-odd spin on rungs 6--59; pairing is the physical leg-even
+nearest-neighbor leg-pair RMS on bonds 6--58. Square spin decays while pairing
+survives at $(1.4,-0.4)$ and $(1.4,-0.2)$; cubic instead retains strong spin
+and loses pairing at both coordinates. At square $(1.2,-0.4)$ and $(1.4,0)$,
+delayed pairing collapse accompanies increasing spin. The long transient in
+these panels explains why a short, flat energy history can be misleading.
+Tiny pairing fluctuations after collapse are numerical remnants, not
+resolved renewed order.
+
+\begin{landscape}
+\begin{figure}[p]
+ \centering
+ \includegraphics[width=\linewidth]{\projectdocroot/reports/campaign_review_20260918/square_cubic_energy_grids.pdf}
+ \caption{Full target-corrected canonical energy grids, square left and
+ cubic unfrustrated right. Within each geometry, columns are $t_0=1,1.2,1.4$
+ and rows are $V=0,-0.2,-0.4$. Solid blue and dashed orange denote stripe
+ and pairing seeds. All 902 square and 1080 cubic saved evaluations are
+ included. Dotted lines mark the square continuations after evaluations
+ 80 and 62; curves end at their own final evaluations. Matching coordinates
+ share an iteration range, while energy y scales vary by panel.}
+ \label{fig:square-cubic-energy}
+\end{figure}
+\begin{figure}[p]
+ \centering
+ \includegraphics[width=\linewidth]{\projectdocroot/reports/campaign_review_20260918/square_cubic_spin_grids.pdf}
+ \caption{Physical leg-odd spin RMS histories, square left and cubic right,
+ over rungs 6--59. All panels use a common logarithmic y scale. The point
+ order, seed colors and continuation markers match
+ Fig.~\ref{fig:square-cubic-energy}. These are physical correlations, not
+ geometry-dependent Hartree-field amplitudes. Spin decays at the two square
+ paired coordinates but remains strong throughout cubic.}
+ \label{fig:square-cubic-spin}
+\end{figure}
+\begin{figure}[p]
+ \centering
+ \includegraphics[width=\linewidth]{\projectdocroot/reports/campaign_review_20260918/square_cubic_pairing_grids.pdf}
+ \caption{Physical leg-pair RMS histories on bonds 6--58, square left and
+ cubic right, with common logarithmic y scale. The layout matches
+ Fig.~\ref{fig:square-cubic-spin}. Pairing survives at the two square paired
+ points and decays to negligible amplitudes at every cubic point. The full
+ histories retain delayed square pairing collapse, including the $V=0$
+ continuation. None of the endpoints is formally accepted.}
+ \label{fig:square-cubic-pairing}
+\end{figure}
+\end{landscape}
 
 \subsection{Finer square cuts and the shape of the variational energy}
 \label{sec:fine-energy}
@@ -985,6 +1051,9 @@ $V=0$ basin.
  \href{run:../reports/cubic_two_basin_grid_20260918/README.md}{complete cubic grid}.
  Source inventories, physical profiles, gate checks and accounting coverage
  are retained with the detailed reports.
+ The side-by-side figures use
+ \href{run:../reports/campaign_review_20260918/square_cubic_histories.csv}{matched physical histories}
+ and their \href{run:../reports/campaign_review_20260918/square_cubic_comparison_sources.json}{source inventory}.
 
  \item\label{ev:square-complete}
  \textbf{Complete coarse square grid and continuations.}

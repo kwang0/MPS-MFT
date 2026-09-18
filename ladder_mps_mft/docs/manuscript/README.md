@@ -9,7 +9,7 @@ is now incorporated into the actual LaTeX and rebuilt PDF: complete square
 and cubic grids, square continuations, finer-cut full variational energies
 and slope diagnostics, positive-V tests, and the first trellis result.
 
-The rebuilt draft has 21 pages and retains 34 cited references, including five additional
+The rebuilt draft has 24 pages and retains 34 cited references, including five additional
 references from the stripe, neutron-scattering, and coherence discussion.
 
 - [Edit the LaTeX document](introduction_and_results.tex).
@@ -33,8 +33,12 @@ references from the stripe, neutron-scattering, and coherence discussion.
 The document preserves provisional status and historical acceptance flags.
 The prepared longer-ladder seeds and partial positive-V/trellis logs are not
 presented as completed spatial results. The earlier spatial figure is reused
-from the September 12 analysis, and three figures are added from the September
-18 analysis. The PDFs and LaTeX sources are updated together.
+from the September 12 analysis, and six figures are added from the September
+18 analysis. Figures 2–5 compare square and cubic side by side: phase diagrams,
+full energy histories, physical spin RMS and physical pairing RMS. The three
+history comparisons use landscape pages and retain all square continuations.
+Every comparison is referenced in the text. The PDFs and LaTeX sources are
+updated together.
 
 ## Build locally
 
@@ -67,8 +71,11 @@ manuscript/
 reports/
   two_basin_v000_20260912/
     profile_evolution.pdf
-  cubic_two_basin_grid_20260918/
-    preliminary_phase_diagram.pdf
+  campaign_review_20260918/
+    square_cubic_phase_diagrams.pdf
+    square_cubic_energy_grids.pdf
+    square_cubic_spin_grids.pdf
+    square_cubic_pairing_grids.pdf
   square_fine_cuts_20260918/
     variational_energy_cuts.pdf
     variational_energy_shape.pdf
@@ -82,7 +89,7 @@ Use the normal pdfLaTeX compiler with BibTeX (the documents use natbib).
 The path handling follows the project-root behavior documented in
 [Overleaf's multi-file guidance](https://www.overleaf.com/learn/latex/Multi-file_LaTeX_projects).
 
-All four figure PDFs are required, even though they are outside the two source
+All seven figure PDFs are required, even though they are outside the two source
 folders. The Git-tracked [Overleaf upload ZIP](overleaf_upload.zip) contains
 the LaTeX sources, bibliographies, living methods notes, required figures and
 these instructions, so it can be downloaded from another device.
@@ -94,7 +101,8 @@ reports they link to are not required for compilation or included in the ZIP.
 
 The checked build used the existing repository-local Tectonic 0.17.0 executable.
 Build logs, extracted-text checks, and rendered pages are under the ignored
-output/manuscript_draft directory. No DMRG calculation is part of this build.
+output/notes_update_20260918 directory (the initial draft checks remain under
+output/manuscript_draft). No DMRG calculation is part of this build.
 
 The September 18 rebuild is checked for unresolved citations/references,
 missing figures and layout warnings, with visual inspection of the added

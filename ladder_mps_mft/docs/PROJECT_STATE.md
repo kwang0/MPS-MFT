@@ -1,6 +1,6 @@
 # Current project state
 
-Last locally reviewed: 2026-09-18 (full energy cuts and actual LaTeX/PDF notes updated)
+Last locally reviewed: 2026-09-18 (square/cubic figure comparisons included in report and LaTeX/PDF)
 
 This is the canonical mutable snapshot for resuming work. It is deliberately
 short. Stable rules belong in `AGENTS.md` and the method documents; durable
@@ -9,7 +9,7 @@ history belongs in `docs/RUN_LOG.md`.
 ## Repository snapshot
 
 - Branch: `codex/mps-mft-phase0-refactor`
-- Baseline for this update: `bb76a71` (trellis plotting adapter fix).
+- Baseline for this update: `72a4359` (full energy cuts and LaTeX results).
 - The earlier trellis implementation and campaign reports are committed.
   An untracked root `.claude/` directory remains outside this analysis scope.
 - Local `output/` and simulation HDF5 files are excluded from Git. The small
@@ -22,6 +22,13 @@ history belongs in `docs/RUN_LOG.md`.
 Recheck the branch, commit, and working tree at the start of each new task.
 
 ## Current scientific position
+
+The combined report and manuscript now place square and cubic phase diagrams
+side by side, followed by matching full energy, physical spin RMS and physical
+pairing RMS grids. All 902 square and 1080 cubic evaluations are included,
+with continuation markers. Physical RMS windows and units match; energy
+panels retain individual y scales. The manuscript has 24 pages with landscape
+history figures and explicit text references. The Overleaf bundle is updated.
 
 The finer-cut report now includes [full variational energies versus V and t0](reports/square_fine_cuts_20260918/variational_energy_cuts.png),
 using twelve fine endpoints and eight coarse anchors, including the latest

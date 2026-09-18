@@ -88,3 +88,13 @@ curvature on the t0 curve. This does not distinguish a first-order kink from
 smooth curvature. The source table retains canonical and density-corrected
 energies, last-ten drift diagnostics, state/config hashes and seed identities.
 No new calculation or literature search underlies this update.
+
+The square/cubic comparison is now explicit in Figures 2–5: matching phase
+diagrams, full energy histories, physical spin RMS and physical leg-pair RMS,
+with references in the narrative. Both geometries use rungs 6–59 for spin and
+bonds 6–58 for leg pairing. The old square CSV stores MF-field amplitudes and
+averages leg bonds onto rungs before taking the pairing RMS, so its physical histories were
+reconstructed with the existing correlation reader from the 20 hashed source
+artifacts. Cubic reuses the audited physical-RMS CSV. The side-by-side panels
+contain all 902 square and 1080 cubic evaluations, including square parents
+and continuations; no late-only crop or new acceptance decision is used.

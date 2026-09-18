@@ -25,7 +25,12 @@ these totals. No tolerance, acceptance flag or simulation artifact changed.
 
 ## 1. Cubic removes the paired corner seen on square
 
-![Cubic preliminary phase diagram](../cubic_two_basin_grid_20260918/preliminary_phase_diagram.png)
+![Figure 1: square and cubic preliminary phase diagrams](square_cubic_phase_diagrams.png)
+
+**Figure 1.** Square (left) and cubic unfrustrated (right), with identical
+coordinate axes. Both seeds agree on the observed phase family at each point;
+all endpoints remain unaccepted. S denotes CDW/SDW stripes, D pairing with
+opposite leg/rung signs. No boundary is interpolated.
 
 Both seeds reach CDW/SDW stripes at every t0=1.0, 1.2, 1.4 and
 V=0, −0.2, −0.4 coordinate. Physical spin RMS is 0.280–0.356, while the
@@ -33,7 +38,7 @@ largest leg-pair RMS across all 18 endpoints is only 2.21e−11. Dominant
 charge/spin modes remain m=4/30, corresponding to nominal 16-rung charge
 and 32-rung spin-envelope periods.
 
-The contrast is sharp at **(1.4,−0.4) and (1.4,−0.2)**: both were paired
+The contrast in **Figure 1** is sharp at **(1.4,−0.4) and (1.4,−0.2)**: both were paired
 from both seeds in the [square grid, including its continuations](../two_basin_grid_20260915/README.md),
 but both are stripe-like in cubic. This is not an artifact of measuring
 larger Hartree fields: the comparison uses physical correlations. The
@@ -45,21 +50,75 @@ t/site. Nonacceptance concerns remaining field/profile drift or slow-mode
 checks. The near-identical endpoint energies support agreement between
 the observed trajectories without making them accepted solutions.
 
+![Figure 2: square and cubic full energy grids](square_cubic_energy_grids.png)
+
+**Figure 2.** Full target-density-corrected canonical energy histories, square
+left and cubic right. Every saved evaluation is included. Columns within each
+geometry have t0=1.0, 1.2, 1.4; rows have V=0, −0.2, −0.4. Solid blue and
+dashed orange denote stripe and pairing seeds. Dotted lines mark the square
+continuations after evaluations 80 and 62. Energy y scales vary by panel to
+preserve the structure of the trajectories. Matching coordinates share their
+iteration range; each curve stops at its own last saved evaluation.
+
+**Figure 2** shows why the complete histories matter: square (1.2,−0.4)
+has an extended pairing-seed energy plateau before its late decrease, and
+square (1.4,0) retains a long transient into the continuation. Cubic energy
+histories generally settle much earlier. Early energy dips are off-self-consistent
+diagnostics, and flat energy alone does not certify a stationary texture.
+The juxtaposition compares trajectories under different geometries, not their
+absolute energies as competing phases of one Hamiltonian.
+
+![Figure 3: square and cubic spin RMS grids](square_cubic_spin_grids.png)
+
+**Figure 3.** Physical leg-odd spin RMS on rungs 6–59, using a common logarithmic
+y scale across both geometries. Colors, coordinate order and continuation
+markers match Figure 2.
+
+In **Figure 3**, square spin decays strongly at (1.4,−0.4) and (1.4,−0.2),
+whereas cubic retains strong spin at both points. The square (1.4,0)
+pairing-seed spin instead grows over a long interval. This distinguishes a
+paired plateau from a slowly developing stripe, even when energy looks flat.
+
+![Figure 4: square and cubic pairing RMS grids](square_cubic_pairing_grids.png)
+
+**Figure 4.** Physical leg-pair RMS on bonds 6–58, with a common logarithmic
+y scale. These are correlation amplitudes, using the same bulk window in
+both geometries; the older standalone square RMS figures use MF fields.
+
+**Figure 4** shows pairing surviving at the two square paired coordinates,
+while it decays to tiny numerical remnants everywhere in cubic. At square
+(1.2,−0.4) and (1.4,0), its delayed collapse accompanies the spin growth in
+Figure 3 and the late energy evolution in Figure 2. Small fluctuations after
+pairing reaches negligible values are not evidence of renewed pairing order.
+
+The four comparisons reuse the audited 36 lineages: 902 square and 1080
+cubic evaluations. [Plotted histories](square_cubic_histories.csv) and
+[source hashes and normalization](square_cubic_comparison_sources.json) are
+included. PDF versions have the same figure filenames. Regenerate with
+`python scripts/analyze_two_basin_campaigns_20260918.py --geometry-comparison-only`
+from the ladder subproject.
+
 [Detailed cubic analysis, full/late energy grids, spin/pairing histories and data](../cubic_two_basin_grid_20260918/README.md).
 
 ## 2. Finer square cuts identify two points with competing trajectories
 
-![Full variational energies across the square transition cuts](../square_fine_cuts_20260918/variational_energy_cuts.png)
+![Figure 5: full variational energies across the square transition cuts](../square_fine_cuts_20260918/variational_energy_cuts.png)
 
-The full target-density-corrected canonical energies include the new fine
+**Figure 5.** Full variational endpoint energies along the two finer cuts,
+including coarse anchors and the latest square continuations.
+
+The full target-density-corrected canonical energies in **Figure 5** include the new fine
 points and the coarse endpoints, with the latest V=0 continuations. **The V
 cut is almost linear; the t0 cut has gradual curvature.** Both seed curves
 nearly overlap on the full energy scale. They connect independent starts,
 not one fixed phase continued through parameter space.
 
-![Energy shape and interval slopes](../square_fine_cuts_20260918/variational_energy_shape.png)
+![Figure 6: energy shape and interval slopes](../square_fine_cuts_20260918/variational_energy_shape.png)
 
-Subtracting one common straight chord per cut reveals a small bend between
+**Figure 6.** The same energies after common chord subtraction (top) and
+adjacent-interval secants (bottom); bars diagnose recent energy drift.
+
+Subtracting one common straight chord per cut in **Figure 6** reveals a small bend between
 V=−0.05 and 0. The pairing-seed interval slope falls from approximately
 1.2662 to 1.2614, a 0.38% change. This is compatible with a weak first-order
 kink, but five samples cannot distinguish a derivative jump from smooth
@@ -70,9 +129,12 @@ effective-Hamiltonian eigenvalues or seed-energy gaps. Recent-drift bars are
 diagnostics rather than convergence error bounds. [Exact energies, slopes,
 normalization and interpretation](../square_fine_cuts_20260918/README.md#full-variational-energies-across-the-transition).
 
-![Finer square cuts](../square_fine_cuts_20260918/cut_summary.png)
+![Figure 7: finer square order parameters and seed energy gaps](../square_fine_cuts_20260918/cut_summary.png)
 
-Along **t0=1.4**, both seeds are paired at V=−0.15 and −0.10. They remain
+**Figure 7.** Spin and pairing RMS across the cuts, with seed-to-seed energy
+differences at the six fine points. Open symbols denote coarse anchors.
+
+In **Figure 7**, along **t0=1.4**, both seeds are paired at V=−0.15 and −0.10. They remain
 different at **V=−0.05**: the stripe seed has spin RMS 0.1447 and leg-pair
 RMS 3.67e−5; the pairing seed has leg-pair RMS 0.03299 and much weaker spin.
 At the earlier V=0 point, both eventually reach stripes.
@@ -91,13 +153,17 @@ but these are diagnostic endpoint gaps, not accepted energetic winners.
 Recent energy drift is not a bound on remaining convergence or finite-chi
 error.
 
-There is an important spatial qualification at (1.4,−0.05). The paired
+There is a spatial qualification at (1.4,−0.05), shown in **Figure 8**. The paired
 trajectory's usual spin RMS grows 1.50% in its last ten records, yet **96.7%
 of its spin-squared weight is in the outer 14 rungs at each end**. Central
 32-rung spin still decreases. This is not established bulk coexistence or
 a demonstrated return to a bulk stripe state.
 
-![End-weighted spin at the boundary](../square_fine_cuts_20260918/boundary_spin.png)
+![Figure 8: end-weighted spin at the boundary](../square_fine_cuts_20260918/boundary_spin.png)
+
+**Figure 8.** Bulk-window histories and spatial profiles distinguish the
+end-weighted spin remainder from persistent central spin. This is the spatial
+qualification to the weak-spin paired endpoint discussed above.
 
 The persistent branch contrast is compatible with metastability near a
 first-order transition and makes its order interesting to determine.
@@ -133,9 +199,12 @@ and none of these observations excludes other basins or numerical limits.
 
 ## 4. Trellis already gives a qualitatively different outcome
 
-![Completed trellis history](../trellis_progress_20260918/histories.png)
+![Figure 9: completed trellis history](../trellis_progress_20260918/histories.png)
 
-The completed **one-ladder, stripe-dominated trellis start** at t0=1, V=0,
+**Figure 9.** Full histories and convergence diagnostics for the first
+completed one-ladder trellis stripe start.
+
+In **Figure 9**, the completed **one-ladder, stripe-dominated trellis start** at t0=1, V=0,
 tau0=tau1=0.1 converts toward pairing. Spin RMS falls from **0.0627 to
 1.21e−5**, while leg-pair RMS rises from **0.00965 to 0.01797**. Final
 mean leg/rung amplitudes have opposite signs, **+0.01796/−0.03292**.
