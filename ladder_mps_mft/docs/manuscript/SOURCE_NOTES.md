@@ -15,7 +15,7 @@ report. It retains the September 4 review's methodological corrections but
 supersedes its early V=0 basin interpretation with the September 8 and
 September 12-13 histories. It does not rerun the underlying simulations.
 
-## Five added references
+## Initial five added references
 
 Primary author records and available publisher records were checked on
 September 15. These readings support the specific background claims below;
@@ -34,6 +34,45 @@ The added keys are unique relative to the shared bibliography. Existing
 references already cover Emery 1997, Arrigoni 2004, the modern Hubbard
 calculations, Padma 2025, and the closest MPS+MF work, so those records are
 reused. Kohler2026 remains explicitly labeled as a preprint.
+
+## Ladder materials and trellis motivation — 18 September 2026
+
+The introduction and Section 2.4 now incorporate the material discussion
+from the trellis conversation. Eleven additional records were checked against
+Crossref publisher metadata and primary papers/author records. Public metadata
+and build checks are cached under ignored `output/trellis_manuscript_20260918/`.
+The shared literature bibliography is unchanged; its Uehara1996, Nagata1998,
+Abbamonte2004 and Padma2025 entries are reused.
+
+| New key | Primary source | Reading depth and specific use |
+|---|---|---|
+| Azuma1994 | [PRL](https://doi.org/10.1103/PhysRevLett.73.3463) | Abstract/record: observed spin gap in insulating SrCu2O3; not a doped Hubbard-array fit. |
+| Hiroi1995 | [Nature](https://doi.org/10.1038/377041a0) | Abstract/record: hole-doped (La,Sr)CuO2.5 becomes metallic without a superconducting transition down to 5 K in that study. |
+| NormandRice1996 | [Author manuscript](https://arxiv.org/abs/cond-mat/9603054); [PRB](https://doi.org/10.1103/PhysRevB.54.7180) | Abstract: calculated substantial three-dimensional interladder coupling in LaCuO2.5. This does not identify our cubic kernel with its exact structure. |
+| Popovic2000 | [Author manuscript](https://arxiv.org/abs/cond-mat/0005096); [PRB](https://doi.org/10.1103/PhysRevB.62.4963) | Abstract and selected full-text Hamiltonian/dispersion passages: t=t0=0.26 eV, txy=0.026 eV, U=2.1 eV; txy multiplies each of two zigzag paths. An effective optical model of the parent compound, not a pressure-calibrated superconducting parameter set or independent determination of V. |
+| Vuletic2003 | [Author manuscript](https://arxiv.org/abs/cond-mat/0305159); [PRL](https://doi.org/10.1103/PhysRevLett.90.257002) | Abstract: CDW transition scale falls from 210 K at x=0 to 10 K at x=9 in transport/dielectric/optical measurements. |
+| Rusydi2006 | [Published paper](https://girsh.rutgers.edu/Papers/Abbamonte_PRL_97_016403.pdf); [PRL](https://doi.org/10.1103/PhysRevLett.97.016403) | Selected full-text results: resonant scattering detects commensurate hole crystals at x=10,11,12 as well as the parent; prevents a universal high-Ca/no-CDW inference. |
+| Katano1999 | [Publisher](https://doi.org/10.1016/S0921-4526(98)00692-9) | Abstract: pressure suppresses the ordered moment at x=11.5, apparently toward disappearance near the superconducting threshold; not proof of universal exclusion of magnetic coexistence. |
+| Fujiwara2003 | [Author manuscript](https://arxiv.org/abs/cond-mat/0303278); [PRL](https://doi.org/10.1103/PhysRevLett.90.137001) | Abstract: finite quasiparticle gap under pressure; its “s-wavelike” description is not a phase-sensitive determination of leg/rung signs. Full published author list taken from publisher metadata, not the single-author arXiv display. |
+| Fujiwara2009 | [Author manuscript](https://arxiv.org/abs/0908.2845); [PRB](https://doi.org/10.1103/PhysRevB.80.100503) | Abstract: NQR supports pressure-induced chain-to-ladder charge transfer; normal-state spin response also changes with pressure. |
+| Frank2014 | [Accepted manuscript](https://link.aps.org/accepted/10.1103/PhysRevB.90.224516); [PRB](https://doi.org/10.1103/PhysRevB.90.224516) | Abstract and charge-distribution passages: chains/ladders, isovalent substitution, pressure-dependent ladder occupation and differing estimates of its absolute value. No unique mapping from n=15/16 to x or pressure is asserted. |
+| Tseng2022 | [npj Quantum Materials](https://www.nature.com/articles/s41535-022-00502-1) | Selected magnetic-spectrum and model passages: off-ladder impurity potentials/localization as an interpretation of Ca-dependent RIXS; not a direct measurement of our static MF channels. |
+
+Additional checks on reused sources: Uehara's primary publication record gives
+12 K/3 GPa and 9 K/4.5 GPa onset temperatures for the oxygen-rich x=13.6 sample.
+The [Padma author manuscript](https://arxiv.org/html/2501.10287v1), including its
+model-parameter appendix, distinguishes intraladder diagonal t' from trellis
+hopping and changes U with V to keep the exchange scale fixed. Its fitted
+attraction is model dependent and is not equated to a bare screened Coulomb
+matrix element or transferred unchanged to the present Hamiltonian.
+
+The reciprocal trellis equations and one-/two-ladder distinctions come from
+the [implemented method contract](../TRELLIS_MEAN_FIELD.md), not from a new
+material-specific derivation. Finite-range projections act on both sides of
+each correlation map. Opposite shifts are spatially reciprocal, not alternated
+over MF iteration. The experimental comparison does not upgrade the September
+18 trajectory to an accepted fixed point or infer zero bulk CDW from boundary
+oscillations. Numerical result sections and acceptance flags remain unchanged.
 
 ## Interpretive boundaries carried into the draft
 

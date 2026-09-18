@@ -9,8 +9,12 @@ is now incorporated into the actual LaTeX and rebuilt PDF: complete square
 and cubic grids, square continuations, finer-cut full variational energies
 and slope diagnostics, positive-V tests, and the first trellis result.
 
-The rebuilt draft has 24 pages and retains 34 cited references, including five additional
-references from the stripe, neutron-scattering, and coherence discussion.
+The rebuilt draft has 27 pages and 48 cited references. The introduction and
+Section 2.4 now motivate the trellis runs through the chain--ladder materials,
+pressure-induced superconductivity, charge and magnetic order, optical/model
+parameter estimates (including the limits on V), and reciprocal one-/two-ladder
+spatial cells. Eleven new material references supplement the initial five
+stripe/coherence references; three existing material records are also cited.
 
 - [Edit the LaTeX document](introduction_and_results.tex).
 - [Read the compiled PDF](introduction_and_results.pdf).
@@ -22,7 +26,8 @@ references from the stripe, neutron-scattering, and coherence discussion.
 1. Draft introduction: correlated-electron motivation, stripes, pairing and
    coherence, ladders, extended interactions, and the project's question.
 2. Physical background: stripe interpretations, magnetic spectroscopy,
-   internal pairing symmetry versus a pair-density wave, and the model.
+   internal pairing symmetry versus a pair-density wave, ladder materials,
+   doping and pressure, model parameters, and the trellis extension.
 3. Current results: isolated-ladder gaps and correlations; response discovery;
    the revision of the early paired-basin interpretation; the two raw anchor
    comparisons; stripe wavevectors and slow texture relaxation; canonical
@@ -52,10 +57,10 @@ or:
 
 This draft uses standard LaTeX packages, natbib, and BibTeX. Its bibliography
 combines [the existing bibliography](../literature/references.bib) with the
-five supplemental entries here. Both LaTeX documents now detect whether the
+sixteen supplemental entries here. Both LaTeX documents now detect whether the
 build starts in their own directory or the parent documentation/project root.
 No path edits are needed when switching between those layouts. The shared
-bibliography and scientific text are unchanged.
+bibliography is reused without editing its entries.
 
 ## Build on Overleaf
 
@@ -104,6 +109,8 @@ Build logs, extracted-text checks, and rendered pages are under the ignored
 output/notes_update_20260918 directory (the initial draft checks remain under
 output/manuscript_draft). No DMRG calculation is part of this build.
 
-The September 18 rebuild is checked for unresolved citations/references,
+The material-discussion build and rendered checks are under
+`output/trellis_manuscript_20260918/`. It retains seven figures and all
+numerical convergence qualifications. The September 18 rebuild is checked for unresolved citations/references,
 missing figures and layout warnings, with visual inspection of the added
 results and figures. Source links and packaged figures are validated locally.

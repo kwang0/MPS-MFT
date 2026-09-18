@@ -3729,3 +3729,41 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   four prose figure references, 48 local Markdown links, an append-only ledger
   and a clean whitespace diff. The 13-file Overleaf bundle compiles from its
   root with all 24 pages matching the delivered manuscript PDF text.
+
+### 2026-09-18 — Ladder-material discussion and trellis motivation in manuscript
+
+- User requested the missing material/study discussion from the conversation
+  in the introduction and Section 2.4 of introduction_and_results.tex.
+  Baseline: 046eb0e; the untracked root .claude/ directory was left untouched.
+- Added magnetic ladder insulators and the doped (La,Sr)CuO2.5 example;
+  Uehara's superconducting chain--ladder material; isovalent Ca substitution,
+  pressure-driven charge transfer, competing CDW and magnetic order, and
+  distinctions between static order, spin dynamics and pairing symmetry.
+  High-Ca commensurate hole crystals prevent a universal no-CDW claim.
+- Added the optical provenance of the approximate (8,1,0.1,0.1) parameter
+  point, explicitly separating it from a pressure-calibrated material fit.
+  V=0 remains a baseline assumption. The Padma RIXS model has a different
+  rung hopping, intraladder diagonal hopping, attractive V and U(V) protocol;
+  its parameters are not transferred directly to our fixed-U Hamiltonian.
+- Added the trellis hopping and reciprocal projected MF kernels, spatial
+  rather than iteration-dependent opposite shifts, and one-/two-ladder cell
+  restrictions. Linked these motivations to the existing trellis results
+  without changing numerical results, convergence thresholds or acceptance.
+- Reused shared bibliography records and added 11 primary studies to the
+  supplemental bibliography. Checked publisher metadata via Crossref and
+  specific primary-source passages; reading depths are recorded in manuscript
+  SOURCE_NOTES.md. Restricted-network metadata retrieval initially failed;
+  the approved public-metadata request succeeded, with spaced retries after
+  rate limiting. No private data were sent.
+- Rebuilt using the cached local Tectonic with --only-cached --keep-logs
+  --keep-intermediates. Fixed a citation-spacing LaTeX typo found by the first
+  compile. Focused validation initially needed to exclude a parameterized
+  macro label and enable UTF-8 console output; those checker issues were fixed.
+  Final build: 27 pages, 48 references, seven figures, 27 local evidence links,
+  no undefined citations/references, missing characters, or over/underfull boxes.
+  Inspected the added prose/equations and new references as rendered pages.
+- Updated the maintained PDF, README, source notes, current-state snapshot and
+  13-file Overleaf bundle. Reused the root-layout compilation check: all 27
+  pages match the delivered PDF text. Build/metadata/validation artifacts are
+  under ignored output/trellis_manuscript_20260918/. Validation is document-only;
+  no DMRG calculation, Perlmutter access, scheduler action or transfer occurred.

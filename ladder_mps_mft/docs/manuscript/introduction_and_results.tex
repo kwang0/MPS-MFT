@@ -1,6 +1,6 @@
 % Working manuscript draft. Compile from this directory or the parent docs root.
 % Reuses ../literature/references.bib without changing the annotated review.
-% New references from the September 15 discussion are in additional_references.bib.
+% Supplemental stripe and ladder-material references are in additional_references.bib.
 \documentclass[11pt,letterpaper]{article}
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
@@ -73,8 +73,8 @@ Sections~\ref{sec:intro}--\ref{sec:background} are draft manuscript prose.
 Section~\ref{sec:results} is a dated collection of results and interpretation,
 including unresolved points that must remain visible during manuscript
 development. The evidence cutoff is the synchronized analyses through
-18 September 2026; the literature discussion also incorporates the
-15 September synthesis. Appendix~\ref{sec:evidence} identifies the local
+18 September 2026; the literature discussion incorporates the stripe and
+ladder-material discussions through that date. Appendix~\ref{sec:evidence} identifies the local
 sources. No new many-body calculation is reported here.
 
 \tableofcontents
@@ -146,6 +146,20 @@ dimension, and fit windows~\citep{Dolfi2015,Shen2023}. Thus a ladder can exhibit
 substantial pairing tendencies while retaining the fluctuations characteristic
 of an effectively one-dimensional system.
 
+Cuprate ladder materials make the role of transverse geometry an experimental
+question. Superconductivity was discovered under pressure in
+Sr$_{0.4}$Ca$_{13.6}$Cu$_{24}$O$_{41.84}$, a member of the
+Sr$_{14-x}$Ca$_x$Cu$_{24}$O$_{41}$ chain--ladder family~\citep{Uehara1996}.
+The same family exhibits ladder charge order and pressure-dependent transport,
+providing a setting in which pairing, charge organization, and interladder
+coherence can be compared~\citep{Nagata1998,Abbamonte2004,Rusydi2006}.
+Its ladder sheets have displaced neighbors connected by zigzag paths: a
+trellis network rather than an array with only aligned transverse bonds.
+The chain subsystem also acts as a charge reservoir, so varying composition
+or pressure changes more than the coupling between otherwise fixed ladders.
+These distinctions motivate a controlled comparison of transverse
+connectivities before attempting a material-specific phase diagram.
+
 Coupling such ladders introduces a second question: which order develops when
 the subsystems reinforce one another? Stripe-centered theories provide an
 explicit route from spin-gap formation to pairing and then to Josephson
@@ -175,7 +189,10 @@ and the transverse environment with a multichannel mean-field construction.
 The principal regime is $U/t=8$ and density $n=15/16$ per physical site.
 Rung hopping, nearest-neighbor interaction, and transverse connectivity are
 varied while pairing, normal exchange, and spin-resolved density fields remain
-available. The immediate objective is to establish reproducible ordered
+available. In particular, the trellis comparison tests whether zigzag
+coupling changes the balance between static stripes and pairing at the same
+intraladder parameters, using both one- and two-ladder spatial cells.
+The immediate objective is to establish reproducible ordered
 solutions and understand how their competition relates to the underlying
 ladder correlations. The current evidence suggests that intrinsic pairing
 tendencies can coexist with an array tendency toward static stripes, and that
@@ -285,7 +302,60 @@ $S(\mathbf q,\omega)$. They can test the static antiphase relation in
 Eq.~\eqref{eq:stripe-cartoon}, but cannot yet demonstrate an hourglass
 spectrum or identify a neutron resonance.
 
-\subsection{Extended Hubbard ladders and transverse coupling}
+\subsection{Extended Hubbard ladders, materials, and transverse coupling}
+\label{sec:ladder-materials}
+
+Magnetic ladder insulators establish the relevance of the ladder building
+block, but do not by themselves realize a doped electronic array.
+The spin gap observed in SrCu$_2$O$_3$ is an early example~\citep{Azuma1994}.
+Introducing mobile holes is a separate materials problem: chemical
+substitution can modify exchange paths, disorder, and carrier localization.
+Hole doping is possible in La$_{1-x}$Sr$_x$CuO$_{2.5}$, where an
+insulator-to-metal transition was observed without superconductivity down
+to 5~K in the reported measurements~\citep{Hiroi1995}.
+Its coupled-ladder electronic structure has substantial three-dimensional
+coupling~\citep{NormandRice1996}. Such compounds motivate studying coupled
+ladders and dimensionality, but do not identify our particular square or
+cubic kernels with a complete material Hamiltonian.
+
+The superconducting chain--ladder cuprates provide a more direct motivation
+for the trellis extension. Uehara et al.\ reported superconducting onset
+temperatures of 12~K at 3~GPa and 9~K at 4.5~GPa in
+Sr$_{0.4}$Ca$_{13.6}$Cu$_{24}$O$_{41.84}$~\citep{Uehara1996}.
+The structure contains both Cu$_2$O$_3$ two-leg ladder sheets and CuO$_2$
+chains. Neighboring ladders are offset longitudinally, producing the two
+zigzag paths of a trellis network~\citep{Popovic2000}.
+Ca substitution is isovalent; it redistributes holes between chains and
+ladders rather than simply adding a known number of ladder holes.
+NQR and pressure-dependent optical measurements likewise support
+pressure-induced transfer of holes into the ladders~\citep{Fujiwara2009,Frank2014}.
+Consequently, the model density $n=15/16$ cannot be assigned directly to a
+Ca concentration or experimental pressure.
+
+The experimental charge-order landscape is richer than a monotonic conversion
+from a CDW to a superconductor. Transport, dielectric, and optical measurements
+found a CDW transition scale decreasing from about 210~K at $x=0$ to 10~K at
+$x=9$~\citep{Vuletic2003}. Resonant x-ray scattering established a ladder
+hole crystal in Sr$_{14}$Cu$_{24}$O$_{41}$ and commensurate charge order also
+at $x=10,11,12$~\citep{Abbamonte2004,Rusydi2006}. High Ca content alone
+therefore does not establish the absence of CDW order. Composition, pressure,
+and commensurability must be specified when comparing a uniform paired model
+state with experiment.
+
+Static magnetic order and dynamic spin correlations must also be separated.
+Neutron measurements on Sr$_{2.5}$Ca$_{11.5}$Cu$_{24}$O$_{41}$ found that the
+ordered moment decreased under pressure and appeared to disappear near the
+superconducting threshold~\citep{Katano1999}. A paired state without a
+resolved SDW is compatible with that trend, but vanishing static magnetization
+does not determine the spin gap. High-pressure NMR found gapped quasiparticle
+excitations in the superconducting state, described as $s$-wave-like in that
+specific sense~\citep{Fujiwara2003}. This is not a phase-sensitive measurement
+of the relative signs of leg and rung pairing. A ladder's $d$-wave-like bond
+structure need not force nodes on its Fermi surfaces; neither agreement nor
+disagreement of pairing symmetry follows from our bond signs alone.
+RIXS on Ca-substituted material further motivates including localization:
+the observed magnetic spectra were interpreted using off-ladder impurity
+potentials that immobilize holes~\citep{Tseng2022}.
 
 Each ladder has $L$ rungs, two legs $\ell=0,1$, and $2L$ physical sites.
 Its Hamiltonian is
@@ -305,6 +375,29 @@ along the ladder; $n=N/(2L)$ is the density per physical site and
 $p_{\mathrm h}=1-n$ the hole density. The rung hopping $t_0$ and interladder
 hopping $\tp$ must not be confused with the next-nearest-neighbor hopping
 $t'$ in two-dimensional Hubbard studies.
+
+An approximate parameter scale comes from the optical analysis of
+Sr$_{14}$Cu$_{24}$O$_{41}$ by Popovi\'c et al.~\citep{Popovic2000}:
+$t=t_0=0.26$~eV, interladder hopping $t_{xy}=0.026$~eV, and $U=2.1$~eV.
+Interpreting $t_{xy}$ as the amplitude on each equivalent zigzag path gives
+$U/t\simeq8.1$, $t_0/t=1$, and $\tau_0/t=\tau_1/t=0.1$, motivating our
+$(8,1,0.1,0.1)$ comparison. These are effective parameters from an optical
+model of the parent compound, not a pressure-resolved fit to Uehara's
+superconducting sample. That analysis does not independently determine the
+nearest-neighbor $V$ used here; $V=0$ is our baseline assumption.
+
+There is independent motivation to vary $V$. The RIXS--DMRG comparison of
+Padma et al.\ favors an effective attraction $V/t\simeq-1$ to $-1.25$ for
+Sr$_{14}$Cu$_{24}$O$_{41}$~\citep{Padma2025}. Their model uses
+$t=0.38$~eV, $t_0/t=0.84$, and an additional \emph{intraladder} diagonal
+hopping $t'/t=-0.3$, distinct from our interladder $\tau_0,\tau_1$.
+It adjusts $U$ with $V$ to hold the exchange scale fixed, whereas our scans
+hold $U/t=8$. Thus its fitted attraction motivates extended interactions
+without providing a directly transferable parameter set for the present
+Hamiltonian. Pairing at $V=0$ in our approximation would not establish that
+the material has no effective attraction. Chains, explicit oxygen orbitals,
+structural modulation, disorder, and longer-range Coulomb interactions are
+also absent from Eq.~\eqref{eq:model}.
 
 The transverse reduction uses the positive scale
 \begin{equation}
@@ -337,6 +430,64 @@ benchmark of Ref.~\citep{Bollmark2023} with the branch called
 \emph{cubic frustrated} in this project. That name is the project's
 nomenclature. Its published result should not be assigned to all three
 geometries (\ev{geometry}).
+
+The trellis adds a longitudinal displacement to the transverse map.
+Writing $m$ for the ladder index, a minimal hopping Hamiltonian is
+\begin{equation}
+ H_{\mathrm{zigzag}}=-\sum_{m,i,\sigma}
+ c^\dagger_{m,i,1,\sigma}
+ \left(\tau_0 c_{m+1,i,0,\sigma}
+       +\tau_1 c_{m+1,i+1,0,\sigma}\right)+\hc .
+ \label{eq:trellis-hopping}
+\end{equation}
+The symmetric case has $\tau_0=\tau_1$; removing the shifted path recovers
+square connectivity in the one-ladder embedding. Triangular connections can
+frustrate interladder antiferromagnetic alignment, making this geometry a
+natural test of whether static stripe order remains favored over pairing.
+The outcome must be calculated with both channels present; it is not implied
+by frustration alone.
+
+In the same common-denominator approximation, let $T_{mn}$ map sites on
+neighboring ladder $n$ to ladder $m$, including both paths, and define
+$F_{ab}=\avg{c_{b\uparrow}c_{a\downarrow}}$ and
+$X^\sigma_{ab}=\avg{c^\dagger_{a\sigma}c_{b\sigma}}$.
+For the real fields retained here, the kernels take the form
+\begin{align}
+ \alpha_m&=\frac{2}{|\Ep|}\sum_{n\sim m}
+ \mathcal P\!\left[T_{mn}(\mathcal P F_n)T_{mn}^{T}\right],\\
+ B_{m\sigma}&=\frac{2}{|\Ep|}\sum_{n\sim m}
+ \mathcal P\!\left[T_{mn}\mathcal P
+ (X_n^\sigma-\tfrac12 I)T_{mn}^{T}\right].
+ \label{eq:trellis-fields}
+\end{align}
+Here $\mathcal P$ retains rung separations within the chosen range cutoff,
+and $B$ combines diagonal density and off-diagonal normal fields. Each
+neighbor contributes separately; the two hops of a pair transfer are not
+split between different neighboring ladders. The shifted paths introduce
+mixed $\tau_0\tau_1$ terms, so a coordination-number rescaling of
+Eq.~\eqref{eq:geometries} is insufficient. In particular, diagonal normal
+fields can depend on bond correlations as well as density (\ev{trellis}).
+
+Reciprocity fixes the apparent directional asymmetry of the rung indexing.
+With $A=\tau_0 I+\tau_1 S$ and $S_{ij}=\delta_{j,i+1}$, the one-ladder
+map contains $A F^{00}A^T$ on leg 1 and $A^T F^{11}A$ on leg 0, with the
+range projections understood. Opposite shifts belong to opposite spatial
+neighbors at every iteration; alternating the indexing convention between
+iterations would instead alternate the map being solved. The comparison
+therefore uses a fixed reciprocal one-ladder cell and an explicit rectangular
+two-ladder $A/B$ cell. Both are stationary spatial ansatzes, with different
+allowed transverse arrangements of longitudinal textures and different open
+end cuts. The two-ladder calculation targets the same mean density on each
+ladder separately; it does not allow unequal average fillings (\ev{trellis}).
+
+These runs test whether geometry can change the selected order at fixed
+intraladder parameters and $V=0$. A paired solution without resolved bulk
+CDW/SDW would be qualitatively compatible with a superconducting regime of
+the chain--ladder family, but would not locate it in pressure or reproduce
+the material's whole phase diagram. The first available trellis trajectory
+and its unresolved convergence and cell-comparison checks are described in
+Section~\ref{sec:positive-trellis}. Its anomalous amplitude is not a
+measurement of $T_c$, phase stiffness, or a dynamical spin gap.
 
 This construction is conceptually related to coupled-ladder pairing
 mechanisms but does not implement every assumption of the original stripe
@@ -1087,12 +1238,16 @@ $V=0$ basin.
 \subsection{Reference provenance and manuscript development}
 
 The draft reuses stable keys from \path{../literature/references.bib}.
-Five additional sources are kept in \path{additional_references.bib}:
+The initial five additional sources in \path{additional_references.bib} are
 Tranquada et al.\ (2004), Vojta and Ulbricht (2004), Li et al.\ (2007),
 Berg et al.\ (2007), and Missiaen et al.\ (2025). Their primary arXiv and
 publisher records were checked on 15 September 2026. These additions
 support the discussion of magnetic spectra, planar coherence, and the
-stripe--pseudogap connection. The existing review's reading-depth limits
+stripe--pseudogap connection. Eleven further sources, checked on
+18 September 2026, support the ladder-material, doping, optical-parameter,
+charge-order, NMR, neutron, and RIXS discussion in
+Section~\ref{sec:ladder-materials}; reading depths and primary links are
+recorded in \path{SOURCE_NOTES.md}. The existing review's reading-depth limits
 continue to apply to inherited references; this draft is not an exhaustive
 literature or novelty assessment.
 
@@ -1106,7 +1261,7 @@ solutions. Those are candidate emphases, not additional results.
 
 \clearpage
 \begingroup
-\setlength{\bibsep}{0.35em}
+\setlength{\bibsep}{0.20em}
 \bibliographystyle{unsrtnat}
 \bibliography{\projectdocroot/literature/references,\manuscriptroot/additional_references}
 \endgroup

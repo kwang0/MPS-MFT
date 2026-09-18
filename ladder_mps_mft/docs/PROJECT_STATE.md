@@ -1,6 +1,6 @@
 # Current project state
 
-Last locally reviewed: 2026-09-18 (square/cubic figure comparisons included in report and LaTeX/PDF)
+Last locally reviewed: 2026-09-18 (ladder-material and trellis motivation added to manuscript)
 
 This is the canonical mutable snapshot for resuming work. It is deliberately
 short. Stable rules belong in `AGENTS.md` and the method documents; durable
@@ -9,7 +9,7 @@ history belongs in `docs/RUN_LOG.md`.
 ## Repository snapshot
 
 - Branch: `codex/mps-mft-phase0-refactor`
-- Baseline for this update: `72a4359` (full energy cuts and LaTeX results).
+- Baseline for this update: `046eb0e` (square/cubic figure comparison).
 - The earlier trellis implementation and campaign reports are committed.
   An untracked root `.claude/` directory remains outside this analysis scope.
 - Local `output/` and simulation HDF5 files are excluded from Git. The small
@@ -27,8 +27,15 @@ The combined report and manuscript now place square and cubic phase diagrams
 side by side, followed by matching full energy, physical spin RMS and physical
 pairing RMS grids. All 902 square and 1080 cubic evaluations are included,
 with continuation markers. Physical RMS windows and units match; energy
-panels retain individual y scales. The manuscript has 24 pages with landscape
+panels retain individual y scales. The manuscript has 27 pages with landscape
 history figures and explicit text references. The Overleaf bundle is updated.
+
+The introduction and Section 2.4 now discuss ladder materials, doping,
+pressure-induced superconductivity, competing CDW/magnetism, the provenance
+and limits of the trellis parameters including V, and reciprocal one-/two-ladder
+spatial cells. Eleven material references were added and three existing
+records newly cited (48 references total). This is a literature/manuscript
+update, not new simulation evidence or a change to acceptance status.
 
 The finer-cut report now includes [full variational energies versus V and t0](reports/square_fine_cuts_20260918/variational_energy_cuts.png),
 using twelve fine endpoints and eight coarse anchors, including the latest
