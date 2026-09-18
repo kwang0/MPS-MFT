@@ -3767,3 +3767,75 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   pages match the delivered PDF text. Build/metadata/validation artifacts are
   under ignored output/trellis_manuscript_20260918/. Validation is document-only;
   no DMRG calculation, Perlmutter access, scheduler action or transfer occurred.
+
+### 2026-09-18 — Complete terminal correlations and latest-campaign CPU backfill
+
+- User requested comprehensive equal-time observables for all future SCF runs,
+  including maximum-iteration endpoints, and a retrospective measurement script
+  for the latest square/cubic two-seed grids, square finer cuts, square (1.2,+0.2)
+  four-seed comparison and trellis spatial cells. Baseline: 672bafb. No new
+  convergence threshold, iteration limit, acceptance decision or DMRG campaign
+  was requested. The root .claude directory remains outside scope.
+- The first attempt could not launch a sandboxed command because C: had zero
+  free bytes. A read-only capacity check confirmed that, and no files were
+  changed in that attempt. After the user freed space, about 41 GB was available.
+  The implementation and validation below then proceeded locally.
+- Enabled full pair diagnostics in RunSettings, config defaults, all current
+  Phase 1 scientific templates, the example SCF config and the frozen-legacy
+  preparation path. Trellis now enables the master diagnostic switch. Ordinary
+  and trellis drivers save the immutable state first, then measure accepted or
+  maximum-iteration endpoints through one shared state-measurement entry point.
+  Archived prepared configurations and submitted source trees remain unchanged;
+  the deferred finite-size configs can be regenerated from their updated base.
+- Reused the existing cached pair transfer sweep, extending it to the complete
+  onsite/rung/nearest-leg basis and cross-channel entries. Save complex pair
+  addition/removal matrices, one-point expectations, connected subtraction,
+  coordinates and class labels; preserve historical class-specific datasets.
+  Schema 2 persists raw/connected charge, longitudinal/transverse spin and
+  density-spin matrices, spin-resolved Green matrices, anomalous correlators,
+  double occupancy, existing connected structure factors and entanglement.
+  No dynamic susceptibility or new fixed-sector gap DMRG is silently included.
+- The shared reader reconstructs and verifies the stored model fingerprint,
+  checks full-source hashes, separates accepted temporal phases from trellis
+  spatial A/B samples, and marks unaccepted data as terminal snapshots with the
+  original status/period/acceptance. Outputs have measurement implementation
+  fingerprints, completion markers, timings and immutable writes. Repeat offline
+  measurements reuse only matching complete files. Original states are read-only.
+- Added scripts/measure_latest_campaigns.jl and slurm/measure_latest_campaigns.sh.
+  Their target is 56 latest branches / 58 spatial MPSs: square 18, cubic 18,
+  fine cuts 12, positive-V 4 and trellis 4 (6 MPSs). The two original square V=0
+  anchors are superseded by the existing finish20 continuations. Discovery
+  requires every final state; it does not substitute a rolling checkpoint.
+- The user-run launcher freezes its code and manifest, uses 56 CPU shared jobs
+  with four Julia threads/eight logical CPUs/32 GiB each, and a two-hour ceiling
+  per MPS (four for two-ladder trellis). The memory-aware nine-core/128 fraction
+  yields 8.15625 requested CPU node-hours, bounded by a nine-node-hour local cap
+  and the existing 400-additional-node-hour ledger. These are ceilings, not
+  measured performance. It invokes the required read-only Phase 0 plan and
+  reuses the existing append-only reservation/reconciliation functions.
+- Local compact inventory validation found 52 of 56 endpoints with matching
+  config/model fingerprints and valid source metadata, including both square
+  continuations. The local square lambda08 and other three trellis final states
+  remain absent, so the plan correctly exits nonzero listing the missing rows.
+  The user reports waiting only for the final trellis run; the older local sync
+  does not establish live scheduler state. Full scratch availability and hashes
+  must be checked on Perlmutter by the user-run workflow.
+- Focused Julia validation: 93 measurement checks (including complex cross-bond
+  contractions against independent OpSum MPOs, connected-matrix positivity,
+  QN-forbidden expectations, immutability and trellis A/B metadata), five
+  four-site square SCF max-iteration checks, 207 trellis checks including actual
+  four-site one-/two-ladder max-iteration diagnostics, and nine retrospective
+  worker/receipt checks. All passed. These are tiny local DMRG/code checks, not
+  scientific convergence or performance evidence for the L=64 chi=200 runs.
+- Nine Python launcher checks passed: three new mocked budget/source/duplicate
+  checks and six existing handoff regressions. Mock submission verifies exactly
+  56 CPU jobs, the 8.15625 ceiling, two four-hour trellis requests, cap rejection
+  before submission, no duplicate jobs and source-tampering rejection. An initial
+  mock PATH used a Windows drive colon; converting the fixture path to MSYS form
+  fixed the test harness. No real scheduler command ran. Julia initially needed
+  approved access to its existing precompile cache; later checks completed.
+- Updated DIAGNOSTICS.md, README, PROJECT_STATE and ACTIVE with dataset
+  conventions, exact Perlmutter handoff, current evidence and interpretation
+  boundaries. No full campaign MPS contraction, Perlmutter authentication,
+  transfer, real submission, local budget-ledger change or full test-suite run
+  occurred. New scientific correlation results await user execution and sync.

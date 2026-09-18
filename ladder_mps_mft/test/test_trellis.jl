@@ -159,10 +159,13 @@ if get(ENV,"TRELLIS_DMRG_SMOKE","0") == "1"
                 convergence = ConvergenceSettings(;minimum_iterations=3,stable_iterations=2,accepted_periods=[1],
                     channel_residuals=true,channel_noise_floor=5e-7,dmrg_sweep_energy_tol=1e-9)
                 run = RunSettings(;output_directory=dir,inherit_from=seed,inherit_sha256=LadderMPSMFT.sha256_file(seed),
-                    max_iterations=2,require_accepted_solution=false,quick_diagnostics=false)
+                    max_iterations=2,require_accepted_solution=false,quick_diagnostics=true)
                 settings = ProjectSettings(;model,dmrg,runtime,mixing,convergence,run)
                 result = run_scf(settings)
                 @test result.diagnostic.status==:maximum_iterations && !result.diagnostic.accepted
+                @test length(result.diagnostics_paths)==count
+                @test all(h5read(p,"full_pair_correlations") for p in result.diagnostics_paths)
+                @test all(!h5read(p,"accepted") for p in result.diagnostics_paths)
                 @test length(result.records)==count
                 for history in result.records
                     @test length(history)==2

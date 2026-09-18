@@ -333,7 +333,7 @@ write_checkpoint(
 )
 state_sha256 = LadderMPSMFT.sha256_file(state_path)
 
-diagnostics = compute_ladder_diagnostics(psi, settings.model; full_pair_correlations=false)
+diagnostics = compute_ladder_diagnostics(psi, settings.model; full_pair_correlations=settings.run.full_pair_correlations)
 diagnostics_path = joinpath(output_directory, "diagnostics.h5")
 write_diagnostics(
     diagnostics_path,

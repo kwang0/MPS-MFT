@@ -956,51 +956,11 @@ function run_scf(settings::ProjectSettings)
         diagnostic,
         records,
     )
-    diagnostics_path = nothing
-    diagnostics_paths = String[]
-    if diagnostic.accepted && settings.run.quick_diagnostics
-        state_hash = sha256_file(final_path)
-        if diagnostic.fundamental_period == 1
-            diagnostics = compute_ladder_diagnostics(
-                psi,
-                settings.model;
-                full_pair_correlations=settings.run.full_pair_correlations,
-            )
-            diagnostics_path = write_diagnostics(
-                joinpath(output_directory, "diagnostics.h5"),
-                diagnostics;
-                state_sha256=state_hash,
-                metadata=Dict("solution_kind" => "fixed_point", "phase" => 1, "period" => 1),
-                immutable=true,
-            )
-            push!(diagnostics_paths, diagnostics_path)
-        else
-            phase_records = records[(end - diagnostic.fundamental_period + 1):end]
-            for (phase, phase_record) in enumerate(phase_records)
-                haskey(phase_psis, phase_record.iteration) || error(
-                    "accepted periodic solution is missing the MPS for iteration $(phase_record.iteration)",
-                )
-                diagnostics = compute_ladder_diagnostics(
-                    phase_psis[phase_record.iteration],
-                    settings.model;
-                    full_pair_correlations=settings.run.full_pair_correlations,
-                )
-                path = write_diagnostics(
-                    joinpath(output_directory, @sprintf("diagnostics_phase_%03d.h5", phase)),
-                    diagnostics;
-                    state_sha256=state_hash,
-                    metadata=Dict(
-                        "solution_kind" => "periodic_orbit",
-                        "phase" => phase,
-                        "period" => diagnostic.fundamental_period,
-                        "iteration" => phase_record.iteration,
-                    ),
-                    immutable=true,
-                )
-                push!(diagnostics_paths, path)
-            end
-        end
-    end
+    diagnostics_paths = terminal_diagnostics_enabled(diagnostic, settings.run) ?
+        measure_state_diagnostics(final_path; allow_unaccepted=true,
+            full_pair_correlations=settings.run.full_pair_correlations,
+            expected_model_fingerprint=model_fingerprint(settings.model)) : String[]
+    diagnostics_path = length(diagnostics_paths) == 1 ? only(diagnostics_paths) : nothing
     return (
         diagnostic,
         records,

@@ -311,5 +311,9 @@ function run_trellis_scf(settings::ProjectSettings)
         println(io, "\nEndpoint target-density-corrected canonical energy: $(energy) t/site. Unaccepted endpoints are diagnostic only.")
         println(io, "\nA/B are spatial states. Each has its own MPS, fields, history and fixed mean density. Temporal recurrences are not accepted.")
     end
-    return (; diagnostic, records=histories, state_path, summary_path, output_directory)
+    diagnostics_paths = terminal_diagnostics_enabled(diagnostic, settings.run) ?
+        measure_state_diagnostics(state_path; allow_unaccepted=true,
+            full_pair_correlations=settings.run.full_pair_correlations,
+            expected_model_fingerprint=model_fingerprint(settings.model)) : String[]
+    return (; diagnostic, records=histories, state_path, summary_path, output_directory, diagnostics_paths)
 end

@@ -101,5 +101,5 @@ max_iterations = 60
 save_every = 1
 require_accepted_solution = false
 allow_unbound_ep = false
-quick_diagnostics = false
-full_pair_correlations = false
+quick_diagnostics = true
+full_pair_correlations = true

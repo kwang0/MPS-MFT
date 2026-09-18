@@ -38,6 +38,13 @@ recorded explicitly as user-reported until synchronized evidence is available.
 
 ## Stable scientific references
 
+The [terminal correlation measurements and retrospective CPU workflow](DIAGNOSTICS.md)
+enable full raw/connected pair-pair, charge/spin, single-particle and entanglement
+diagnostics, including maximum-iteration endpoints without changing acceptance.
+The September 18 backfill covers the 56 latest square/cubic/fine-cut/positive-V/
+trellis branch states (58 spatial MPSs); it is prepared for user submission,
+not yet new measured evidence.
+
 The latest synchronized results are in the
 [September 18 combined campaign review](reports/campaign_review_20260918/README.md).
 It brings together all 18 cubic starts, all 12 finer square starts, three

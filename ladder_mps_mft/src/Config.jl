@@ -191,7 +191,7 @@ function load_settings(path::AbstractString)
         )),
         allow_unbound_ep=allow_unbound,
         quick_diagnostics=Bool(_value(run_raw, "quick_diagnostics", true)),
-        full_pair_correlations=Bool(_value(run_raw, "full_pair_correlations", false)),
+        full_pair_correlations=Bool(_value(run_raw, "full_pair_correlations", true)),
     )
     settings = ProjectSettings(; model, dmrg, mixing, convergence, runtime, run, config_path)
     validate_settings(settings)

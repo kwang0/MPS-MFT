@@ -1784,6 +1784,9 @@ Storage:
 EOF
 }
 
+# Other user-run launchers may reuse the shared append-only budget controls.
+[[ "${BASH_SOURCE[0]}" == "$0" ]] || return 0
+
 action="${1:-plan}"
 case "$action" in
   plan) print_plan;;

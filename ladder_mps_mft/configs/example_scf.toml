@@ -78,4 +78,4 @@ save_every = 1
 require_accepted_solution = true
 allow_unbound_ep = false
 quick_diagnostics = true
-full_pair_correlations = false
+full_pair_correlations = true

@@ -126,7 +126,7 @@ Base.@kwdef struct RunSettings
     require_accepted_solution::Bool = true
     allow_unbound_ep::Bool = false
     quick_diagnostics::Bool = true
-    full_pair_correlations::Bool = false
+    full_pair_correlations::Bool = true
 end
 
 Base.@kwdef struct ProjectSettings

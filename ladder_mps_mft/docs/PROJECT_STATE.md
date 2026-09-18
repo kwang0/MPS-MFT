@@ -1,6 +1,6 @@
 # Current project state
 
-Last locally reviewed: 2026-09-18 (ladder-material and trellis motivation added to manuscript)
+Last locally reviewed: 2026-09-18 (complete terminal correlations and retrospective measurement workflow)
 
 This is the canonical mutable snapshot for resuming work. It is deliberately
 short. Stable rules belong in `AGENTS.md` and the method documents; durable
@@ -9,7 +9,7 @@ history belongs in `docs/RUN_LOG.md`.
 ## Repository snapshot
 
 - Branch: `codex/mps-mft-phase0-refactor`
-- Baseline for this update: `046eb0e` (square/cubic figure comparison).
+- Baseline for this update: `672bafb` (ladder-material/trellis manuscript context).
 - The earlier trellis implementation and campaign reports are committed.
   An untracked root `.claude/` directory remains outside this analysis scope.
 - Local `output/` and simulation HDF5 files are excluded from Git. The small
@@ -22,6 +22,31 @@ history belongs in `docs/RUN_LOG.md`.
 Recheck the branch, commit, and working tree at the start of each new task.
 
 ## Current scientific position
+
+The user has now requested full equal-time correlation measurements for future
+SCF runs, including maximum-iteration endpoints, and a retrospective pass over
+the latest square/cubic grids, square fine cuts, positive-V seeds and trellis.
+The implementation and [Perlmutter handoff](DIAGNOSTICS.md#user-run-perlmutter-backfill)
+are prepared: 56 branch endpoints / 58 spatial MPSs, excluding the two
+superseded square V=0 anchor endpoints. The CPU requested ceiling is 8.15625
+node-hours through the existing shared project ledger, not an actual cost.
+No new scientific measurement on the full campaign MPSs has been performed.
+
+Future templates enable full raw/connected pair-pair matrices including
+onsite/rung/leg cross channels, charge/spin and density-spin matrices,
+single-particle/anomalous correlators, double occupancy and entanglement.
+Both ordinary and trellis drivers measure accepted and maximum-iteration
+endpoints, retaining their original acceptance/status. Trellis A/B are
+separate spatial measurements. State hashes and a frozen measurement-code
+copy make the offline backfill auditable. Existing submitted source trees,
+archived controls, original state files and convergence thresholds are unchanged.
+
+The user reports waiting for the final trellis run. This workspace's compact
+inventory is older: 52/56 requested endpoints validate locally; the square
+period-eight result and three trellis results are missing here. The Perlmutter
+plan requires all 56 final artifacts before submission and checks recorded
+full-source availability. Do not interpret these local omissions as live job
+status. Await the user's synchronization for the new correlation analysis.
 
 The combined report and manuscript now place square and cubic phase diagrams
 side by side, followed by matching full energy, physical spin RMS and physical
@@ -173,6 +198,16 @@ live state of unreviewed older campaigns from their dated records.
   and current user-provided accounting are authoritative for new compute.
 
 ## Exact next action
+
+Once the final trellis result and ordinary CFS compact exports are available,
+the user can pull this branch on Perlmutter, reconcile the existing project
+ledger, and run `bash slurm/measure_latest_campaigns.sh plan`, then `submit`.
+See [DIAGNOSTICS.md](DIAGNOSTICS.md) for exact commands, output paths, checks
+and cost limits. The same script's `status` verifies completed measurement
+receipts, and `reconcile` records actual CPU accounting. Codex does not submit
+or transfer. Once the MPS-free diagnostic files are synchronized, compare
+connected pair decay/sign structure in stripe and paired endpoints alongside
+spin/charge correlations; formal stationarity remains a separate question.
 
 Review the [combined report](reports/campaign_review_20260918/README.md).
 Await user-synchronized spatial artifacts for square period-eight job 58394105

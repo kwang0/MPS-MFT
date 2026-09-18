@@ -258,7 +258,7 @@ algorithm is O(B^2 chi^3), rather than doing B^2 independent length-L MPO
 expectation values.
 """
 function _singlet_pair_gram_matrices(psi::MPS, bonds)
-    isempty(bonds) && return (addition=zeros(0, 0), removal=zeros(0, 0))
+    isempty(bonds) && return (addition=zeros(0, 0), removal=zeros(0, 0), expectation=ComplexF64[])
     ordered = collect(bonds)
     issorted(ordered; by=first) || throw(ArgumentError("pair bonds must be sorted by first site"))
     sites = siteinds(psi)
@@ -271,6 +271,7 @@ function _singlet_pair_gram_matrices(psi::MPS, bonds)
     count = length(ordered)
     addition = zeros(ComplexF64, count, count)
     removal = zeros(ComplexF64, count, count)
+    expectation = zeros(ComplexF64, count)
     left_environment = ITensor(1.0)
     left_position = 0
 
@@ -280,6 +281,10 @@ function _singlet_pair_gram_matrices(psi::MPS, bonds)
             left_position += 1
             left_environment = _plain_mps_transfer(left_environment, canonical, left_position)
         end
+
+        expectation[row] = scalar(_insert_cluster_operator(
+            left_environment, canonical, annihilation[row], first_row, last_row;
+            close_right=true)) / normalization
 
         addition[row, row] = _overlapping_cluster_expectation(
             left_environment,
@@ -373,16 +378,41 @@ function _singlet_pair_gram_matrices(psi::MPS, bonds)
         addition[column, row] = conj(addition[row, column])
         removal[column, row] = conj(removal[row, column])
     end
-    return (; addition, removal)
+    return (; addition, removal, expectation)
 end
 
-function sign_resolved_pair_correlations(psi::MPS, model::ModelSettings)
+function sign_resolved_pair_correlations(psi::MPS, model::ModelSettings; cross_channels::Bool=false)
     rung_bonds = [(rung_leg_to_site(rung, 0), rung_leg_to_site(rung, 1)) for rung in 1:model.L]
     leg0_bonds = [(rung_leg_to_site(rung, 0), rung_leg_to_site(rung + 1, 0)) for rung in 1:(model.L - 1)]
     leg1_bonds = [(rung_leg_to_site(rung, 1), rung_leg_to_site(rung + 1, 1)) for rung in 1:(model.L - 1)]
-    rung = _singlet_pair_gram_matrices(psi, rung_bonds)
-    leg0 = _singlet_pair_gram_matrices(psi, leg0_bonds)
-    leg1 = _singlet_pair_gram_matrices(psi, leg1_bonds)
+    # The complete short-range basis permits rung/leg sign and d-wave analysis.
+    # Keep the historical class-only interface available for bare Stage 1.
+    complete = if cross_channels
+        coordinates = vcat(
+            [(bond=b, label="rung") for b in rung_bonds],
+            [(bond=b, label="leg0") for b in leg0_bonds],
+            [(bond=b, label="leg1") for b in leg1_bonds],
+            [(bond=(i, i), label=isodd(i) ? "onsite0" : "onsite1") for i in 1:2model.L])
+        sort!(coordinates; by=c -> c.bond)
+        grams = _singlet_pair_gram_matrices(psi, getproperty.(coordinates, :bond))
+        anomalous = grams.expectation
+        (basis_site1=[c.bond[1] for c in coordinates],
+         basis_site2=[c.bond[2] for c in coordinates],
+         basis_class=[c.label for c in coordinates],
+         expectation=anomalous, addition=grams.addition, removal=grams.removal,
+         addition_connected=grams.addition - anomalous * anomalous',
+         removal_connected=grams.removal - conj.(anomalous) * transpose(anomalous))
+    else
+        (;)
+    end
+    function class_grams(label, bonds)
+        !cross_channels && return _singlet_pair_gram_matrices(psi, bonds)
+        indices = findall(==(label), complete.basis_class)
+        return (addition=complete.addition[indices, indices], removal=complete.removal[indices, indices])
+    end
+    rung = class_grams("rung", rung_bonds)
+    leg0 = class_grams("leg0", leg0_bonds)
+    leg1 = class_grams("leg1", leg1_bonds)
     onsite_removal = real.(correlation_matrix(
         psi,
         "Cdagdn * Cdagup",
@@ -411,23 +441,33 @@ function sign_resolved_pair_correlations(psi::MPS, model::ModelSettings)
         rung_field=real.(rung.addition + rung.removal),
         leg0_field=real.(leg0.addition + leg0.removal),
         leg1_field=real.(leg1.addition + leg1.removal),
+        complete...,
         convention="P=c_up*c_dn; Delta_ab=c_up,a*c_dn,b-c_dn,a*c_up,b (unnormalized); bare class is <Delta_i Delta_j^dagger>",
     )
 end
 
-function compute_ladder_diagnostics(psi::MPS, model::ModelSettings; full_pair_correlations::Bool=false)
+function compute_ladder_diagnostics(psi::MPS, model::ModelSettings; full_pair_correlations::Bool=true)
+    # All contractions use the host representation, including GPU-produced MPSs.
+    psi = move_to_cpu(psi)
+    length(psi) == 2model.L || throw(DimensionMismatch("MPS length differs from model"))
+    state_norm = norm(psi)
+    isfinite(state_norm) && state_norm > eps(Float64) || throw(ArgumentError("cannot measure a nonfinite or zero-norm MPS"))
+    psi = normalize(psi)
     density = real.(expect(psi, "Ntot"))
     spin = real.(expect(psi, "Sz"))
     charge_correlation = real.(correlation_matrix(psi, "Ntot", "Ntot"))
     spin_correlation = real.(correlation_matrix(psi, "Sz", "Sz"))
+    density_spin_correlation = real.(correlation_matrix(psi, "Ntot", "Sz"))
+    spin_transverse_correlation = correlation_matrix(psi, "S+", "S-")
+    spin_plus = expect(psi, "S+")
+    green_up = correlation_matrix(psi, "Cdagup", "Cup")
+    green_down = correlation_matrix(psi, "Cdagdn", "Cdn")
+    anomalous_pair = correlation_matrix(psi, "Cup", "Cdn")
+    double_occupancy = real.(expect(psi, "Nupdn"))
     charge_grid = structure_factor_grid(charge_correlation, density, model.L)
     spin_grid = structure_factor_grid(spin_correlation, spin, model.L)
-    # Entanglement extraction indexes singular values element by element, which
-    # is intentionally done on the host. Full pair MPO diagnostics likewise use
-    # a host MPS so a CPU MPO is never contracted with a GPU state.
-    psi_cpu = move_to_cpu(psi)
-    entropy = entanglement_profile(psi_cpu)
-    pair = full_pair_correlations ? sign_resolved_pair_correlations(psi_cpu, model) : nothing
+    entropy = entanglement_profile(psi)
+    pair = full_pair_correlations ? sign_resolved_pair_correlations(psi, model; cross_channels=true) : nothing
     expected_spin_q = pi * model.density
     spin_peak = dominant_wavevector(spin_grid)
     return (
@@ -435,6 +475,13 @@ function compute_ladder_diagnostics(psi::MPS, model::ModelSettings; full_pair_co
         spin,
         charge_correlation,
         spin_correlation,
+        density_spin_correlation,
+        density_spin_connected=density_spin_correlation - density * spin',
+        charge_connected=charge_correlation - density * density',
+        spin_connected=spin_correlation - spin * spin',
+        spin_transverse_correlation,
+        spin_transverse_connected=spin_transverse_correlation - spin_plus * spin_plus',
+        spin_plus, green_up, green_down, anomalous_pair, double_occupancy,
         charge_structure=charge_grid,
         spin_structure=spin_grid,
         charge_peak=dominant_wavevector(charge_grid),
@@ -477,7 +524,7 @@ function write_diagnostics(
     mkpath(dirname(path))
     temporary = tempname(dirname(path))
     h5open(temporary, "w") do file
-        file["schema_version"] = 1
+        file["schema_version"] = 2
         file["artifact_kind"] = "ladder_mps_mft_diagnostics"
         file["state_sha256"] = String(state_sha256)
         for (key, value) in metadata
@@ -485,6 +532,12 @@ function write_diagnostics(
         end
         file["density"] = diagnostics.density
         file["spin"] = diagnostics.spin
+        for name in (:charge_correlation, :spin_correlation, :charge_connected, :spin_connected,
+                     :density_spin_correlation, :density_spin_connected,
+                     :spin_transverse_correlation, :spin_transverse_connected, :spin_plus,
+                     :green_up, :green_down, :anomalous_pair, :double_occupancy)
+            file[String(name)] = getproperty(diagnostics, name)
+        end
         file["expected_spin_q"] = diagnostics.expected_spin_q
         file["spin_q_mismatch"] = diagnostics.spin_q_mismatch
         for (name, grid) in (("charge_structure", diagnostics.charge_structure), ("spin_structure", diagnostics.spin_structure))
@@ -513,15 +566,9 @@ function write_diagnostics(
         end
         if diagnostics.pair_correlations !== nothing
             pair = create_group(file, "pair_correlations")
-            for name in (
-                :onsite0, :onsite1, :onsite0_addition, :onsite1_addition,
-                :onsite0_field, :onsite1_field, :rung, :leg0, :leg1,
-                :rung_removal, :leg0_removal, :leg1_removal,
-                :rung_field, :leg0_field, :leg1_field,
-            )
+            for name in keys(diagnostics.pair_correlations)
                 pair[String(name)] = getproperty(diagnostics.pair_correlations, name)
             end
-            pair["convention"] = diagnostics.pair_correlations.convention
         end
     end
     mv(temporary, path; force=!immutable)

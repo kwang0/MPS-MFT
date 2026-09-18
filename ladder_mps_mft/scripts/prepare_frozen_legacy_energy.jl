@@ -187,7 +187,7 @@ run["inherit_sha256"] = legacy_sha256
 run["max_iterations"] = 1
 run["require_accepted_solution"] = false
 run["quick_diagnostics"] = true
-run["full_pair_correlations"] = false
+run["full_pair_correlations"] = true
 for key in (
     "parent_checkpoint", "parent_sha256", "parent_orbit_phase",
     "resume_checkpoint", "resume_sha256",

@@ -4,6 +4,18 @@ Last reviewed: 2026-09-18
 
 ## Current outcome
 
+September 18 follow-up: complete terminal equal-time diagnostics and the
+56-endpoint / 58-MPS retroactive measurement pass are prepared. The user will
+run the [CPU submission workflow](../DIAGNOSTICS.md#user-run-perlmutter-backfill)
+after the final trellis run and compact exports finish. Future ordinary and
+trellis SCF runs measure full correlations at acceptance or maximum iterations;
+this does not relax convergence or change archived acceptance flags.
+The requested CPU ceiling is 8.15625 node-hours in the existing project ledger.
+No campaign MPS measurements or Perlmutter submissions were executed locally.
+The locally synced inventory still contains only 52 of the 56 requested endpoints;
+that is not a live scheduler claim. New diagnostics must be synced before their
+scientific interpretation, especially residual pair correlations in stripes.
+
 The [combined campaign review](../reports/campaign_review_20260918/README.md)
 completes the requested analysis of the cubic grid, finer square cuts,
 positive-V comparison and first completed trellis run. It includes 34

@@ -24,6 +24,7 @@ include("Variational.jl")
 include("Diagnostics.jl")
 include("Provenance.jl")
 include("Storage.jl")
+include("StateDiagnostics.jl")
 include("Solver.jl")
 include("Trellis.jl")
 include("Backbone.jl")
@@ -129,6 +130,7 @@ export SUPPORTED_GEOMETRIES,
        run_stage2_validation_probe,
        assemble_stage2_validation,
        write_diagnostics,
+       measure_state_diagnostics,
        write_sector_gaps,
        write_checkpoint,
        write_stateless_copy,
