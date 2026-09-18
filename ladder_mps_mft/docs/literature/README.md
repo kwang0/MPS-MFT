@@ -6,6 +6,10 @@ eight groups from the general Hubbard problem to the closest MPS+MF work.
 Each paper has a medium-length summary, a paragraph on relevance and limits,
 persistent links, and a stable BibTeX key. An introduction outline follows.
 
+The actual LaTeX/PDF now includes a September 18 project-evidence update:
+cubic, finer square energy cuts, positive-V tests and the first trellis result.
+The literature-search cutoff and 49-paper bibliography remain unchanged.
+
 - [Read the compiled PDF](literature_review.pdf).
 - [Edit the LaTeX review](literature_review.tex).
 - [Reuse or extend the BibTeX bibliography](references.bib).

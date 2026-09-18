@@ -3617,3 +3617,69 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   density/spin/pair correlations. No legacy plotting file, solver controls,
   simulation data, acceptance flag or accounting ledger changed. No DMRG or
   unrelated regression suite was run. Git baseline at task start: fc3db31.
+
+### 2026-09-18 — Full transition-cut energies and actual LaTeX notes
+
+- User clarified that the finer-cut analysis should show the full variational
+  energy versus Hamiltonian parameter, not just seed gaps or MF histories,
+  and explicitly requested updating the actual LaTeX notes with the new data.
+  Baseline: bb76a71; only unrelated `.claude/` was untracked at task start.
+- Added a narrow `--energy-cuts-only` path to
+  `scripts/analyze_two_basin_campaigns_20260918.py`. It reads twelve fine
+  endpoints (jobs 58387972--58387983) and eight coarse endpoints, including
+  the latest square V=0 continuations (58383124/58383125), to cover both
+  five-coordinate cuts from both seeds. All 20 compact hashes match the
+  prior audited reports. Endpoint source/config hashes, job IDs, seed family,
+  iteration counts, E_p, canonical and corrected energies are retained in
+  `docs/reports/square_fine_cuts_20260918/variational_energy_cuts.csv` and
+  `variational_energy_analysis.json`. No simulation artifacts were edited.
+- Plotted E_var,target/N versus V at t0=1.4 and versus t0 at V=-0.4, with
+  N=128 physical sites. Verified the stored full canonical functional and
+  correction e_target=e_var+mu*(n_target-n), matching the existing summaries
+  to 2e-14 t/site. No extra field-independent offset or effective-H eigenvalue
+  substitution. CSV includes both total and per-site canonical/corrected
+  energies. Seed curves connect independent starts, not continued phase
+  branches; coarse/fine controls remain distinguishable.
+- Added a separate shape figure with one common endpoint chord per cut,
+  preserving seed gaps and changes in slope, plus 16 adjacent secants.
+  The pairing-seed V slopes are 1.266231,1.266144,1.266212,1.261367:
+  a small final-interval downturn of 0.38%. The t0 slopes are
+  -0.340515,-0.368857,-0.393241,-0.417749, with nearly regular curvature.
+  A weak first-order crossing is compatible with the V bend, but the current
+  five-point curves do not resolve a derivative discontinuity. Only one
+  point per cut retains distinct textures; no accepted crossing or hysteresis
+  is inferred. The interpolated E_p changes the transverse coupling along
+  the cuts. Last-ten drift bars are explicitly not convergence error bounds;
+  the coarse t0=1.2 pairing endpoint has a 1.56e-4 t/site recent range.
+- Updated the fine-cut and combined reports, PROJECT_STATE, ACTIVE and
+  documentation map. Updated actual `manuscript/introduction_and_results.tex`
+  to include completed square/cubic grids, continuations, full cut energies,
+  positive-V and trellis observations; advanced the cutoff explicitly to
+  September 18. Added method/interpretation notes to `METHODS_NOTES.tex` and
+  a local-project evidence section to `literature/literature_review.tex`.
+  Existing bibliography and search cutoff are unchanged. Source notes now
+  describe completed incorporation rather than deferring to a later draft.
+- Local figure command: `C:/Python313/python.exe -B -X utf8
+  ladder_mps_mft/scripts/analyze_two_basin_campaigns_20260918.py
+  --energy-cuts-only` (about 3 seconds). No campaign-wide rerun or DMRG test.
+  Verified 20 endpoint rows, 16 secants, normalization and Python syntax.
+  Inspected both new PNGs and their rendered LaTeX placement.
+- Rebuilt manuscript (21 pages/34 references), literature review
+  (29 pages/49 references), and methods PDF (21 pages). Tectonic initially
+  could not use its default external cache; setting TECTONIC_CACHE_DIR to
+  the existing repository cache resolved that. Missing font/package files
+  required an approved compiler download after restricted network attempts
+  failed; compilation then completed. The bundled Python PDF dependencies
+  were used for validation after system Python lacked pypdf.
+- All three final builds have no unresolved citations/references, missing
+  characters or overfull boxes. Methods retains four harmless underfull
+  spacing warnings in its existing code map/bibliography. Verified 25 local
+  manuscript evidence links and four figure files; inspected new results
+  pages and figure captions. The 10-file Overleaf ZIP includes updated sources,
+  methods notes and all required figure PDFs. A cached root-layout build
+  reproduces the delivered manuscript's text on all 21 pages. Build logs,
+  validation JSON and rendered checks live under ignored
+  `output/notes_update_20260918/`. No remote scheduler, transfer, simulation,
+  acceptance change, threshold change or allocation-ledger mutation occurred.
+- Final checks: 96 local Markdown links resolve, the run-log update is strictly
+  append-only, and the configured Git whitespace check passes.

@@ -1,6 +1,6 @@
 # Draft reference and evidence notes
 
-Draft date: **15 September 2026**. Numerical evidence cutoff: **13 September 2026**.
+Initial draft: **15 September 2026**. Updated numerical evidence cutoff: **18 September 2026**.
 
 ## Existing sources
 
@@ -50,11 +50,12 @@ reused. Kohler2026 remains explicitly labeled as a preprint.
 - Local pairing in the eventual stripe state is an open question; the
   disappearing anomalous expectation value does not answer it alone.
 
-## Results update for the next draft — 18 September 2026
+## Results incorporated in LaTeX/PDF — 18 September 2026
 
 The [combined campaign review](../reports/campaign_review_20260918/README.md)
-supersedes the draft's incomplete numerical coverage. It does not silently
-change the September 13 evidence cutoff of the current LaTeX/PDF.
+supersedes the draft's incomplete numerical coverage. At the user's request,
+the actual LaTeX/PDF now includes these results and explicitly advances its
+evidence cutoff from September 13 to September 18.
 
 - The coarse square grid, including both V=0 continuations, has seven
   stripe and two paired coordinates. Both seeds reach the same family at
@@ -77,3 +78,13 @@ change the September 13 evidence cutoff of the current LaTeX/PDF.
 These are finite-L64, chi200 trajectory observations. All 34 completed
 histories reviewed in September 18 remain formally unaccepted. Cite their
 dated detailed reports for profiles, gates, source hashes and cost coverage.
+
+The finer-cut section now plots full target-corrected canonical energies
+against V and t0, using 12 fine endpoints plus eight coarse anchors, including
+the latest V=0 continuations. A common chord per cut exposes small curvature
+without changing seed gaps or slope changes. Adjacent secants show a 0.38%
+final-interval slope decrease on the pairing-seed V curve and nearly regular
+curvature on the t0 curve. This does not distinguish a first-order kink from
+smooth curvature. The source table retains canonical and density-corrected
+energies, last-ten drift diagnostics, state/config hashes and seed identities.
+No new calculation or literature search underlies this update.

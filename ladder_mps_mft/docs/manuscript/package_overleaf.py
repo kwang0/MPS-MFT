@@ -7,11 +7,15 @@ def main():
     manuscript = Path(__file__).resolve().parent
     docs = manuscript.parent
     names = (
+        "METHODS_NOTES.tex",
         "literature/literature_review.tex",
         "literature/references.bib",
         "manuscript/introduction_and_results.tex",
         "manuscript/additional_references.bib",
         "reports/two_basin_v000_20260912/profile_evolution.pdf",
+        "reports/cubic_two_basin_grid_20260918/preliminary_phase_diagram.pdf",
+        "reports/square_fine_cuts_20260918/variational_energy_cuts.pdf",
+        "reports/square_fine_cuts_20260918/variational_energy_shape.pdf",
         "manuscript/README.md",
     )
     # Read everything first, so a missing source cannot truncate a valid ZIP.

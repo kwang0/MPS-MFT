@@ -6,6 +6,7 @@ does not modify acceptance, choose energetic winners or run DMRG.
 import csv
 import json
 import re
+import sys
 import textwrap
 
 import h5py
@@ -316,6 +317,106 @@ def boundary_spin(out,data):
     save(fig,out,'boundary_spin')
 
 
+def variational_energy_cuts():
+    """Rebuild only energy-versus-parameter figures from audited endpoint sources."""
+    out = PROJECT/'docs/reports/square_fine_cuts_20260918'
+    fine = json.loads((out/'analysis.json').read_text(encoding='utf-8'))['runs']
+    coarse = json.loads((PROJECT/'docs/reports/two_basin_grid_20260915/analysis.json').read_text(encoding='utf-8'))['runs']
+    cuts = [('V', 1.4, [-.2, -.15, -.1, -.05, 0.]),
+            ('t0', -.4, [1.2, 1.25, 1.3, 1.35, 1.4])]
+    rows, slopes, references = [], [], []
+    fig, axes = plt.subplots(1, 2, figsize=(12, 5.3), layout='constrained')
+    detail, dax = plt.subplots(2, 2, figsize=(12, 8.5), layout='constrained')
+    for j, (parameter, fixed, coordinates) in enumerate(cuts):
+        group = []
+        for x in coordinates:
+            t0, v = (fixed, x) if parameter == 'V' else (x, fixed)
+            for family in ('stripe', 'pairing'):
+                candidates = [s for s in fine+coarse if (s['t0'], s['V'], s['family']) == (t0, v, family)]
+                assert len(candidates) == 1, (t0, v, family)
+                s = candidates[0]; is_fine = s in fine
+                source = s['source'].replace('\\', '/')
+                sha = s['compact_sha256'] if is_fine else s['source_sha256']
+                assert base.common.sha(PROJECT/source) == sha
+                with h5py.File(PROJECT/source, 'r') as f:
+                    assert base.text(f, 'model/transverse_geometry') == 'square'
+                    assert (f['model/U'][()], f['model/tp'][()], f['model/density'][()]) == (8., .1, .9375)
+                    assert (f['model/t0'][()], f['model/V'][()]) == (t0, v)
+                    nsites = 2*int(f['model/L'][()]); assert nsites == 128
+                    h = f['history']
+                    canonical = float(h['variational_energy'][-1])/nsites
+                    energy = float(h['target_density_corrected_variational_energy'][-1])/nsites
+                    correction = float(h['chemical_potential'][-1])*(.9375-float(h['density'][-1]))
+                    np.testing.assert_allclose(energy, canonical+correction, atol=2e-14, rtol=0)
+                    np.testing.assert_allclose(energy, s['energy_final'] if is_fine else s['corrected_energy_per_site'], atol=2e-14, rtol=0)
+                    span = float(np.ptp(h['target_density_corrected_variational_energy'][-10:]/nsites))
+                    np.testing.assert_allclose(span, s['energy_span_last10'], atol=2e-14, rtol=0)
+                    ep = float(f['model/E_p_signed'][()])
+                    coupling = float(f['model/effective_mf_coupling_tp2_over_ep'][()])
+                r = dict(cut=parameter, coordinate=x, t0=t0, V=v, family=family,
+                         sampling='fine' if is_fine else 'coarse', phase_observation=s['phase_observation'],
+                         target_corrected_energy_per_site=energy, canonical_energy_per_site=canonical,
+                         density_correction_per_site=correction, target_corrected_energy_total=energy*nsites,
+                         canonical_energy_total=canonical*nsites, sites=nsites,
+                         final10_energy_range_per_site=span, segment_iterations=s['iterations'],
+                         cumulative_iterations=s.get('cumulative_iterations', s['iterations']),
+                         accepted=s['accepted'], ep_signed=ep, coupling=coupling,
+                         job_id=s['job_id'], source=source, source_sha256=sha,
+                         config_sha256=s['config_sha256'])
+                rows.append(r); group.append(r)
+        # One common chord, using the mean of both seed endpoints at each end.
+        # No lower-envelope selection, branch-specific fit, or smoothing.
+        ends = [np.mean([r['target_corrected_energy_per_site'] for r in group if r['coordinate'] == x])
+                for x in (coordinates[0], coordinates[-1])]
+        slope = (ends[1]-ends[0])/(coordinates[-1]-coordinates[0])
+        references.append(dict(cut=parameter, x0=coordinates[0], energy_at_x0=ends[0], slope=slope))
+        for family, marker in (('stripe', 'o'), ('pairing', 's')):
+            rr = [r for r in group if r['family'] == family]
+            x = np.array([r['coordinate'] for r in rr])
+            y = np.array([r['target_corrected_energy_per_site'] for r in rr])
+            residual = 1e6*(y-(ends[0]+slope*(x-coordinates[0])))
+            for ax, values in ((axes[j], y), (dax[0,j], residual)):
+                ax.plot(x, values, **style(family))
+                for r, xx, yy in zip(rr, x, values):
+                    ax.plot(xx, yy, marker=marker, ms=6, color=COLORS[family],
+                            mfc=COLORS[family] if r['sampling']=='fine' else 'white', ls='none')
+            secants = np.diff(y)/np.diff(x)
+            drift = [(a['final10_energy_range_per_site']+b['final10_energy_range_per_site'])/(b['coordinate']-a['coordinate'])
+                     for a,b in zip(rr[:-1], rr[1:])]
+            dax[1,j].errorbar((x[:-1]+x[1:])/2, secants, yerr=drift, marker=marker,
+                             capsize=3, **style(family))
+            for a,b,value,span in zip(rr[:-1],rr[1:],secants,drift):
+                slopes.append(dict(cut=parameter,family=family,x_left=a['coordinate'],x_right=b['coordinate'],
+                                   secant_slope=float(value), final10_drift_scale=float(span)))
+        title = r'$t_0=1.4$: varying $V$' if parameter=='V' else r'$V=-0.4$: varying $t_0$'
+        xlabel = r'$V/t$' if parameter=='V' else r'$t_0/t$'
+        axes[j].set(title=title, xlabel=xlabel, ylabel=r'$E_{\mathrm{var,target}}/(Nt)$')
+        dax[0,j].set(title=title, xlabel=xlabel, ylabel=r'Energy minus common chord [$10^{-6}t$/site]')
+        dax[0,j].axhline(0, color='.5', lw=.7)
+        dax[1,j].set(xlabel=xlabel+' (interval midpoint)', ylabel=r'Adjacent secant slope $\Delta(E/N)/\Delta p$')
+        for ax in (axes[j], dax[0,j], dax[1,j]):
+            ax.grid(alpha=.2); ax.ticklabel_format(axis='y',style='plain',useOffset=False)
+        for ax in (axes[j], dax[0,j]): ax.set_xticks(coordinates)
+        dax[1,j].set_xticks((np.array(coordinates[:-1])+coordinates[1:])/2)
+    axes[0].legend(fontsize=9); dax[0,0].legend(fontsize=9)
+    fig.suptitle('Square transition cuts: full variational endpoint energies',fontsize=15)
+    fig.supxlabel('Filled markers: new 60-step runs; open: coarse endpoints (latest continuations).\n'
+                  'Lines connect independent starts with the same seed family; they are not continued phase branches. All endpoints unaccepted.', fontsize=9)
+    detail.suptitle('Energy shape after removing a common linear background',fontsize=15)
+    detail.supxlabel('Top: the same endpoint chord is subtracted from both seeds in each cut; independent y scales.\n'
+                     'Bottom: interval slopes; bars show summed final-ten energy ranges / interval width, not statistical or convergence errors.',fontsize=9)
+    save(fig,out,'variational_energy_cuts'); save(detail,out,'variational_energy_shape')
+    write_csv(out/'variational_energy_cuts.csv', rows)
+    write_csv(out/'variational_energy_slopes.csv', slopes)
+    result = dict(date='2026-09-18', energy_convention='Stored canonical variational functional including field-dependent double counting, with target-density tangent correction; no extra field-independent offset added.',
+                  chord_definition='Mean of the two seed energies at each outer endpoint, connected linearly; common reference for both seeds.',
+                  slope_definition='Adjacent endpoint secant; drift scale is sum of endpoint final-ten ranges divided by parameter spacing, not an error bound.',
+                  references=references, endpoints=rows, slopes=slopes)
+    (out/'variational_energy_analysis.json').write_text(json.dumps(base.common.clean(result),indent=2,allow_nan=False)+'\n',encoding='utf-8')
+    assert len(rows)==20 and len(slopes)==16 and not any(r['accepted'] for r in rows)
+    print('Verified 20 endpoint sources and density corrections; wrote full energy curves and 16 interval slopes.',flush=True)
+
+
 def main():
     plt.rcParams.update({'font.size':10,'axes.spines.top':False,'axes.spines.right':False})
     accounting=base.common.rows(PROJECT/'output/project_budget/additional_node_hours_reconciliations.tsv')
@@ -339,6 +440,7 @@ def main():
             history_grids(out,data,coords,'Square finer cuts');cut_summary(out,data,payload)
             profiles(out,data,[(1.4,-.05),(1.25,-.4)],'split_seed_profiles','Distinct endpoint textures at the two seed-dependent points')
             boundary_spin(out,data)
+            variational_energy_cuts()
         else:
             positive_figures(out,data,missing)
             for m in missing:
@@ -348,4 +450,7 @@ def main():
 
 
 if __name__=='__main__':
-    main()
+    if sys.argv[1:] == ['--energy-cuts-only']:
+        variational_energy_cuts()
+    else:
+        main()

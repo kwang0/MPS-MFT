@@ -65,7 +65,85 @@ are essential here. The stripe-seeded competitor has strong spin and only
 
 ![Two seed-dependent spatial profiles](split_seed_profiles.png)
 
-## What the energy differences establish
+## Full variational energies across the transition
+
+![Full variational energy along both cuts](variational_energy_cuts.png)
+
+These are **energies versus Hamiltonian parameter**, including all three new
+coordinates and both coarse endpoints on each cut. They use the full stored
+canonical variational functional, including the field-dependent mean-field
+double-counting terms, with the target-density correction
+`E_target/N = E_var/N + mu*(n_target-n)`. The effective-Hamiltonian eigenvalue
+alone is not plotted. All ladders have 128 sites, so total energies are these
+values multiplied by 128; both forms, and the uncorrected canonical energies,
+are exported in [the endpoint table](variational_energy_cuts.csv).
+The convention is the [implemented functional](../../VARIATIONAL_FUNCTIONAL.md);
+no additional field-independent perturbative offset has been introduced.
+
+On the full scale, **the V cut looks almost linear and the t0 cut smoothly
+curved**. The seed differences are too small to distinguish at this scale.
+The coarse V=0 markers use the latest 100/82-evaluation continuation endpoints,
+not the earlier parent states. Open markers distinguish coarse controls from
+the new 60-step fine runs. Each curve connects independent runs sharing a seed
+family; a seed can end in a different phase at different coordinates.
+
+![Energy curvature and adjacent-interval slopes](variational_energy_shape.png)
+
+To expose small features, the upper panels subtract **the same straight chord
+from both seed curves in a cut**. The chord joins the mean of the two seed
+energies at each outer endpoint. This removes only a linear background; it
+does not change seed gaps or slope changes. The lower panels give actual
+adjacent secants `Delta(E/N)/Delta p`, with p=V or t0, rather than a fitted
+derivative. Their bars show the sum of the two endpoints' final-ten energy
+ranges divided by the interval width: a recent-drift diagnostic, not an
+uncertainty bound. The two cuts have independent vertical scales.
+
+| Cut and interval | Stripe-seed secant | Pairing-seed secant |
+|---|---:|---:|
+| V: −0.20 → −0.15 | 1.266231 | 1.266231 |
+| V: −0.15 → −0.10 | 1.266144 | 1.266144 |
+| V: −0.10 → −0.05 | 1.267403 | 1.266212 |
+| V: −0.05 → 0 | 1.260138 | 1.261367 |
+| t0: 1.20 → 1.25 | −0.339825 | −0.340515 |
+| t0: 1.25 → 1.30 | −0.369494 | −0.368857 |
+| t0: 1.30 → 1.35 | −0.393242 | −0.393241 |
+| t0: 1.35 → 1.40 | −0.417749 | −0.417749 |
+
+**There is a small candidate bend on the V cut, but no resolved first-order
+kink.** The pairing-seed secant is nearly constant at 1.2662 through V=−0.05,
+then falls to 1.26137 in the final interval (a 0.38% decrease). The stripe-seed
+curve also turns downward. The common-background plot makes this visible
+near the change from paired to stripe outcomes. A first-order crossing can
+produce a continuous energy with a discontinuous first derivative; it need
+not produce a jump in energy. Here the interval-average slope change is
+compatible with such a weak crossing, but also with a smooth change of
+curvature. Straight segments joining five samples cannot resolve that distinction.
+
+**The t0 cut does not show an obvious sharp cusp.** Its pairing-seed slopes
+evolve −0.3405, −0.3689, −0.3932, −0.4177, with nearly regular increments.
+The broad arch after linear subtraction reflects that curvature; its polygonal
+appearance is a sampling effect, not evidence for a cusp at t0=1.30.
+Absence of a visible kink does not exclude a weak first-order transition.
+
+The energy shape and distinct textures together make first order plausible,
+especially on the V cut, but do not establish it. Only one coordinate on
+each cut retains two distinct textures; these curves do not trace two
+stationary phase branches through a crossing. Every endpoint remains
+unaccepted. The coarse t0=1.2 pairing lineage has a final-ten energy range
+1.56e−4 t/site, much larger than most others, and contributes the visible
+drift bar to the first t0 secant. Varying the interpolated E_p also varies
+g=tp²/|E_p|, so these slopes include that smooth coupling dependence and are
+not the bare nearest-neighbor density correlator or rung kinetic energy alone.
+
+Exact [secants](variational_energy_slopes.csv), [chords and source hashes](variational_energy_analysis.json),
+and PDF versions of [full curves](variational_energy_cuts.pdf) and
+[shape diagnostics](variational_energy_shape.pdf) accompany the plots.
+Regenerate just these figures with
+`python scripts/analyze_two_basin_campaigns_20260918.py --energy-cuts-only`
+from the ladder subproject. This verifies all 20 endpoint hashes, summary
+energies and density corrections without rerunning the campaign analysis.
+
+## What the seed-to-seed energy differences establish
 
 At the two split points the signed endpoint gaps are −3.189e−5 t/site
 (t0=1.25) and −5.952e−5 t/site (V=−0.05). The sums of the two final-ten

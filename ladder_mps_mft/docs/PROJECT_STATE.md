@@ -1,6 +1,6 @@
 # Current project state
 
-Last locally reviewed: 2026-09-18 (cubic grid, finer square cuts, positive V and first trellis result)
+Last locally reviewed: 2026-09-18 (full energy cuts and actual LaTeX/PDF notes updated)
 
 This is the canonical mutable snapshot for resuming work. It is deliberately
 short. Stable rules belong in `AGENTS.md` and the method documents; durable
@@ -9,10 +9,9 @@ history belongs in `docs/RUN_LOG.md`.
 ## Repository snapshot
 
 - Branch: `codex/mps-mft-phase0-refactor`
-- Analysis baseline: `558c2b2` (Expand MPS-MFT workflow and analysis support).
-- Existing uncommitted trellis implementation/preparation changes are
-  preserved alongside the September 18 analysis additions. An untracked
-  root `.claude/` directory remains outside this subproject's analysis scope.
+- Baseline for this update: `bb76a71` (trellis plotting adapter fix).
+- The earlier trellis implementation and campaign reports are committed.
+  An untracked root `.claude/` directory remains outside this analysis scope.
 - Local `output/` and simulation HDF5 files are excluded from Git. The small
   `data/two_basin_references.h5` is a versioned seed-input exception.
 - The finer-cut campaign added explicit V-axis E_p interpolation and changed
@@ -23,6 +22,16 @@ history belongs in `docs/RUN_LOG.md`.
 Recheck the branch, commit, and working tree at the start of each new task.
 
 ## Current scientific position
+
+The finer-cut report now includes [full variational energies versus V and t0](reports/square_fine_cuts_20260918/variational_energy_cuts.png),
+using twelve fine endpoints and eight coarse anchors, including the latest
+V=0 continuations. A common-background plot exposes a small final-interval
+slope decrease on the V cut (0.38% for the pairing seed), while t0 shows
+gradual curvature. Neither resolves a first-order kink or accepted crossing.
+The actual [manuscript LaTeX/PDF](manuscript/README.md), living methods notes
+and literature-review project section now incorporate the September 18 data;
+the manuscript cutoff explicitly advances to September 18. The Overleaf
+bundle includes the new figures. This corrects the earlier notes-only update.
 
 September 18 plotting fix: `plot_phase1_mf_observables.jl` now reads trellis
 fields/seeds/full histories under `ladders/A` by default; `ladder=:B` selects

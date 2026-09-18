@@ -49,6 +49,27 @@ the observed trajectories without making them accepted solutions.
 
 ## 2. Finer square cuts identify two points with competing trajectories
 
+![Full variational energies across the square transition cuts](../square_fine_cuts_20260918/variational_energy_cuts.png)
+
+The full target-density-corrected canonical energies include the new fine
+points and the coarse endpoints, with the latest V=0 continuations. **The V
+cut is almost linear; the t0 cut has gradual curvature.** Both seed curves
+nearly overlap on the full energy scale. They connect independent starts,
+not one fixed phase continued through parameter space.
+
+![Energy shape and interval slopes](../square_fine_cuts_20260918/variational_energy_shape.png)
+
+Subtracting one common straight chord per cut reveals a small bend between
+V=−0.05 and 0. The pairing-seed interval slope falls from approximately
+1.2662 to 1.2614, a 0.38% change. This is compatible with a weak first-order
+kink, but five samples cannot distinguish a derivative jump from smooth
+curvature. The t0 slopes vary nearly regularly, with no obvious sharp cusp.
+The broad arch there after linear subtraction is not a measured singularity.
+All energies include the implemented MF double-counting terms; they are not
+effective-Hamiltonian eigenvalues or seed-energy gaps. Recent-drift bars are
+diagnostics rather than convergence error bounds. [Exact energies, slopes,
+normalization and interpretation](../square_fine_cuts_20260918/README.md#full-variational-energies-across-the-transition).
+
 ![Finer square cuts](../square_fine_cuts_20260918/cut_summary.png)
 
 Along **t0=1.4**, both seeds are paired at V=−0.15 and −0.10. They remain

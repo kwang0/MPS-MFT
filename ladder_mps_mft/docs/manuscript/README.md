@@ -2,14 +2,14 @@
 
 Created 15 September 2026. This is an editable manuscript starting point using
 the existing annotated literature review and locally synchronized analyses
-through September 13.
+through September 18 (updated from the initial September 13 cutoff).
 
 Results-note update, September 18: the [combined campaign review](../reports/campaign_review_20260918/README.md)
-now adds the complete cubic grid, finer square cuts, positive-V tests and
-first trellis result. These findings are linked in SOURCE_NOTES but are not
-yet incorporated into this dated LaTeX/PDF draft.
+is now incorporated into the actual LaTeX and rebuilt PDF: complete square
+and cubic grids, square continuations, finer-cut full variational energies
+and slope diagnostics, positive-V tests, and the first trellis result.
 
-The compiled draft has 16 pages and 34 cited references, including five new
+The rebuilt draft has 21 pages and retains 34 cited references, including five additional
 references from the stripe, neutron-scattering, and coherence discussion.
 
 - [Edit the LaTeX document](introduction_and_results.tex).
@@ -26,13 +26,15 @@ references from the stripe, neutron-scattering, and coherence discussion.
 3. Current results: isolated-ladder gaps and correlations; response discovery;
    the revision of the early paired-basin interpretation; the two raw anchor
    comparisons; stripe wavevectors and slow texture relaxation; canonical
-   energies and the bond-dimension comparison; remaining physical controls.
-4. An appendix linking claims to eleven groups of local evidence.
+   energies and the bond-dimension comparison; complete grid results, fine-cut
+   energy shapes, positive-V and trellis outcomes; remaining physical controls.
+4. An appendix linking claims to sixteen groups of local evidence.
 
 The document preserves provisional status and historical acceptance flags.
-The prepared longer-ladder seeds and incomplete grid coverage are not
-presented as completed physics results. The included spatial figure is reused
-from the September 12 analysis without changing its data.
+The prepared longer-ladder seeds and partial positive-V/trellis logs are not
+presented as completed spatial results. The earlier spatial figure is reused
+from the September 12 analysis, and three figures are added from the September
+18 analysis. The PDFs and LaTeX sources are updated together.
 
 ## Build locally
 
@@ -65,6 +67,12 @@ manuscript/
 reports/
   two_basin_v000_20260912/
     profile_evolution.pdf
+  cubic_two_basin_grid_20260918/
+    preliminary_phase_diagram.pdf
+  square_fine_cuts_20260918/
+    variational_energy_cuts.pdf
+    variational_energy_shape.pdf
+METHODS_NOTES.tex
 ```
 
 Set the main document to `manuscript/introduction_and_results.tex`, then
@@ -74,9 +82,10 @@ Use the normal pdfLaTeX compiler with BibTeX (the documents use natbib).
 The path handling follows the project-root behavior documented in
 [Overleaf's multi-file guidance](https://www.overleaf.com/learn/latex/Multi-file_LaTeX_projects).
 
-The figure is required, even though it is outside the two source folders.
-The Git-tracked [Overleaf upload ZIP](overleaf_upload.zip) contains these five
-files plus these instructions, so it can be downloaded from another device.
+All four figure PDFs are required, even though they are outside the two source
+folders. The Git-tracked [Overleaf upload ZIP](overleaf_upload.zip) contains
+the LaTeX sources, bibliographies, living methods notes, required figures and
+these instructions, so it can be downloaded from another device.
 Regenerate it after later source edits by running
 `python package_overleaf.py` from this directory (Python standard library only).
 The ZIP is a generated snapshot; edit the original sources, not its contents.
@@ -87,6 +96,6 @@ The checked build used the existing repository-local Tectonic 0.17.0 executable.
 Build logs, extracted-text checks, and rendered pages are under the ignored
 output/manuscript_draft directory. No DMRG calculation is part of this build.
 
-Validation found no unresolved citations or cross-references, overfull text
-boxes, or text outside the checked margins. All 16 local evidence links and the
-reused figure resolve. Every rendered page was visually inspected.
+The September 18 rebuild is checked for unresolved citations/references,
+missing figures and layout warnings, with visual inspection of the added
+results and figures. Source links and packaged figures are validated locally.

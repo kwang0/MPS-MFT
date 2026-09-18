@@ -16,6 +16,10 @@ accepted. No simulation controls or acceptance flags changed.
   stripe/paired trajectories at (1.25,-0.4) and (1.4,-0.05). Signed endpoint
   energy gaps are diagnostics only. The weak spin of the paired V=-0.05
   trajectory is concentrated near the ends; central spin still decays.
+  Full energy-versus-parameter plots now include both coarse endpoints per
+  cut and the latest V=0 continuations. A small V-slope downturn is visible
+  after common linear subtraction; t0 curvature is gradual. A first-order
+  kink is not resolved by the current five-point cuts.
 - Square (1.2,+0.2): three completed starts lose pairing and reach stripes.
   The period-eight intertwined seed has 46 complete log records, no state.
 - Trellis: the one-ladder stripe seed becomes paired after 60 sweeps. Other
@@ -58,6 +62,8 @@ remain in force. First-segment ceilings do not authorize blanket extensions.
 Current findings and costs live in `PROJECT_STATE.md` and the linked detailed
 reports; `RUN_LOG.md` has the append-only provenance, commands and validation
 record. The September 16 partial snapshot and September 15 preparation reports
-are retained as history and now link to the September 18 results. The manuscript
-still uses numerical evidence through September 13; its notes flag the newer
-results without silently changing the draft PDF.
+are retained as history and now link to the September 18 results. At the user's
+request the actual manuscript, methods notes and literature-review LaTeX/PDF
+now incorporate the new results. The manuscript explicitly uses numerical
+evidence through September 18, including full energy cuts and slope diagnostics;
+the bibliography and literature-search cutoff are unchanged.

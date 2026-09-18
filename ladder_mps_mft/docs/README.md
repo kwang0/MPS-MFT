@@ -43,6 +43,8 @@ The latest synchronized results are in the
 It brings together all 18 cubic starts, all 12 finer square starts, three
 completed positive-V square seeds and the first completed trellis run,
 with histories, spatial profiles, convergence diagnostics and cost evidence.
+The finer-square report also plots full canonical variational energies against
+both cut parameters, with common-background and interval-slope diagnostics.
 All34 completed histories remain unaccepted. Cubic is stripe-like throughout;
 two finer square points retain distinct seed-dependent textures; positive-V
 square has not retained pairing in its three completed starts; the trellis
@@ -72,12 +74,15 @@ energy normalization and the one-/two-ladder spatial ansatz distinction.
 
 For manuscript background, see the
 [introduction and results draft](manuscript/README.md), created September 15
-with numerical evidence through September 13. Its 16-page PDF and 34 references
-remain a dated starting point; the source notes now link to the newer results.
+and now updated in LaTeX and PDF with numerical evidence through September 18.
+It includes the complete grids, full transition-cut energies, positive-V and
+trellis outcomes, while retaining its 34 references and provisional status.
 The [coupled-ladder literature review](literature/README.md) provides annotated
-sources, LaTeX/PDF and 49 references. Its source notes qualify the legacy
-positive-V interpretation with the new square data without claiming a fresh
-literature search.
+sources, LaTeX/PDF and 49 references. Its actual project-evidence section now
+qualifies the legacy positive-V interpretation with the new square data,
+without claiming a fresh literature search. The [living methods notes](METHODS_NOTES.tex)
+([compiled PDF](METHODS_NOTES.pdf))
+also describe the raw-update protocol and energy-shape interpretation.
 
 The deferred [finite-size seed snapshot](reports/finite_size_seeds_20260906/README.md)
 retains four chi=200 L=96/L=128 pairing/stripe seeds with fixed L=64 coupling.

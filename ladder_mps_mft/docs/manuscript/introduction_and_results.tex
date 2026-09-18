@@ -39,7 +39,7 @@
 \title{Pairing, Stripes, and Competing Order\\in Coupled Hubbard Ladders\\
   \large Introduction, Background, and Current Results}
 \author{Ladder MPS+MF project\\Working manuscript draft}
-\date{15 September 2026}
+\date{Updated 18 September 2026}
 
 \begin{document}
 \maketitle
@@ -56,7 +56,12 @@ The isolated repulsive ladder exhibits a finite-system spin gap and substantial
 pairing correlations, whereas the latest square-array trajectories at zero
 nearest-neighbor interaction develop strong stripe textures. At an attractive
 interaction, two contrasting initial states instead approach a common paired
-state. These observations motivate a distinction between local pairing
+state. The completed unfrustrated-cubic grid instead reaches stripes at all
+nine tested coordinates. Finer square cuts retain distinct textures near
+the boundary, with a small change in energy slope along the interaction cut
+but no resolved first-order singularity. Three completed repulsive-$V$
+square starts lose pairing; the first completed trellis stripe start develops
+it. These observations motivate a distinction between local pairing
 tendencies and the order selected in an array. The numerical results remain
 finite-length, finite-bond-dimension evidence, with explicit limits on
 self-consistency, response completeness, and thermodynamic interpretation.
@@ -67,7 +72,7 @@ Sections~\ref{sec:intro}--\ref{sec:background} are draft manuscript prose.
 Section~\ref{sec:results} is a dated collection of results and interpretation,
 including unresolved points that must remain visible during manuscript
 development. The evidence cutoff is the synchronized analyses through
-13 September 2026; the literature discussion also incorporates the
+18 September 2026; the literature discussion also incorporates the
 15 September synthesis. Appendix~\ref{sec:evidence} identifies the local
 sources. No new many-body calculation is reported here.
 
@@ -641,6 +646,172 @@ the applied partner fields with current correlations; raw self-consistency
 iteration is not guaranteed to minimize a single self-consistent state's
 energy monotonically.
 
+\subsection{Complete square and unfrustrated-cubic grids}
+\label{sec:complete-grids}
+
+The September~18 review extends the anchor comparison to
+$t_0/t=1.0,1.2,1.4$ and $V/t=0,-0.2,-0.4$, with $U/t=8$,
+$n=0.9375$, $t_\perp/t=0.1$, $L=64$ rungs and $\chi=200$.
+The two starts are reciprocal 95\%/5\% mixtures of the reference stripe and
+paired correlations, reconstructed with the target couplings. They evolve
+with raw MF updates, without Anderson acceleration. All phase descriptions
+below refer to finite-run physical correlations, not certified minima
+(\ev{campaign}).
+
+After including both $(1.4,0)$ continuations, the coarse square grid has
+seven stripe coordinates and two paired coordinates, $(1.4,-0.4)$ and
+$(1.4,-0.2)$. Both seed families now reach the same qualitative basin at
+each coordinate. At $(1.4,0)$ the stripe and pairing lineages contain
+100 and 82 cumulative evaluations, respectively; the late pairing collapse
+seen in the earlier history is therefore followed by a stripe endpoint.
+The whole square grid contains 902 evaluations across 18 lineages, including
+20 source jobs, with no formally accepted endpoint (\ev{square-complete}).
+
+In contrast, all 18 unfrustrated-cubic starts reach essentially unpaired
+CDW/SDW stripes after 60 evaluations. Physical leg-odd spin RMS ranges from
+0.280 to 0.356, while the largest leg-pair RMS is $2.21\times10^{-11}$.
+The dominant charge and spin modes are $m=4$ and 30, corresponding to
+nominal 16-rung charge and 32-rung staggered-spin-envelope periods.
+The two square paired coordinates are striped in cubic. Every cubic
+endpoint passes its final energy-window, density, inner-DMRG and identity
+checks; remaining field/profile and slow-mode checks prevent acceptance.
+This is evidence of geometry-dependent nonlinear basin selection, not an
+energetic ranking of different Hamiltonians or an exclusion of every other
+cubic basin.
+
+\begin{figure}[htbp]
+ \centering
+ \includegraphics[width=\textwidth]{\projectdocroot/reports/cubic_two_basin_grid_20260918/preliminary_phase_diagram.pdf}
+ \caption{Unfrustrated-cubic grid from the two reference seed families.
+ Both starts reach stripe-like endpoints at every tested coordinate.
+ These are observed finite-run outcomes at $\chi=200$; none is an accepted
+ fixed point. Source: \ev{campaign}.}
+ \label{fig:cubic-grid}
+\end{figure}
+
+\subsection{Finer square cuts and the shape of the variational energy}
+\label{sec:fine-energy}
+
+The finer cuts add $V/t=-0.15,-0.10,-0.05$ at $t_0/t=1.4$ and
+$t_0/t=1.25,1.30,1.35$ at $V/t=-0.4$, with 60 raw evaluations per seed.
+Both seeds reach paired trajectories at four new points. Distinct stripe
+and paired trajectories survive at $(1.25,-0.4)$ and $(1.4,-0.05)$.
+Their signed endpoint energy differences, pairing seed minus stripe seed,
+are $-3.189\times10^{-5}$ and $-5.952\times10^{-5}\,t$/site.
+These exceed the sums of the corresponding final-ten energy ranges,
+$1.574\times10^{-7}$ and $7.461\times10^{-8}\,t$/site, but recent drift
+does not bound the remaining convergence error. All twelve endpoints remain
+unaccepted (\ev{fine-cuts}).
+
+Figure~\ref{fig:energy-cuts} shows the full stored variational energy along
+both cuts, including the coarse endpoints and the latest $V=0$ continuations.
+The quantity is the canonical functional with its field-dependent
+double-counting terms and target-density correction,
+\begin{equation}
+ e_{\mathrm{target}}=E_{\mathrm{var}}/N_s+
+ \mu(n_{\mathrm{target}}-n),\qquad N_s=2L=128.
+\end{equation}
+It is not the effective-Hamiltonian eigenvalue. No additional
+field-independent perturbative offset has been introduced. On this scale
+the two seed curves nearly overlap: the $V$ cut is almost linear, while
+the $t_0$ cut has gradual curvature. Curves identify the initial seed,
+not a persistent phase, because independent runs can change their outcome
+as the parameter changes.
+
+\begin{figure}[htbp]
+ \centering
+ \includegraphics[width=\textwidth]{\projectdocroot/reports/square_fine_cuts_20260918/variational_energy_cuts.pdf}
+ \caption{Full canonical variational endpoint energies, corrected to the
+ target density. Filled points are the new 60-step starts; open points use
+ the coarse endpoints and latest continuations. Lines guide the eye between
+ independent starts; they are not parameter-continuation branches.
+ Total energy equals the displayed energy per site times 128.}
+ \label{fig:energy-cuts}
+\end{figure}
+
+To resolve small shape changes, Fig.~\ref{fig:energy-shape} subtracts one
+common linear chord from both seed curves on each cut. Its endpoints are
+the mean seed energies at the two outer coordinates. This preserves both
+seed gaps and changes in slope. The lower panels display adjacent secants
+$\Delta e/\Delta p$, with $p=V$ or $t_0$, rather than a fitted derivative.
+Along the pairing-seed $V$ curve the slopes are approximately 1.266231,
+1.266144, 1.266212 and 1.261367. Thus the last interval, $-0.05\le V/t\le0$,
+has a slope smaller by about 0.38\% than its predecessor. The stripe-seed
+curve also bends downward in that interval. This small feature lies near
+the change from paired to stripe outcomes and is compatible with a weak
+first-order crossing, but does not resolve one.
+
+For a first-order transition the minimizing energy can remain continuous
+while its first derivative jumps. Five sampled coordinates do not
+distinguish that kink from a continuous change of curvature. On the $t_0$
+cut the pairing-seed secants, $-0.340515,-0.368857,-0.393241,-0.417749$,
+change nearly regularly, with no obvious sharp cusp at this resolution.
+The broad arch after linear subtraction is not itself a singularity.
+Absence of a visible kink does not exclude a weak first-order transition.
+
+\begin{figure}[p]
+ \centering
+ \includegraphics[width=\textwidth]{\projectdocroot/reports/square_fine_cuts_20260918/variational_energy_shape.pdf}
+ \caption{Energy shape and adjacent-interval slopes. The same chord is
+ subtracted from both seed curves within each cut; the two cuts have
+ independent vertical scales. Bars on the secants are the sum of endpoint
+ final-ten energy ranges divided by interval width, not statistical or
+ convergence error bounds. In particular, the coarse $t_0=1.2$ pairing
+ lineage still has an energy range $1.56\times10^{-4}\,t$/site.
+ Polygonal corners between samples are not measured derivative jumps.}
+ \label{fig:energy-shape}
+\end{figure}
+
+The two distinct textures at one point on each cut make metastability and
+first order worth testing. However, these are not two stationary phase
+branches traced through a crossing, nor parameter-sweep hysteresis.
+The signed $E_p$ values at the new points were linearly interpolated between
+the coarse endpoints as requested; $g=t_\perp^2/|E_p|$ therefore also changes
+along each cut. The plotted slopes include this coupling dependence and
+cannot be identified with the bare $V$ or rung-hopping conjugate observable
+alone. Coarse and fine runs also have different stopping controls.
+
+The weak spin at the paired $(1.4,-0.05)$ endpoint requires a spatial
+qualification. Its usual spin RMS on rungs 6--59 rises 1.50\% over the last
+ten evaluations to 0.005606, but 96.7\% of its spin-squared weight lies in
+the outer 14 rungs at each end. Central 32-rung spin still decreases, while
+leg-pair RMS remains 0.032991. This is not established bulk coexistence or
+a demonstrated bulk return to stripes. At paired $(1.25,-0.4)$, the spin
+remainder decreases by 52.1\% over the final ten evaluations.
+
+\subsection{Positive interaction and the first trellis result}
+\label{sec:positive-trellis}
+
+The square $(t_0/t,V/t)=(1.2,+0.2)$ test has three completed 60-step
+starts: stripe, paired, and an intertwined period-16 pattern. All lose
+their anomalous pairing, reaching spin RMS near 0.233 and leg-pair RMS
+below $8.3\times10^{-10}$, with nominal charge/spin-envelope periods
+16/32. The period-eight intertwined start has 46 complete scalar log
+records but no synchronized spatial state. The three complete results do
+not reproduce the legacy frustrated-cubic coexistence and do not support
+a geometry-independent rule that repulsive $V$ promotes intertwining.
+The missing wavelength test and other possible basins remain open
+(\ev{positive-v}).
+
+The first completed trellis run gives the opposite conversion. At
+$(t_0/t,V/t)=(1,0)$ and zigzag hoppings $\tau_0/t=\tau_1/t=0.1$,
+the one-ladder stripe-dominated start develops pairing over 60 cell sweeps.
+Physical spin RMS decreases from 0.0627 to $1.21\times10^{-5}$ and leg-pair
+RMS increases from 0.00965 to 0.01797. The final mean leg/rung amplitudes
+have opposite signs, $+0.01796/-0.03292$. Square and unfrustrated cubic
+instead reach stripes at the same bare-ladder coordinate. This comparison
+uses physical correlations; trellis fields include additional normal-bond
+Hartree contributions and cannot be inverted with the square formula.
+
+The trellis global residual checks pass late, but energy, inner-DMRG and
+channel/profile gates still fail. The last-ten energy range is
+$2.84\times10^{-7}\,t$/site. Other synchronized logs contain 21 one-ladder
+pairing, 18 two-ladder stripe and one two-ladder pairing cell sweeps, without
+spatial artifacts. The skew one-ladder repetition and rectangular two-ladder
+$A/B$ cell are distinct spatial ansatzes, not temporal two-cycle phases.
+No comparison of completed trellis branches or cross-geometry energies is
+yet justified (\ev{trellis}).
+
 \subsection{Scope of the emerging physical interpretation}
 
 The isolated-ladder and coupled-array observations separate pair formation
@@ -719,9 +890,12 @@ The remaining high-value controls are:
  Compare pair correlations across bond classes and bulk reference positions.
 \end{enumerate}
 
-The wider square grid supplies coverage and access information, while the
-available cubic coverage is incomplete in the reviewed local record.
-No universal effect of $V$, geometry-wide phase ordering, transition
+The completed square and unfrustrated-cubic grids now supply contrasting
+finite-run phase patterns. The finer cuts identify competing textures but
+do not resolve the order of the transition. The September~18 campaigns
+contain 34 completed 60-step histories, or 2040 evaluations, all unaccepted;
+the earlier coarse square grid is a separate data set. No universal effect
+of $V$, certified ground-state phase diagram, transition
 temperature, phase stiffness, pair-density-wave state, or dynamical magnetic
 spectrum is claimed. The present contribution is a developing account of
 how local pairing tendencies and competing static orders relate in a
@@ -804,6 +978,35 @@ $V=0$ basin.
  \href{run:../reports/two_basin_v000_20260912/README.md}{Analysis and follow-up}.
  Figure~\ref{fig:zero} is reused without modifying the underlying data.
  \path{reports/two_basin_v000_20260912/README.md}.
+
+ \item\label{ev:campaign}
+ \textbf{Combined synchronized campaign review, September~18.}
+ \href{run:../reports/campaign_review_20260918/README.md}{Combined report} and
+ \href{run:../reports/cubic_two_basin_grid_20260918/README.md}{complete cubic grid}.
+ Source inventories, physical profiles, gate checks and accounting coverage
+ are retained with the detailed reports.
+
+ \item\label{ev:square-complete}
+ \textbf{Complete coarse square grid and continuations.}
+ \href{run:../reports/two_basin_grid_20260915/README.md}{Updated square report},
+ including both $(1.4,0)$ continuations and the historical parent records.
+
+ \item\label{ev:fine-cuts}
+ \textbf{Finer square cuts and full energy curves, September~18.}
+ \href{run:../reports/square_fine_cuts_20260918/README.md}{Cut report},
+ \href{run:../reports/square_fine_cuts_20260918/variational_energy_cuts.csv}{endpoint energy table},
+ and \href{run:../reports/square_fine_cuts_20260918/variational_energy_analysis.json}{energy audit}.
+ Twenty endpoint sources include the twelve fine runs and eight coarse anchors.
+
+ \item\label{ev:positive-v}
+ \textbf{Square repulsive-interaction test, September~18.}
+ \href{run:../reports/square_positive_v_20260918/README.md}{Four-seed comparison};
+ three spatial endpoints and one partial scalar log.
+
+ \item\label{ev:trellis}
+ \textbf{First trellis endpoint and partial logs, September~18.}
+ \href{run:../reports/trellis_progress_20260918/README.md}{Trellis report} and
+ \href{run:../TRELLIS_MEAN_FIELD.md}{spatial-cell method contract}.
 
  \item\label{ev:length}
  \textbf{Prepared finite-size seeds, September~6.}

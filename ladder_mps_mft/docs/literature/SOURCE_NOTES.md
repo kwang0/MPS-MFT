@@ -163,3 +163,7 @@ These observations strengthen the need to match interaction topology,
 geometry, density and numerical status before comparing to isolated-ladder
 papers or the Bollmark2023 benchmark. They do not alter the summaries or
 bibliographic metadata above; no new literature search was performed.
+
+This qualification is now incorporated into the actual LaTeX/PDF under
+"Project evidence update: 18 September 2026", alongside the finer square
+energy-shape result. The source summaries and 49-paper bibliography are unchanged.

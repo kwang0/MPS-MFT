@@ -36,7 +36,7 @@
 
 \title{Ladder MPS+Mean-Field Project: Living Methods Notes}
 \author{Kevin Wang and contributors}
-\date{Living notes --- updated 9 September 2026}
+\date{Living notes --- updated 18 September 2026}
 
 \begin{document}
 
@@ -728,6 +728,15 @@ orders outside the present real one-/two-sublattice description.  Final claims
 must use the measured full Jacobian together with converged variational-energy
 comparisons.
 
+The September~18 nonlinear runs illustrate the limitation of this
+kernel-level expectation: both tested starts reach stripes throughout the
+unfrustrated-cubic grid, including two coordinates where square remains
+paired. Stronger bare pair feedback does not by itself imply a larger paired
+region when the normal competitors and the dressed ladder response change.
+The dated results are discussed in
+\path{docs/manuscript/introduction_and_results.tex} and
+\path{docs/reports/campaign_review_20260918/README.md}.
+
 \section{MPS ground-state solve and density targeting}
 
 \subsection{Finite-system DMRG}
@@ -1042,7 +1051,7 @@ field-independent perturbative offset has not been restored.
 \section{Observables and validation diagnostics}
 \label{sec:diagnostics}
 
-\subsection{Structure factors and \(K_\rho\)}
+\subsection{Structure factors and \texorpdfstring{\(K_\rho\)}{K rho}}
 
 For \(O_i=n_i\) or \(S_i^z\), the connected structure factor is
 \begin{equation}
@@ -1136,6 +1145,53 @@ boundary/bulk-window checks, consistent order diagnostics, sector gaps, and
 seed/basin robustness.  The implementation currently excludes complex fields
 and flux order.
 
+\subsection{September 18 raw-update campaign and energy-shape diagnostics}
+
+The current two-family protocol mixes 95\% of one reference correlation
+profile with 5\% of the competing reference, then rebuilds the fields with
+the target couplings. The references are the stripe at $(t_0,V)=(1,0)$
+and paired state at $(1.4,-0.4)$. The recent cubic grid and finer square
+cuts use $L=64$, $\chi=200$, raw MF updates, no Anderson acceleration,
+and a 60-evaluation cap. Earlier square anchors, remainder runs and
+continuations retain their original controls. These are representative
+campaign settings, not a replacement for the generic algorithms above.
+
+The September~18 local review contains 34 complete 60-step histories:
+18 cubic, 12 finer-square, three positive-$V$ square and one trellis.
+None is formally accepted. Cubic reaches stripes at all nine coordinates;
+the finer square cuts retain two seed-dependent texture pairs. The three
+completed $(1.2,+0.2)$ square starts lose pairing, whereas the one-ladder
+trellis stripe start at $(1,0)$ develops opposite-sign leg/rung pairing.
+Detailed profiles, failed gates and partial-run boundaries belong to
+\path{docs/reports/campaign_review_20260918/README.md}.
+
+For a transition cut, plot the full stored target-corrected canonical
+energy per physical site against the varied Hamiltonian parameter, including
+coarse endpoints. Label curves by initial seed unless a phase is actually
+continued through parameter space. The diagnostic endpoint energy does
+not become an accepted branch energy simply because its last few values
+are flat. Any signed gap between unaccepted endpoints remains a diagnostic.
+
+Small energy-shape changes can be exposed by subtracting one common affine
+reference from both curves. In the present plots that reference joins the
+mean of the two seed energies at each outer endpoint. This preserves seed
+gaps and slope changes; separate fits to each seed would not do so. Adjacent
+secants $\Delta(E_{\mathrm{target}}/N_s)/\Delta p$ are interval averages,
+not derivatives measured at a phase boundary. The sum of the endpoints'
+last-ten energy ranges divided by $\Delta p$ diagnoses recent drift only;
+it is neither a statistical error bar nor a bound on remaining relaxation.
+
+The square $t_0=1.4$ cut has a small final-interval downturn in slope
+between $V=-0.05$ and 0 (about 0.38\% for the pairing-seed curve).
+The $V=-0.4$ cut has nearly regular curvature in $t_0$. These observations
+do not resolve a discontinuous first derivative of a minimizing energy.
+The two textures at one coordinate per cut motivate a first-order test,
+but are not parameter-sweep hysteresis or two accepted branches crossing.
+Also, the interpolated $E_p$ changes $g=t_\perp^2/|E_p|$ along each cut:
+the energy slope includes the changing transverse functional as well as
+the explicit bare-ladder parameter. All plotted energies retain the
+implemented convention of Sec.~\ref{sec:variational}.
+
 \section{Artifacts, provenance, and branch selection}
 
 Each HDF5 state records the complete configuration, applied and measured field
@@ -1151,8 +1207,9 @@ selection data plus hashes and the full-artifact location.  A compact state may
 be plotted, compared, or used for field-only inheritance, but cannot be used as
 an MPS restart.
 
-The comparison tool admits only accepted period-one states or explicitly
-enabled, raw-map-validated orbits with matching fingerprints.  For scans, keep
+The comparison tool requires matching fingerprints and accepts only gated
+period-one states or explicitly enabled orbits validated with the raw map.
+For scans, keep
 independent, forward, reverse, and metastable continuations as distinct
 lineages rather than overwriting a higher-energy basin.
 
@@ -1200,6 +1257,9 @@ clearly labeled representative settings.
 \toprule
 Date & Revision & Summary \\
 \midrule
+2026-09-18 & 0.9 & Added the current raw two-seed campaign, qualified the
+kernel-level geometry expectation with the new data, and specified full
+energy-cut, common-background and secant-slope diagnostics.\\
 2026-09-09 & 0.8 & Distinguished correlators from Hamiltonian fields and
 expanded the canonical constraint, double counting, residual density
 correction, and orbit-averaged branch comparison.\\
