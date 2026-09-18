@@ -24,6 +24,14 @@ Recheck the branch, commit, and working tree at the start of each new task.
 
 ## Current scientific position
 
+September 18 plotting fix: `plot_phase1_mf_observables.jl` now reads trellis
+fields/seeds/full histories under `ladders/A` by default; `ladder=:B` selects
+the second spatial ladder. The reported missing-seed error was a schema-path
+mismatch, not missing data. The actual 60-sweep file renders with 61 slider
+positions including its seed. Eighty-eight focused plotting checks pass;
+no simulation artifacts or acceptance flags changed. See the
+[plotting instructions](TRELLIS_MEAN_FIELD.md#plotting-saved-mf-histories).
+
 The [September 18 combined review](reports/campaign_review_20260918/README.md)
 is the current results entry point. It covers 34 complete chi=200 histories,
 2040 MF evaluations, plus partial square/trellis logs. All 34 completed

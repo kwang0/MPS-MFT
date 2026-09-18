@@ -16,6 +16,13 @@ Interactive use from the MPS-MFT checkout:
     plot_phase1_seed_profiles(state)
     plot_phase1_mf_profiles_from_file(state; source=:applied)
 
+Trellis files keep their fields and complete histories under `ladders/A`
+(and `ladders/B` for a two-ladder cell). These functions select A by default;
+pass `ladder=:B` to inspect B separately. The seed is read from that ladder's
+saved initial fields, with no external seed file required. These plots show
+MF fields; trellis mu_cdw also contains normal-bond contributions and must
+not be interpreted directly as physical density or spin.
+
 Schema-v7 files additionally store the exact time-zero seed inside the field
 history; schema-v5/v6 files use their equivalent `fields/initial` record.
 In profile/history figures that seed is displayed as MF iteration 1, followed
@@ -83,6 +90,21 @@ end
 function _p1_read_fields(file, path::AbstractString)
     haskey(file, path) || throw(ArgumentError("state has no field group '$path'"))
     return _p1_read_fields(file[path])
+end
+
+function _p1_field_root(file; ladder=nothing)
+    if !haskey(file, "ladders")
+        ladder === nothing || throw(ArgumentError(
+            "ladder selection is only available for trellis spatial-cell files",
+        ))
+        return file
+    end
+    name = uppercase(String(something(ladder, :A)))
+    haskey(file, "ladders/$name") || throw(ArgumentError(
+        "state has no spatial ladder '$name'; available ladders: " *
+        join(sort!(String.(collect(keys(file["ladders"])))), ", "),
+    ))
+    return file["ladders/$name"]
 end
 
 function _p1_metadata(file)
@@ -205,12 +227,13 @@ function _p1_local_artifact_path(recorded_path::AbstractString)
     return ""
 end
 
-function phase1_seed_fields(state_file::AbstractString; parent_path=nothing)
+function phase1_seed_fields(state_file::AbstractString; parent_path=nothing, ladder=nothing)
     isfile(state_file) || throw(ArgumentError("state file does not exist: $state_file"))
     metadata, saved_initial = h5open(state_file, "r") do file
+        root = _p1_field_root(file; ladder)
         return (
             _p1_metadata(file),
-            haskey(file, "fields/initial") ? _p1_read_fields(file, "fields/initial") : nothing,
+            haskey(root, "fields/initial") ? _p1_read_fields(root, "fields/initial") : nothing,
         )
     end
     saved_initial !== nothing && return saved_initial
@@ -296,11 +319,13 @@ function _p1_complete_history(
     state_file::AbstractString,
     source::Symbol;
     include_seed::Bool=true,
+    ladder=nothing,
 )
     source in (:applied, :measured) || throw(ArgumentError(
         "history_source must be :applied or :measured",
     ))
-    return h5open(state_file, "r") do file
+    return h5open(state_file, "r") do state
+        file = _p1_field_root(state; ladder)
         base = "history/fields/$(String(source))"
         haskey(file, base) || return nothing
         iterations = Int.(read(file, "history/iteration"))
@@ -334,20 +359,21 @@ function _p1_final_iteration(file)
     return isempty(iterations) ? 0 : last(iterations)
 end
 
-function _p1_saved_snapshots(state_file::AbstractString; include_seed::Bool=true, parent_path=nothing)
+function _p1_saved_snapshots(state_file::AbstractString; include_seed::Bool=true, parent_path=nothing, ladder=nothing)
     snapshots = NamedTuple[]
     if include_seed
         push!(snapshots, (
             label="seed",
             iteration=0,
             role=:seed,
-            fields=phase1_seed_fields(state_file; parent_path),
+            fields=phase1_seed_fields(state_file; parent_path, ladder),
         ))
     end
 
     best_path = joinpath(dirname(state_file), "checkpoint_best.h5")
     best_snapshot = if isfile(best_path)
-        h5open(best_path, "r") do file
+        h5open(best_path, "r") do state
+            file = _p1_field_root(state; ladder)
             (
                 label="best",
                 iteration=_p1_final_iteration(file),
@@ -359,7 +385,8 @@ function _p1_saved_snapshots(state_file::AbstractString; include_seed::Bool=true
         nothing
     end
 
-    terminal_snapshots = h5open(state_file, "r") do file
+    terminal_snapshots = h5open(state_file, "r") do state
+        file = _p1_field_root(state; ladder)
         values = NamedTuple[]
         if haskey(file, "cycle_members")
             names = sort!(String.(collect(keys(file["cycle_members"]))))
@@ -407,9 +434,11 @@ function _p1_snapshot_fields(
     source::Symbol;
     cycle_phase::Integer=1,
     parent_path=nothing,
+    ladder=nothing,
 )
-    source == :seed && return phase1_seed_fields(state_file; parent_path)
-    return h5open(state_file, "r") do file
+    source == :seed && return phase1_seed_fields(state_file; parent_path, ladder)
+    return h5open(state_file, "r") do state
+        file = _p1_field_root(state; ladder)
         if source in (:applied, :measured, :restart)
             return _p1_read_fields(file, "fields/$(String(source))")
         elseif source in (:cycle_applied, :cycle_measured)
@@ -430,12 +459,15 @@ function _p1_snapshot_fields(
     end
 end
 
-function _p1_figure_title(state_file::AbstractString, detail::AbstractString)
-    metadata = h5open(state_file, "r") do file
-        _p1_metadata(file)
+function _p1_figure_title(state_file::AbstractString, detail::AbstractString; ladder=nothing)
+    metadata, cell_detail = h5open(state_file, "r") do file
+        _p1_field_root(file; ladder) # Validate the selection even for custom titles.
+        cell = haskey(file, "ladders") ?
+            " | cell=$(_p1_string(file, "model/trellis_cell")) | ladder=$(uppercase(String(something(ladder, :A))))" : ""
+        return _p1_metadata(file), cell
     end
     return join((
-        "$(metadata.geometry) | $(metadata.seed_label) | status=$(metadata.status) | accepted=$(metadata.accepted) | period=$(metadata.period)",
+        "$(metadata.geometry)$(cell_detail) | $(metadata.seed_label) | status=$(metadata.status) | accepted=$(metadata.accepted) | period=$(metadata.period)",
         detail,
     ), "\n")
 end
@@ -478,6 +510,7 @@ function plot_phase1_mf_profiles_from_file(
     source::Symbol=:measured,
     cycle_phase::Integer=1,
     parent_path=nothing,
+    ladder=nothing,
     savepath=nothing,
     dpi=nothing,
     figure_title=nothing,
@@ -489,10 +522,11 @@ function plot_phase1_mf_profiles_from_file(
         source;
         cycle_phase,
         parent_path,
+        ladder,
     )
     detail = source in (:cycle_applied, :cycle_measured) ?
         "profile=$(source), phase=$cycle_phase" : "profile=$(source)"
-    title = something(figure_title, _p1_figure_title(state_file, detail))
+    title = something(figure_title, _p1_figure_title(state_file, detail; ladder))
     fig = plot_mf_profiles(
         fields.alpha,
         _p1_legacy_beta(fields);
@@ -616,14 +650,15 @@ function _p1_stitch_parent_measured_history(
     continuation_history;
     include_seed::Bool,
     parent_path=nothing,
+    ladder=nothing,
 )
     local_parent = _p1_parent_history_path(state_file; parent_path)
     local_parent === nothing && return nothing
-    parent_history = _p1_complete_history(local_parent, :measured; include_seed)
+    parent_history = _p1_complete_history(local_parent, :measured; include_seed, ladder)
     parent_history === nothing && return nothing
 
     parent_final = _p1_history_endpoint(parent_history, length(parent_history.iterations))
-    continuation_seed = phase1_seed_fields(state_file)
+    continuation_seed = phase1_seed_fields(state_file; ladder)
     _p1_assert_same_fields(
         parent_final,
         continuation_seed,
@@ -704,6 +739,8 @@ stitched to a locally available parent history by default. Set
 `stitch_parent_history=false` to show only the requested state. For v2, the
 left column is controlled by a saved-snapshot slider and the right column
 connects only the explicitly labelled retained snapshots.
+Trellis files default to spatial ladder A; use `ladder=:B` for B. The two
+spatial ladders are never concatenated into a temporal history.
 """
 function plot_phase1_mf_profiles_and_middle_histories(
     state_file::AbstractString;
@@ -712,13 +749,14 @@ function plot_phase1_mf_profiles_and_middle_histories(
     include_seed::Bool=true,
     stitch_parent_history::Bool=true,
     parent_path=nothing,
+    ladder=nothing,
     savepath=nothing,
     dpi=nothing,
     figure_title=nothing,
     kwargs...,
 )
     state_file = abspath(state_file)
-    complete_history = _p1_complete_history(state_file, history_source; include_seed)
+    complete_history = _p1_complete_history(state_file, history_source; include_seed, ladder)
     if complete_history !== nothing
         stitched = if stitch_parent_history && history_source == :measured
             _p1_stitch_parent_measured_history(
@@ -726,6 +764,7 @@ function plot_phase1_mf_profiles_and_middle_histories(
                 complete_history;
                 include_seed,
                 parent_path,
+                ladder,
             )
         else
             nothing
@@ -748,7 +787,7 @@ function plot_phase1_mf_profiles_and_middle_histories(
         else
             "complete $(history_source) MF history: $update_count updates"
         end
-        title = something(figure_title, _p1_figure_title(state_file, detail))
+        title = something(figure_title, _p1_figure_title(state_file, detail; ladder))
         fig = plot_mf_profiles_and_middle_histories(
             plotted_history.alpha,
             beta_list,
@@ -767,7 +806,7 @@ function plot_phase1_mf_profiles_and_middle_histories(
     history_source == :measured || throw(ArgumentError(
         "this pre-schema-v5 state has no complete $history_source field history; only measured saved-snapshot fallback is available",
     ))
-    snapshots = _p1_saved_snapshots(state_file; include_seed, parent_path)
+    snapshots = _p1_saved_snapshots(state_file; include_seed, parent_path, ladder)
     isempty(snapshots) && throw(ArgumentError("no saved field snapshots found in $state_file"))
     alpha_list = cat((item.fields.alpha for item in snapshots)...; dims=5)
     beta_list = cat((_p1_legacy_beta(item.fields) for item in snapshots)...; dims=6)
@@ -777,7 +816,7 @@ function plot_phase1_mf_profiles_and_middle_histories(
         ", ",
     )
     detail = "saved MF snapshots: $labels; v2 did not store the full field history"
-    title = something(figure_title, _p1_figure_title(state_file, detail))
+    title = something(figure_title, _p1_figure_title(state_file, detail; ladder))
 
     fig = plot_mf_profiles_and_middle_histories(
         alpha_list,

@@ -106,3 +106,28 @@ removes them and keeps every history. Resuming requires the complete cell
 checkpoint and its SHA-256. The existing branch comparator can rank accepted
 seeds within the same cell fingerprint; comparison across cell ansatzes
 requires explicit per-site normalization and profile/embedding assessment.
+
+## Plotting saved MF histories
+
+The Phase 1 plotting adapter reads each trellis ladder's nested fields and
+complete history directly, including its embedded initial seed. From the
+`ladder_mps_mft` directory:
+
+```julia
+include("plot_phase1_mf_observables.jl")
+plot_phase1_mf_profiles_and_middle_histories(state_file)             # ladder A
+plot_phase1_mf_profiles_and_middle_histories(state_file; ladder=:B)  # two-ladder cell
+plot_phase1_seed_profiles(state_file; ladder=:A)
+```
+
+For two-ladder states, inspect A and B separately; they are spatial states,
+not alternate iterations. Titles identify the cell and selected ladder.
+The default includes the seed as plotted iteration 1, so a 60-sweep state has
+61 slider positions. Use `include_seed=false` to show only the 60 measured
+records. No external seed or `parent_path` is needed for these saved states.
+
+These are MF-field plots, consistent with the existing square/cubic adapter.
+Trellis `mu_cdw` contains normal-bond contributions as well as densities, and
+its pairing kernel mixes bond channels. For physical density, spin and pair
+profiles, use `ladders/A/history/correlations` (or B), as in the
+[September 18 physical-correlation analysis](reports/trellis_progress_20260918/README.md).

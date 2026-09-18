@@ -3585,3 +3585,35 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   CRLF endings as trailing whitespace. Repeating with the repository's
   configured normalization passed; no wholesale line-ending rewrite was
   performed. Normalized Git diff confirms the run log has additions only.
+
+### 2026-09-18 — Fix trellis full-history plotting adapter
+
+- User's direct `plot_phase1_mf_profiles_and_middle_histories(state)` call
+  on completed trellis job 58468871 failed with a missing recorded seed ''.
+  The adapter only looked for root `history/fields` and `fields/initial`.
+  Trellis has both under `ladders/A`, so the reader incorrectly entered the
+  legacy sparse-snapshot/external-seed fallback. The embedded seed is present.
+- Added a common spatial-ladder group selector to seed, complete-history,
+  saved-snapshot and profile readers. Trellis defaults to A; `ladder=:B`
+  selects B, with explicit errors for unavailable/invalid selections. Titles
+  identify the cell and ladder. Parent-history stitching propagates the same
+  selection and retains the exact field-handoff check; A/B are never joined
+  as temporal records. Root-layout square/cubic behavior is preserved.
+- Added standalone `test/test_phase1_plotting.jl` (HDF5/PyPlot environment,
+  Agg backend, no solver imports). Eighty-three fixture checks passed for
+  root/one-/two-ladder files, embedded seeds with missing legacy provenance,
+  applied/measured histories, snapshots, invalid selections, actual slider
+  updates and separate A/B continuation stitching. Five further checks
+  passed against the user's exact locally synced state, comparing the read
+  arrays with HDF5 and rendering the full history with its embedded seed.
+- Local command: direct Julia 1.12.7 executable with `--startup-file=no
+  --compiled-modules=existing test/test_phase1_plotting.jl <state.h5>`.
+  Test execution reports 27.2 seconds for fixtures and 2.5 seconds for the
+  real-file check, excluding Julia/package startup. Inspected the resulting
+  `output/plot_validation/trellis_mf_and_middle_histories.png`: all five
+  profile/history rows and 61 slider positions (seed plus 60 updates) render.
+- Updated trellis method instructions and current project notes. These plots
+  remain MF fields; trellis fields cannot be read directly as physical
+  density/spin/pair correlations. No legacy plotting file, solver controls,
+  simulation data, acceptance flag or accounting ledger changed. No DMRG or
+  unrelated regression suite was run. Git baseline at task start: fc3db31.
