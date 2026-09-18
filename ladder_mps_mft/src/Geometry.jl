@@ -19,6 +19,7 @@ The kernel is for one rung and one spin species.
 """
 function density_kernel(geometry, tp::Real, ep::Real)
     geom = normalize_geometry(geometry)
+    geom == :trellis && throw(ArgumentError("trellis densities couple to bond correlations; use trellis_mean_fields"))
     ep > 0 || throw(ArgumentError("the perturbative E_p denominator must be positive"))
     g = Float64(tp)^2 / Float64(ep)
     if geom == :cubic_frustrated
@@ -32,5 +33,5 @@ end
 
 function transverse_coordination(geometry)::Int
     geom = normalize_geometry(geometry)
-    return geom == :square ? 2 : 6
+    return geom == :square ? 2 : geom == :trellis ? 4 : 6
 end

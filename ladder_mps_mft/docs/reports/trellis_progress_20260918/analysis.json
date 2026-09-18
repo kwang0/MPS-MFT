@@ -1,0 +1,498 @@
+{
+  "date": "2026-09-18",
+  "runs": [
+    {
+      "campaign": "20260916_trellis_two_basin_comparison_60",
+      "label": "trellis__one_ladder__stripe_eps005_chi200_raw60",
+      "job_id": "58468871",
+      "cell": "one_ladder",
+      "family": "stripe",
+      "source": "output/phase1_gpu/20260916_trellis_two_basin_comparison_60/results/trellis__one_ladder__stripe_eps005_chi200_raw60/trellis__one_ladder_stripe_weak_other__trellis_two_reference_correlations_eps005_raw__none__stripe_eps005/20260917T180438_970141_b65cb3151528/state.h5",
+      "compact_sha256": "b3d204a10eeeced5446f22a7b65ffef8314cf5243e49d8bceae11046a1db7b00",
+      "full_sha256": "b6eba891c3da1df315840beed9e2048267ef639ae200ec39dabb098f269fb805",
+      "config_sha256": "34a326efb0946ab958eed3f00f98dc9413829f6ea4117bb1ffc001b05429b0b0",
+      "seed_sha256": "5c0438c2dfc80f82ad4b874b917670d103fe3721deba88c7c5567646f7463248",
+      "fingerprints": {
+        "model_fingerprint": "b65cb31515282b5f2b65560c5f29cc12f17560c4ec0cee628471a1093bfcbb4f",
+        "numerical_fingerprint": "d3129105a6cee2136e69ec6d68a762dad1cfa04c3b5b6a020d2efee5ba5790a3",
+        "implementation_sha256": "0bd439eeb91020cc9db447ba15109d79b0b70b3a2489c0d3fefc04ac31933e98",
+        "ep_source_sha256": "2209bd2ca3c1ad02c0e542d1a9d63ecf90fdfa49120ad9cc3af599a5b4bc1f0e"
+      },
+      "controls": {
+        "stagnation_min_relative_improvement": 0.01,
+        "period2_oscillation_cosine_max": -0.5,
+        "stable_iterations": 10,
+        "divergence_factor": 8.0,
+        "max_period": 8,
+        "period2_two_step_ratio_max": 0.5,
+        "probe_iterations": 60,
+        "cycle_action": "continue",
+        "dmrg_sweep_energy_tol": 1e-07,
+        "period_rel_tol": 0.0002,
+        "field_rel_tol": 0.0001,
+        "minimum_iterations": 40,
+        "accepted_periods": [
+          1
+        ],
+        "stagnation_window": 40,
+        "period_repeats": 3,
+        "effective_energy_consistency_tol": 1e-08,
+        "density_tol": 1e-05,
+        "variational_energy_tol": 1e-07,
+        "probe_max_period": 2,
+        "channel_noise_floor": 5e-07,
+        "period_abs_tol": 2e-07,
+        "slow_mode_cosine_min": 0.9,
+        "hamiltonian_identity_tol": 1e-08,
+        "channel_residuals": true,
+        "orbit_bulk_fraction": 0.5,
+        "unmixed_cycle_probe": true,
+        "field_abs_tol": 1e-07
+      },
+      "status": "maximum_iterations",
+      "accepted": false,
+      "cell_sweeps": 60,
+      "ladder_solves": 60,
+      "physical_sites": 128,
+      "energy_per_site_final": -0.5188203364667907,
+      "energy_span_last10": 2.84371664549532e-07,
+      "solver_seconds": 28609.97730922699,
+      "solver_node_hours": 1.98680397980743,
+      "allocation": null,
+      "reserved_node_hours": 3.0,
+      "energy_ranking_eligible": false,
+      "ladders": [
+        {
+          "ladder": "A",
+          "spin_rms_first": 0.06271498511445085,
+          "spin_rms_final": 1.2148433985518125e-05,
+          "pair_rms_first": 0.00965140170965085,
+          "pair_rms_final": 0.01796892016963376,
+          "leg_pair_mean": 0.017955985351258634,
+          "rung_pair_mean": -0.03292321123110605,
+          "charge_std_final": 0.0056511993247225795,
+          "central_charge_std": 0.001571751326787982,
+          "central_spin_rms": 8.798805322378224e-06,
+          "spin_fractional_change_last10": -0.14726278142223626,
+          "pair_fractional_change_last10": 6.585707085227099e-06,
+          "profile_max_change_last10": {
+            "spin": 2.1283158868581897e-05,
+            "charge": 5.7204301580071615e-06,
+            "leg_pair": 6.900831279882391e-07
+          },
+          "global_relative": 2.1035380441576318e-05,
+          "last10_max_global_relative": 8.459557404254799e-05,
+          "final_density_error": 4.156059168369808e-06,
+          "last10_max_density_error": 7.048758279393219e-06,
+          "energy_span_last10": 2.84371664549532e-07,
+          "dmrg_last10_failing_iterations": [
+            55,
+            59,
+            60
+          ],
+          "final_dmrg_sweep_delta": 3.359795073265559e-07,
+          "final_dmrg_discarded_weight": 6.295412380733332e-05,
+          "gates": {
+            "minimum": true,
+            "global_field": true,
+            "global_slow": true,
+            "density": true,
+            "inner_dmrg": false,
+            "energy": false,
+            "identity": true,
+            "effective": true,
+            "charge_modulation_steps": false,
+            "charge_modulation_span": false,
+            "charge_uniform_steps": true,
+            "charge_uniform_span": true,
+            "exchange_charge_steps": true,
+            "exchange_charge_span": true,
+            "exchange_spin_steps": false,
+            "exchange_spin_span": false,
+            "pairing_steps": false,
+            "pairing_span": false,
+            "spin_steps": false,
+            "spin_span": false
+          },
+          "failed_gates": [
+            "inner_dmrg",
+            "energy",
+            "charge_modulation_steps",
+            "charge_modulation_span",
+            "exchange_spin_steps",
+            "exchange_spin_span",
+            "pairing_steps",
+            "pairing_span",
+            "spin_steps",
+            "spin_span"
+          ],
+          "channels_final": {
+            "charge_modulation": {
+              "absolute": 7.908943028545057e-07,
+              "applied_rms": 0.004435426280773885,
+              "contraction": -0.185183652935708,
+              "cosine": -0.8905363591044154,
+              "factor": 1.0,
+              "measured_rms": 0.004435433530990925,
+              "passes": 1,
+              "relative": 7.685591022850804e-05,
+              "window_absolute": 6.343687941195997e-06,
+              "window_passes": 0,
+              "window_relative": 0.0004735477439675499
+            },
+            "charge_uniform": {
+              "absolute": 1.459674384279852e-07,
+              "applied_rms": 0.03348697899104931,
+              "contraction": -0.2217534721174291,
+              "cosine": -1.0,
+              "factor": 1.0,
+              "measured_rms": 0.03348712495848774,
+              "passes": 1,
+              "relative": 4.358912226980773e-06,
+              "window_absolute": 7.866496983949256e-07,
+              "window_passes": 1,
+              "window_relative": 2.349067837970672e-05
+            },
+            "exchange_charge": {
+              "absolute": 1.6701522604911645e-06,
+              "applied_rms": 0.0058206174785753,
+              "contraction": -0.27129493048823977,
+              "cosine": -0.8893126490329218,
+              "factor": 1.0,
+              "measured_rms": 0.0058205928199822786,
+              "passes": 1,
+              "relative": 1.7810701520971573e-05,
+              "window_absolute": 8.63917532307329e-06,
+              "window_passes": 1,
+              "window_relative": 7.876860541938741e-05
+            },
+            "exchange_spin": {
+              "absolute": 1.47658919839172e-06,
+              "applied_rms": 4.2552040323534185e-07,
+              "contraction": -0.11350713647817766,
+              "cosine": -0.2389145234448601,
+              "factor": 1.0,
+              "measured_rms": 4.3485548157438213e-07,
+              "passes": 0,
+              "relative": 0.1720354487909678,
+              "window_absolute": 4.991550089296359e-06,
+              "window_passes": 0,
+              "window_relative": 0.7348649658378341
+            },
+            "pairing": {
+              "absolute": 4.5915247467477605e-07,
+              "applied_rms": 0.0009998503099239832,
+              "contraction": 0.0744715529424937,
+              "cosine": 0.6095469447711013,
+              "factor": 1.0,
+              "measured_rms": 0.0009998393398562263,
+              "passes": 1,
+              "relative": 2.7633684977272993e-05,
+              "window_absolute": 5.33655881826238e-06,
+              "window_passes": 0,
+              "window_relative": 0.000388573763200029
+            },
+            "spin": {
+              "absolute": 1.474934046508114e-06,
+              "applied_rms": 4.633476610170996e-06,
+              "contraction": -0.1452316613658512,
+              "cosine": -0.435343604764431,
+              "factor": 1.0,
+              "measured_rms": 4.6845631653227095e-06,
+              "passes": 0,
+              "relative": 0.0889679669417491,
+              "window_absolute": 5.28335082878445e-06,
+              "window_passes": 0,
+              "window_relative": 0.3953172124403588
+            }
+          }
+        }
+      ],
+      "log_source": "output/phase1_gpu/20260916_trellis_two_basin_comparison_60/logs/trellis__one_ladder__stripe_eps005_chi200_raw60.s1-58468871.out",
+      "log_sha256": "4523d6149fdc09c8c3ba82a1542592b35e7119c63865d6c18fb60dc71b3a42cb"
+    }
+  ],
+  "missing": [
+    {
+      "label": "trellis__one_ladder__pairing_eps005_chi200_raw60",
+      "cell": "one_ladder",
+      "family": "pairing",
+      "job_id": "58468873",
+      "source": "output/phase1_gpu/20260916_trellis_two_basin_comparison_60/logs/trellis__one_ladder__pairing_eps005_chi200_raw60.s1-58468873.out",
+      "sha256": "f4378ab8cc88ec7562a31d3e48577308ea7d010a71c97f7b87016dc669a166ae",
+      "state_available": false,
+      "records": [
+        {
+          "cell_sweep": 1,
+          "spatial_ladders": 1,
+          "energy_per_site": -0.518687442508,
+          "status": "iterating"
+        },
+        {
+          "cell_sweep": 2,
+          "spatial_ladders": 1,
+          "energy_per_site": -0.518818894841,
+          "status": "iterating"
+        },
+        {
+          "cell_sweep": 3,
+          "spatial_ladders": 1,
+          "energy_per_site": -0.518819894912,
+          "status": "iterating"
+        },
+        {
+          "cell_sweep": 4,
+          "spatial_ladders": 1,
+          "energy_per_site": -0.51882028419,
+          "status": "iterating"
+        },
+        {
+          "cell_sweep": 5,
+          "spatial_ladders": 1,
+          "energy_per_site": -0.51882032216,
+          "status": "iterating"
+        },
+        {
+          "cell_sweep": 6,
+          "spatial_ladders": 1,
+          "energy_per_site": -0.518820294878,
+          "status": "iterating"
+        },
+        {
+          "cell_sweep": 7,
+          "spatial_ladders": 1,
+          "energy_per_site": -0.518820304685,
+          "status": "iterating"
+        },
+        {
+          "cell_sweep": 8,
+          "spatial_ladders": 1,
+          "energy_per_site": -0.518820614578,
+          "status": "iterating"
+        },
+        {
+          "cell_sweep": 9,
+          "spatial_ladders": 1,
+          "energy_per_site": -0.518820304383,
+          "status": "iterating"
+        },
+        {
+          "cell_sweep": 10,
+          "spatial_ladders": 1,
+          "energy_per_site": -0.518820303805,
+          "status": "iterating"
+        },
+        {
+          "cell_sweep": 11,
+          "spatial_ladders": 1,
+          "energy_per_site": -0.518820304782,
+          "status": "iterating"
+        },
+        {
+          "cell_sweep": 12,
+          "spatial_ladders": 1,
+          "energy_per_site": -0.518820332619,
+          "status": "iterating"
+        },
+        {
+          "cell_sweep": 13,
+          "spatial_ladders": 1,
+          "energy_per_site": -0.51882061779,
+          "status": "iterating"
+        },
+        {
+          "cell_sweep": 14,
+          "spatial_ladders": 1,
+          "energy_per_site": -0.518820320719,
+          "status": "iterating"
+        },
+        {
+          "cell_sweep": 15,
+          "spatial_ladders": 1,
+          "energy_per_site": -0.518820335572,
+          "status": "iterating"
+        },
+        {
+          "cell_sweep": 16,
+          "spatial_ladders": 1,
+          "energy_per_site": -0.518820336551,
+          "status": "iterating"
+        },
+        {
+          "cell_sweep": 17,
+          "spatial_ladders": 1,
+          "energy_per_site": -0.518820333785,
+          "status": "iterating"
+        },
+        {
+          "cell_sweep": 18,
+          "spatial_ladders": 1,
+          "energy_per_site": -0.518820590818,
+          "status": "iterating"
+        },
+        {
+          "cell_sweep": 19,
+          "spatial_ladders": 1,
+          "energy_per_site": -0.518820333735,
+          "status": "iterating"
+        },
+        {
+          "cell_sweep": 20,
+          "spatial_ladders": 1,
+          "energy_per_site": -0.518820364788,
+          "status": "iterating"
+        },
+        {
+          "cell_sweep": 21,
+          "spatial_ladders": 1,
+          "energy_per_site": -0.518820331322,
+          "status": "iterating"
+        }
+      ],
+      "limitation": "Synced stdout only; no physical profiles or terminal acceptance/cost evidence."
+    },
+    {
+      "label": "trellis__two_ladder__stripe_eps005_chi200_raw60",
+      "cell": "two_ladder",
+      "family": "stripe",
+      "job_id": "58468875",
+      "source": "output/phase1_gpu/20260916_trellis_two_basin_comparison_60/logs/trellis__two_ladder__stripe_eps005_chi200_raw60.s1-58468875.out",
+      "sha256": "3a7a79b89ffd568ba1e20eecea88ff98f6e748562e32af9c01cb3eec5e181bab",
+      "state_available": false,
+      "records": [
+        {
+          "cell_sweep": 1,
+          "spatial_ladders": 2,
+          "energy_per_site": -0.516638867486,
+          "status": "iterating"
+        },
+        {
+          "cell_sweep": 2,
+          "spatial_ladders": 2,
+          "energy_per_site": -0.516873658988,
+          "status": "iterating"
+        },
+        {
+          "cell_sweep": 3,
+          "spatial_ladders": 2,
+          "energy_per_site": -0.517173021034,
+          "status": "iterating"
+        },
+        {
+          "cell_sweep": 4,
+          "spatial_ladders": 2,
+          "energy_per_site": -0.517332339204,
+          "status": "iterating"
+        },
+        {
+          "cell_sweep": 5,
+          "spatial_ladders": 2,
+          "energy_per_site": -0.517560354991,
+          "status": "iterating"
+        },
+        {
+          "cell_sweep": 6,
+          "spatial_ladders": 2,
+          "energy_per_site": -0.517699094073,
+          "status": "iterating"
+        },
+        {
+          "cell_sweep": 7,
+          "spatial_ladders": 2,
+          "energy_per_site": -0.517895374141,
+          "status": "iterating"
+        },
+        {
+          "cell_sweep": 8,
+          "spatial_ladders": 2,
+          "energy_per_site": -0.518021677528,
+          "status": "iterating"
+        },
+        {
+          "cell_sweep": 9,
+          "spatial_ladders": 2,
+          "energy_per_site": -0.518197004794,
+          "status": "iterating"
+        },
+        {
+          "cell_sweep": 10,
+          "spatial_ladders": 2,
+          "energy_per_site": -0.518312456669,
+          "status": "iterating"
+        },
+        {
+          "cell_sweep": 11,
+          "spatial_ladders": 2,
+          "energy_per_site": -0.518471616621,
+          "status": "iterating"
+        },
+        {
+          "cell_sweep": 12,
+          "spatial_ladders": 2,
+          "energy_per_site": -0.518578843696,
+          "status": "iterating"
+        },
+        {
+          "cell_sweep": 13,
+          "spatial_ladders": 2,
+          "energy_per_site": -0.51872415191,
+          "status": "iterating"
+        },
+        {
+          "cell_sweep": 14,
+          "spatial_ladders": 2,
+          "energy_per_site": -0.518823876431,
+          "status": "iterating"
+        },
+        {
+          "cell_sweep": 15,
+          "spatial_ladders": 2,
+          "energy_per_site": -0.518957099634,
+          "status": "iterating"
+        },
+        {
+          "cell_sweep": 16,
+          "spatial_ladders": 2,
+          "energy_per_site": -0.519049329405,
+          "status": "iterating"
+        },
+        {
+          "cell_sweep": 17,
+          "spatial_ladders": 2,
+          "energy_per_site": -0.519171274478,
+          "status": "iterating"
+        },
+        {
+          "cell_sweep": 18,
+          "spatial_ladders": 2,
+          "energy_per_site": -0.519257203947,
+          "status": "iterating"
+        }
+      ],
+      "limitation": "Synced stdout only; no physical profiles or terminal acceptance/cost evidence."
+    },
+    {
+      "label": "trellis__two_ladder__pairing_eps005_chi200_raw60",
+      "cell": "two_ladder",
+      "family": "pairing",
+      "job_id": "58468876",
+      "source": "output/phase1_gpu/20260916_trellis_two_basin_comparison_60/logs/trellis__two_ladder__pairing_eps005_chi200_raw60.s1-58468876.out",
+      "sha256": "9d65924c4672e740038b90e10bd6ae49a8acf7e7086e2b18304642ba14248382",
+      "state_available": false,
+      "records": [
+        {
+          "cell_sweep": 1,
+          "spatial_ladders": 2,
+          "energy_per_site": -0.518667545597,
+          "status": "iterating"
+        }
+      ],
+      "limitation": "Synced stdout only; no physical profiles or terminal acceptance/cost evidence."
+    }
+  ],
+  "total_complete_cell_sweeps": 60,
+  "total_complete_ladder_solves": 60,
+  "total_solver_node_hours": 1.98680397980743,
+  "accepted_count": 0,
+  "interpretation": "One completed pairing-dominated trajectory. No accepted within-cell or between-cell energetic comparison."
+}

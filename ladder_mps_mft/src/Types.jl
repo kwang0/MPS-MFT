@@ -1,4 +1,4 @@
-const SUPPORTED_GEOMETRIES = (:cubic_frustrated, :cubic_unfrustrated, :square)
+const SUPPORTED_GEOMETRIES = (:cubic_frustrated, :cubic_unfrustrated, :square, :trellis)
 
 Base.@kwdef struct ModelSettings
     L::Int = 64
@@ -7,6 +7,9 @@ Base.@kwdef struct ModelSettings
     V::Float64 = 0.0
     t0::Float64 = 1.0
     tp::Float64 = 0.1
+    tau0::Float64 = 0.1
+    tau1::Float64 = 0.1
+    trellis_cell::Symbol = :one_ladder
     density::Float64 = 0.9375
     mu_initial::Float64 = 0.0
     r_range::Int = 4

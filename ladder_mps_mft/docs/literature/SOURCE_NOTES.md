@@ -145,3 +145,21 @@ Its temperature estimate is not a result for all three project geometries.
 Equation numbers above refer to the published version; the arXiv v1 numbering
 differs. This note records an equation-level correspondence, not a new
 finite-temperature calculation or a certification of competing phases.
+
+## Project comparison update — 18 September 2026
+
+The [new local campaign review](../reports/campaign_review_20260918/README.md)
+qualifies the earlier motivation to seek positive-V intertwining on square.
+At (t0,V)=(1.2,+0.2), the three completed square seeds, including a regular
+intertwined period-16 pattern, lose their anomalous pairing and reach CDW/SDW
+stripes. The period-eight seed is still missing a spatial artifact. Do not
+present repulsive V as a demonstrated geometry-independent mechanism for
+coexistence based on the legacy cubic-frustrated data.
+
+The complete cubic-unfrustrated grid also differs from square, reaching
+stripes at both coordinates that were paired on square. Conversely, the
+first completed one-ladder trellis stripe seed develops pairing at (1,0).
+These observations strengthen the need to match interaction topology,
+geometry, density and numerical status before comparing to isolated-ladder
+papers or the Bollmark2023 benchmark. They do not alter the summaries or
+bibliographic metadata above; no new literature search was performed.

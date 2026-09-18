@@ -1,5 +1,11 @@
 # Square finer cuts and bare-ladder interpolation check
 
+Results update, September 18: all twelve starts have completed their caps.
+The [finer-cut analysis](../square_fine_cuts_20260918/README.md) identifies
+two coordinates with distinct stripe/paired trajectories and preserves
+the interpolation qualification below. It is included in the
+[combined campaign review](../campaign_review_20260918/README.md).
+
 Prepared locally September 15, 2026. The user requested six new square-array
 coordinates, with two reciprocal 95%/5% stripe/pairing starts at each, and
 linear interpolation of the pair-binding energy between the existing coarse

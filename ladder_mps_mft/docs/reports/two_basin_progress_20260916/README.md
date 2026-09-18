@@ -1,5 +1,10 @@
 # Square continuation and partial cubic grid — September 16, 2026
 
+Historical snapshot. The [September 18 combined review](../campaign_review_20260918/README.md)
+supersedes the partial cubic coverage and cost estimate below with all
+18 cubic histories, and adds the finer square cuts, positive-V results and
+first trellis endpoint. The square continuation findings here still apply.
+
 The square (t0,V)=(1.4,0) pairing lineage now loses its residual pairing and
 reaches a stripe texture. Both starts at each of the four available cubic
 coordinates also reach essentially unpaired stripes, substantially stronger

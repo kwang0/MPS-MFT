@@ -73,6 +73,9 @@ function model_fingerprint(model::ModelSettings)
     if model.ep_mode == :linear_V
         payload *= "|ep_V_lower=$(model.ep_V_lower)|ep_V_upper=$(model.ep_V_upper)"
     end
+    if model.geometry == :trellis
+        payload *= "|tau0=$(model.tau0)|tau1=$(model.tau1)|trellis_cell=$(model.trellis_cell)|trellis_kernel=1"
+    end
     return bytes2hex(SHA.sha256(payload))
 end
 

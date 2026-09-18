@@ -38,55 +38,49 @@ recorded explicitly as user-reported until synchronized evidence is available.
 
 ## Stable scientific references
 
-The latest synchronized results are the
-[September 16 square continuation and partial cubic grid](reports/two_basin_progress_20260916/README.md).
-Both square continuations finish 20 additional evaluations; the pairing lineage
-now loses its pairing. Eight cubic histories at four coordinates all reach
-stripes after 60 evaluations each. All ten remain unaccepted; complete
-histories, spatial drift diagnostics and available cost evidence are included.
+The latest synchronized results are in the
+[September 18 combined campaign review](reports/campaign_review_20260918/README.md).
+It brings together all 18 cubic starts, all 12 finer square starts, three
+completed positive-V square seeds and the first completed trellis run,
+with histories, spatial profiles, convergence diagnostics and cost evidence.
+All34 completed histories remain unaccepted. Cubic is stripe-like throughout;
+two finer square points retain distinct seed-dependent textures; positive-V
+square has not retained pairing in its three completed starts; the trellis
+one-ladder stripe seed instead develops pairing. Partial logs remain distinct
+from completed spatial outcomes.
 
-For the manuscript starting point, see the
-[introduction, background, and current-results draft](manuscript/README.md),
-created September 15, 2026. It provides editable LaTeX, a checked PDF,
-34 cited references, and an appendix linking the accumulated interpretations
-to their dated local evidence.
+Detailed results:
 
-For introduction background and paper summaries, see the
-[coupled-ladder literature review](literature/README.md). It contains a plain
-LaTeX review, compiled PDF, and maintained BibTeX file covering 49 papers in
-eight broad-to-narrow groups, with source notes dated September 7, 2026.
+- [Complete cubic grid](reports/cubic_two_basin_grid_20260918/README.md).
+- [Finer square transition cuts](reports/square_fine_cuts_20260918/README.md).
+- [Square (1.2,+0.2)](reports/square_positive_v_20260918/README.md).
+- [First trellis result and partial logs](reports/trellis_progress_20260918/README.md).
+- [Coarse square grid with both continuations](reports/two_basin_grid_20260915/README.md):
+  seven stripe and two paired coordinates,902 evaluations, zero accepted
+  endpoints and 27.350764 actual node-hours across18 lineages/20 source jobs.
+- [September 16 partial progress](reports/two_basin_progress_20260916/README.md),
+  retained as a historical snapshot.
 
-For the current experiment under review, see the
-[September 6 finite-size seed snapshot](reports/finite_size_seeds_20260906/README.md).
-It contains four chi=200 L=96/128 pairing/stripe seeds with fixed L=64 coupling.
+Preparation contracts remain in the
+[trellis campaign](reports/trellis_comparison_20260916/README.md),
+[positive-V seeds](reports/square_positive_v_seeds_20260915/README.md),
+[finer cuts and bare-ladder interpolation check](reports/two_basin_fine_cuts_20260915/README.md),
+and [cubic/continuation launchers](reports/two_basin_next_campaigns_20260915/README.md).
+They are not instructions to resubmit the already recorded jobs. The
+[trellis method contract](TRELLIS_MEAN_FIELD.md) specifies reciprocal maps,
+energy normalization and the one-/two-ladder spatial ansatz distinction.
 
-For the full two-basin grid, see the
-[September 15 preliminary phase diagram](reports/two_basin_grid_20260915/README.md).
-Updated September 16 with both V=0 continuations: seven stripe assignments,
-two paired assignments, zero formally accepted endpoints, 902 MF evaluations,
-and 27.350764 allocation node-hours across 18 lineages / 20 source jobs.
-The report includes complete and late energy grids, spin/pairing histories,
-latest convergence failures and parent/continuation provenance.
+For manuscript background, see the
+[introduction and results draft](manuscript/README.md), created September 15
+with numerical evidence through September 13. Its 16-page PDF and 34 references
+remain a dated starting point; the source notes now link to the newer results.
+The [coupled-ladder literature review](literature/README.md) provides annotated
+sources, LaTeX/PDF and 49 references. Its source notes qualify the legacy
+positive-V interpretation with the new square data without claiming a fresh
+literature search.
 
-The latest prepared campaign is the
-[four-seed positive-V square comparison](reports/square_positive_v_seeds_20260915/README.md)
-at (1.2,+0.2). It adds regular intertwined-order seeds with charge/pair
-periods 8 and 16 to the two established reference mixtures, using the legacy
-shape and target square couplings. The report includes source and seed
-figures, convergence controls and a four-job launcher (12-node-hour ceiling).
-
-The preceding prepared campaign is the
-[six finer square cuts and bare-ladder interpolation check](reports/two_basin_fine_cuts_20260915/README.md).
-It provides E0 and E_p figures along t0=1.4 and V=-0.4, the six requested
-linear estimates, and a separate-worktree launcher for twelve chi=200
-95%/5% starts (max 60, minimum 40, 36-node-hour ceiling).
-
-The preceding authorized campaigns are the
-[cubic two-basin grid and short square (1.4,0) continuation](reports/two_basin_next_campaigns_20260915/README.md):
-18 cubic starts capped at 60 raw evaluations and two square continuations
-capped at 20 additional evaluations. The report documents thresholds,
-saved-history qualification, full-MPS validation and two simple launchers.
-The user now reports cubic submission; preserve that source checkout.
+The deferred [finite-size seed snapshot](reports/finite_size_seeds_20260906/README.md)
+retains four chi=200 L=96/L=128 pairing/stripe seeds with fixed L=64 coupling.
 
 For the preceding V=0 anchor result, see the
 [September 12 V=0 anchor analysis](reports/two_basin_v000_20260912/README.md).
@@ -110,7 +104,7 @@ The [basin follow-up](reports/square_grid_20260908/BASIN_ASSESSMENT.md) records
 SDW growth, the reproduced Anderson jump, and the proposed paired/striped
 seed comparison; loose acceptance does not establish basin stability.
 The [approved raw two-basin campaign](reports/two_basin_raw_20260908/README.md)
-supplies all 18 square seeds, tighter chi=200 controls, energy-history tools,
+supplies all 18 square seeds, tighter chi=200 controls, energy -history tools,
 and `slurm/submit_square_two_basin.sh` for four-anchor-first submission after
 `git pull`, with versioned reference correlations and Anderson disabled.
 For the preceding bond-dimension comparison, see the

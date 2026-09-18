@@ -1,5 +1,12 @@
 # Cubic two-basin grid and short square continuation
 
+Results update, September 18: the [complete cubic grid](../cubic_two_basin_grid_20260918/README.md)
+now has all 18 histories, with stripes from both seeds at all nine points.
+Both square continuations are already included in the
+[updated square grid](../two_basin_grid_20260915/README.md). See the
+[combined review](../campaign_review_20260918/README.md) for the other follow-ups.
+The preparation contract below is retained as history, not a resubmission request.
+
 Prepared locally on September 15, 2026, following the user's approval of the
 [full square-grid analysis](../two_basin_grid_20260915/README.md). No jobs have
 been submitted by Codex. The user performs all Perlmutter actions.

@@ -52,7 +52,7 @@ full_run_directory_from_control() { printf '%s/full\\n' "$1"; }
     def test_syntax(self):
         for name in ('phase1_gpu.sh', 'two_basin_submission_environment.sh',
                      'submit_cubic_unfrustrated_two_basin.sh', 'submit_square_two_basin_finish.sh',
-                     'submit_square_two_basin_fine_cuts.sh', 'submit_square_positive_v.sh'):
+                     'submit_square_two_basin_fine_cuts.sh', 'submit_square_positive_v.sh', 'submit_trellis_comparison.sh'):
             result = subprocess.run([BASH, '-n', (ROOT / 'slurm' / name).as_posix()],
                                     capture_output=True, text=True)
             self.assertEqual(result.returncode, 0, result.stderr)
@@ -68,6 +68,12 @@ full_run_directory_from_control() { printf '%s/full\\n' "$1"; }
             'PHASE1_POSITIVE_V_CONFIG', 'prepare-square-positive-v',
             '20260915_square_t012_vp02_four_seeds_60',
             'phase1_gpu_square_positive_v_chi200_raw60.toml')
+
+    def test_trellis_isolate_source_and_share_accounting(self):
+        self.check_isolated_wrapper('submit_trellis_comparison.sh',
+            'PHASE1_TRELLIS_CONFIG', 'prepare-trellis-comparison',
+            '20260916_trellis_two_basin_comparison_60',
+            'phase1_gpu_trellis_chi200_raw60.toml')
 
     def check_isolated_wrapper(self, wrapper, config_var, prepare, run, config):
         with tempfile.TemporaryDirectory() as directory:

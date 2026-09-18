@@ -4,6 +4,11 @@
 
 The code implements a zero-temperature energy functional. It does not implement a finite-temperature entropy or free energy.
 
+For the trellis spatial-cell driver, see [TRELLIS_MEAN_FIELD.md](TRELLIS_MEAN_FIELD.md).
+It evaluates the centered functional from the current simultaneous cell
+correlations, while retaining the applied fields for the Hamiltonian identity.
+A/B are stored spatial states; temporal iteration cycles are not accepted.
+
 For a trial MPS `psi`, the effective single-ladder Hamiltonian is written
 
 ```text

@@ -2,6 +2,11 @@
 
 Updated September 16 to include both square `(1.4,0)` continuations.
 
+September 18 follow-up: the [combined campaign review](../campaign_review_20260918/README.md)
+compares this coarse square reference with the complete cubic grid, finer
+square transition cuts, positive-V seeds and first trellis result. The data
+and figures in this coarse-grid report remain unchanged by that review.
+
 **The nine-point grid supports seven stripe assignments and two d-wave-like
 paired assignments.** Both seed lineages now reach the same phase family at
 all nine points. At `(t0,V)=(1.4,0)`, the pairing lineage loses its residual

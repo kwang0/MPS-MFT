@@ -43,6 +43,7 @@ operate Slurm.
 | `src/Geometry.jl`, `src/EpRegistry.jl` | Ladder geometry and exact/interpolated pair-binding provenance |
 | `src/MeanField.jl`, `src/Mixing.jl` | MF fields, seed construction, raw-map updates, and fixed-point acceleration |
 | `src/Solver.jl`, `src/Device.jl` | Density-fixed DMRG/SCF execution and CPU/CUDA representation |
+| `src/Trellis.jl` | Reciprocal zigzag maps, one-/two-ladder spatial-cell SCF and complete-cell checkpoints; see `TRELLIS_MEAN_FIELD.md` |
 | `src/Convergence.jl` | Fixed-point, oscillation, slow-mode, and recurrence classification |
 | `src/Variational.jl`, `src/Selection.jl` | Canonical functional and accepted-only same-fingerprint ranking |
 | `src/Provenance.jl`, `src/Storage.jl` | Fingerprints, immutable HDF5, histories, hashes, and full/compact lineage |
@@ -85,10 +86,16 @@ See `docs/CONVERGENCE.md`, `docs/VARIATIONAL_FUNCTIONAL.md`, and
 
 ## Continuity ownership
 
+The [September 18 campaign review](reports/campaign_review_20260918/README.md)
+is the current multi-campaign analysis entry point. Its data are reproduced
+by `scripts/analyze_two_basin_campaigns_20260918.py` (square/cubic, reusing
+the earlier verified loaders) and `scripts/analyze_trellis_progress_20260918.py`
+(stored trellis correlation histories). Both are read-only with respect to
+simulation artifacts and export dated figures, CSVs and provenance JSON.
+
 - `AGENTS.md`: durable rules.
 - `docs/PROJECT_STATE.md`: current snapshot and exact next action.
 - `docs/plans/ACTIVE.md`: active completion sequence.
 - Dated campaign docs: frozen question and numerical contract.
 - `docs/RUN_LOG.md`: append-only evidence and decision history.
 - Git commits: implementation history and reviewable changes.
-

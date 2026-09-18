@@ -4,6 +4,11 @@ Created 15 September 2026. This is an editable manuscript starting point using
 the existing annotated literature review and locally synchronized analyses
 through September 13.
 
+Results-note update, September 18: the [combined campaign review](../reports/campaign_review_20260918/README.md)
+now adds the complete cubic grid, finer square cuts, positive-V tests and
+first trellis result. These findings are linked in SOURCE_NOTES but are not
+yet incorporated into this dated LaTeX/PDF draft.
+
 The compiled draft has 16 pages and 34 cited references, including five new
 references from the stripe, neutron-scattering, and coherence discussion.
 

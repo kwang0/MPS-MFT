@@ -25,6 +25,7 @@ include("Diagnostics.jl")
 include("Provenance.jl")
 include("Storage.jl")
 include("Solver.jl")
+include("Trellis.jl")
 include("Backbone.jl")
 include("BareStage1.jl")
 include("BareStage2.jl")
@@ -71,6 +72,9 @@ export SUPPORTED_GEOMETRIES,
        initial_seed_metadata,
        calculate_mean_fields,
        mean_fields_from_correlations,
+       measure_correlations,
+       trellis_mean_fields,
+       run_trellis_scf,
        configure_threading!,
        build_mf_mpo,
        field_energy_components,

@@ -543,6 +543,12 @@ function mean_fields_from_correlations(
     model::ModelSettings;
     threshold::Real=0.0,
 )
+    if model.geometry == :trellis
+        model.trellis_cell == :one_ladder || throw(ArgumentError(
+            "the two-ladder trellis map needs both correlation states"))
+        threshold == 0 || throw(ArgumentError("trellis reciprocity requires an unthresholded map"))
+        return only(trellis_mean_fields([correlations], model))
+    end
     pair = correlations.pair
     exchange_down = correlations.exchange_down
     exchange_up = correlations.exchange_up
@@ -603,12 +609,16 @@ function mean_fields_from_correlations(
     return FieldState(alpha, beta, mu_cdw)
 end
 
-function calculate_mean_fields(psi::MPS, model::ModelSettings; threshold::Real=0.0)
+function measure_correlations(psi::MPS)
     pair = real.(correlation_matrix(psi, "Cup", "Cdn"))
     exchange_down = real.(correlation_matrix(psi, "Cdagdn", "Cdn"))
     exchange_up = real.(correlation_matrix(psi, "Cdagup", "Cup"))
     density_down = real.(expect(psi, "Ndn"))
     density_up = real.(expect(psi, "Nup"))
-    correlations = CorrelationState(pair, exchange_down, exchange_up, density_down, density_up)
+    return CorrelationState(pair, exchange_down, exchange_up, density_down, density_up)
+end
+
+function calculate_mean_fields(psi::MPS, model::ModelSettings; threshold::Real=0.0)
+    correlations = measure_correlations(psi)
     return mean_fields_from_correlations(correlations, model; threshold), correlations
 end

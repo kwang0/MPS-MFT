@@ -3400,3 +3400,188 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   September 16 continuation report. git diff --check passes. No DMRG or
   Perlmutter operations. Updated the report narrative, documentation map,
   PROJECT_STATE and active plan; the earlier progress report remains intact.
+
+### 2026-09-16 — Prepare four trellis runs with two spatial implementations
+
+- User requested (U,t0,tau0,tau1,V)=(8,1,.1,.1,0) with the established
+  stripe/pairing 95%/5% correlation seeds in both a fixed reciprocal
+  one-ladder map and an explicit two-ladder cell. The user reports the other
+  runs are still in progress. No scheduler state was queried or inferred;
+  no existing source checkout, result artifact, acceptance flag or ledger
+  was changed on Perlmutter.
+- Added src/Trellis.jl and dispatch from run_scf. One-ladder leg maps use
+  A and A^T, A=tau0 I+tau1 S with OBC. The rectangular A/B cell uses
+  forward paths on A and reverse paths on B for equal hoppings. A/B are
+  independent spatial MPS states, solved against frozen incoming fields
+  before a simultaneous raw update. The convention never alternates by
+  iteration parity. Each ladder retains the existing fixed mean density.
+- The same r_range projection acts on input and output, preserving
+  reciprocity even where a shift crosses the cutoff. Retained zigzag cross
+  terms include bond contributions to mu_cdw and the off-diagonal
+  -T T^T/Delta normal term. The existing centered variational functional
+  is reused with current simultaneous cell correlations for the interaction
+  energy and the actually applied fields for the Hamiltonian identity.
+  Tests verify its derivative for both cells, unequal hoppings and cutoffs.
+- Complete-cell HDF5 stores per-ladder MPS, fields, correlations, raw
+  histories and convergence evidence, plus cell totals and per-site energy.
+  Spatial A/B order is period one of the cell update. Both members must
+  pass all stationary gates in one sweep; temporal cycles remain unaccepted.
+  Compact copying removes each nested MPS; complete-cell resume requires a
+  pinned full checkpoint. Different mean A/B fillings are outside this run.
+- Added the trellis base config, preparation script, v1.23 GPU-launcher
+  campaign kind and separate-source submission wrapper. L64 per ladder,
+  n=.9375, chi200, r_range4, max60/min40 cell sweeps, ten stable records,
+  field tolerances 1e-7/1e-4, channel floor5e-7, inner-DMRG1e-7 total and
+  energy-window1e-7 per site. Four 12-hour shared-GPU jobs, one segment each,
+  cap reservation at12 node-hours and at360 density-targeted ladder solves.
+  No new E_p jobs: exact highest-chi E_p=-.13251724, bare chi1000.
+- Preview at output/seed_previews/20260916_trellis_comparison/ has exactly
+  four configs and hashed seeds. Reference SHA-256 is
+  e01a1ea7d6be813110870d26377db0df529d1584816c946af78584e1e1fbddc1.
+  Local GPU-manifest implementation SHA-256 is
+  dc3f49684b789a7645358f33c1bd9168b3ff491fe3ca9b55afa1f6a9492832ef.
+  Full seed/model/numerical/registry hashes are in the manifest and tracked
+  docs/reports/trellis_comparison_20260916/prepared_branches.csv. Host paths
+  and source fingerprints are regenerated during Perlmutter preparation.
+- Focused validation passed150 algebra, projection, preparation and spatial
+  stationarity assertions; tiny CPU L2/chi16 tests passed51 driver, identity,
+  history, complete-cell loading and compact-storage assertions. The initial
+  smoke exposed HDF5's unsupported BitVector input in a new Boolean history;
+  changed it to a dense vector and reran the complete smoke successfully.
+- One repository-wide test attempt stopped at two pre-existing unqualified
+  numerical_fingerprint calls in tests. Qualified them and ran only the
+  failed/remaining testsets, deleting the temporary continuation driver
+  afterwards. Combined coverage:784 passing assertions and two existing
+  Windows-specific shell skips, including150 trellis unit assertions.
+  Six Python launcher tests passed with actual local Git Bash syntax and
+  fake-launcher isolation/accounting checks; no Slurm commands ran.
+  Full logs are output/trellis_validation/runtests.log and remaining_tests.log.
+- Local Julia's app alias and writable compile cache were inconsistent under
+  the sandbox. Validation completed with the direct1.12.7 executable and
+  --startup-file=no --compiled-modules=existing, reusing installed packages
+  without changing user caches. A private-depot attempt failed in dependency
+  precompilation before tests; no NERSC authentication or connection occurred.
+  Git ownership was handled with per-process safe.directory only.
+- Extended the existing source bundler with --trellis, including the actual
+  versioned reference HDF5 and the new method/campaign docs. The handoff uses
+  output/source_bundles/trellis_comparison_20260916.zip with verified member
+  hashes, CRCs and SHA-256 sidecars, extracted to a new Perlmutter source
+  directory. The original accounting environment and budget gates are reused
+  by the user-run wrapper. No commit, push, transfer or submission performed.
+- Updated PROJECT_STATE, ACTIVE, architecture, variational-method pointer
+  and documentation map. The method report distinguishes skew repetition
+  from rectangular transverse order and their OBC end cuts. This is local
+  implementation validation, not GPU performance or scientific convergence.
+
+### 2026-09-17 — Repair CRLF checksum sidecar in the trellis handoff
+
+- User-provided Perlmutter output shows sha256sum trying to open a filename
+  ending in a carriage return. The set -e handoff stopped at verification,
+  before extraction or submission; no new job IDs were supplied.
+- Confirmed the local checksum sidecar contains CRLF. The Python bundle
+  writer used platform-default text newlines. Changed both checksum and
+  manifest sidecar writes to explicit LF, and normalized only the existing
+  local checksum file. Preserved the dated ZIP byte-for-byte, SHA-256
+  b27d1825b66f5dcec3d4e002fb29ba700123d442b7895f7368fde6538cad7629.
+- Updated the handoff to pipe the checksum through tr -d '\r' before
+  sha256sum -c -. Verified that exact pipeline against the original CRLF
+  sidecar using local Git Bash, then verified ordinary sha256sum -c against
+  the repaired LF sidecar. Both report the ZIP OK. The first local Bash
+  attempt lacked /usr/bin in PATH; adding that local tool path resolved it.
+- Updated PROJECT_STATE. No ZIP regeneration, solver/config changes,
+  DMRG tests, Git pull, transfer or Perlmutter operation. The user can use
+  the existing transferred ZIP with the corrected shell block; ordinary
+  underscores must be copied without Markdown backslashes.
+
+### 2026-09-18 — Complete cubic/fine-cut review, positive-V results and first trellis endpoint
+
+- User requested the same analysis as the completed square-grid report for
+  cubic unfrustrated, the finer square transition cuts and (1.2,+0.2), then
+  added the first completed trellis run and a single readable report plus
+  updated project notes. Work used only user-synchronized local output.
+  No Perlmutter authentication, transfer, scheduler query or submission.
+- Added `docs/reports/campaign_review_20260918/README.md` as the consolidated
+  scientific readout, with four detailed report directories:
+  `cubic_two_basin_grid_20260918`, `square_fine_cuts_20260918`,
+  `square_positive_v_20260918`, and `trellis_progress_20260918`.
+  They retain complete/late energy plots on individual y scales, physical
+  order histories/profiles, failed gates, source hashes and CSV/JSON data.
+- Cubic campaign `20260915_cubic_unfrustrated_two_basin_95_5_60` has all
+  18 terminal states, 60 evaluations each, 1080 total. Both seeds reach
+  stripes at all nine points, including square's paired (1.4,-0.4/-0.2)
+  coordinates. Physical spin RMS 0.280–0.356; maximum leg-pair RMS 2.214e-11;
+  dominant charge/spin modes4/30. All final energy windows, density,
+  inner-DMRG and identity/effective gates pass; field/profile/slow-mode
+  failures remain. Closest is stripe (1,-0.2), charge span 1.01306e-4 versus
+  1e-4. No acceptance flag or threshold changed. All job IDs are retained
+  in that report's sources.csv and run_summary.csv.
+- Finer square campaign `20260915_square_two_basin_fine_cuts_95_5_60` has
+  all 12 terminal states (jobs 58387972–58387983), 720 evaluations. Both starts
+  are paired at (1.4,-0.15/-0.10) and(1.30/1.35,-0.4). Distinct stripe/paired
+  trajectories remain at (1.25,-0.4) and(1.4,-0.05). Their signed endpoint
+  E(pair seed)-E(stripe seed) diagnostics are -3.18913e-5/-5.95196e-5 t/site;
+  summed final-ten ranges 1.57449e-7/7.46127e-8. These do not constitute
+  accepted ranking, hysteresis or proof of transition order. All six E_p
+  estimates match manifest-recorded linear interpolation; no new bare jobs.
+- At paired (1.4,-0.05), the usual spin RMS grows 1.50% over evaluations 51–60,
+  but96.7% of the final full-chain spin-squared weight is in the outer 14
+  rungs at each end. Central 32-rung spin RMS 0.001703 still falls 0.385%.
+  Added a dedicated boundary-spin figure; no claim of bulk coexistence or
+  resolved bulk stripe growth. Paired t0=1.25 spin falls 52% over the same
+  window; both t0=1.4,V=-0.10 remnants also decay.
+- Positive-V jobs 58394103/58394104/58394106 finish60 each: stripe, pairing
+  and intertwined period16 all lose pairing (leg RMS<=8.29e-10), spin RMS
+  about 0.233, dominant modes4/30. One global spin flip is aligned only in
+  figures; raw exported signs are retained. Job58394105, period8, has 46
+  complete MF stdout rows and part of the next DMRG solve, no synced state
+  or checkpoint. Latest logged residual 1.046e-3 and corrected energy
+  -0.332811522836 t/site remain scalar transient evidence, not a phase label.
+- Trellis campaign `20260916_trellis_two_basin_comparison_60` has one complete
+  state, one-ladder stripe job 58468871,60 sweeps. It develops pairing:
+  spin RMS 0.062715 to 1.21484e-5; leg-pair RMS 0.0096514 to 0.0179689; leg/rung
+  mean signs +0.017956/-0.032923. Corrected endpoint energy -0.518820336467
+  t/site; global field/slow/density/identity gates pass late, but energy
+  span 2.84372e-7, inner-DMRG and channel/profile gates fail. The final
+  DMRG sweep gap is 3.3598e-7 total and discarded weight 6.2954e-5.
+  Physical profiles come from stored correlation histories: trellis fields
+  mix density with normal bonds and cannot use square/cubic inversion.
+  Compact SHA256 b3d204a10eeeced5446f22a7b65ffef8314cf5243e49d8bceae11046a1db7b00;
+  recorded full SHA256 b6eba891c3da1df315840beed9e2048267ef639ae200ec39dabb098f269fb805.
+  The remote full artifact was not accessed or certified locally.
+- Other trellis stdout: one-ladder pairing58468873 has 21 complete sweeps;
+  two-ladder stripe58468875 has 18; two-ladder pairing58468876 has 1. No synced
+  spatial artifacts. One-ladder pairing energy nearly matches the completed
+  trajectory, but seed merging and rectangular A/B outcomes remain unproven.
+  No ranking of unaccepted cells or different geometries was performed.
+- Total reviewed completed subset:34 histories,2040 MF evaluations, zero
+  accepted. Saved solver-only fractional node-hours: cubic 13.88699481,
+  cuts 13.03048545, positive-V 3.02706540, trellis 1.98680398; total 31.93134965.
+  Actual synced cubic reconciliations cover12/18 jobs and 9.44159722 node-hours;
+  no actual fine-cut/positive-V/trellis reconciliation. Partial jobs and
+  allocation overhead are excluded from solver totals. Prior coarse square
+  remains 902 evaluations/27.350764 actual node-hours and is not counted again.
+  Both append-only budget ledgers were left unchanged.
+- Added read-only scripts `analyze_two_basin_campaigns_20260918.py` and
+  `analyze_trellis_progress_20260918.py`. Local commands use
+  `C:/Python313/python.exe -B -X utf8 ladder_mps_mft/scripts/<script>.py`.
+  Audits verify compact/config/seed hashes, model/numerical/implementation/
+  registry fingerprints, raw applied-to -measured adjacency, stdout counts,
+  physical correlation consistency, target-density canonical correction and
+  channel spans. Trellis additionally verifies cell energy normalization and
+  direct canonical reconstruction. Focused plotting/data validation only;
+  no solver source change, DMRG run or unrelated regression suite.
+- Updated PROJECT_STATE, ACTIVE, documentation/architecture maps, campaign
+  result pointers, and manuscript/literature evidence notes. The LaTeX/PDF
+  manuscript retains its September 13 numerical cutoff. The September 16
+  partial snapshot is preserved as history; coarse square data are unchanged.
+  User-requested higher chi/length work remains deferred. No new compute,
+  continuation, threshold change, commit, push or remote action in this review.
+- Final focused validation: 34 unique completed job IDs, 2040 CSV history
+  rows, endpoint/JSON agreement, summed solver cost and 161 local document
+  links checked. Both analysis scripts parse; every figure has PNG/PDF
+  counterparts. Figures were visually inspected for axes, units, labels,
+  clipping and full/late history coverage. Git diff whitespace check passes.
+- A redundant check with core.autocrlf=false incorrectly treated Windows
+  CRLF endings as trailing whitespace. Repeating with the repository's
+  configured normalization passed; no wholesale line-ending rewrite was
+  performed. Normalized Git diff confirms the run log has additions only.

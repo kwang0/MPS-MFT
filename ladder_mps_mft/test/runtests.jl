@@ -733,7 +733,7 @@ end
     @test isempty(gpu_project["preferences"]["MPIPreferences"]["preloads"])
     @test occursin("require_current_run_version", script_source)
     @test occursin("require_worker_compatible_run_version", script_source)
-    @test occursin("PHASE1_SCRIPT_VERSION=\"1.19.0\"", script_source)
+    @test occursin("PHASE1_SCRIPT_VERSION=\"1.23.0\"", script_source)
     @test occursin("check-gpu-preferences)", script_source)
     @test occursin("validate_gpu_runtime_preferences", script_source)
     @test occursin("Base.get_preferences", preference_source)
@@ -845,7 +845,7 @@ end
     @test cubic_grid_settings.model.V == grid_settings.model.V
     @test cubic_grid_settings.model.t0 == grid_settings.model.t0
     @test cubic_grid_settings.model.ep_signed == grid_settings.model.ep_signed
-    @test numerical_fingerprint(cubic_grid_settings) == numerical_fingerprint(grid_settings)
+    @test LadderMPSMFT.numerical_fingerprint(cubic_grid_settings) == LadderMPSMFT.numerical_fingerprint(grid_settings)
     @test initial_seed_fingerprint(cubic_grid_settings) == initial_seed_fingerprint(grid_settings)
     stripe_compare_settings = load_settings(joinpath(
         ROOT,
@@ -861,7 +861,7 @@ end
     @test stripe_compare_settings.dmrg.mu_density_tol == 1.0e-3
     @test stripe_compare_settings.convergence.field_rel_tol == 5.0e-3
     @test stripe_compare_settings.convergence.probe_iterations == 20
-    @test numerical_fingerprint(stripe_compare_settings) == numerical_fingerprint(grid_settings)
+    @test LadderMPSMFT.numerical_fingerprint(stripe_compare_settings) == LadderMPSMFT.numerical_fingerprint(grid_settings)
     stripe_prepare_source = read(joinpath(
         ROOT,
         "scripts",
@@ -2443,3 +2443,4 @@ end
 end
 
 include("test_raw_basin.jl")
+include("test_trellis.jl")

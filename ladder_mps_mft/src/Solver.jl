@@ -686,6 +686,7 @@ function _print_iteration(record::IterationRecord, diagnostic::ConvergenceDiagno
 end
 
 function run_scf(settings::ProjectSettings)
+    settings.model.geometry == :trellis && return run_trellis_scf(settings)
     validate_settings(settings)
     ensure_backend!(settings.runtime)
     threading = configure_threading!(settings.runtime)

@@ -31,7 +31,7 @@ function load_bare_stage2_settings(path::AbstractString, model::ModelSettings)
         geometries=normalize_geometry.(_value(
             table,
             "geometries",
-            String.(SUPPORTED_GEOMETRIES),
+            String.(BareStage2Settings().geometries),
         )),
         maxdim=Int(_value(table, "maxdim", 1200)),
         normal_reference_sweeps=Int(_value(table, "normal_reference_sweeps", 20)),
@@ -74,8 +74,8 @@ function load_bare_stage2_settings(path::AbstractString, model::ModelSettings)
     ))
     length(unique(settings.pair_form_factors)) == length(settings.pair_form_factors) ||
         throw(ArgumentError("pair_form_factors contains duplicates"))
-    all(in(SUPPORTED_GEOMETRIES), settings.geometries) || throw(ArgumentError(
-        "unknown Stage 2 geometry",
+    all(in(BareStage2Settings().geometries), settings.geometries) || throw(ArgumentError(
+        "Stage 2 response supports the square and cubic geometries",
     ))
     length(unique(settings.geometries)) == length(settings.geometries) ||
         throw(ArgumentError("stage2 geometries contains duplicates"))

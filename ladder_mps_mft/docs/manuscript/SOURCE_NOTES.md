@@ -49,3 +49,31 @@ reused. Kohler2026 remains explicitly labeled as a preprint.
   interpretation alongside the original unresolved formal acceptance.
 - Local pairing in the eventual stripe state is an open question; the
   disappearing anomalous expectation value does not answer it alone.
+
+## Results update for the next draft — 18 September 2026
+
+The [combined campaign review](../reports/campaign_review_20260918/README.md)
+supersedes the draft's incomplete numerical coverage. It does not silently
+change the September 13 evidence cutoff of the current LaTeX/PDF.
+
+- The coarse square grid, including both V=0 continuations, has seven
+  stripe and two paired coordinates. Both seeds reach the same family at
+  every coarse coordinate, although all endpoints remain unaccepted.
+- Both seeds reach stripes throughout the complete cubic-unfrustrated grid,
+  including the two square paired coordinates at t0=1.4, V=-0.4/-0.2.
+- Finer square points (1.25,-0.4) and (1.4,-0.05) retain distinct seed-dependent
+  textures with diagnostic endpoint gaps well above recent energy drift.
+  This motivates a metastability/transition-order test, not a claim of a
+  measured first-order transition. Weak spin in the paired V=-0.05 endpoint
+  is strongly concentrated near the ends; central spin still decays.
+- Three completed square (1.2,+0.2) seeds lose pairing, including the
+  intertwined period-16 start. The period-eight seed has only a partial
+  scalar log. The legacy positive-V coexistence result is therefore not a
+  general sign-of-V conclusion across the tested geometries.
+- The first completed trellis one-ladder stripe seed instead develops
+  opposite-sign leg/rung pairing at (1,0). Other trellis seeds/cell outcomes
+  remain incomplete; no cross-geometry energetic ranking is appropriate.
+
+These are finite-L64, chi200 trajectory observations. All 34 completed
+histories reviewed in September 18 remain formally unaccepted. Cite their
+dated detailed reports for profiles, gates, source hashes and cost coverage.
