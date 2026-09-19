@@ -3839,3 +3839,89 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   boundaries. No full campaign MPS contraction, Perlmutter authentication,
   transfer, real submission, local budget-ledger change or full test-suite run
   occurred. New scientific correlation results await user execution and sync.
+
+## 2026-09-19 — final positive-V square / trellis analysis and LaTeX completion
+
+- User reports all final runs complete and output synchronized, and requests
+  completion of the positive-V and trellis analyses, separate comprehensive
+  manuscript Sections 3.11/3.12, and spin/pairing figures across both fine cuts.
+  Baseline: 9b7d4d5 on codex/mps-mft-phase0-refactor. The root .claude directory
+  is unrelated and untouched. No solver, mixing, threshold or launcher change
+  was made. Standing user push authorization is retained.
+- Reused the existing verified campaign/trellis loaders. Positive-V jobs
+  58394103/58394104/58394105/58394106 all have 60-evaluation maximum-iteration
+  states, accepted=false. The newly available period-eight compact SHA-256 is
+  22b5f44e7d96057f50191d90dd1c88369f7ff3accd46977ee0128d88879a2566.
+  Trellis jobs 58468871/58468873/58468875/58468876 all have 60 cell sweeps,
+  maximum_iterations, accepted=false. New compact hashes are:
+  58468873 acbfff6dc8df900310d77499ef380656b82dc92be864e05bae82fe52dc5e71a5;
+  58468875 1b360712c6731f3efda0a68b80faefcc39ebbf0b36001a79819ee877c752e13b;
+  58468876 d9a803de57b3acbb6006ab9328173bd93bf7ccf6d30a1053f07e335057420e8d.
+  Complete config/seed/state/full-source hashes remain in report inventories.
+- All four positive-V square seeds lose anomalous pairing. Period eight ends
+  at spin RMS 0.207004, pair RMS 7.005e-9 and six uneven envelope nodes, after
+  starting with eight nodes. Dominant charge m=4 and mixed spin m=31/30/28
+  support a coarsening/defect interpretation rather than a clean retained
+  wavelength. Its endpoint excess over the stripe seed is 9.324203425e-4
+  t/site, diagnostic only. Last-ten pointwise spin changes 0.00358–0.00655
+  show why nearly constant RMS and energy do not establish stationarity.
+- Both skew one-ladder trellis seeds approach the same paired texture,
+  pair RMS about 0.017969 and spin about 1.3e-5. Both rectangular A/B seeds
+  instead develop unpaired stripes with spin RMS 0.2282–0.2288. Final global
+  relative residuals 0.1845–0.2085 remain large; final inner-DMRG windows pass
+  for both two-ladder runs. Increment cosines -0.999962/-0.999943 and norm
+  ratios about 0.975 identify slowly damped alternating numerical relaxation.
+  Two-sweep/one-sweep maximum differences are 0.03215/0.03472, still resolved;
+  no accepted orbit, physical dynamics or certified energetic winner follows.
+  Spatial A/B labels, their -1/2-rung registration, and different cell/end-cut
+  constraints remain explicit. All physical trellis profiles use stored raw
+  correlations, not square/cubic Hartree inversion.
+- Added complete_campaign_analysis_20260919.py for consistent physical order
+  cuts, spin nodes, full-cell lag-one/lag-two diagnostics and accounting.
+  The cut figures use the same twenty hashed coarse/fine endpoints as the
+  full energy curves: physical leg-odd spin on rungs 6–59, symmetrized
+  two-leg-averaged anomalous pairing on bonds with left rungs 6–58, plus
+  central rungs 17–48 for spin. Coarse anchors in the older cut_summary were
+  corrected to this same physical RMS convention. Linear and log companion
+  plots preserve the weak end-weighted V=-0.05 spin qualification. Neither
+  the cuts nor their connecting lines establish a first-order discontinuity.
+- The updated combined report covers 38 runs / 2280 cell updates / 2400
+  individual ladder solves. Newly synced completed-job accounting covers
+  all 38: cubic 14.196666667, fine square 13.274722222, positive-V 4.602430556,
+  trellis 8.708541667, total 40.782361111 actual node-hours. Recorded solver
+  time totals 40.068426596 node-hours. Coarse square remains separate at
+  27.350764 actual node-hours. Ledger SHA-256:
+  493347fb61caee99a071cf9d19ddb4a4b4b5c6d3c351df9fc432960d6a6b5893.
+  Job-level records are in campaign_review_20260918/completion_accounting.json;
+  no budget ledger was edited and no remote accounting query was made.
+- Updated the two detailed reports and combined review, actual manuscript
+  LaTeX/PDF, METHODS_NOTES LaTeX/PDF, literature-review project-evidence
+  LaTeX/PDF, source notes, README, PROJECT_STATE, ACTIVE and preparation-result
+  pointers. Section 3.10 gains physical order cuts; 3.11 now covers positive-V
+  square; 3.12 covers all trellis cells/seeds and their alternating relaxation.
+  Square/cubic side-by-side figures and the material introduction are preserved.
+  The manuscript is 37 pages / 13 figures / 48 cited references. Numerical
+  cutoff is September 19; literature search/bibliographies are unchanged.
+  The Overleaf ZIP is verified with all 19 entries and thirteen figure PDFs.
+- Local reproduction commands (C:/Python313/python.exe -B -X utf8):
+  scripts/analyze_two_basin_campaigns_20260918.py --positive-only;
+  scripts/analyze_trellis_progress_20260918.py;
+  scripts/complete_campaign_analysis_20260919.py;
+  docs/manuscript/package_overleaf.py. These are local analysis/build commands,
+  not Perlmutter submissions. Checks validate compact/config/seed hashes,
+  within-cell fingerprints, raw adjacency, correlation endpoints, canonical
+  reconstruction and site normalization, channel windows, log counts and costs.
+  Input state hashes match after analysis. No DMRG test suite was rerun.
+- Cached Tectonic builds succeed for manuscript (37 pages), methods (21) and
+  literature review (30). All thirteen manuscript graphics and text references,
+  48 bibliography entries, and ZIP contents are verified. No unresolved
+  references, missing figures or overfull boxes occur. Minor underfull spacing
+  remains in a long energy paragraph and existing methods tables; rendered
+  pages were inspected without clipping. Local QA/summary/render files are
+  retained under output/notes_update_20260919. Build intermediates are kept
+  there rather than added to versioned documentation.
+- This completes the requested endpoint analysis and notes. Full terminal
+  correlations/backfill remain prepared, not newly measured campaign evidence.
+  No GPU port, extra compute, submission, authentication, synchronization or
+  scheduler operation was performed. Selective stability/convergence work and
+  any modest linear-damping trellis test remain future user decisions.

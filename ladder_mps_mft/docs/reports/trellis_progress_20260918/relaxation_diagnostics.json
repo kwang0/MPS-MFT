@@ -1,0 +1,194 @@
+{
+  "date": "2026-09-19",
+  "runs": [
+    {
+      "cell": "one_ladder",
+      "family": "stripe",
+      "source": "output/phase1_gpu/20260916_trellis_two_basin_comparison_60/results/trellis__one_ladder__stripe_eps005_chi200_raw60/trellis__one_ladder_stripe_weak_other__trellis_two_reference_correlations_eps005_raw__none__stripe_eps005/20260917T180438_970141_b65cb3151528/state.h5",
+      "source_sha256": "b3d204a10eeeced5446f22a7b65ffef8314cf5243e49d8bceae11046a1db7b00",
+      "final_field_lag1_max": 2.326870998416164e-06,
+      "final_field_lag2_max": 6.5522990301408734e-06,
+      "lag2_over_lag1": 2.815927068840877,
+      "last_field_increment_cosine": -0.6206611136914076,
+      "final_increment_norm_ratio": 0.3076321052776788,
+      "lag1_at_sweep51": 2.276498265514626e-06,
+      "lag1_at_sweep60": 2.326870998416164e-06,
+      "ladders": [
+        {
+          "ladder": "A",
+          "spin_nodes": [
+            6.324398239325294,
+            14.430547905970563,
+            15.271853056431494,
+            16.93404642839934,
+            17.05896733344123,
+            18.79185398128271,
+            19.189900148044696,
+            20.820216327132542,
+            21.197726593403264,
+            22.71132160304416,
+            23.3141987642662,
+            24.605255436233936,
+            25.42362718305864,
+            26.543775594418065,
+            27.466563066688504,
+            28.538841846973643,
+            29.451666926044098,
+            30.570265476906,
+            31.417235677616638,
+            32.59371954357925,
+            33.410126712829886,
+            34.560364153191955,
+            35.48238310309267,
+            36.448399273747285,
+            37.66473745214808,
+            38.26881209444158,
+            39.925876720861226,
+            40.0593416491998,
+            45.91186227881055,
+            46.13753702429118,
+            47.60681659160966,
+            55.49096576344977,
+            63.40121015707613
+          ],
+          "charge_mode": 3,
+          "spin_mode": 29,
+          "spin_profile_step": 8.239407817217659e-06
+        }
+      ]
+    },
+    {
+      "cell": "one_ladder",
+      "family": "pairing",
+      "source": "output/phase1_gpu/20260916_trellis_two_basin_comparison_60/results/trellis__one_ladder__pairing_eps005_chi200_raw60/trellis__one_ladder_pairing_weak_other__trellis_two_reference_correlations_eps005_raw__none__pairing_eps005/20260918T110126_1096127_b65cb3151528/state.h5",
+      "source_sha256": "acbfff6dc8df900310d77499ef380656b82dc92be864e05bae82fe52dc5e71a5",
+      "final_field_lag1_max": 3.304658516417591e-07,
+      "final_field_lag2_max": 6.382157856435478e-07,
+      "lag2_over_lag1": 1.9312609229452378,
+      "last_field_increment_cosine": -0.13967960390125087,
+      "final_increment_norm_ratio": 0.521626836636624,
+      "lag1_at_sweep51": 4.1345037982186764e-07,
+      "lag1_at_sweep60": 3.304658516417591e-07,
+      "ladders": [
+        {
+          "ladder": "A",
+          "spin_nodes": [
+            6.11718167027445,
+            10.652776951376712,
+            11.52751538533495,
+            12.212951879942036,
+            15.555476793756453,
+            16.743851492759813,
+            17.173207635315173,
+            18.842248942107027,
+            19.125032168445667,
+            20.95863995593065,
+            21.043530375653635,
+            22.85861359129241,
+            23.155897110744746,
+            24.724037911549686,
+            25.308427917228613,
+            26.623106563587047,
+            27.403025848451847,
+            28.57864357091906,
+            29.42741787380126,
+            30.57857314702411,
+            31.419399980392143,
+            32.578505805534824,
+            33.434661423049405,
+            34.52601287201187,
+            35.531785800917866,
+            36.39628084463775,
+            37.74609188606765,
+            38.19882545798001,
+            45.90597774150975,
+            46.16407917578974,
+            47.516291919743196,
+            55.59607864311084
+          ],
+          "charge_mode": 3,
+          "spin_mode": 29,
+          "spin_profile_step": 9.95731652853049e-07
+        }
+      ]
+    },
+    {
+      "cell": "two_ladder",
+      "family": "stripe",
+      "source": "output/phase1_gpu/20260916_trellis_two_basin_comparison_60/results/trellis__two_ladder__stripe_eps005_chi200_raw60/trellis__two_ladder_stripe_weak_other__trellis_two_reference_correlations_eps005_raw__none__stripe_eps005/20260918T120708_1360293_84461ebc15f5/state.h5",
+      "source_sha256": "1b360712c6731f3efda0a68b80faefcc39ebbf0b36001a79819ee877c752e13b",
+      "final_field_lag1_max": 0.023449192519348985,
+      "final_field_lag2_max": 0.000753906393135946,
+      "lag2_over_lag1": 0.032150633439248025,
+      "last_field_increment_cosine": -0.9999618330105646,
+      "final_increment_norm_ratio": 0.9751080676964431,
+      "lag1_at_sweep51": 0.029213374082095456,
+      "lag1_at_sweep60": 0.023449192519348985,
+      "ladders": [
+        {
+          "ladder": "A",
+          "spin_nodes": [
+            13.859135763412729,
+            27.737779831055892,
+            41.92713459826739,
+            56.44180827160208
+          ],
+          "charge_mode": 4,
+          "spin_mode": 30,
+          "spin_profile_step": 0.13698281658314906
+        },
+        {
+          "ladder": "B",
+          "spin_nodes": [
+            8.363726127810157,
+            22.75416389318994,
+            36.94667752897918,
+            50.926880915915326
+          ],
+          "charge_mode": 4,
+          "spin_mode": 30,
+          "spin_profile_step": 0.13995633004637145
+        }
+      ]
+    },
+    {
+      "cell": "two_ladder",
+      "family": "pairing",
+      "source": "output/phase1_gpu/20260916_trellis_two_basin_comparison_60/results/trellis__two_ladder__pairing_eps005_chi200_raw60/trellis__two_ladder_pairing_weak_other__trellis_two_reference_correlations_eps005_raw__none__pairing_eps005/20260918T123032_886482_84461ebc15f5/state.h5",
+      "source_sha256": "d9a803de57b3acbb6006ab9328173bd93bf7ccf6d30a1053f07e335057420e8d",
+      "final_field_lag1_max": 0.0262027960204117,
+      "final_field_lag2_max": 0.0009096628599393822,
+      "lag2_over_lag1": 0.03471625162561905,
+      "last_field_increment_cosine": -0.9999432010994426,
+      "final_increment_norm_ratio": 0.9753956034529861,
+      "lag1_at_sweep51": 0.03244213062434094,
+      "lag1_at_sweep60": 0.0262027960204117,
+      "ladders": [
+        {
+          "ladder": "A",
+          "spin_nodes": [
+            13.739710142742867,
+            27.552525656772627,
+            41.72270952317671,
+            56.30388327906899
+          ],
+          "charge_mode": 4,
+          "spin_mode": 30,
+          "spin_profile_step": 0.15215643592233744
+        },
+        {
+          "ladder": "B",
+          "spin_nodes": [
+            8.370663790694328,
+            22.762638145785587,
+            36.95073234296279,
+            50.9268706437338
+          ],
+          "charge_mode": 4,
+          "spin_mode": 30,
+          "spin_profile_step": 0.15721373408182968
+        }
+      ]
+    }
+  ]
+}

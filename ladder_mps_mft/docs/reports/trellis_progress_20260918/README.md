@@ -1,106 +1,131 @@
-# Trellis: the first completed stripe seed evolves toward pairing
+# Trellis: paired one-ladder cell, striped two-ladder trajectories
 
-Local synchronized snapshot, 18 September 2026. Part of the
-[combined campaign review](../campaign_review_20260918/README.md).
+**Updated 19 September 2026 from all four user-synchronized final states.**
+The earlier one-completed-run assessment is superseded. Both seeds approach
+the same paired texture in the skew one-ladder cell. Both lose pairing and
+retain strong stripes in the rectangular two-ladder cell, where large
+alternating relaxation still prevents convergence.
 
-**The fixed one-ladder trellis map has a paired trajectory at (t0,V)=(1,0),
-even when initialized with 95% stripe and 5% pairing.** Its substantial
-initial spin order disappears while opposite-sign leg/rung pairing grows.
-This is qualitatively different from the square and cubic-unfrustrated
-results at the same bare-ladder coordinate, which reach stripes.
+All runs use (t0,V)=(1,0), U=8, tau0=tau1=0.1, density 15/16, L=64 per
+ladder, chi=200 and 60 raw cell sweeps. All four retain
+`status=maximum_iterations`, `accepted=false`. A/B denote two spatial
+ladders solved from the previous cell fields, not successive MF iterations.
 
-![Trellis full and late histories](histories.png)
+| Cell / seed | Job | Final spin RMS, A / B | Final leg-pair RMS, A / B | Corrected energy, t/site | Final-ten energy range |
+|---|---:|---:|---:|---:|---:|
+| One / stripe | 58468871 | 1.215e−5 | 0.01796892 | −0.518820336467 | 2.84e−7 |
+| One / pairing | 58468873 | 1.368e−5 | 0.01796878 | −0.518820322856 | 2.83e−7 |
+| Two / stripe | 58468875 | 0.228442 / 0.228761 | 1.26e−8 / 1.18e−9 | −0.521125816792 | 1.53e−4 |
+| Two / pairing | 58468876 | 0.228234 / 0.228755 | 6.56e−9 / 2.60e−10 | −0.521055560230 | 1.92e−4 |
 
-## Completed run and physical profiles
+Energy is the target-density-corrected canonical functional divided by
+128 sites for one ladder or 256 for two. Spin RMS uses rungs 6–59;
+the two-leg-averaged anomalous leg-pair RMS uses bonds with left rungs 6–58.
+These are observed endpoints, not accepted branch energies.
 
-Campaign `20260916_trellis_two_basin_comparison_60`, job **58468871**:
-one-ladder cell, U=8, t0=1, V=0, tau0=tau1=0.1, L=64, n=0.9375, chi=200,
-r_range=4. The exact signed E_p is −0.13251724. Sixty simultaneous raw cell
-sweeps here are sixty ladder solves; no Anderson or damping was used.
-The saved terminal status is `maximum_iterations`, `accepted=false`.
+![Figure 1. Full energy, spin and pairing histories](histories.png)
 
-| Physical diagnostic | First measured evaluation | Evaluation 60 |
-|---|---:|---:|
-| Leg-odd spin RMS, rungs 6–59 | 0.0627150 | 1.21484e−5 |
-| Leg-pair RMS, bonds 6–58 | 0.00965140 | 0.01796892 |
-| Charge standard deviation, rungs 6–59 | 0.0230562 | 0.00565120 |
+## The one-ladder seeds agree on a paired texture
 
-The final mean leg and rung pair amplitudes are +0.017956 and −0.032923.
-The pairing RMS changes by only 6.59e−6 fractionally from evaluations 51
-to 60; the maximum bond-profile change over those endpoints is 6.90e−7.
-Spin is reduced by more than three orders of magnitude from the first
-measurement and has no resolved late return to a strong stripe texture.
+In **Figure 1**, the stripe start loses spin (0.0627 to 1.21e−5) and gains
+pairing (0.00965 to 0.01797). The pairing start retains pairing and loses its
+weak stripe component. Final leg/rung means are about **+0.01796/−0.03292**
+in both runs: d-wave-like internal signs, not a spatial pair-density wave.
 
-![Trellis spatial profiles](profiles.png)
+The endpoint energies differ by only **1.361e−8 t/site**, much less than
+their summed recent energy ranges of 5.678e−7. Maximum seed-to-seed differences
+are 6.27e−6 in charge and 5.68e−7 in leg pairing across the full ladder.
+This supports the same qualitative paired basin. It does not certify
+a fixed point: energy windows, inner-DMRG and some channel/profile gates fail.
+Final inner-sweep energy changes are about 3e−7 t total versus 1e−7 allowed.
+Small residual spin fluctuates near 1e−5 rather than decaying monotonically
+to zero; assigning it robust magnetic order would be premature.
 
-Charge oscillations are strongest near the open ends and weaken in the
-center (central 32-rung standard deviation 0.001572). They do not by
-themselves demonstrate a bulk CDW intertwined with pairing. Opposite
-leg/rung signs identify d-wave-like internal structure, not a spatially
-sign-changing pair-density wave. Spin at about 1e−5 is too small/noisy here
-to assign a robust spin wavelength from its largest Fourier bin.
+![Figure 2. Charge, staggered spin and anomalous pair profiles](profiles.png)
 
-Trellis fields mix density with normal bond correlators. This analysis
-therefore uses the **stored raw correlation histories**, not the
-square/cubic Hartree-field inversion. See the
-[trellis map and energy contract](../../TRELLIS_MEAN_FIELD.md).
+**Figure 2** distinguishes end-dependent one-ladder charge structure
+(central charge standard deviation about 0.00157) from persistent central
+CDW in the two-ladder runs (about 0.0467–0.0470). One-ladder charge oscillations
+alone do not establish bulk intertwining. Tiny pairing panels in the two-ladder
+columns use 1e−7/1e−8 scales and are negligible compared with the one-ladder
+paired amplitude. Raw signs are retained; B has physical offset −1/2 rung.
 
-## Why it remains unaccepted
+## Two-ladder stripes still undergo large alternating relaxation
 
-The last ten global relative residuals all pass 1e−4; their maximum is
-8.46e−5 and the last is 2.10e−5. The global slow-mode, density,
-Hamiltonian-identity and effective-energy checks pass too. However:
+The pairing start rapidly develops spin and loses pairing. Both final A/B
+textures have charge Fourier mode m=4 and spin mode m=30, consistent with
+nominal charge/spin-envelope periods 16/32. Neighboring ladders have shifted
+charge minima and spin nodes; they are not identical profiles copied at
+the same rung index.
 
-- The corrected energy range is **2.844e−7 t/site**, versus 1e−7 allowed.
-- Inner-DMRG last-sweep differences fail at evaluations 55, 59 and 60;
-  the final difference is **3.36e−7 t total** versus 1e−7 allowed.
-- Spin/exchange-spin residuals and the spin, pairing and charge-modulation
-  profile windows fail. The final spin absolute residual is 1.47e−6;
-  weak-channel residuals are not simply below the 5e−7 floor.
+A nearly constant spin RMS hides a large moving texture. Final global relative
+residuals are **0.1845–0.2085**, versus 1e−4 allowed. Final inner-DMRG windows
+pass in both runs, so the principal problem is the outer MF iteration.
+Energy windows and most normal-field/channel windows also fail.
 
-The last discarded weight is 6.30e−5. A stable qualitative paired texture
-is well supported, but finite-chi/inner-solver variability and the recorded
-profile spans still prevent a fixed-point claim. The corrected endpoint
-energy is **−0.518820336467 t/site**. No threshold or acceptance flag changed.
+![Figure 3. Alternating relaxation and adjacent-sweep spin profiles](two_ladder_relaxation.png)
 
-## Other trellis evidence available in the sync
+In **Figure 3**, successive measured full-cell field increments have cosine
+**−0.999962** (stripe seed) and **−0.999943** (pairing seed). Their norm ratios
+are about **0.975**, consistent with a slowly damped alternating mode, not
+established endpoint growth. Maximum field changes are 0.02345/0.02620 over
+one sweep but 0.000754/0.000910 over two, only 3.22/3.47% as large. Even
+two-sweep differences remain resolved. Pointwise spin changes between
+sweeps 59 and 60 reach roughly 0.14–0.16.
 
-These are partial stdout records only; none has a synced spatial artifact.
-They are not terminal outcomes or live scheduler observations.
+This is an alternating transient with continuing drift, **not an accepted
+period-two orbit**; MF sweep number is not physical time. A/B are spatial
+states, separate from the temporal numerical oscillation. A future controlled
+test of modest linear damping could target this negative iteration mode
+without Anderson. No mixing change or continuation is prepared here; such
+a test would still need spatial/stability checks.
 
-| Cell / initial family | Job | Complete logged cell sweeps | Latest corrected energy, t/site |
-|---|---:|---:|---:|
-| One ladder / pairing | 58468873 | 21 | −0.518820331322 |
-| Two ladders / stripe | 58468875 | 18 | −0.519257203947 |
-| Two ladders / pairing | 58468876 | 1 | −0.518667545597 |
+## What the cell comparison establishes
 
-The one-ladder pairing log is already very close in energy to the completed
-one-ladder trajectory, but its profiles are needed before concluding that
-both seeds merge. The two-ladder results are unfinished. A/B are spatial
-states solved simultaneously, not alternating temporal states. The skew
-one-ladder repetition and rectangular A/B cell impose different transverse
-patterns and end cuts; no accepted cell comparison is available yet.
+The earlier statement that “trellis develops pairing whereas square/cubic
+develop stripes” applies to the **skew one-ladder ansatz**. The rectangular
+A/B test also accesses stripes from both seeds. Independent spatial profiles
+permit relative texture arrangements absent from a single repeated profile;
+different open-end cuts are an additional finite-size distinction. The
+ansatz and relative stripe arrangement matter alongside lattice connectivity.
 
-The interesting result now is the **change of observed basin with geometry**.
-It is not a cross-geometry energy ranking and does not yet determine whether
-the explicit two-ladder cell supports the same pairing or a competing texture.
+The two-ladder endpoints lie 0.00224–0.00231 t/site below the one-ladder
+endpoints, as **diagnostic functional values**. Within the two-ladder cell,
+the pairing-seeded endpoint is 7.026e−5 t/site above the stripe-seeded endpoint,
+less than their summed final-ten ranges of 3.445e−4. Large self-consistency
+residuals, different cell fingerprints and finite-OBC embeddings prevent a
+certified cell/phase ranking. These are not converged stripe ground states.
 
-## Reproduction, evidence and cost
+The paired one-ladder branch remains a useful reference for future pair–pair
+measurements. Vanishing anomalous order in the two-ladder trajectories does
+not by itself determine connected local pair correlations. No new
+four-fermion measurement enters this report.
 
-The completed run records 28,609.98 solver seconds, or **1.986804 fractional
-node-hours** at one quarter node. No actual allocation reconciliation for
-it is in the local ledger. Partial-job costs are unavailable and excluded.
+## Evidence, cost and reproduction
 
-- [Audit JSON](analysis.json), [source hashes](sources.csv), [full iteration history](iteration_history.csv),
-  [terminal profiles](terminal_profiles.csv), and [partial log histories](partial_log_histories.csv).
-- [Preparation contract](../trellis_comparison_20260916/README.md).
-- [Analysis script](../../../scripts/analyze_trellis_progress_20260918.py).
+There are **240 cell sweeps and 360 individual ladder solves** across four
+jobs/six spatial histories. Recorded solver time is **8.627653 fractional
+node-hours**; synced completed-job accounting gives **8.708542 actual node-hours**.
+
+- [Summaries and within-cell comparisons](analysis.json),
+  [source inventory](sources.csv), [identified histories](iteration_history.csv),
+  [physical profiles](terminal_profiles.csv), [alternation diagnostics](relaxation_diagnostics.json).
+- `partial_log_histories.csv` remains a historical September 18 snapshot;
+  `analysis.json` now has no missing branches.
+- [Trellis method contract](../../TRELLIS_MEAN_FIELD.md),
+  [preparation](../trellis_comparison_20260916/README.md),
+  [combined report](../campaign_review_20260918/README.md).
+
+Run locally from the repository root:
 
 ```powershell
 C:/Python313/python.exe -B -X utf8 ladder_mps_mft/scripts/analyze_trellis_progress_20260918.py
+C:/Python313/python.exe -B -X utf8 ladder_mps_mft/scripts/complete_campaign_analysis_20260919.py
 ```
 
-Checks cover compact/config/seed hashes, fingerprints, raw-map adjacency,
-stored correlation endpoints/densities, canonical energy reconstruction,
-target-density correction, cell normalization, channel windows and stdout
-counts. The audit does not modify results or inspect the remote scratch MPS.
+Trellis Hartree fields contain normal-bond terms. Profiles here come directly
+from saved correlations, never square/cubic Hartree inversion. Checks cover
+hashes, seeds/configs, fingerprints within each cell, update adjacency,
+endpoint correlations, canonical reconstruction, density correction, site
+normalization, channel windows, logs and accounting. States and acceptance
+flags are unchanged.

@@ -146,24 +146,21 @@ Equation numbers above refer to the published version; the arXiv v1 numbering
 differs. This note records an equation-level correspondence, not a new
 finite-temperature calculation or a certification of competing phases.
 
-## Project comparison update — 18 September 2026
+## Project comparison update — 19 September 2026
 
-The [new local campaign review](../reports/campaign_review_20260918/README.md)
-qualifies the earlier motivation to seek positive-V intertwining on square.
-At (t0,V)=(1.2,+0.2), the three completed square seeds, including a regular
-intertwined period-16 pattern, lose their anomalous pairing and reach CDW/SDW
-stripes. The period-eight seed is still missing a spatial artifact. Do not
-present repulsive V as a demonstrated geometry-independent mechanism for
-coexistence based on the legacy cubic-frustrated data.
+The [completed local review](../reports/campaign_review_20260918/README.md)
+now covers all four square (1.2,+0.2) seeds. Both intertwined wavelengths lose
+anomalous pairing; the period-eight start retains irregular magnetic defects.
+The legacy cubic-frustrated evidence therefore does not establish a universal
+sign-of-V rule for coexistence.
 
-The complete cubic-unfrustrated grid also differs from square, reaching
-stripes at both coordinates that were paired on square. Conversely, the
-first completed one-ladder trellis stripe seed develops pairing at (1,0).
-These observations strengthen the need to match interaction topology,
-geometry, density and numerical status before comparing to isolated-ladder
-papers or the Bollmark2023 benchmark. They do not alter the summaries or
-bibliographic metadata above; no new literature search was performed.
+Cubic unfrustrated reaches stripes at all nine points, including square's
+paired corner. Trellis also requires a spatial-cell qualification: both
+one-ladder starts are paired, but both rectangular A/B starts develop
+stripes with large alternating numerical relaxation. No accepted orbit or
+cell/phase energy ranking follows from these unfinished endpoints.
 
-This qualification is now incorporated into the actual LaTeX/PDF under
-"Project evidence update: 18 September 2026", alongside the finer square
-energy-shape result. The source summaries and 49-paper bibliography are unchanged.
+The actual review LaTeX/PDF now carries this qualification under “Project
+evidence update: 19 September 2026”, alongside the finer energy/order cuts.
+All 38 reviewed runs remain unaccepted. This is new local project evidence;
+source summaries, 49-paper bibliography and search cutoff are unchanged.

@@ -1,27 +1,26 @@
 # Stripe–pairing competition across square, cubic and trellis geometries
 
-**18 September 2026 — analysis of user-synchronized local results.**
+**Updated 19 September 2026 — analysis of all user-synchronized final results.**
 
-The new data strengthen the geometry dependence of the phase picture.
-Cubic unfrustrated reaches stripes throughout the 3×3 grid, while the finer
-square cuts reveal two coordinates with distinct seed-dependent textures.
-The completed positive-V square runs lose pairing, and the first completed
-trellis run does the opposite: it loses its seeded stripe order and develops
-robust pairing.
+The completed data distinguish geometry from the imposed spatial cell.
+Cubic unfrustrated reaches stripes throughout its 3×3 grid; square retains
+a paired corner and two seed-dependent coordinates on the finer cuts.
+All four positive-V square starts lose pairing. In trellis, both one-ladder
+seeds remain paired, while both two-ladder seeds develop stripes with large
+alternating relaxation. The latter qualifies the earlier one-run conclusion.
 
-This report brings those four findings together. The 34 completed histories
-reviewed here contain **2040 MF evaluations**, all at chi=200 and all
-formally unaccepted after their 60-step cap. Qualitative basin identification
-is often clear; accepted energetic phase selection remains unfinished.
-Earlier square-grid results are used as reference, not counted again in
-these totals. No tolerance, acceptance flag or simulation artifact changed.
+This report covers **38 completed runs, 2280 cell updates and 2400 individual
+ladder solves**, all at chi=200 and all unaccepted at their 60-step caps.
+The earlier coarse square grid remains a separate reference. Qualitative
+order and convergence are recorded separately; no simulation control,
+acceptance flag or immutable state was changed.
 
-| Campaign | Complete histories | Observed outcome | Remaining limitation |
+| Campaign | Complete runs | Observed outcome | Remaining limitation |
 |---|---:|---|---|
-| Cubic unfrustrated 3×3 | 18/18 | Both seeds stripe at all nine points | Spatial fixed-point gates still fail |
-| Six finer square points | 12/12 | Four paired from both seeds; two retain distinct textures | Transition order and accepted energy crossing unresolved |
-| Square (1.2,+0.2) | 3/4 | All three lose pairing and reach stripes | Period-eight intertwined seed has only 46 complete log records |
-| Trellis (1.0,0.0) | 1/4 | One-ladder stripe seed becomes paired | Other seed/cell comparisons have partial logs only |
+| Cubic unfrustrated 3×3 | 18/18 | Both seeds stripe at every point | Spatial fixed-point gates fail |
+| Six finer square points | 12/12 | Four paired from both seeds; two retain distinct textures | Transition order and accepted crossing unresolved |
+| Square (1.2,+0.2) | 4/4 | All lose pairing; period-eight seed leaves magnetic defects | Spatial drift; no accepted energy ranking |
+| Trellis (1.0,0.0) | 4/4 | One-ladder paired; two-ladder striped from both seeds | Large alternating two-ladder relaxation; cell/boundary dependence |
 
 ## 1. Cubic removes the paired corner seen on square
 
@@ -129,10 +128,13 @@ effective-Hamiltonian eigenvalues or seed-energy gaps. Recent-drift bars are
 diagnostics rather than convergence error bounds. [Exact energies, slopes,
 normalization and interpretation](../square_fine_cuts_20260918/README.md#full-variational-energies-across-the-transition).
 
-![Figure 7: finer square order parameters and seed energy gaps](../square_fine_cuts_20260918/cut_summary.png)
+![Figure 7: physical spin and pairing across the finer cuts](../square_fine_cuts_20260918/order_parameter_cuts.png)
 
-**Figure 7.** Spin and pairing RMS across the cuts, with seed-to-seed energy
-differences at the six fine points. Open symbols denote coarse anchors.
+**Figure 7.** Physical spin and anomalous leg-pair RMS on linear scales,
+using matched definitions for all twenty coarse/fine endpoints. Open symbols
+denote coarse anchors; dotted spin curves use the central 32 rungs.
+A [logarithmic companion](../square_fine_cuts_20260918/order_parameter_cuts_log.png)
+resolves small remainders. Connecting independent starts does not measure hysteresis.
 
 In **Figure 7**, along **t0=1.4**, both seeds are paired at V=−0.15 and −0.10. They remain
 different at **V=−0.05**: the stripe seed has spin RMS 0.1447 and leg-pair
@@ -176,83 +178,139 @@ transition location should retain that limitation.
 
 [Detailed cut analysis, spatial comparisons, complete energy histories and data](../square_fine_cuts_20260918/README.md).
 
-## 3. Positive V has not produced intertwined order on square so far
+## 3. All positive-V square seeds lose pairing
 
-At **(1.2,+0.2)**, the stripe, pairing and intertwined period-16 starts
-all finish with spin RMS about **0.233** and leg pairing below **8.3e−10**.
-The deliberately intertwined seed loses its pairing too. All three have
-the same nominal 16-rung charge/32-rung spin-envelope wavelength; a global
-spin reversal of one seed is a symmetry choice, not another phase.
+![Figure 9. All four positive-V square histories](../square_positive_v_20260918/histories.png)
 
-The outstanding **period-eight intertwined seed** has 46 complete stdout
-records but no synced state/checkpoint. Its latest global relative residual
-is 1.046e−3 and its corrected energy is −0.332811523 t/site, versus roughly
-−0.333744 for the three completed trajectories. Without its profiles we
-cannot tell whether its shorter wavelength or pairing persists.
+**Figure 9.** Full energy and order histories, with late energy detail, at
+(t0,V)=(1.2,+0.2). The intertwined period-eight state is now included.
 
-Thus the available square evidence does **not** support a general rule
-that repulsive V produces intertwining. The legacy result remains specific
-to its geometry and tested states. One wavelength test is still missing,
-and none of these observations excludes other basins or numerical limits.
+The stripe, pairing and intertwined period-16 starts end with spin RMS
+0.23321–0.23358 and leg pairing below 8.3e−10. The period-eight start also
+loses pairing, reaching 7.01e−9 after a further 87.8% decrease over its last
+ten evaluations. No tested seed sustains appreciable anomalous coexistence.
 
-[Positive-V history/profile figures, convergence details and partial log](../square_positive_v_20260918/README.md).
+![Figure 10. Positive-V square spatial profiles](../square_positive_v_20260918/terminal_profiles.png)
 
-## 4. Trellis already gives a qualitatively different outcome
+**Figure 10.** The period-eight start retains a distinct magnetic defect
+texture despite losing pairing. Pairing panels use a tiny 1e−7 scale.
 
-![Figure 9: completed trellis history](../trellis_progress_20260918/histories.png)
+The other three starts have four spin-envelope nodes near rungs 10, 25, 40
+and 55. The period-eight start evolves from eight to six nodes, with two
+close node pairs around the inner hole-rich regions. Its charge has dominant
+m=4, while its spin spectrum mixes m=31,30,28; it has not retained a clean
+shorter charge wavelength. This is consistent with incomplete coarsening or
+trapped magnetic defects, not a demonstrated stationary metastable phase.
 
-**Figure 9.** Full histories and convergence diagnostics for the first
-completed one-ladder trellis stripe start.
+Its corrected endpoint energy is −0.332811625875 t/site, **9.3242e−4 above
+the stripe-seeded endpoint**. That diagnostic gap exceeds recent energy
+drift, which does not bound remaining convergence error. All four retain
+global and spatial gate failures; maximum pointwise spin changes over the
+final ten evaluations are 0.00358–0.00655 despite nearly constant RMS.
 
-In **Figure 9**, the completed **one-ladder, stripe-dominated trellis start** at t0=1, V=0,
-tau0=tau1=0.1 converts toward pairing. Spin RMS falls from **0.0627 to
-1.21e−5**, while leg-pair RMS rises from **0.00965 to 0.01797**. Final
-mean leg/rung amplitudes have opposite signs, **+0.01796/−0.03292**.
-The pair profile is nearly stationary over the last ten evaluations.
-End-dependent charge oscillations remain; they do not demonstrate bulk
-intertwined order.
+This completed test does not reproduce legacy frustrated-cubic intertwining
+on square. Repulsive V is not by itself sufficient in this tested setup.
+Other basins and parameters remain open, as do connected pair correlations
+after anomalous order has vanished.
 
-Square and cubic at the same bare-ladder coordinate instead reach stripes.
-That contrast is interesting now, even before the other trellis jobs finish.
-It concerns geometry-dependent trajectories, not a comparison of energies
-between different Hamiltonians.
+[Four-seed analysis, exact energies, nodes, gates and sources](../square_positive_v_20260918/README.md).
 
-The global relative residual passes late, but the trellis run still misses
-inner-DMRG, energy-window and several channel/profile gates. Its last-ten
-energy range is 2.84e−7 t/site; the endpoint energy is −0.518820336467.
-The other one-ladder seed has a very similar logged energy after 21 sweeps,
-but no synced profile. The two-ladder stripe/pairing logs contain 18/1
-complete cell sweeps. Their cell outcomes and energetics remain unresolved.
+## 4. Trellis distinguishes the skew one-ladder and rectangular two-ladder cells
 
-[Trellis profiles, raw-correlation analysis, gate failures and partial logs](../trellis_progress_20260918/README.md).
+![Figure 11. All trellis energy, spin and pairing histories](../trellis_progress_20260918/histories.png)
+
+**Figure 11.** Both seeds in each trellis cell at (t0,V)=(1,0),
+tau0=tau1=0.1. A/B are spatial ladders. Energy is normalized by 128 sites
+for the one-ladder cell and 256 for the two-ladder cell.
+
+Both one-ladder seeds reach nearly identical pairing: leg-pair RMS about
+**0.017969**, opposite leg/rung mean signs **+0.01796/−0.03292**, and spin
+near **1.3e−5**. Their endpoint energies differ by only 1.361e−8 t/site,
+and maximum full-ladder pair-profile difference is 5.68e−7. The same
+qualitative paired basin is well supported, though energy, inner-DMRG and
+some spatial gates still fail.
+
+Both two-ladder seeds instead develop strong CDW/SDW: spin RMS
+**0.22823–0.22876** on A/B and leg pairing at most **1.26e−8**.
+The pairing start loses its order rapidly. Charge/spin bins m=4/30 retain
+nominal periods 16/32.
+
+![Figure 12. Trellis charge, spin and pair profiles](../trellis_progress_20260918/profiles.png)
+
+**Figure 12.** All six spatial histories, with final and nine-sweeps-earlier
+profiles. B is shifted by its physical −1/2-rung offset; raw signs are retained.
+
+The one-ladder charge modulation is end-sensitive (central standard deviation
+about 0.00157). Two-ladder charge remains strongly modulated centrally
+(0.0467–0.0470), with relative A/B shifts of the charge minima and spin nodes.
+The tiny one-ladder spin and two-ladder pairing panels do not establish
+additional orders. All profiles use stored correlations; the square Hartree
+inversion is not valid for trellis.
+
+![Figure 13. Alternating outer-iteration relaxation in two-ladder trellis](../trellis_progress_20260918/two_ladder_relaxation.png)
+
+**Figure 13.** One- versus two-sweep measured-field differences, and spin
+profiles at sweeps 58–60. Even sweeps nearly overlap; the odd sweep shifts
+the walls. A/B spatial labels are separate from this iteration parity.
+
+The two-ladder result is **not merely missing an overly strict tolerance**.
+Final global relative residuals are 0.1845–0.2085, versus 1e−4 required.
+Final inner-DMRG windows pass. Successive full-cell field increments almost
+reverse (cosines −0.99996/−0.99994), shrinking by a factor about 0.975.
+Two-sweep field differences are only 3.22/3.47% of one-sweep differences but
+remain resolved. This is consistent with a slowly damped alternating
+transient, not an accepted orbit or physical dynamics. Modest linear damping
+could be a future targeted numerical test; no such change is made here.
+
+The two-ladder stripe/pairing endpoint energies are −0.521125816792 and
+−0.521055560230 t/site. Their gap, 7.026e−5, is less than the summed final-ten
+energy ranges 3.445e−4. They lie about 0.00224–0.00231 t/site below the
+one-ladder endpoints as diagnostic functional values. Large residuals,
+different cell fingerprints and different finite open-end embeddings prevent
+a certified energetic ranking.
+
+Thus the earlier contrast “trellis pairs, square/cubic stripe” applies to
+the **skew one-ladder ansatz**. Allowing independent A/B profiles also accesses
+stripes; relative transverse texture arrangements and boundary cuts both
+need to be distinguished before assigning a trellis phase.
+
+[Complete trellis analysis, gate failures, profiles and relaxation data](../trellis_progress_20260918/README.md).
 
 ## Cost, evidence and the next scientific decision
 
-| Completed histories reviewed here | MF evaluations | Solver-only fractional node-hours | Actual allocation evidence in sync |
-|---|---:|---:|---|
-| Cubic grid | 1080 | 13.886995 | 9.441597 node-hours for 12 of 18 jobs |
-| Finer square cuts | 720 | 13.030485 | Unavailable |
-| Positive-V square, three complete | 180 | 3.027065 | Unavailable |
-| Trellis, one complete | 60 | 1.986804 | Unavailable |
-| **Total completed subset** | **2040** | **31.931350** | **Incomplete; no exact overall allocation total** |
+The newly synced ledger contains completed-job accounting for all 38 jobs:
 
-Solver totals use recorded solver seconds × one quarter node and exclude
-allocation overhead. Partial-job costs are excluded. The original coarse
-square grid, including its continuations, separately has 902 evaluations
-and 27.350764 actual node-hours; it is not added to this table.
+| Campaign | Cell updates | Ladder solves | Solver-only node-hours | Actual node-hours |
+|---|---:|---:|---:|---:|
+| Cubic grid | 1080 | 1080 | 13.886995 | 14.196667 |
+| Finer square cuts | 720 | 720 | 13.030485 | 13.274722 |
+| Positive-V square | 240 | 240 | 4.523293 | 4.602431 |
+| Trellis | 240 | 360 | 8.627653 | 8.708542 |
+| **Total** | **2280** | **2400** | **40.068427** | **40.782361** |
 
-The audit checked source hashes, seed/config provenance, compatible
-fingerprints within each comparison, raw-update adjacency, log counts,
-physical order parameters, canonical energy correction and channel windows.
-Trellis profiles come directly from correlation histories because its fields
-cannot be inverted using the square/cubic density formula. Each detailed
-report includes source inventories, machine-readable histories and figures.
-All analysis was local; no new simulation, remote query, submission, artifact
-mutation or accounting-ledger edit occurred.
+Actual costs use synchronized sacct reconciliations, elapsed seconds and
+the recorded node fraction. Solver time excludes allocation overhead.
+The earlier coarse square grid separately has 902 evaluations and 27.350764
+actual node-hours; it is not counted again here. [Job-level accounting and
+ledger hash](completion_accounting.json) supersede the September 18
+incomplete accounting coverage.
 
-The most useful next evidence is the remaining period-eight square state
-and the other trellis states. After those arrive, the two split square
-coordinates are natural candidates for selective convergence/stability
-work before deciding the order of the transition. Higher chi, length and
-interpolation studies remain deferred, as requested. This report prepares
-no new compute or tolerance changes.
+Source hashes, seed/config provenance, matching within-cell fingerprints,
+raw-update adjacency, log counts, physical profiles, canonical normalization
+and channel windows were checked. The cut figure uses the same twenty
+hashed endpoints as the energy curves and consistent physical RMS definitions.
+All original state files, gates and ledgers were read-only.
+
+The actual [manuscript LaTeX/PDF](../../manuscript/README.md) now separates
+Section 3.11 (positive-V square) and Section 3.12 (trellis), with referenced
+history/profile/relaxation figures and physical spin/pairing cuts in Section
+3.10. The methods and literature-review project notes are updated too; no
+fresh literature search is implied.
+
+The correlation workflow is prepared for all 56 latest branches / 58 MPSs,
+including unaccepted maximum-iteration states. These reports still use
+anomalous amplitudes, not newly measured connected pair–pair functions.
+A useful next comparison is local pair correlations in the paired and
+striped endpoints with their residuals attached. Selective convergence
+tests for the square boundary and two-ladder trellis remain future decisions.
+No new jobs, thresholds or remote operations are prepared or executed here.

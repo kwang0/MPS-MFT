@@ -1,0 +1,120 @@
+{
+  "date": "2026-09-19",
+  "reference_family": "stripe_weak_other",
+  "runs": [
+    {
+      "family": "stripe_weak_other",
+      "job_id": "58394103",
+      "spin_rms": 0.23326823296241112,
+      "pair_rms": 1.5381329854901499e-10,
+      "energy": -0.33374404621730347,
+      "energy_minus_stripe": 0.0,
+      "energy_range": 3.573856699468081e-08,
+      "charge_mode": 4,
+      "spin_mode": 30,
+      "spin_nodes_final": [
+        9.988687946672956,
+        24.472809033367817,
+        39.31983928002799,
+        54.502639330234935
+      ],
+      "spin_nodes_first": [
+        9.626950682581725,
+        24.048780143684372,
+        38.999458487438375,
+        54.567394432218535
+      ],
+      "final_spin_profile_change": 0.004762717396408767,
+      "final_charge_profile_change": 0.0018429188775770378,
+      "source": "output/phase1_gpu/20260915_square_t012_vp02_four_seeds_60/results/square__stripe_weak_other_t012_vp02_chi200_raw/square__stripe_weak_other__square_positive_v_four_reference_and_intertwined_raw__none__stripe_weak_other/20260918T084323_905799_a994c1ee7bf7/state.h5",
+      "source_sha256": "3b22d02a21e21e655227fb3c97f2c8efcc48c96c572d7ce2539b9f6d01e7a7b6"
+    },
+    {
+      "family": "pairing_weak_other",
+      "job_id": "58394104",
+      "spin_rms": 0.2332122637405864,
+      "pair_rms": 1.7176538366959032e-10,
+      "energy": -0.3337443790645869,
+      "energy_minus_stripe": -3.3284728345739367e-07,
+      "energy_range": 5.096582167407604e-08,
+      "charge_mode": 4,
+      "spin_mode": 30,
+      "spin_nodes_final": [
+        10.115213871100725,
+        24.68503435381331,
+        39.54921848270407,
+        54.58983850656319
+      ],
+      "spin_nodes_first": [
+        9.841556663663672,
+        24.063219365435128,
+        39.17182548353747,
+        54.63883719109653
+      ],
+      "final_spin_profile_change": 0.0035848854460722446,
+      "final_charge_profile_change": 0.001363684348545724,
+      "source": "output/phase1_gpu/20260915_square_t012_vp02_four_seeds_60/results/square__pairing_weak_other_t012_vp02_chi200_raw/square__pairing_weak_other__square_positive_v_four_reference_and_intertwined_raw__none__pairing_weak_other/20260918T094307_2071823_a994c1ee7bf7/state.h5",
+      "source_sha256": "42afc6e7c9f44e7dd9d492031899b7a51128f06e27559d445719cf4aa5f6b3ca"
+    },
+    {
+      "family": "intertwined_lambda08",
+      "job_id": "58394105",
+      "spin_rms": 0.20700441469942935,
+      "pair_rms": 7.005189732283913e-09,
+      "energy": -0.33281162587479524,
+      "energy_minus_stripe": 0.0009324203425082334,
+      "energy_range": 5.383786999546558e-08,
+      "charge_mode": 4,
+      "spin_mode": 31,
+      "spin_nodes_final": [
+        10.156669663023006,
+        23.212548211590466,
+        26.805432885226757,
+        38.29714323095587,
+        41.89474855379499,
+        54.90545740391881
+      ],
+      "spin_nodes_first": [
+        4.411613406077934,
+        12.315462578245297,
+        20.6325312514807,
+        28.409623216543064,
+        36.59089945672151,
+        44.36779026183871,
+        52.68527554114712,
+        60.58820914890934
+      ],
+      "final_spin_profile_change": 0.004832645212967807,
+      "final_charge_profile_change": 0.0018068750734453465,
+      "source": "output/phase1_gpu/20260915_square_t012_vp02_four_seeds_60/results/square__intertwined_lambda08_t012_vp02_chi200_raw/square__intertwined_lambda08__square_positive_v_four_reference_and_intertwined_raw__none__intertwined_lambda08/20260918T095224_1033914_a994c1ee7bf7/state.h5",
+      "source_sha256": "22b5f44e7d96057f50191d90dd1c88369f7ff3accd46977ee0128d88879a2566"
+    },
+    {
+      "family": "intertwined_lambda16",
+      "job_id": "58394106",
+      "spin_rms": 0.23358133055051067,
+      "pair_rms": 8.287803847483083e-10,
+      "energy": -0.3337438481209027,
+      "energy_minus_stripe": 1.9809640078305435e-07,
+      "energy_range": 2.662144771292674e-07,
+      "charge_mode": 4,
+      "spin_mode": 30,
+      "spin_nodes_final": [
+        10.047417257140244,
+        24.857946938690134,
+        40.218155151629304,
+        55.00655799430785
+      ],
+      "spin_nodes_first": [
+        8.65011062846821,
+        24.501770573334397,
+        40.499768582294394,
+        56.35122014182122
+      ],
+      "final_spin_profile_change": 0.006546533793061966,
+      "final_charge_profile_change": 0.0024393273631074797,
+      "source": "output/phase1_gpu/20260915_square_t012_vp02_four_seeds_60/results/square__intertwined_lambda16_t012_vp02_chi200_raw/square__intertwined_lambda16__square_positive_v_four_reference_and_intertwined_raw__none__intertwined_lambda16/20260918T102941_1089707_a994c1ee7bf7/state.h5",
+      "source_sha256": "2b664101ab04a5a0b92098c3bf2b938c8b5b9bf22e4e84427a78382ab74926b9"
+    }
+  ]
+}

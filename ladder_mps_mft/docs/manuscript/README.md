@@ -2,14 +2,17 @@
 
 Created 15 September 2026. This is an editable manuscript starting point using
 the existing annotated literature review and locally synchronized analyses
-through September 18 (updated from the initial September 13 cutoff).
+through September 19 (updated from the initial September 13 cutoff).
 
-Results-note update, September 18: the [combined campaign review](../reports/campaign_review_20260918/README.md)
+Final-results update, September 19: the [combined campaign review](../reports/campaign_review_20260918/README.md)
 is now incorporated into the actual LaTeX and rebuilt PDF: complete square
 and cubic grids, square continuations, finer-cut full variational energies
-and slope diagnostics, positive-V tests, and the first trellis result.
+and matched physical spin/pairing cuts, all four positive-V square starts,
+and all four one-/two-ladder trellis runs. Sections 3.11 and 3.12 now develop
+the square and trellis analyses separately, including magnetic defects,
+spatial-cell dependence, convergence and alternating relaxation.
 
-The rebuilt draft has 27 pages and 48 cited references. The introduction and
+The rebuilt draft has 37 pages and 48 cited references. The introduction and
 Section 2.4 now motivate the trellis runs through the chain--ladder materials,
 pressure-induced superconductivity, charge and magnetic order, optical/model
 parameter estimates (including the limits on V), and reciprocal one-/two-ladder
@@ -36,10 +39,11 @@ stripe/coherence references; three existing material records are also cited.
 4. An appendix linking claims to sixteen groups of local evidence.
 
 The document preserves provisional status and historical acceptance flags.
-The prepared longer-ladder seeds and partial positive-V/trellis logs are not
-presented as completed spatial results. The earlier spatial figure is reused
-from the September 12 analysis, and six figures are added from the September
-18 analysis. Figures 2–5 compare square and cubic side by side: phase diagrams,
+The prepared longer-ladder seeds are not new evidence. All four positive-V
+and all four trellis final states are now analyzed; old partial logs remain
+historical. There are thirteen figures, including the earlier September 12
+spatial evolution, the square/cubic comparisons, full transition-cut energies,
+physical spin/pairing cuts and completed square/trellis history/profile plots. Figures 2–5 compare square and cubic side by side: phase diagrams,
 full energy histories, physical spin RMS and physical pairing RMS. The three
 history comparisons use landscape pages and retain all square continuations.
 Every comparison is referenced in the text. The PDFs and LaTeX sources are
@@ -84,6 +88,14 @@ reports/
   square_fine_cuts_20260918/
     variational_energy_cuts.pdf
     variational_energy_shape.pdf
+    order_parameter_cuts.pdf
+  square_positive_v_20260918/
+    histories.pdf
+    terminal_profiles.pdf
+  trellis_progress_20260918/
+    histories.pdf
+    profiles.pdf
+    two_ladder_relaxation.pdf
 METHODS_NOTES.tex
 ```
 
@@ -94,7 +106,7 @@ Use the normal pdfLaTeX compiler with BibTeX (the documents use natbib).
 The path handling follows the project-root behavior documented in
 [Overleaf's multi-file guidance](https://www.overleaf.com/learn/latex/Multi-file_LaTeX_projects).
 
-All seven figure PDFs are required, even though they are outside the two source
+All thirteen figure PDFs are required, even though they are outside the two source
 folders. The Git-tracked [Overleaf upload ZIP](overleaf_upload.zip) contains
 the LaTeX sources, bibliographies, living methods notes, required figures and
 these instructions, so it can be downloaded from another device.
@@ -109,8 +121,8 @@ Build logs, extracted-text checks, and rendered pages are under the ignored
 output/notes_update_20260918 directory (the initial draft checks remain under
 output/manuscript_draft). No DMRG calculation is part of this build.
 
-The material-discussion build and rendered checks are under
-`output/trellis_manuscript_20260918/`. It retains seven figures and all
-numerical convergence qualifications. The September 18 rebuild is checked for unresolved citations/references,
-missing figures and layout warnings, with visual inspection of the added
-results and figures. Source links and packaged figures are validated locally.
+The historical material-discussion build is under
+`output/trellis_manuscript_20260918/`. Final-results rendering and checks are
+under `output/notes_update_20260919/`. The September 19 build retains all
+48 references and convergence qualifications and is checked for unresolved
+references, missing figures, layout and Overleaf path coverage.

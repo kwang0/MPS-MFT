@@ -1,7 +1,8 @@
 # Four seeds for square (t0,V)=(1.2,+0.2)
 
-Results update, September 18: the [three completed starts lose pairing](../square_positive_v_20260918/README.md),
-including the intertwined period-16 seed. The period-eight seed has a
+Final results update, September 19: [all four starts lose pairing](../square_positive_v_20260918/README.md),
+including both intertwined seeds; the period-eight start retains a magnetic
+defect texture. The preparation below is historical. The September 18 sync had a
 partial log but no synced spatial artifact. See the
 [combined campaign review](../campaign_review_20260918/README.md).
 The seed construction and original submission contract below are retained.

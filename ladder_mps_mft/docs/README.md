@@ -47,23 +47,23 @@ not yet new measured evidence.
 
 The latest synchronized results are in the
 [September 18 combined campaign review](reports/campaign_review_20260918/README.md).
-It brings together all 18 cubic starts, all 12 finer square starts, three
-completed positive-V square seeds and the first completed trellis run,
-with histories, spatial profiles, convergence diagnostics and cost evidence.
+Updated September 19, it brings together all 18 cubic, 12 finer square,
+four positive-V square and four trellis starts, with full histories, spatial
+profiles, convergence diagnostics and completed-job accounting.
 The finer-square report also plots full canonical variational energies against
 both cut parameters, with common-background and interval-slope diagnostics.
-All34 completed histories remain unaccepted. Cubic is stripe-like throughout;
-two finer square points retain distinct seed-dependent textures; positive-V
-square has not retained pairing in its three completed starts; the trellis
-one-ladder stripe seed instead develops pairing. Partial logs remain distinct
-from completed spatial outcomes.
+All 38 completed runs remain unaccepted. Cubic is stripe-like throughout;
+two finer square points retain distinct seed-dependent textures. All four
+positive-V square seeds lose pairing, with magnetic defects remaining in
+the period-eight start. Trellis is paired from both seeds in the one-ladder
+cell but striped with large alternating relaxation in the two-ladder cell.
 
 Detailed results:
 
 - [Complete cubic grid](reports/cubic_two_basin_grid_20260918/README.md).
 - [Finer square transition cuts](reports/square_fine_cuts_20260918/README.md).
 - [Square (1.2,+0.2)](reports/square_positive_v_20260918/README.md).
-- [First trellis result and partial logs](reports/trellis_progress_20260918/README.md).
+- [Complete one-/two-ladder trellis comparison](reports/trellis_progress_20260918/README.md).
 - [Coarse square grid with both continuations](reports/two_basin_grid_20260915/README.md):
   seven stripe and two paired coordinates,902 evaluations, zero accepted
   endpoints and 27.350764 actual node-hours across18 lineages/20 source jobs.
@@ -81,15 +81,17 @@ energy normalization and the one-/two-ladder spatial ansatz distinction.
 
 For manuscript background, see the
 [introduction and results draft](manuscript/README.md), created September 15
-and now updated in LaTeX and PDF with numerical evidence through September 18.
+and now updated in LaTeX and PDF with numerical evidence through September 19.
 It includes the complete grids, full transition-cut energies, positive-V and
-trellis outcomes, while retaining its 34 references and provisional status.
+trellis outcomes, with separate Sections 3.11/3.12, thirteen figures and
+48 cited references. The material introduction and provisional status remain.
 The [coupled-ladder literature review](literature/README.md) provides annotated
 sources, LaTeX/PDF and 49 references. Its actual project-evidence section now
 qualifies the legacy positive-V interpretation with the new square data,
 without claiming a fresh literature search. The [living methods notes](METHODS_NOTES.tex)
 ([compiled PDF](METHODS_NOTES.pdf))
-also describe the raw-update protocol and energy-shape interpretation.
+also describe the raw-update protocol, energy-shape interpretation and
+two-ladder alternating relaxation. No new literature search is implied.
 
 The deferred [finite-size seed snapshot](reports/finite_size_seeds_20260906/README.md)
 retains four chi=200 L=96/L=128 pairing/stripe seeds with fixed L=64 coupling.

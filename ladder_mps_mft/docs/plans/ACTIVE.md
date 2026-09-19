@@ -1,85 +1,53 @@
 # Active plan
 
-Last reviewed: 2026-09-18
+Last reviewed: **2026-09-19**
 
-## Current outcome
+## Completed analysis
 
-September 18 follow-up: complete terminal equal-time diagnostics and the
-56-endpoint / 58-MPS retroactive measurement pass are prepared. The user will
-run the [CPU submission workflow](../DIAGNOSTICS.md#user-run-perlmutter-backfill)
-after the final trellis run and compact exports finish. Future ordinary and
-trellis SCF runs measure full correlations at acceptance or maximum iterations;
-this does not relax convergence or change archived acceptance flags.
-The requested CPU ceiling is 8.15625 node-hours in the existing project ledger.
-No campaign MPS measurements or Perlmutter submissions were executed locally.
-The locally synced inventory still contains only 52 of the 56 requested endpoints;
-that is not a live scheduler claim. New diagnostics must be synced before their
-scientific interpretation, especially residual pair correlations in stripes.
+The final sync completes the [combined review](../reports/campaign_review_20260918/README.md):
+38 runs, 2280 cell updates, 2400 ladder solves, all unaccepted after 60 steps.
+No simulation controls, original artifacts or acceptance flags changed.
 
-The [combined campaign review](../reports/campaign_review_20260918/README.md)
-completes the requested analysis of the cubic grid, finer square cuts,
-positive-V comparison and first completed trellis run. It includes 34
-complete 60-step chi=200 histories (2040 MF evaluations); none is formally
-accepted. No simulation controls or acceptance flags changed.
+- Cubic: both seeds stripe at all nine coordinates.
+- Fine square: paired outcomes at four new points, distinct textures at
+  (1.25,−0.4) and (1.4,−0.05). Full energy and matched physical spin/pairing
+  cuts are in the report and manuscript; no first-order kink is resolved.
+- Positive-V square: all four seeds lose pairing. The period-eight start
+  retains an irregular six-node magnetic texture and a higher diagnostic
+  endpoint energy, not sustained intertwined order.
+- Trellis: both one-ladder seeds paired; both two-ladder seeds striped.
+  The latter still has large alternating outer-MF relaxation. A/B are
+  spatial; sweep parity is numerical, not physical dynamics.
+- Coarse square remains the seven-stripe/two-paired reference, including
+  both V=0 continuations (902 evaluations, 27.350764 actual node-hours).
 
-- Cubic: all 18 starts, nine points, essentially unpaired stripes from both
-  seeds. The square paired corner is absent in this tested cubic grid.
-- Finer square: all 12 starts; paired outcomes at four points and distinct
-  stripe/paired trajectories at (1.25,-0.4) and (1.4,-0.05). Signed endpoint
-  energy gaps are diagnostics only. The weak spin of the paired V=-0.05
-  trajectory is concentrated near the ends; central spin still decays.
-  Full energy-versus-parameter plots now include both coarse endpoints per
-  cut and the latest V=0 continuations. A small V-slope downturn is visible
-  after common linear subtraction; t0 curvature is gradual. A first-order
-  kink is not resolved by the current five-point cuts.
-- Square (1.2,+0.2): three completed starts lose pairing and reach stripes.
-  The period-eight intertwined seed has 46 complete log records, no state.
-- Trellis: the one-ladder stripe seed becomes paired after 60 sweeps. Other
-  logs contain 21 one-ladder pairing, 18 two-ladder stripe and 1 two-ladder
-  pairing sweeps, without spatial states. A/B are spatial, not temporal.
-
-The [coarse square grid](../reports/two_basin_grid_20260915/README.md) already
-includes both V=0 continuations: 100/82 cumulative evaluations, seven stripe
-and two paired coordinates, 902 total evaluations, 27.350764 actual node-hours.
-Its underlying data and historical parent controls remain unchanged.
-The combined report and LaTeX manuscript now compare square and cubic phase
-diagrams, full energy grids and physical spin/pairing RMS grids side by side.
-The 1982 plotted evaluations retain the square continuations. This is a
-presentation update with matched RMS conventions, not a new phase selection.
+The manuscript now separates Sections 3.11/3.12 into comprehensive positive-V
+and trellis analyses. Section 3.10 has physical spin/pairing cut figures.
+Existing square/cubic comparisons and the material introduction remain.
+Actual methods/literature-review LaTeX and PDF notes are updated too;
+the Overleaf bundle includes the new figures.
 
 ## Next evidence and decisions
 
-1. Await user-synchronized state/checkpoint artifacts for square job 58394105
-   and trellis jobs 58468873/58468875/58468876. Do not infer phase from their
-   logged energy alone or submit duplicates based on this snapshot.
-2. Compare terminal physical profiles and complete raw histories. Trellis
-   analysis must use stored correlations because normal bonds contribute
-   to its Hartree fields. Distinguish skew one-ladder repetition from the
-   rectangular A/B cell and its separate mean-density constraints.
-3. Decide whether selected square boundary lineages need further convergence
-   or stability probes. No new continuation or tolerance change is prepared.
-   Distinct unfinished endpoints do not yet prove a first-order transition,
-   and end-weighted spin does not certify bulk coexistence.
-4. Rank only accepted, fingerprint-compatible canonical solutions. Keep
-   diagnostic endpoint differences separate from certified energy selection.
-5. Reconcile actual allocation costs before choosing additional compute.
-   The current completed subset records 31.931350 solver-only node-hours;
-   only 12 cubic jobs have actual reconciliations, totaling 9.441597.
-   These are different coverage sets, not interchangeable totals.
+1. Full terminal correlations are enabled for future accepted and
+   maximum-iteration states. The retrospective workflow covers 56 latest
+   branches / 58 spatial MPSs. All terminal state branches are now synced,
+   but full scratch-MPS preflight remains user-run. New pair–pair evidence
+   awaits measurement and sync; it is not inferred from anomalous order.
+2. The [prepared CPU handoff](../DIAGNOSTICS.md) is unchanged. GPU speed
+   remains unbenchmarked; CPU is the existing implementation, not a proven
+   performance winner. No new submission or GPU port was requested here.
+3. Consider selective convergence/stability work on the two square boundary
+   points and the alternating two-ladder trellis trajectories. Linear damping
+   is a possible targeted trellis test, not a prepared control change.
+4. Rank only accepted, fingerprint-compatible canonical solutions. Retain
+   open-end/cell qualifications on trellis endpoint energy comparisons and
+   end-localized spin qualifications near the square boundary.
+5. All 38 reviewed jobs are now accounted: 40.782361 actual node-hours,
+   versus 40.068427 solver-only. Reconcile future compute through the existing
+   400-additional-node-hour control; do not count reservations as actual cost.
 
-Higher chi, length, stripe wavelength and precise E_p sensitivity checks remain
-deferred at the user's request. The four L=96/L=128 chi=200 seeds with fixed
-L=64 E_p remain available in the [finite-size preparation](../reports/finite_size_seeds_20260906/README.md).
-The 400-additional-node-hour project control and user-only Perlmutter boundary
-remain in force. First-segment ceilings do not authorize blanket extensions.
-
-## Continuity
-
-Current findings and costs live in `PROJECT_STATE.md` and the linked detailed
-reports; `RUN_LOG.md` has the append-only provenance, commands and validation
-record. The September 16 partial snapshot and September 15 preparation reports
-are retained as history and now link to the September 18 results. At the user's
-request the actual manuscript, methods notes and literature-review LaTeX/PDF
-now incorporate the new results. The manuscript explicitly uses numerical
-evidence through September 18, including full energy cuts and slope diagnostics;
-the bibliography and literature-search cutoff are unchanged.
+Higher chi, length, wavelength and precise E_p sensitivity studies remain
+deferred. Only the user operates or transfers to/from Perlmutter.
+PROJECT_STATE.md carries the current snapshot, RUN_LOG.md the append-only
+evidence, and dated preparation/earlier partial reports remain historical.

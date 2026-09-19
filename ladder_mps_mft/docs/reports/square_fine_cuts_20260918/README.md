@@ -187,8 +187,32 @@ separate from fixed-point acceptance. No thresholds were relaxed.
 - Reproduction: [analysis script](../../../scripts/analyze_two_basin_campaigns_20260918.py).
 
 The twelve completed histories contain **13.030485 solver-only fractional
-node-hours**. No actual allocation reconciliation for these jobs is present
-in the synced ledger; the 36-node-hour reservation is only a ceiling.
+node-hours**. The September 19 sync now includes all twelve reconciliations,
+giving **13.274722 actual node-hours**. The 36-node-hour reservation remains
+a requested ceiling, not actual cost. See the [completed accounting audit](../campaign_review_20260918/completion_accounting.json).
 Compact/config/seed hashes, pointwise fingerprints, interpolation, raw-map
 adjacency, logs, physical correlations and energy/channel calculations were
 checked locally. No simulation or accounting artifact was changed.
+
+## Matched physical spin/pairing cuts — September 19 addition
+
+![Physical spin and pairing along both transition cuts](order_parameter_cuts.png)
+
+This figure uses exactly the same twenty hashed endpoints as the full
+variational-energy curves. Spin is physical leg-odd Sz RMS on rungs 6–59;
+leg pairing is symmetrized and averaged over the two legs before its RMS
+on bonds with left rungs 6–58. Coarse endpoints are recomputed with that
+same convention. Dotted curves use the central 32 spin rungs. These are
+anomalous amplitudes, not four-fermion pair–pair correlations.
+
+Finite pairing and sizable stripe order remain in distinct trajectories
+at one point per cut. Their abrupt sampled changes motivate a first-order
+test; lines between independent starts do not measure a discontinuity,
+hysteresis or a stationary coexistence region. The small end-weighted spin
+at paired V=−0.05 is better resolved in the [logarithmic companion](order_parameter_cuts_log.png).
+
+[PDF](order_parameter_cuts.pdf), [log PDF](order_parameter_cuts_log.pdf),
+[values and provenance](order_parameter_cuts.csv), [definitions and audit](order_parameter_analysis.json).
+This figure is included in manuscript Section 3.10. Reproduce locally with
+`python scripts/complete_campaign_analysis_20260919.py` from the ladder
+subproject. No state, threshold or acceptance flag was changed.

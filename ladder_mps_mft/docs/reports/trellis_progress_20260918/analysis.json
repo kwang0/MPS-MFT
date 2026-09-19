@@ -1,5 +1,5 @@
 {
-  "date": "2026-09-18",
+  "date": "2026-09-19",
   "runs": [
     {
       "campaign": "20260916_trellis_two_basin_comparison_60",
@@ -58,7 +58,12 @@
       "energy_span_last10": 2.84371664549532e-07,
       "solver_seconds": 28609.97730922699,
       "solver_node_hours": 1.98680397980743,
-      "allocation": null,
+      "allocation": {
+        "seconds": 28986,
+        "node_hours": 2.0129166666666665,
+        "reconciled_utc": "2026-09-19T16:21:05Z",
+        "source": "output/project_budget/additional_node_hours_reconciliations.tsv"
+      },
       "reserved_node_hours": 3.0,
       "energy_ranking_eligible": false,
       "ladders": [
@@ -210,289 +215,985 @@
       ],
       "log_source": "output/phase1_gpu/20260916_trellis_two_basin_comparison_60/logs/trellis__one_ladder__stripe_eps005_chi200_raw60.s1-58468871.out",
       "log_sha256": "4523d6149fdc09c8c3ba82a1542592b35e7119c63865d6c18fb60dc71b3a42cb"
-    }
-  ],
-  "missing": [
+    },
     {
+      "campaign": "20260916_trellis_two_basin_comparison_60",
       "label": "trellis__one_ladder__pairing_eps005_chi200_raw60",
+      "job_id": "58468873",
       "cell": "one_ladder",
       "family": "pairing",
-      "job_id": "58468873",
-      "source": "output/phase1_gpu/20260916_trellis_two_basin_comparison_60/logs/trellis__one_ladder__pairing_eps005_chi200_raw60.s1-58468873.out",
-      "sha256": "f4378ab8cc88ec7562a31d3e48577308ea7d010a71c97f7b87016dc669a166ae",
-      "state_available": false,
-      "records": [
+      "source": "output/phase1_gpu/20260916_trellis_two_basin_comparison_60/results/trellis__one_ladder__pairing_eps005_chi200_raw60/trellis__one_ladder_pairing_weak_other__trellis_two_reference_correlations_eps005_raw__none__pairing_eps005/20260918T110126_1096127_b65cb3151528/state.h5",
+      "compact_sha256": "acbfff6dc8df900310d77499ef380656b82dc92be864e05bae82fe52dc5e71a5",
+      "full_sha256": "574e5ae0106a9e8e99b4d8c9212b5385f6a69850926e9d3e560b146db89eb53b",
+      "config_sha256": "26e0ccd637a0e350455a6c78be49822a94d24dd9633f00d44741d143ef59d76c",
+      "seed_sha256": "6c6ecc6be47a3db50dfef079dc20dc78f3540b1703ae10d9a59c7728bbec92a1",
+      "fingerprints": {
+        "model_fingerprint": "b65cb31515282b5f2b65560c5f29cc12f17560c4ec0cee628471a1093bfcbb4f",
+        "numerical_fingerprint": "d3129105a6cee2136e69ec6d68a762dad1cfa04c3b5b6a020d2efee5ba5790a3",
+        "implementation_sha256": "0bd439eeb91020cc9db447ba15109d79b0b70b3a2489c0d3fefc04ac31933e98",
+        "ep_source_sha256": "2209bd2ca3c1ad02c0e542d1a9d63ecf90fdfa49120ad9cc3af599a5b4bc1f0e"
+      },
+      "controls": {
+        "stagnation_min_relative_improvement": 0.01,
+        "period2_oscillation_cosine_max": -0.5,
+        "stable_iterations": 10,
+        "divergence_factor": 8.0,
+        "max_period": 8,
+        "period2_two_step_ratio_max": 0.5,
+        "probe_iterations": 60,
+        "cycle_action": "continue",
+        "dmrg_sweep_energy_tol": 1e-07,
+        "period_rel_tol": 0.0002,
+        "field_rel_tol": 0.0001,
+        "minimum_iterations": 40,
+        "accepted_periods": [
+          1
+        ],
+        "stagnation_window": 40,
+        "period_repeats": 3,
+        "effective_energy_consistency_tol": 1e-08,
+        "density_tol": 1e-05,
+        "variational_energy_tol": 1e-07,
+        "probe_max_period": 2,
+        "channel_noise_floor": 5e-07,
+        "period_abs_tol": 2e-07,
+        "slow_mode_cosine_min": 0.9,
+        "hamiltonian_identity_tol": 1e-08,
+        "channel_residuals": true,
+        "orbit_bulk_fraction": 0.5,
+        "unmixed_cycle_probe": true,
+        "field_abs_tol": 1e-07
+      },
+      "status": "maximum_iterations",
+      "accepted": false,
+      "cell_sweeps": 60,
+      "ladder_solves": 60,
+      "physical_sites": 128,
+      "energy_per_site_final": -0.5188203228563002,
+      "energy_span_last10": 2.83416217050636e-07,
+      "solver_seconds": 26918.263215065002,
+      "solver_node_hours": 1.869323834379514,
+      "allocation": {
+        "seconds": 27126,
+        "node_hours": 1.88375,
+        "reconciled_utc": "2026-09-19T16:21:05Z",
+        "source": "output/project_budget/additional_node_hours_reconciliations.tsv"
+      },
+      "reserved_node_hours": 3.0,
+      "energy_ranking_eligible": false,
+      "ladders": [
         {
-          "cell_sweep": 1,
-          "spatial_ladders": 1,
-          "energy_per_site": -0.518687442508,
-          "status": "iterating"
-        },
-        {
-          "cell_sweep": 2,
-          "spatial_ladders": 1,
-          "energy_per_site": -0.518818894841,
-          "status": "iterating"
-        },
-        {
-          "cell_sweep": 3,
-          "spatial_ladders": 1,
-          "energy_per_site": -0.518819894912,
-          "status": "iterating"
-        },
-        {
-          "cell_sweep": 4,
-          "spatial_ladders": 1,
-          "energy_per_site": -0.51882028419,
-          "status": "iterating"
-        },
-        {
-          "cell_sweep": 5,
-          "spatial_ladders": 1,
-          "energy_per_site": -0.51882032216,
-          "status": "iterating"
-        },
-        {
-          "cell_sweep": 6,
-          "spatial_ladders": 1,
-          "energy_per_site": -0.518820294878,
-          "status": "iterating"
-        },
-        {
-          "cell_sweep": 7,
-          "spatial_ladders": 1,
-          "energy_per_site": -0.518820304685,
-          "status": "iterating"
-        },
-        {
-          "cell_sweep": 8,
-          "spatial_ladders": 1,
-          "energy_per_site": -0.518820614578,
-          "status": "iterating"
-        },
-        {
-          "cell_sweep": 9,
-          "spatial_ladders": 1,
-          "energy_per_site": -0.518820304383,
-          "status": "iterating"
-        },
-        {
-          "cell_sweep": 10,
-          "spatial_ladders": 1,
-          "energy_per_site": -0.518820303805,
-          "status": "iterating"
-        },
-        {
-          "cell_sweep": 11,
-          "spatial_ladders": 1,
-          "energy_per_site": -0.518820304782,
-          "status": "iterating"
-        },
-        {
-          "cell_sweep": 12,
-          "spatial_ladders": 1,
-          "energy_per_site": -0.518820332619,
-          "status": "iterating"
-        },
-        {
-          "cell_sweep": 13,
-          "spatial_ladders": 1,
-          "energy_per_site": -0.51882061779,
-          "status": "iterating"
-        },
-        {
-          "cell_sweep": 14,
-          "spatial_ladders": 1,
-          "energy_per_site": -0.518820320719,
-          "status": "iterating"
-        },
-        {
-          "cell_sweep": 15,
-          "spatial_ladders": 1,
-          "energy_per_site": -0.518820335572,
-          "status": "iterating"
-        },
-        {
-          "cell_sweep": 16,
-          "spatial_ladders": 1,
-          "energy_per_site": -0.518820336551,
-          "status": "iterating"
-        },
-        {
-          "cell_sweep": 17,
-          "spatial_ladders": 1,
-          "energy_per_site": -0.518820333785,
-          "status": "iterating"
-        },
-        {
-          "cell_sweep": 18,
-          "spatial_ladders": 1,
-          "energy_per_site": -0.518820590818,
-          "status": "iterating"
-        },
-        {
-          "cell_sweep": 19,
-          "spatial_ladders": 1,
-          "energy_per_site": -0.518820333735,
-          "status": "iterating"
-        },
-        {
-          "cell_sweep": 20,
-          "spatial_ladders": 1,
-          "energy_per_site": -0.518820364788,
-          "status": "iterating"
-        },
-        {
-          "cell_sweep": 21,
-          "spatial_ladders": 1,
-          "energy_per_site": -0.518820331322,
-          "status": "iterating"
+          "ladder": "A",
+          "spin_rms_first": 0.003532754348193654,
+          "spin_rms_final": 1.3678433950779108e-05,
+          "pair_rms_first": 0.018382183860247304,
+          "pair_rms_final": 0.017968783708540964,
+          "leg_pair_mean": 0.01795584276572973,
+          "rung_pair_mean": -0.0329229463364642,
+          "charge_std_final": 0.00565279218797789,
+          "central_charge_std": 0.0015725678887575595,
+          "central_spin_rms": 9.309027581337288e-06,
+          "spin_fractional_change_last10": -0.027599006055123443,
+          "pair_fractional_change_last10": -1.756110493689178e-07,
+          "profile_max_change_last10": {
+            "spin": 1.6655814289029403e-06,
+            "charge": 6.925732733975565e-07,
+            "leg_pair": 1.8737773658204782e-07
+          },
+          "global_relative": 2.7651954935331203e-06,
+          "last10_max_global_relative": 8.07269767104647e-05,
+          "final_density_error": 5.015132244379217e-06,
+          "last10_max_density_error": 7.294155715320549e-06,
+          "energy_span_last10": 2.83416217050636e-07,
+          "dmrg_last10_failing_iterations": [
+            51,
+            52,
+            53,
+            54,
+            57,
+            58,
+            59,
+            60
+          ],
+          "final_dmrg_sweep_delta": 2.9507685894714086e-07,
+          "final_dmrg_discarded_weight": 6.296559255155897e-05,
+          "gates": {
+            "minimum": true,
+            "global_field": true,
+            "global_slow": true,
+            "density": true,
+            "inner_dmrg": false,
+            "energy": false,
+            "identity": true,
+            "effective": true,
+            "charge_modulation_steps": false,
+            "charge_modulation_span": false,
+            "charge_uniform_steps": true,
+            "charge_uniform_span": true,
+            "exchange_charge_steps": true,
+            "exchange_charge_span": true,
+            "exchange_spin_steps": false,
+            "exchange_spin_span": false,
+            "pairing_steps": false,
+            "pairing_span": false,
+            "spin_steps": false,
+            "spin_span": false
+          },
+          "failed_gates": [
+            "inner_dmrg",
+            "energy",
+            "charge_modulation_steps",
+            "charge_modulation_span",
+            "exchange_spin_steps",
+            "exchange_spin_span",
+            "pairing_steps",
+            "pairing_span",
+            "spin_steps",
+            "spin_span"
+          ],
+          "channels_final": {
+            "charge_modulation": {
+              "absolute": 1.3632922254286362e-07,
+              "applied_rms": 0.004435432715489329,
+              "contraction": -0.43976301032718484,
+              "cosine": -0.798403962075148,
+              "factor": 1.0,
+              "measured_rms": 0.004435432031878003,
+              "passes": 1,
+              "relative": 9.938288594067552e-06,
+              "window_absolute": 6.0474103937280255e-06,
+              "window_passes": 0,
+              "window_relative": 0.0004423485977299809
+            },
+            "charge_uniform": {
+              "absolute": 5.468407886233262e-09,
+              "applied_rms": 0.03348707440124568,
+              "contraction": -0.2458452644487383,
+              "cosine": -1.0,
+              "factor": 1.0,
+              "measured_rms": 0.033487068932837795,
+              "passes": 1,
+              "relative": 1.6329906341504241e-07,
+              "window_absolute": 7.944132876247512e-07,
+              "window_passes": 1,
+              "window_relative": 2.3722516031824657e-05
+            },
+            "exchange_charge": {
+              "absolute": 2.493537704997828e-07,
+              "applied_rms": 0.005820600056215176,
+              "contraction": -0.4644242937746514,
+              "cosine": -0.8087798708897457,
+              "factor": 1.0,
+              "measured_rms": 0.005820601915030364,
+              "passes": 1,
+              "relative": 2.302727767128452e-06,
+              "window_absolute": 7.730903367215297e-06,
+              "window_passes": 1,
+              "window_relative": 7.187302927193069e-05
+            },
+            "exchange_spin": {
+              "absolute": 2.035383985347916e-07,
+              "applied_rms": 4.456536901555932e-07,
+              "contraction": 0.3390811048083946,
+              "cosine": 0.7854993693280364,
+              "factor": 1.0,
+              "measured_rms": 4.477253669705905e-07,
+              "passes": 1,
+              "relative": 0.021091367446015533,
+              "window_absolute": 4.456250403399309e-06,
+              "window_passes": 0,
+              "window_relative": 0.5457975287938318
+            },
+            "pairing": {
+              "absolute": 2.1062614432437732e-07,
+              "applied_rms": 0.000999830351700182,
+              "contraction": -0.02549737950237344,
+              "cosine": -0.03729850294662541,
+              "factor": 1.0,
+              "measured_rms": 0.0009998314626965253,
+              "passes": 1,
+              "relative": 7.075592157927406e-06,
+              "window_absolute": 3.9268009699141085e-06,
+              "window_passes": 0,
+              "window_relative": 0.000295549322995901
+            },
+            "spin": {
+              "absolute": 2.432854442312171e-07,
+              "applied_rms": 4.711127036899377e-06,
+              "contraction": 0.30808692161409146,
+              "cosine": 0.6115624293764288,
+              "factor": 1.0,
+              "measured_rms": 4.717345860671836e-06,
+              "passes": 1,
+              "relative": 0.01119254209998256,
+              "window_absolute": 4.8730667951447926e-06,
+              "window_passes": 0,
+              "window_relative": 0.31215910330734126
+            }
+          }
         }
       ],
-      "limitation": "Synced stdout only; no physical profiles or terminal acceptance/cost evidence."
+      "log_source": "output/phase1_gpu/20260916_trellis_two_basin_comparison_60/logs/trellis__one_ladder__pairing_eps005_chi200_raw60.s1-58468873.out",
+      "log_sha256": "73450714118c39d20ce56cc4ac1202f7d8c9acd12869e69285992ad4e54fd0e1"
     },
     {
+      "campaign": "20260916_trellis_two_basin_comparison_60",
       "label": "trellis__two_ladder__stripe_eps005_chi200_raw60",
+      "job_id": "58468875",
       "cell": "two_ladder",
       "family": "stripe",
-      "job_id": "58468875",
-      "source": "output/phase1_gpu/20260916_trellis_two_basin_comparison_60/logs/trellis__two_ladder__stripe_eps005_chi200_raw60.s1-58468875.out",
-      "sha256": "3a7a79b89ffd568ba1e20eecea88ff98f6e748562e32af9c01cb3eec5e181bab",
-      "state_available": false,
-      "records": [
+      "source": "output/phase1_gpu/20260916_trellis_two_basin_comparison_60/results/trellis__two_ladder__stripe_eps005_chi200_raw60/trellis__two_ladder_stripe_weak_other__trellis_two_reference_correlations_eps005_raw__none__stripe_eps005/20260918T120708_1360293_84461ebc15f5/state.h5",
+      "compact_sha256": "1b360712c6731f3efda0a68b80faefcc39ebbf0b36001a79819ee877c752e13b",
+      "full_sha256": "33f5182edf094f992c455aa5e7a8a76c4bd9793e30146a5ae1fab178aee6e9f2",
+      "config_sha256": "47fe9b1bb50776d9793673b38434d327a0e2620c5a2049a659066723b57d70c0",
+      "seed_sha256": "39df9609a6f5cd7fdc9baab36a5079e98bc9e3a26f3a6e9c788da03b9dca54c7",
+      "fingerprints": {
+        "model_fingerprint": "84461ebc15f53c912ff2ea5d60abf12c414bac0fd1aa266088b8c8d7dc56d241",
+        "numerical_fingerprint": "d3129105a6cee2136e69ec6d68a762dad1cfa04c3b5b6a020d2efee5ba5790a3",
+        "implementation_sha256": "0bd439eeb91020cc9db447ba15109d79b0b70b3a2489c0d3fefc04ac31933e98",
+        "ep_source_sha256": "2209bd2ca3c1ad02c0e542d1a9d63ecf90fdfa49120ad9cc3af599a5b4bc1f0e"
+      },
+      "controls": {
+        "stagnation_min_relative_improvement": 0.01,
+        "period2_oscillation_cosine_max": -0.5,
+        "stable_iterations": 10,
+        "divergence_factor": 8.0,
+        "max_period": 8,
+        "period2_two_step_ratio_max": 0.5,
+        "probe_iterations": 60,
+        "cycle_action": "continue",
+        "dmrg_sweep_energy_tol": 1e-07,
+        "period_rel_tol": 0.0002,
+        "field_rel_tol": 0.0001,
+        "minimum_iterations": 40,
+        "accepted_periods": [
+          1
+        ],
+        "stagnation_window": 40,
+        "period_repeats": 3,
+        "effective_energy_consistency_tol": 1e-08,
+        "density_tol": 1e-05,
+        "variational_energy_tol": 1e-07,
+        "probe_max_period": 2,
+        "channel_noise_floor": 5e-07,
+        "period_abs_tol": 2e-07,
+        "slow_mode_cosine_min": 0.9,
+        "hamiltonian_identity_tol": 1e-08,
+        "channel_residuals": true,
+        "orbit_bulk_fraction": 0.5,
+        "unmixed_cycle_probe": true,
+        "field_abs_tol": 1e-07
+      },
+      "status": "maximum_iterations",
+      "accepted": false,
+      "cell_sweeps": 60,
+      "ladder_solves": 120,
+      "physical_sites": 256,
+      "energy_per_site_final": -0.521125816791624,
+      "energy_span_last10": 0.00015275053864927113,
+      "solver_seconds": 27588.798068761826,
+      "solver_node_hours": 1.9158887547751269,
+      "allocation": {
+        "seconds": 27879,
+        "node_hours": 1.9360416666666667,
+        "reconciled_utc": "2026-09-19T16:21:05Z",
+        "source": "output/project_budget/additional_node_hours_reconciliations.tsv"
+      },
+      "reserved_node_hours": 3.0,
+      "energy_ranking_eligible": false,
+      "ladders": [
         {
-          "cell_sweep": 1,
-          "spatial_ladders": 2,
-          "energy_per_site": -0.516638867486,
-          "status": "iterating"
+          "ladder": "A",
+          "spin_rms_first": 0.2328550914986207,
+          "spin_rms_final": 0.22844164659363797,
+          "pair_rms_first": 0.00026543370413909103,
+          "pair_rms_final": 1.2581285208925004e-08,
+          "leg_pair_mean": -1.9213849280355367e-09,
+          "rung_pair_mean": 8.792945700434927e-09,
+          "charge_std_final": 0.048971557720563406,
+          "central_charge_std": 0.04684307241030889,
+          "central_spin_rms": 0.23705591854997846,
+          "spin_fractional_change_last10": -0.006958790857085173,
+          "pair_fractional_change_last10": 2.4577307716794037,
+          "profile_max_change_last10": {
+            "spin": 0.14907867856106324,
+            "charge": 0.05630255501796977,
+            "leg_pair": 5.714317984961349e-08
+          },
+          "global_relative": 0.18570040522436865,
+          "last10_max_global_relative": 0.23126855020201986,
+          "final_density_error": 1.1373213482102074e-09,
+          "last10_max_density_error": 1.650284797705126e-09,
+          "energy_span_last10": 0.00014954792826804564,
+          "dmrg_last10_failing_iterations": [
+            59
+          ],
+          "final_dmrg_sweep_delta": 3.0889282243151683e-08,
+          "final_dmrg_discarded_weight": 3.1926121794259904e-05,
+          "gates": {
+            "minimum": true,
+            "global_field": false,
+            "global_slow": false,
+            "density": true,
+            "inner_dmrg": false,
+            "energy": false,
+            "identity": true,
+            "effective": true,
+            "charge_modulation_steps": false,
+            "charge_modulation_span": false,
+            "charge_uniform_steps": false,
+            "charge_uniform_span": false,
+            "exchange_charge_steps": false,
+            "exchange_charge_span": false,
+            "exchange_spin_steps": false,
+            "exchange_spin_span": false,
+            "pairing_steps": true,
+            "pairing_span": true,
+            "spin_steps": false,
+            "spin_span": false
+          },
+          "failed_gates": [
+            "global_field",
+            "global_slow",
+            "inner_dmrg",
+            "energy",
+            "charge_modulation_steps",
+            "charge_modulation_span",
+            "charge_uniform_steps",
+            "charge_uniform_span",
+            "exchange_charge_steps",
+            "exchange_charge_span",
+            "exchange_spin_steps",
+            "exchange_spin_span",
+            "spin_steps",
+            "spin_span"
+          ],
+          "channels_final": {
+            "charge_modulation": {
+              "absolute": 0.0026358237790898506,
+              "applied_rms": 0.005040263605113483,
+              "contraction": -0.9818529103186806,
+              "cosine": -0.9999793249598953,
+              "factor": 1.0,
+              "measured_rms": 0.005023601118089504,
+              "passes": 0,
+              "relative": 0.2792671259182373,
+              "window_absolute": 0.0032376696610360786,
+              "window_passes": 0,
+              "window_relative": 0.34579560663009984
+            },
+            "charge_uniform": {
+              "absolute": 1.2183471418750202e-05,
+              "applied_rms": 0.033731604949108,
+              "contraction": -0.9911297143204425,
+              "cosine": -1.0,
+              "factor": 1.0,
+              "measured_rms": 0.03374378842052675,
+              "passes": 0,
+              "relative": 0.0003610581973462959,
+              "window_absolute": 1.5589499641664728e-05,
+              "window_passes": 0,
+              "window_relative": 0.00046198930394489513
+            },
+            "exchange_charge": {
+              "absolute": 0.00498855501350666,
+              "applied_rms": 0.0058913245928962675,
+              "contraction": -0.9818930902117357,
+              "cosine": -0.9999780565004704,
+              "factor": 1.0,
+              "measured_rms": 0.005893507008356386,
+              "passes": 0,
+              "relative": 0.06555648904218209,
+              "window_absolute": 0.006106340247654041,
+              "window_passes": 0,
+              "window_relative": 0.08117240645270424
+            },
+            "exchange_spin": {
+              "absolute": 0.023327488989834708,
+              "applied_rms": 0.004526264152134139,
+              "contraction": -0.9814112675591524,
+              "cosine": -0.9999930009516459,
+              "factor": 1.0,
+              "measured_rms": 0.0045386410925969,
+              "passes": 0,
+              "relative": 0.30242421211266435,
+              "window_absolute": 0.02895449346913526,
+              "window_passes": 0,
+              "window_relative": 0.3770002651490158
+            },
+            "pairing": {
+              "absolute": 2.3427930073985414e-08,
+              "applied_rms": 6.188137034179694e-10,
+              "contraction": -0.9940778820315949,
+              "cosine": -0.9701506746113054,
+              "factor": 1.0,
+              "measured_rms": 1.4214490700021226e-10,
+              "passes": 1,
+              "relative": 1.0311793272117415,
+              "window_absolute": 1.7835688765002272e-07,
+              "window_passes": 1,
+              "window_relative": 1.1813708180912175
+            },
+            "spin": {
+              "absolute": 0.009694888181901458,
+              "applied_rms": 0.016451516466299054,
+              "contraction": -0.981542154761683,
+              "cosine": -0.9999873905657678,
+              "factor": 1.0,
+              "measured_rms": 0.016434728491079794,
+              "passes": 0,
+              "relative": 0.34087257745059474,
+              "window_absolute": 0.01195305854383718,
+              "window_passes": 0,
+              "window_relative": 0.42383990333825566
+            }
+          }
         },
         {
-          "cell_sweep": 2,
-          "spatial_ladders": 2,
-          "energy_per_site": -0.516873658988,
-          "status": "iterating"
-        },
-        {
-          "cell_sweep": 3,
-          "spatial_ladders": 2,
-          "energy_per_site": -0.517173021034,
-          "status": "iterating"
-        },
-        {
-          "cell_sweep": 4,
-          "spatial_ladders": 2,
-          "energy_per_site": -0.517332339204,
-          "status": "iterating"
-        },
-        {
-          "cell_sweep": 5,
-          "spatial_ladders": 2,
-          "energy_per_site": -0.517560354991,
-          "status": "iterating"
-        },
-        {
-          "cell_sweep": 6,
-          "spatial_ladders": 2,
-          "energy_per_site": -0.517699094073,
-          "status": "iterating"
-        },
-        {
-          "cell_sweep": 7,
-          "spatial_ladders": 2,
-          "energy_per_site": -0.517895374141,
-          "status": "iterating"
-        },
-        {
-          "cell_sweep": 8,
-          "spatial_ladders": 2,
-          "energy_per_site": -0.518021677528,
-          "status": "iterating"
-        },
-        {
-          "cell_sweep": 9,
-          "spatial_ladders": 2,
-          "energy_per_site": -0.518197004794,
-          "status": "iterating"
-        },
-        {
-          "cell_sweep": 10,
-          "spatial_ladders": 2,
-          "energy_per_site": -0.518312456669,
-          "status": "iterating"
-        },
-        {
-          "cell_sweep": 11,
-          "spatial_ladders": 2,
-          "energy_per_site": -0.518471616621,
-          "status": "iterating"
-        },
-        {
-          "cell_sweep": 12,
-          "spatial_ladders": 2,
-          "energy_per_site": -0.518578843696,
-          "status": "iterating"
-        },
-        {
-          "cell_sweep": 13,
-          "spatial_ladders": 2,
-          "energy_per_site": -0.51872415191,
-          "status": "iterating"
-        },
-        {
-          "cell_sweep": 14,
-          "spatial_ladders": 2,
-          "energy_per_site": -0.518823876431,
-          "status": "iterating"
-        },
-        {
-          "cell_sweep": 15,
-          "spatial_ladders": 2,
-          "energy_per_site": -0.518957099634,
-          "status": "iterating"
-        },
-        {
-          "cell_sweep": 16,
-          "spatial_ladders": 2,
-          "energy_per_site": -0.519049329405,
-          "status": "iterating"
-        },
-        {
-          "cell_sweep": 17,
-          "spatial_ladders": 2,
-          "energy_per_site": -0.519171274478,
-          "status": "iterating"
-        },
-        {
-          "cell_sweep": 18,
-          "spatial_ladders": 2,
-          "energy_per_site": -0.519257203947,
-          "status": "iterating"
+          "ladder": "B",
+          "spin_rms_first": 0.23303789613505807,
+          "spin_rms_final": 0.22876142290966353,
+          "pair_rms_first": 0.00031677858375923315,
+          "pair_rms_final": 1.1824167636027907e-09,
+          "leg_pair_mean": -5.818049383420678e-10,
+          "rung_pair_mean": 9.894301676466154e-10,
+          "charge_std_final": 0.049170957134687866,
+          "central_charge_std": 0.04666693523115987,
+          "central_spin_rms": 0.236102256916015,
+          "spin_fractional_change_last10": -0.0065985256045358875,
+          "pair_fractional_change_last10": 0.3192829655620941,
+          "profile_max_change_last10": {
+            "spin": 0.15959877227590602,
+            "charge": 0.059932498756592456,
+            "leg_pair": 1.0551481925754946e-08
+          },
+          "global_relative": 0.18453951972761692,
+          "last10_max_global_relative": 0.23280600157291442,
+          "final_density_error": 6.335907354326764e-10,
+          "last10_max_density_error": 1.9837240738951323e-09,
+          "energy_span_last10": 0.00015595314903060764,
+          "dmrg_last10_failing_iterations": [],
+          "final_dmrg_sweep_delta": 3.868177600452327e-08,
+          "final_dmrg_discarded_weight": 3.1137985112597606e-05,
+          "gates": {
+            "minimum": true,
+            "global_field": false,
+            "global_slow": false,
+            "density": true,
+            "inner_dmrg": true,
+            "energy": false,
+            "identity": true,
+            "effective": true,
+            "charge_modulation_steps": false,
+            "charge_modulation_span": false,
+            "charge_uniform_steps": false,
+            "charge_uniform_span": false,
+            "exchange_charge_steps": false,
+            "exchange_charge_span": false,
+            "exchange_spin_steps": false,
+            "exchange_spin_span": false,
+            "pairing_steps": true,
+            "pairing_span": true,
+            "spin_steps": false,
+            "spin_span": false
+          },
+          "failed_gates": [
+            "global_field",
+            "global_slow",
+            "energy",
+            "charge_modulation_steps",
+            "charge_modulation_span",
+            "charge_uniform_steps",
+            "charge_uniform_span",
+            "exchange_charge_steps",
+            "exchange_charge_span",
+            "exchange_spin_steps",
+            "exchange_spin_span",
+            "spin_steps",
+            "spin_span"
+          ],
+          "channels_final": {
+            "charge_modulation": {
+              "absolute": 0.0026678633670909543,
+              "applied_rms": 0.005035595514031012,
+              "contraction": -0.9692700476244759,
+              "cosine": -0.9999398995457758,
+              "factor": 1.0,
+              "measured_rms": 0.00502241992037693,
+              "passes": 0,
+              "relative": 0.2782552972406773,
+              "window_absolute": 0.0033228797195735127,
+              "window_passes": 0,
+              "window_relative": 0.3489409883383841
+            },
+            "charge_uniform": {
+              "absolute": 9.20643369190649e-06,
+              "applied_rms": 0.033735195714624876,
+              "contraction": -0.9944952786333476,
+              "cosine": -1.0,
+              "factor": 1.0,
+              "measured_rms": 0.03374440214831678,
+              "passes": 0,
+              "relative": 0.0002728284724512661,
+              "window_absolute": 1.0646074887869783e-05,
+              "window_passes": 0,
+              "window_relative": 0.000315490586005667
+            },
+            "exchange_charge": {
+              "absolute": 0.00497196876375498,
+              "applied_rms": 0.005891933778279874,
+              "contraction": -0.9693565262711545,
+              "cosine": -0.9999353468675598,
+              "factor": 1.0,
+              "measured_rms": 0.005893652679458689,
+              "passes": 0,
+              "relative": 0.06524942166429339,
+              "window_absolute": 0.006161066968837052,
+              "window_passes": 0,
+              "window_relative": 0.08181174778996703
+            },
+            "exchange_spin": {
+              "absolute": 0.022814251202090963,
+              "applied_rms": 0.004531158167008456,
+              "contraction": -0.9687021050442671,
+              "cosine": -0.9999794396212545,
+              "factor": 1.0,
+              "measured_rms": 0.004537955318930965,
+              "passes": 0,
+              "relative": 0.3004733300030212,
+              "window_absolute": 0.028500629553719795,
+              "window_passes": 0,
+              "window_relative": 0.3793787137836986
+            },
+            "pairing": {
+              "absolute": 1.6649618240578255e-07,
+              "applied_rms": 7.631777541644669e-10,
+              "contraction": -0.1555237665358093,
+              "cosine": -0.41986593274543244,
+              "factor": 1.0,
+              "measured_rms": 2.794964672981769e-09,
+              "passes": 1,
+              "relative": 1.0413940585146373,
+              "window_absolute": 4.896046723383448e-07,
+              "window_passes": 1,
+              "window_relative": 1.150007404606249
+            },
+            "spin": {
+              "absolute": 0.009721361603793504,
+              "applied_rms": 0.016442192254713748,
+              "contraction": -0.9688756661458997,
+              "cosine": -0.9999637038507735,
+              "factor": 1.0,
+              "measured_rms": 0.016440000289863078,
+              "passes": 0,
+              "relative": 0.33941144025530046,
+              "window_absolute": 0.012106379651810441,
+              "window_passes": 0,
+              "window_relative": 0.42742470385983894
+            }
+          }
         }
       ],
-      "limitation": "Synced stdout only; no physical profiles or terminal acceptance/cost evidence."
+      "log_source": "output/phase1_gpu/20260916_trellis_two_basin_comparison_60/logs/trellis__two_ladder__stripe_eps005_chi200_raw60.s1-58468875.out",
+      "log_sha256": "e67c0e79bfc8c3062d61560f0d4ccfa0457cc2a055f8f8631e59d1fd571bd91e"
     },
     {
+      "campaign": "20260916_trellis_two_basin_comparison_60",
       "label": "trellis__two_ladder__pairing_eps005_chi200_raw60",
+      "job_id": "58468876",
       "cell": "two_ladder",
       "family": "pairing",
-      "job_id": "58468876",
-      "source": "output/phase1_gpu/20260916_trellis_two_basin_comparison_60/logs/trellis__two_ladder__pairing_eps005_chi200_raw60.s1-58468876.out",
-      "sha256": "9d65924c4672e740038b90e10bd6ae49a8acf7e7086e2b18304642ba14248382",
-      "state_available": false,
-      "records": [
+      "source": "output/phase1_gpu/20260916_trellis_two_basin_comparison_60/results/trellis__two_ladder__pairing_eps005_chi200_raw60/trellis__two_ladder_pairing_weak_other__trellis_two_reference_correlations_eps005_raw__none__pairing_eps005/20260918T123032_886482_84461ebc15f5/state.h5",
+      "compact_sha256": "d9a803de57b3acbb6006ab9328173bd93bf7ccf6d30a1053f07e335057420e8d",
+      "full_sha256": "2ad237cc4d5aa532a49ed62b6809fbdb06be9b3fb0adc0026d1ffabbe182657e",
+      "config_sha256": "225a15be6d5774963a853a02f1d05805d5fc7fc11234e80aca39640d9315400c",
+      "seed_sha256": "d2814e8febb3085b8a05453d95226c886d5fe97802462d18abda2d83018b6ca8",
+      "fingerprints": {
+        "model_fingerprint": "84461ebc15f53c912ff2ea5d60abf12c414bac0fd1aa266088b8c8d7dc56d241",
+        "numerical_fingerprint": "d3129105a6cee2136e69ec6d68a762dad1cfa04c3b5b6a020d2efee5ba5790a3",
+        "implementation_sha256": "0bd439eeb91020cc9db447ba15109d79b0b70b3a2489c0d3fefc04ac31933e98",
+        "ep_source_sha256": "2209bd2ca3c1ad02c0e542d1a9d63ecf90fdfa49120ad9cc3af599a5b4bc1f0e"
+      },
+      "controls": {
+        "stagnation_min_relative_improvement": 0.01,
+        "period2_oscillation_cosine_max": -0.5,
+        "stable_iterations": 10,
+        "divergence_factor": 8.0,
+        "max_period": 8,
+        "period2_two_step_ratio_max": 0.5,
+        "probe_iterations": 60,
+        "cycle_action": "continue",
+        "dmrg_sweep_energy_tol": 1e-07,
+        "period_rel_tol": 0.0002,
+        "field_rel_tol": 0.0001,
+        "minimum_iterations": 40,
+        "accepted_periods": [
+          1
+        ],
+        "stagnation_window": 40,
+        "period_repeats": 3,
+        "effective_energy_consistency_tol": 1e-08,
+        "density_tol": 1e-05,
+        "variational_energy_tol": 1e-07,
+        "probe_max_period": 2,
+        "channel_noise_floor": 5e-07,
+        "period_abs_tol": 2e-07,
+        "slow_mode_cosine_min": 0.9,
+        "hamiltonian_identity_tol": 1e-08,
+        "channel_residuals": true,
+        "orbit_bulk_fraction": 0.5,
+        "unmixed_cycle_probe": true,
+        "field_abs_tol": 1e-07
+      },
+      "status": "maximum_iterations",
+      "accepted": false,
+      "cell_sweeps": 60,
+      "ladder_solves": 120,
+      "physical_sites": 256,
+      "energy_per_site_final": -0.521055560229962,
+      "energy_span_last10": 0.0001917159207904806,
+      "solver_seconds": 41121.16961193085,
+      "solver_node_hours": 2.855636778606309,
+      "allocation": {
+        "seconds": 41412,
+        "node_hours": 2.8758333333333335,
+        "reconciled_utc": "2026-09-19T16:21:05Z",
+        "source": "output/project_budget/additional_node_hours_reconciliations.tsv"
+      },
+      "reserved_node_hours": 3.0,
+      "energy_ranking_eligible": false,
+      "ladders": [
         {
-          "cell_sweep": 1,
-          "spatial_ladders": 2,
-          "energy_per_site": -0.518667545597,
-          "status": "iterating"
+          "ladder": "A",
+          "spin_rms_first": 0.025252434625616844,
+          "spin_rms_final": 0.2282340928858641,
+          "pair_rms_first": 0.01825384480500538,
+          "pair_rms_final": 6.561905565810296e-09,
+          "leg_pair_mean": -4.744976267931765e-10,
+          "rung_pair_mean": 1.676103173606502e-09,
+          "charge_std_final": 0.048846039212692864,
+          "central_charge_std": 0.04698354084812546,
+          "central_spin_rms": 0.23764884174371279,
+          "spin_fractional_change_last10": -0.007855490404465426,
+          "pair_fractional_change_last10": 0.27830766045582944,
+          "profile_max_change_last10": {
+            "spin": 0.16442086629908245,
+            "charge": 0.06165876799984493,
+            "leg_pair": 3.179720838956007e-08
+          },
+          "global_relative": 0.20854220200536952,
+          "last10_max_global_relative": 0.25878489563179996,
+          "final_density_error": 4.396556341212943e-09,
+          "last10_max_density_error": 4.396556341212943e-09,
+          "energy_span_last10": 0.00018666421097146557,
+          "dmrg_last10_failing_iterations": [],
+          "final_dmrg_sweep_delta": 8.584521538068657e-08,
+          "final_dmrg_discarded_weight": 3.234203314972289e-05,
+          "gates": {
+            "minimum": true,
+            "global_field": false,
+            "global_slow": false,
+            "density": true,
+            "inner_dmrg": true,
+            "energy": false,
+            "identity": true,
+            "effective": true,
+            "charge_modulation_steps": false,
+            "charge_modulation_span": false,
+            "charge_uniform_steps": false,
+            "charge_uniform_span": false,
+            "exchange_charge_steps": false,
+            "exchange_charge_span": false,
+            "exchange_spin_steps": false,
+            "exchange_spin_span": false,
+            "pairing_steps": true,
+            "pairing_span": true,
+            "spin_steps": false,
+            "spin_span": false
+          },
+          "failed_gates": [
+            "global_field",
+            "global_slow",
+            "energy",
+            "charge_modulation_steps",
+            "charge_modulation_span",
+            "charge_uniform_steps",
+            "charge_uniform_span",
+            "exchange_charge_steps",
+            "exchange_charge_span",
+            "exchange_spin_steps",
+            "exchange_spin_span",
+            "spin_steps",
+            "spin_span"
+          ],
+          "channels_final": {
+            "charge_modulation": {
+              "absolute": 0.0029513082732647786,
+              "applied_rms": 0.005043675112260035,
+              "contraction": -0.9837988881367271,
+              "cosine": -0.9999781424769804,
+              "factor": 1.0,
+              "measured_rms": 0.005023675099689341,
+              "passes": 0,
+              "relative": 0.31224558122082535,
+              "window_absolute": 0.0036169564350767153,
+              "window_passes": 0,
+              "window_relative": 0.38462821915525985
+            },
+            "charge_uniform": {
+              "absolute": 1.482722393828656e-05,
+              "applied_rms": 0.033728891047764054,
+              "contraction": -0.9942367569104638,
+              "cosine": -1.0,
+              "factor": 1.0,
+              "measured_rms": 0.03374371827170234,
+              "passes": 0,
+              "relative": 0.00043940693846773694,
+              "window_absolute": 1.920163059925678e-05,
+              "window_passes": 0,
+              "window_relative": 0.0005690375038518177
+            },
+            "exchange_charge": {
+              "absolute": 0.005522823908563384,
+              "applied_rms": 0.005890886475919445,
+              "contraction": -0.9838480691993454,
+              "cosine": -0.9999768769901684,
+              "factor": 1.0,
+              "measured_rms": 0.005893501991088901,
+              "passes": 0,
+              "relative": 0.07332484779067439,
+              "window_absolute": 0.006751566468140777,
+              "window_passes": 0,
+              "window_relative": 0.09032796857440481
+            },
+            "exchange_spin": {
+              "absolute": 0.026196153048055247,
+              "applied_rms": 0.004522364705915083,
+              "contraction": -0.9833636252305362,
+              "cosine": -0.9999922568132388,
+              "factor": 1.0,
+              "measured_rms": 0.004538446918685348,
+              "passes": 0,
+              "relative": 0.3398081221143552,
+              "window_absolute": 0.03233382685305637,
+              "window_passes": 0,
+              "window_relative": 0.42217326768582775
+            },
+            "pairing": {
+              "absolute": 3.144204926125746e-09,
+              "applied_rms": 6.895950127952767e-11,
+              "contraction": -0.013548102444133667,
+              "cosine": -0.1881661999937935,
+              "factor": 1.0,
+              "measured_rms": 1.8242875989848784e-11,
+              "passes": 1,
+              "relative": 1.0535902810438906,
+              "window_absolute": 3.823203717763263e-07,
+              "window_passes": 1,
+              "window_relative": 1.4248001302992563
+            },
+            "spin": {
+              "absolute": 0.010801307059096753,
+              "applied_rms": 0.016459648208868728,
+              "contraction": -0.9834670271471989,
+              "cosine": -0.9999869598185608,
+              "factor": 1.0,
+              "measured_rms": 0.016435060551142362,
+              "passes": 0,
+              "relative": 0.3821137186645857,
+              "window_absolute": 0.0133233449549492,
+              "window_passes": 0,
+              "window_relative": 0.4732675602811069
+            }
+          }
+        },
+        {
+          "ladder": "B",
+          "spin_rms_first": 0.024755712632212337,
+          "spin_rms_final": 0.22875499027008997,
+          "pair_rms_first": 0.018280501717957486,
+          "pair_rms_final": 2.6014247066915855e-10,
+          "leg_pair_mean": 1.6045146184499228e-10,
+          "rung_pair_mean": -2.7160239143347554e-10,
+          "charge_std_final": 0.049167657245814206,
+          "central_charge_std": 0.04667286802737724,
+          "central_spin_rms": 0.23612808731176108,
+          "spin_fractional_change_last10": -0.0070176272740494205,
+          "pair_fractional_change_last10": -0.9786631142328037,
+          "profile_max_change_last10": {
+            "spin": 0.18008575258953047,
+            "charge": 0.06735996017060364,
+            "leg_pair": 3.9649605850573324e-08
+          },
+          "global_relative": 0.20695552307833562,
+          "last10_max_global_relative": 0.2610852030104706,
+          "final_density_error": 5.714073658680263e-11,
+          "last10_max_density_error": 1.4061996012060263e-09,
+          "energy_span_last10": 0.00019676763060938463,
+          "dmrg_last10_failing_iterations": [],
+          "final_dmrg_sweep_delta": 8.046504262892995e-08,
+          "final_dmrg_discarded_weight": 3.1156798152514e-05,
+          "gates": {
+            "minimum": true,
+            "global_field": false,
+            "global_slow": false,
+            "density": true,
+            "inner_dmrg": true,
+            "energy": false,
+            "identity": true,
+            "effective": true,
+            "charge_modulation_steps": false,
+            "charge_modulation_span": false,
+            "charge_uniform_steps": false,
+            "charge_uniform_span": false,
+            "exchange_charge_steps": false,
+            "exchange_charge_span": false,
+            "exchange_spin_steps": false,
+            "exchange_spin_span": false,
+            "pairing_steps": false,
+            "pairing_span": false,
+            "spin_steps": false,
+            "spin_span": false
+          },
+          "failed_gates": [
+            "global_field",
+            "global_slow",
+            "energy",
+            "charge_modulation_steps",
+            "charge_modulation_span",
+            "charge_uniform_steps",
+            "charge_uniform_span",
+            "exchange_charge_steps",
+            "exchange_charge_span",
+            "exchange_spin_steps",
+            "exchange_spin_span",
+            "pairing_steps",
+            "pairing_span",
+            "spin_steps",
+            "spin_span"
+          ],
+          "channels_final": {
+            "charge_modulation": {
+              "absolute": 0.0029727434141576525,
+              "applied_rms": 0.005035780211747497,
+              "contraction": -0.9681253234008598,
+              "cosine": -0.9999160226158594,
+              "factor": 1.0,
+              "measured_rms": 0.005022337232259723,
+              "passes": 0,
+              "relative": 0.31131114679581307,
+              "window_absolute": 0.003676926091085393,
+              "window_passes": 0,
+              "window_relative": 0.3897745124605814
+            },
+            "charge_uniform": {
+              "absolute": 9.20475291761591e-06,
+              "applied_rms": 0.03373503289283636,
+              "contraction": -1.0045088198233902,
+              "cosine": -1.0,
+              "factor": 1.0,
+              "measured_rms": 0.033744237645753974,
+              "passes": 0,
+              "relative": 0.0002727799932612833,
+              "window_absolute": 1.0698159513829186e-05,
+              "window_passes": 0,
+              "window_relative": 0.0003170366338139908
+            },
+            "exchange_charge": {
+              "absolute": 0.005508585442270002,
+              "applied_rms": 0.005891913618895941,
+              "contraction": -0.9682620919464328,
+              "cosine": -0.9999094308572909,
+              "factor": 1.0,
+              "measured_rms": 0.005893669069006758,
+              "passes": 0,
+              "relative": 0.07297100305246024,
+              "window_absolute": 0.006789125383895426,
+              "window_passes": 0,
+              "window_relative": 0.09134272420727765
+            },
+            "exchange_spin": {
+              "absolute": 0.025327618652175463,
+              "applied_rms": 0.0045308521762107215,
+              "contraction": -0.9673232749481661,
+              "cosine": -0.9999693126507176,
+              "factor": 1.0,
+              "measured_rms": 0.0045367056544031266,
+              "passes": 0,
+              "relative": 0.3371301520147278,
+              "window_absolute": 0.031696370597016355,
+              "window_passes": 0,
+              "window_relative": 0.42569853417572
+            },
+            "pairing": {
+              "absolute": 2.322451835309217e-07,
+              "applied_rms": 9.874423631446982e-11,
+              "contraction": -0.023317088688916025,
+              "cosine": -0.004371593025906299,
+              "factor": 1.0,
+              "measured_rms": 4.746165404176707e-09,
+              "passes": 1,
+              "relative": 1.0002914894158341,
+              "window_absolute": 1.0049872978185336e-06,
+              "window_passes": 0,
+              "window_relative": 1.2338102589642712
+            },
+            "spin": {
+              "absolute": 0.010815755543954782,
+              "applied_rms": 0.016442617551530033,
+              "contraction": -0.9675147502043295,
+              "cosine": -0.9999489397018279,
+              "factor": 1.0,
+              "measured_rms": 0.016445940797507403,
+              "passes": 0,
+              "relative": 0.3804293386585746,
+              "window_absolute": 0.013383202264804899,
+              "window_passes": 0,
+              "window_relative": 0.4788290519787005
+            }
+          }
         }
       ],
-      "limitation": "Synced stdout only; no physical profiles or terminal acceptance/cost evidence."
+      "log_source": "output/phase1_gpu/20260916_trellis_two_basin_comparison_60/logs/trellis__two_ladder__pairing_eps005_chi200_raw60.s1-58468876.out",
+      "log_sha256": "eb41420a33dd46957816898a82883f79ceed12db73a51471f18062cc03aca4fa"
     }
   ],
-  "total_complete_cell_sweeps": 60,
-  "total_complete_ladder_solves": 60,
-  "total_solver_node_hours": 1.98680397980743,
+  "missing": [],
+  "within_cell_comparisons": [
+    {
+      "cell": "one_ladder",
+      "endpoint_pairing_minus_stripe": 1.3610490512405704e-08,
+      "sum_last10_energy_ranges": 5.67787881600168e-07,
+      "spin_alignment_sign": -1.0,
+      "pair_alignment_sign": 1.0,
+      "profile_max_seed_difference": {
+        "charge": 6.266215638595085e-06,
+        "spin": 6.391826529950073e-06,
+        "leg": 5.677578988928789e-07,
+        "rung": 9.504362885222328e-07
+      },
+      "energy_ranking_eligible": false
+    },
+    {
+      "cell": "two_ladder",
+      "endpoint_pairing_minus_stripe": 7.025656166192995e-05,
+      "sum_last10_energy_ranges": 0.00034446645943975174,
+      "spin_alignment_sign": 1.0,
+      "pair_alignment_sign": -1.0,
+      "profile_max_seed_difference": {
+        "charge": 0.006525400514311164,
+        "spin": 0.016904584473105694,
+        "leg": 6.648458546306167e-08,
+        "rung": 1.5345527300068367e-07
+      },
+      "energy_ranking_eligible": false
+    }
+  ],
+  "total_complete_cell_sweeps": 240,
+  "total_complete_ladder_solves": 360,
+  "total_solver_node_hours": 8.62765334756838,
   "accepted_count": 0,
-  "interpretation": "One completed pairing-dominated trajectory. No accepted within-cell or between-cell energetic comparison."
+  "allocation_jobs_available": 4,
+  "known_allocation_node_hours": 8.708541666666667,
+  "interpretation": "Completed endpoint observations; within-cell seed differences remain diagnostic unless both endpoints pass. Different spatial cells have different finite-OBC embeddings."
 }

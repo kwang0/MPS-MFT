@@ -40,7 +40,7 @@
 \title{Pairing, Stripes, and Competing Order\\in Coupled Hubbard Ladders\\
   \large Introduction, Background, and Current Results}
 \author{Ladder MPS+MF project\\Working manuscript draft}
-\date{Updated 18 September 2026}
+\date{Updated 19 September 2026}
 
 \begin{document}
 \maketitle
@@ -60,9 +60,11 @@ interaction, two contrasting initial states instead approach a common paired
 state. The completed unfrustrated-cubic grid instead reaches stripes at all
 nine tested coordinates. Finer square cuts retain distinct textures near
 the boundary, with a small change in energy slope along the interaction cut
-but no resolved first-order singularity. Three completed repulsive-$V$
-square starts lose pairing; the first completed trellis stripe start develops
-it. These observations motivate a distinction between local pairing
+but no resolved first-order singularity. All four repulsive-$V$ square
+starts lose pairing, including both intertwined seeds. Both trellis seeds
+become paired in a skew one-ladder cell but develop stripes in a rectangular
+two-ladder cell, where large alternating relaxation persists. These
+observations motivate a distinction between local pairing
 tendencies and the order selected in an array. The numerical results remain
 finite-length, finite-bond-dimension evidence, with explicit limits on
 self-consistency, response completeness, and thermodynamic interpretation.
@@ -73,8 +75,8 @@ Sections~\ref{sec:intro}--\ref{sec:background} are draft manuscript prose.
 Section~\ref{sec:results} is a dated collection of results and interpretation,
 including unresolved points that must remain visible during manuscript
 development. The evidence cutoff is the synchronized analyses through
-18 September 2026; the literature discussion incorporates the stripe and
-ladder-material discussions through that date. Appendix~\ref{sec:evidence} identifies the local
+19 September 2026; the literature discussion incorporates the stripe and
+ladder-material discussions through 18 September. Appendix~\ref{sec:evidence} identifies the local
 sources. No new many-body calculation is reported here.
 
 \tableofcontents
@@ -996,39 +998,210 @@ leg-pair RMS remains 0.032991. This is not established bulk coexistence or
 a demonstrated bulk return to stripes. At paired $(1.25,-0.4)$, the spin
 remainder decreases by 52.1\% over the final ten evaluations.
 
-\subsection{Positive interaction and the first trellis result}
+Figure~\ref{fig:order-cuts} places spin and pairing alongside the energy
+cuts. Coarse and fine points use the same physical definitions:
+$M_i=(\langle S^z_{i,0}\rangle-\langle S^z_{i,1}\rangle)/2$, with spin RMS
+over rungs 6--59, and symmetric nearest-leg anomalous pairing averaged
+over the two legs before its RMS on bonds with left rungs 6--58. These
+are not source-field norms or four-fermion pair--pair correlations.
+Central-window spin exposes the end-weighted remainder at $(1.4,-0.05)$.
+Pairing stays finite almost up to the sampled change of outcome, while
+the stripe-seeded amplitudes change at a different sample. This motivates
+testing competing finite-amplitude branches, but joining independent starts
+does not measure a discontinuity, coexistence interval or hysteresis.
+A logarithmic companion in the report resolves the small remainders.
+
+\begin{figure}[p]
+ \centering
+ \includegraphics[width=\textwidth]{\projectdocroot/reports/square_fine_cuts_20260918/order_parameter_cuts.pdf}
+ \caption{Spin and anomalous leg-pair RMS along both finer square cuts,
+ using the same twenty endpoints as Fig.~\ref{fig:energy-cuts}. Filled
+ markers denote fine starts; open markers denote coarse anchors with
+ latest continuations. Dotted spin curves use central rungs 17--48.
+ Lines join independent finite-iteration starts, not stationary phase
+ branches. All endpoints remain unaccepted.}
+ \label{fig:order-cuts}
+\end{figure}
+
+\clearpage
+\subsection{Repulsive interaction on square: loss of pairing and magnetic defects}
+\label{sec:positive-v}
 \label{sec:positive-trellis}
 
-The square $(t_0/t,V/t)=(1.2,+0.2)$ test has three completed 60-step
-starts: stripe, paired, and an intertwined period-16 pattern. All lose
-their anomalous pairing, reaching spin RMS near 0.233 and leg-pair RMS
-below $8.3\times10^{-10}$, with nominal charge/spin-envelope periods
-16/32. The period-eight intertwined start has 46 complete scalar log
-records but no synchronized spatial state. The three complete results do
-not reproduce the legacy frustrated-cubic coexistence and do not support
-a geometry-independent rule that repulsive $V$ promotes intertwining.
-The missing wavelength test and other possible basins remain open
-(\ev{positive-v}).
+All four square $(t_0/t,V/t)=(1.2,+0.2)$ starts now complete 60 raw
+evaluations at $L=64$, $\chi=200$: the two 95\%/5\% reference mixtures
+and intertwined patterns with initial charge wavelengths eight and sixteen.
+The additional seeds place pairing near hole-rich regions and spin nodes,
+testing whether the legacy frustrated-cubic texture survives on square.
+Figure~\ref{fig:positive-histories} shows that all four lose anomalous pairing.
+Stripe, pairing and period-16 starts end at spin RMS $0.23321$--$0.23358$
+and leg-pair RMS below $8.3\times10^{-10}$. The period-eight start ends at
+spin RMS $0.20700$ and leg-pair RMS $7.01\times10^{-9}$, with the latter
+falling another 87.8\% over the last ten evaluations. None retains
+appreciable anomalous coexistence (\ev{positive-v}).
 
-The first completed trellis run gives the opposite conversion. At
-$(t_0/t,V/t)=(1,0)$ and zigzag hoppings $\tau_0/t=\tau_1/t=0.1$,
-the one-ladder stripe-dominated start develops pairing over 60 cell sweeps.
-Physical spin RMS decreases from 0.0627 to $1.21\times10^{-5}$ and leg-pair
-RMS increases from 0.00965 to 0.01797. The final mean leg/rung amplitudes
-have opposite signs, $+0.01796/-0.03292$. Square and unfrustrated cubic
-instead reach stripes at the same bare-ladder coordinate. This comparison
-uses physical correlations; trellis fields include additional normal-bond
-Hartree contributions and cannot be inverted with the square formula.
+\begin{figure}[p]
+ \centering
+ \includegraphics[width=\textwidth]{\projectdocroot/reports/square_positive_v_20260918/histories.pdf}
+ \caption{All four square $(1.2,+0.2)$ histories. Full energy, spin RMS,
+ logarithmic pairing RMS and late energy detail separate loss of pairing
+ from persistence of different magnetic textures. Every start reaches the
+ 60-evaluation cap without acceptance.}
+ \label{fig:positive-histories}
+\end{figure}
 
-The trellis global residual checks pass late, but energy, inner-DMRG and
-channel/profile gates still fail. The last-ten energy range is
-$2.84\times10^{-7}\,t$/site. Other synchronized logs contain 21 one-ladder
-pairing, 18 two-ladder stripe and one two-ladder pairing cell sweeps, without
-spatial artifacts. The skew one-ladder repetition and rectangular two-ladder
-$A/B$ cell are distinct spatial ansatzes, not temporal two-cycle phases.
-No comparison of completed trellis branches or cross-geometry energies is
-yet justified (\ev{trellis}).
+The shorter-wavelength start has not merged with the other three.
+Figure~\ref{fig:positive-profiles} shows four spin-envelope nodes in the
+stripe, pairing and period-16 endpoints, near rungs 10, 25, 40 and 55.
+Their charge/spin Fourier bins are $m=4/30$, giving nominal charge and
+spin-envelope periods 16/32. The period-eight start evolves from eight
+nodes at evaluation one to six near $10.16,23.21,26.81,38.30,41.89,54.91$.
+Two close node pairs survive around the inner hole-rich regions. Charge
+still has dominant $m=4$, while the spin spectrum has comparable
+$m=31,30,28$ amplitudes $0.09264,0.08450,0.06761$. Its largest bin should
+not be interpreted as a clean new spin wavelength. The spatial evidence
+is consistent with incomplete coarsening or a trapped magnetic defect
+pattern, rather than a surviving period-eight intertwined state.
 
+\begin{figure}[p]
+ \centering
+ \includegraphics[width=0.76\textwidth,height=0.76\textheight,keepaspectratio]{\projectdocroot/reports/square_positive_v_20260918/terminal_profiles.pdf}
+ \caption{Square positive-$V$ charge, staggered leg-odd spin and pairing
+ profiles. Strong curves are evaluation 60, faint curves evaluation 51;
+ dotted pairing curves are rung amplitudes. Only a global spin reversal
+ aligns seeds. The period-eight start leaves two additional spin nodes.
+ Pairing uses a $10^{-7}$ scale and is negligible in every endpoint;
+ its residual spatial structure does not establish coexistence.}
+ \label{fig:positive-profiles}
+\end{figure}
+
+The period-eight energy is $-0.332811625875\,t$/site, versus approximately
+$-0.333744\,t$/site for the other three. Its excess over the stripe-seeded
+endpoint is $9.3242\times10^{-4}\,t$/site; their summed final-ten energy
+ranges are $8.96\times10^{-8}\,t$/site. This is a useful diagnostic
+distinction, not a certified metastable branch energy. All four fail
+global field/slow-mode and spatial charge, spin and exchange checks.
+Maximum pointwise spin changes over the last ten evaluations remain
+$0.00358$--$0.00655$, despite nearly constant RMS. Stripe and period-eight
+starts also fail an inner-DMRG window; period sixteen fails the energy
+window. Flat energy and a steady norm conceal moving walls.
+
+The completed wavelength test strengthens the qualification on the earlier
+physical interpretation: repulsive $V$ alone does not guarantee intertwining
+across these geometries. Other square parameters or basins remain possible.
+Loss of anomalous order also does not determine whether connected
+pair--pair correlations survive in the stripes. The prepared retrospective
+measurement pass addresses that separate question; its results are not
+part of this endpoint analysis.
+
+\clearpage
+\subsection{Trellis: spatial-cell dependence and alternating stripe relaxation}
+\label{sec:trellis-results}
+
+All four trellis comparisons now complete 60 raw cell sweeps at
+$(t_0/t,V/t)=(1,0)$, $\tau_0/t=\tau_1/t=0.1$, density $15/16$ and
+$\chi=200$, with $L=64$ per spatial ladder. Two seeds were tested in
+the skew one-ladder cell and two in the rectangular $A/B$ cell.
+All four remain unaccepted maximum-iteration endpoints. The contrast in
+Fig.~\ref{fig:trellis-histories} is between spatial ansatzes: both one-ladder
+starts are pairing dominated, while both two-ladder starts develop strong,
+essentially unpaired stripes. The first one-ladder result must therefore
+be qualified by this additional cell dependence (\ev{trellis}).
+
+\begin{figure}[p]
+ \centering
+ \includegraphics[width=\textwidth]{\projectdocroot/reports/trellis_progress_20260918/histories.pdf}
+ \caption{Complete trellis histories for both seeds in each spatial cell.
+ Energy uses 128 sites for the skew one-ladder cell and 256 for the
+ rectangular two-ladder cell. Spin and anomalous pairing use physical
+ correlations and the same RMS windows as the square cuts. $A/B$ are
+ spatial ladders, not successive iterations or temporal orbit phases.
+ Vertical scales differ between cells.}
+ \label{fig:trellis-histories}
+\end{figure}
+
+In the one-ladder cell, the stripe seed loses spin from $0.0627$ to
+$1.215\times10^{-5}$ while leg-pair RMS rises from $0.00965$ to
+$0.01796892$. The paired seed ends at spin RMS $1.368\times10^{-5}$
+and leg-pair RMS $0.01796878$. Both have mean leg/rung amplitudes near
+$+0.01796/-0.03292$: d-wave-like internal signs, not a spatial pair-density
+wave. Their energies, $-0.518820336467$ and $-0.518820322856\,t$/site,
+differ by $1.361\times10^{-8}\,t$/site. Maximum seed-to-seed full-profile
+differences are $6.27\times10^{-6}$ in charge and $5.68\times10^{-7}$ in
+leg pairing. This supports a common paired basin, although final-ten
+energy ranges near $2.84\times10^{-7}\,t$/site and inner-DMRG/profile
+failures prevent acceptance. Small spin fluctuations persist near $10^{-5}$.
+
+Figure~\ref{fig:trellis-profiles} contrasts the one-ladder paired profiles
+with the two-ladder stripes. Central charge standard deviation is about
+$0.00157$ for one ladder, versus $0.0467$--$0.0470$ for two. End-sensitive
+charge structure in the former does not establish bulk intertwining.
+The latter retains strong central modulation, spin RMS
+$0.22823$--$0.22876$ on both spatial ladders, and leg-pair RMS no larger
+than $1.26\times10^{-8}$. Charge/spin bins $m=4/30$ correspond to nominal
+periods 16/32. Charge minima and spin nodes shift between $A$ and $B$;
+the latter is plotted at its physical offset of $-1/2$ rung.
+Profiles are read directly from stored correlations: trellis Hartree
+fields also contain normal-bond terms and cannot be inverted with the
+square/cubic density formula.
+
+\begin{landscape}
+\begin{figure}[p]
+ \centering
+ \includegraphics[width=\linewidth,height=0.78\textheight,keepaspectratio]{\projectdocroot/reports/trellis_progress_20260918/profiles.pdf}
+ \caption{Trellis profiles for all four starts and six spatial ladders.
+ Solid curves are the final sweep, faint curves nine sweeps earlier, and
+ dotted curves final rung pairing. Raw signs are retained. One-ladder
+ spin and two-ladder pairing panels use tiny scales; neither establishes
+ an additional ordered component. The two-ladder spatial displacement
+ changes with sweep parity, as resolved in Fig.~\ref{fig:trellis-relaxation}.}
+ \label{fig:trellis-profiles}
+\end{figure}
+\end{landscape}
+
+Two-ladder nonacceptance is substantial, not marginal. Final global
+relative residuals are $0.1845$--$0.2085$ against $10^{-4}$ allowed.
+Both final inner-DMRG windows pass, but the outer MF map and its spatial
+windows do not. Nearly constant spin RMS conceals the alternating wall
+displacement in Fig.~\ref{fig:trellis-relaxation}. Successive full-cell
+measured-field increments have cosine $-0.999962$ and $-0.999943$ for
+the stripe and pairing starts, with norm ratios about $0.975$. Maximum
+field changes are $0.02345/0.02620$ over one sweep but
+$0.000754/0.000910$ over two. The iteration nearly reverses its previous
+displacement while its amplitude slowly decreases. Two-sweep drift is
+still resolved. This is consistent with a damped alternating numerical
+mode, not an accepted period-two orbit or physical time-dependent order.
+Modest linear damping is a possible future diagnostic of that negative
+mode; no mixing change is made here.
+
+\begin{figure}[p]
+ \centering
+ \includegraphics[width=\textwidth]{\projectdocroot/reports/trellis_progress_20260918/two_ladder_relaxation.pdf}
+ \caption{Two-ladder relaxation. Upper panels compare measured fields
+ separated by one and two sweeps, taking the maximum over all channels
+ and both spatial ladders. Lower panels resolve staggered spin on $A$
+ at sweeps 58, 59 and 60. Even sweeps nearly overlap while the odd sweep
+ has displaced nodes. Large one-step changes and continuing two-step
+ drift preclude stationarity.}
+ \label{fig:trellis-relaxation}
+\end{figure}
+
+The two-ladder stripe- and pairing-seeded endpoint energies are
+$-0.521125816792$ and $-0.521055560230\,t$/site. Their difference,
+$7.026\times10^{-5}\,t$/site, is smaller than their summed final-ten
+ranges of $3.445\times10^{-4}\,t$/site. They lie approximately
+$0.00224$--$0.00231\,t$/site below the one-ladder endpoints as diagnostic
+functional values. These are not certified energetic winners: the
+two-ladder residuals are large, while skew and rectangular cells have
+different fingerprints, repetition constraints and finite open-end cuts.
+Independent $A/B$ profiles allow relative stripe arrangements absent
+from a single repeated profile, but this comparison does not isolate
+that freedom from the boundary difference. Trellis cannot yet be assigned
+a unique paired or stripe phase from these tests. The robust result is
+contrasting basin access under the two spatial ansatzes, with both seeds
+agreeing on the qualitative order within each cell.
+
+\clearpage
 \subsection{Scope of the emerging physical interpretation}
 
 The isolated-ladder and coupled-array observations separate pair formation
@@ -1053,9 +1226,13 @@ stripe state retains strong pair--pair correlations after its anomalous
 expectation value has vanished. Strong residual pair correlations would
 support a distinction between local pairing and interladder coherence.
 Suppression of those correlations would instead indicate more direct
-competition with pairing. Resolving this requires measurements in the
-converged stripe state; the current source-field history alone does not
-answer it.
+competition with pairing. Resolving this requires four-fermion measurements
+on the stripe MPS; anomalous-amplitude histories alone do not answer it.
+These measurements are now enabled for future accepted and maximum-iteration
+endpoints, and a retrospective pass over the latest 56 branches (58 spatial
+MPSs) is prepared. Measuring an unaccepted endpoint is useful if its residuals
+and status accompany the correlations. No new pair--pair data from that
+pass enter the present analysis.
 
 Attraction changes more than one ingredient of the coupled problem.
 The prefactor $g=\tp^2/|\Ep|$ decreases when $|\Ep|$ increases at fixed
@@ -1109,8 +1286,9 @@ The remaining high-value controls are:
 
 The completed square and unfrustrated-cubic grids now supply contrasting
 finite-run phase patterns. The finer cuts identify competing textures but
-do not resolve the order of the transition. The September~18 campaigns
-contain 34 completed 60-step histories, or 2040 evaluations, all unaccepted;
+do not resolve the order of the transition. The final September~19 review
+contains 38 completed 60-step run histories, or 2280 cell updates and
+2400 individual ladder solves, all unaccepted;
 the earlier coarse square grid is a separate data set. No universal effect
 of $V$, certified ground-state phase diagram, transition
 temperature, phase stiffness, pair-density-wave state, or dynamical magnetic
@@ -1197,7 +1375,7 @@ $V=0$ basin.
  \path{reports/two_basin_v000_20260912/README.md}.
 
  \item\label{ev:campaign}
- \textbf{Combined synchronized campaign review, September~18.}
+ \textbf{Combined synchronized campaign review, updated September~19.}
  \href{run:../reports/campaign_review_20260918/README.md}{Combined report} and
  \href{run:../reports/cubic_two_basin_grid_20260918/README.md}{complete cubic grid}.
  Source inventories, physical profiles, gate checks and accounting coverage
@@ -1217,14 +1395,16 @@ $V=0$ basin.
  \href{run:../reports/square_fine_cuts_20260918/variational_energy_cuts.csv}{endpoint energy table},
  and \href{run:../reports/square_fine_cuts_20260918/variational_energy_analysis.json}{energy audit}.
  Twenty endpoint sources include the twelve fine runs and eight coarse anchors.
+ The \href{run:../reports/square_fine_cuts_20260918/order_parameter_analysis.json}{order-parameter audit}
+ uses the same sources and consistent physical RMS windows.
 
  \item\label{ev:positive-v}
- \textbf{Square repulsive-interaction test, September~18.}
+ \textbf{Square repulsive-interaction test, completed September~19.}
  \href{run:../reports/square_positive_v_20260918/README.md}{Four-seed comparison};
- three spatial endpoints and one partial scalar log.
+ all four spatial endpoints, with spin-node and energy diagnostics.
 
  \item\label{ev:trellis}
- \textbf{First trellis endpoint and partial logs, September~18.}
+ \textbf{All four trellis endpoints and alternating relaxation, September~19.}
  \href{run:../reports/trellis_progress_20260918/README.md}{Trellis report} and
  \href{run:../TRELLIS_MEAN_FIELD.md}{spatial-cell method contract}.
 

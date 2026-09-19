@@ -1,0 +1,285 @@
+{
+  "date": "2026-09-19",
+  "accounting_source": "output\\project_budget\\additional_node_hours_reconciliations.tsv",
+  "accounting_sha256": "493347fb61caee99a071cf9d19ddb4a4b4b5c6d3c351df9fc432960d6a6b5893",
+  "campaigns": [
+    {
+      "report": "cubic_two_basin_grid_20260918",
+      "runs": 18,
+      "cell_updates": 1080,
+      "ladder_solves": 1080,
+      "solver_node_hours": 13.886994809607664,
+      "accounted_jobs": 18,
+      "actual_node_hours": 14.196666666666665,
+      "jobs": [
+        {
+          "job_id": "58383141",
+          "label": "cubic_unfrustrated__stripe_weak_other_t010_vm04_chi200_raw",
+          "node_hours": 0.7336805555555556,
+          "seconds": 10565
+        },
+        {
+          "job_id": "58383142",
+          "label": "cubic_unfrustrated__pairing_weak_other_t010_vm04_chi200_raw",
+          "node_hours": 0.8497916666666666,
+          "seconds": 12237
+        },
+        {
+          "job_id": "58383146",
+          "label": "cubic_unfrustrated__stripe_weak_other_t010_vm02_chi200_raw",
+          "node_hours": 0.7079166666666666,
+          "seconds": 10194
+        },
+        {
+          "job_id": "58383148",
+          "label": "cubic_unfrustrated__pairing_weak_other_t010_vm02_chi200_raw",
+          "node_hours": 0.8984027777777778,
+          "seconds": 12937
+        },
+        {
+          "job_id": "58383153",
+          "label": "cubic_unfrustrated__stripe_weak_other_t010_v000_chi200_raw",
+          "node_hours": 0.6659027777777777,
+          "seconds": 9589
+        },
+        {
+          "job_id": "58383156",
+          "label": "cubic_unfrustrated__pairing_weak_other_t010_v000_chi200_raw",
+          "node_hours": 0.8471527777777778,
+          "seconds": 12199
+        },
+        {
+          "job_id": "58383157",
+          "label": "cubic_unfrustrated__stripe_weak_other_t012_vm04_chi200_raw",
+          "node_hours": 0.6752777777777778,
+          "seconds": 9724
+        },
+        {
+          "job_id": "58383158",
+          "label": "cubic_unfrustrated__pairing_weak_other_t012_vm04_chi200_raw",
+          "node_hours": 0.9061805555555555,
+          "seconds": 13049
+        },
+        {
+          "job_id": "58383161",
+          "label": "cubic_unfrustrated__stripe_weak_other_t012_vm02_chi200_raw",
+          "node_hours": 0.7141666666666666,
+          "seconds": 10284
+        },
+        {
+          "job_id": "58383164",
+          "label": "cubic_unfrustrated__pairing_weak_other_t012_vm02_chi200_raw",
+          "node_hours": 0.9438888888888889,
+          "seconds": 13592
+        },
+        {
+          "job_id": "58383165",
+          "label": "cubic_unfrustrated__stripe_weak_other_t012_v000_chi200_raw",
+          "node_hours": 0.6694444444444444,
+          "seconds": 9640
+        },
+        {
+          "job_id": "58383168",
+          "label": "cubic_unfrustrated__pairing_weak_other_t012_v000_chi200_raw",
+          "node_hours": 0.8297916666666667,
+          "seconds": 11949
+        },
+        {
+          "job_id": "58383169",
+          "label": "cubic_unfrustrated__stripe_weak_other_t014_vm04_chi200_raw",
+          "node_hours": 0.71875,
+          "seconds": 10350
+        },
+        {
+          "job_id": "58383170",
+          "label": "cubic_unfrustrated__pairing_weak_other_t014_vm04_chi200_raw",
+          "node_hours": 0.9386111111111111,
+          "seconds": 13516
+        },
+        {
+          "job_id": "58383171",
+          "label": "cubic_unfrustrated__stripe_weak_other_t014_vm02_chi200_raw",
+          "node_hours": 0.7235416666666666,
+          "seconds": 10419
+        },
+        {
+          "job_id": "58383173",
+          "label": "cubic_unfrustrated__pairing_weak_other_t014_vm02_chi200_raw",
+          "node_hours": 0.8640277777777777,
+          "seconds": 12442
+        },
+        {
+          "job_id": "58383174",
+          "label": "cubic_unfrustrated__stripe_weak_other_t014_v000_chi200_raw",
+          "node_hours": 0.6886111111111111,
+          "seconds": 9916
+        },
+        {
+          "job_id": "58383176",
+          "label": "cubic_unfrustrated__pairing_weak_other_t014_v000_chi200_raw",
+          "node_hours": 0.8215277777777777,
+          "seconds": 11830
+        }
+      ]
+    },
+    {
+      "report": "square_fine_cuts_20260918",
+      "runs": 12,
+      "cell_updates": 720,
+      "ladder_solves": 720,
+      "solver_node_hours": 13.030485454698404,
+      "accounted_jobs": 12,
+      "actual_node_hours": 13.274722222222222,
+      "jobs": [
+        {
+          "job_id": "58387972",
+          "label": "square__stripe_weak_other_t01400_vm0050_chi200_raw",
+          "node_hours": 0.8002777777777778,
+          "seconds": 11524
+        },
+        {
+          "job_id": "58387973",
+          "label": "square__pairing_weak_other_t01400_vm0050_chi200_raw",
+          "node_hours": 0.840625,
+          "seconds": 12105
+        },
+        {
+          "job_id": "58387974",
+          "label": "square__stripe_weak_other_t01400_vm0100_chi200_raw",
+          "node_hours": 1.2288194444444445,
+          "seconds": 17695
+        },
+        {
+          "job_id": "58387975",
+          "label": "square__pairing_weak_other_t01400_vm0100_chi200_raw",
+          "node_hours": 0.8520138888888888,
+          "seconds": 12269
+        },
+        {
+          "job_id": "58387976",
+          "label": "square__stripe_weak_other_t01400_vm0150_chi200_raw",
+          "node_hours": 1.2727083333333333,
+          "seconds": 18327
+        },
+        {
+          "job_id": "58387977",
+          "label": "square__pairing_weak_other_t01400_vm0150_chi200_raw",
+          "node_hours": 0.8984027777777778,
+          "seconds": 12937
+        },
+        {
+          "job_id": "58387978",
+          "label": "square__stripe_weak_other_t01250_vm0400_chi200_raw",
+          "node_hours": 1.0934027777777777,
+          "seconds": 15745
+        },
+        {
+          "job_id": "58387979",
+          "label": "square__pairing_weak_other_t01250_vm0400_chi200_raw",
+          "node_hours": 1.1014583333333334,
+          "seconds": 15861
+        },
+        {
+          "job_id": "58387980",
+          "label": "square__stripe_weak_other_t01300_vm0400_chi200_raw",
+          "node_hours": 1.2552777777777777,
+          "seconds": 18076
+        },
+        {
+          "job_id": "58387981",
+          "label": "square__pairing_weak_other_t01300_vm0400_chi200_raw",
+          "node_hours": 1.1041666666666667,
+          "seconds": 15900
+        },
+        {
+          "job_id": "58387982",
+          "label": "square__stripe_weak_other_t01350_vm0400_chi200_raw",
+          "node_hours": 1.5584722222222223,
+          "seconds": 22442
+        },
+        {
+          "job_id": "58387983",
+          "label": "square__pairing_weak_other_t01350_vm0400_chi200_raw",
+          "node_hours": 1.2690972222222223,
+          "seconds": 18275
+        }
+      ]
+    },
+    {
+      "report": "square_positive_v_20260918",
+      "runs": 4,
+      "cell_updates": 240,
+      "ladder_solves": 240,
+      "solver_node_hours": 4.523292984565099,
+      "accounted_jobs": 4,
+      "actual_node_hours": 4.602430555555555,
+      "jobs": [
+        {
+          "job_id": "58394103",
+          "label": "square__stripe_weak_other_t012_vp02_chi200_raw",
+          "node_hours": 0.9215277777777777,
+          "seconds": 13270
+        },
+        {
+          "job_id": "58394104",
+          "label": "square__pairing_weak_other_t012_vp02_chi200_raw",
+          "node_hours": 1.226388888888889,
+          "seconds": 17660
+        },
+        {
+          "job_id": "58394105",
+          "label": "square__intertwined_lambda08_t012_vp02_chi200_raw",
+          "node_hours": 1.515763888888889,
+          "seconds": 21827
+        },
+        {
+          "job_id": "58394106",
+          "label": "square__intertwined_lambda16_t012_vp02_chi200_raw",
+          "node_hours": 0.93875,
+          "seconds": 13518
+        }
+      ]
+    },
+    {
+      "report": "trellis_progress_20260918",
+      "runs": 4,
+      "cell_updates": 240,
+      "ladder_solves": 360,
+      "solver_node_hours": 8.62765334756838,
+      "accounted_jobs": 4,
+      "actual_node_hours": 8.708541666666667,
+      "jobs": [
+        {
+          "job_id": "58468871",
+          "label": "trellis__one_ladder__stripe_eps005_chi200_raw60",
+          "node_hours": 2.0129166666666665,
+          "seconds": 28986
+        },
+        {
+          "job_id": "58468873",
+          "label": "trellis__one_ladder__pairing_eps005_chi200_raw60",
+          "node_hours": 1.88375,
+          "seconds": 27126
+        },
+        {
+          "job_id": "58468875",
+          "label": "trellis__two_ladder__stripe_eps005_chi200_raw60",
+          "node_hours": 1.9360416666666667,
+          "seconds": 27879
+        },
+        {
+          "job_id": "58468876",
+          "label": "trellis__two_ladder__pairing_eps005_chi200_raw60",
+          "node_hours": 2.8758333333333335,
+          "seconds": 41412
+        }
+      ]
+    }
+  ],
+  "total_runs": 38,
+  "total_cell_updates": 2280,
+  "total_ladder_solves": 2400,
+  "total_solver_node_hours": 40.06842659643955,
+  "total_actual_node_hours": 40.78236111111111,
+  "total_accounted_jobs": 38
+}

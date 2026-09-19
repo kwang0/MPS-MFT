@@ -1,8 +1,8 @@
 # Four trellis comparison runs
 
-Results update, September 18: all four submission IDs are synchronized.
-The [first completed one-ladder stripe seed develops pairing](../trellis_progress_20260918/README.md);
-the other three runs have partial logs without spatial artifacts. See the
+Final results update, September 19: all four terminal states are synchronized.
+[Both one-ladder starts are paired; both two-ladder starts develop stripes](../trellis_progress_20260918/README.md),
+with large alternating relaxation remaining in the latter. See the
 [combined campaign review](../campaign_review_20260918/README.md). The preparation
 contract and original checksum-repair history below are retained; they are
 not instructions to resubmit these jobs.

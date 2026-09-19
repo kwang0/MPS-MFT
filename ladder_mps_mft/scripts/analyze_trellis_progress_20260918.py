@@ -1,4 +1,4 @@
-"""Read-only audit of the September 18 trellis sync, including partial stdout.
+"""Read-only audit of all four trellis endpoints synced September 19.
 
 Trellis Hartree fields mix densities and normal bonds. Physical profiles must
 come from stored correlations, never from the square/cubic field inversion.
@@ -116,15 +116,22 @@ def load(row, job, accounting):
                 density=h['density'][()],dmrg_gap=gaps,global_relative=h['field_rel_residual'][()]))
         np.testing.assert_allclose(np.sum(energies,axis=0),canonical,atol=1e-12,rtol=0)
         np.testing.assert_allclose(np.sum(corrected_energies,axis=0),corrected,atol=1e-12,rtol=0)
-        allocation = [a for a in accounting if a['job_id']==job['job_id']]
-        assert not allocation  # No reconciled cost in this dated local snapshot.
+        records = [a for a in accounting if a['job_id']==job['job_id']]
+        allocation = None
+        if records:
+            ac = records[-1]
+            assert ac['campaign'] == RUN.name and ac['label'] == row['label'] and ac['sacct_state'] == 'COMPLETED'
+            cost = int(ac['elapsed_raw_seconds'])/3600*float(ac['effective_node_fraction'])
+            np.testing.assert_allclose(cost,float(ac['measured_node_hours']),atol=1e-9)
+            allocation = dict(seconds=int(ac['elapsed_raw_seconds']),node_hours=cost,
+                reconciled_utc=ac['reconciled_utc'],source='output/project_budget/additional_node_hours_reconciliations.tsv')
         summary = dict(campaign=RUN.name,label=row['label'],job_id=job['job_id'],cell=row['trellis_cell'],family=row['family'],
             source=path.relative_to(PROJECT).as_posix(),compact_sha256=compact['compact_sha256'],full_sha256=compact['full_sha256'],
             config_sha256=row['config_sha256'],seed_sha256=row['seed_sha256'],fingerprints=fingerprints,controls=cfg,
             status=base.text(f,'status'),accepted=bool(f['accepted'][()]),cell_sweeps=n,ladder_solves=n*len(ladders),
             physical_sites=sites,energy_per_site_final=energy[-1],energy_span_last10=np.ptp(energy[-10:]),
             solver_seconds=np.sum(f['history/wall_seconds'][()]),solver_node_hours=np.sum(f['history/wall_seconds'][()])/14400,
-            allocation=None,reserved_node_hours=float(job['reserved_node_hours']),energy_ranking_eligible=False,
+            allocation=allocation,reserved_node_hours=float(job['reserved_node_hours']),energy_ranking_eligible=False,
             ladders=[l['summary'] for l in ladders])
     logpath = RUN/'logs'/f"{row['label']}.s1-{job['job_id']}.out"
     text = logpath.read_text(); steps = re.findall(r'^TRELLIS cell_sweep=(\d+)',text,re.M)
@@ -143,32 +150,71 @@ def partial(row,job):
         state_available=False,records=records,limitation='Synced stdout only; no physical profiles or terminal acceptance/cost evidence.')
 
 
-def figures(d):
-    x = np.arange(1,len(d['energy'])+1); l = d['ladders'][0]
-    fig,axes = plt.subplots(2,2,figsize=(12,8),layout='constrained')
-    axes[0,0].plot(x,d['energy'],color='#6D4E9B');axes[0,0].set(title='Energy from the first evaluation',ylabel='Corrected energy per site [t]')
-    axes[0,1].plot(x[-20:],d['energy'][-20:],color='#6D4E9B');axes[0,1].set(title='Late energy plateau',ylabel='Corrected energy per site [t]')
-    axes[1,0].plot(x,l['spin_rms'],label='Spin RMS',color='#245A9C')
-    axes[1,0].plot(x,l['pair_rms'],label='Leg-pair RMS',color='#B65F16');axes[1,0].set(yscale='log',ylabel='Bulk physical order',title='Stripe seed evolves toward pairing');axes[1,0].legend()
-    axes[1,1].plot(x,l['global_relative'],color='#6D4E9B',label='Global relative residual');axes[1,1].axhline(1e-4,color='0.5',ls=':',label='Relative tolerance')
-    axes[1,1].set(yscale='log',ylabel='Raw-map relative residual',title='Global residual passes late; other gates fail');axes[1,1].legend(fontsize=9)
-    for ax in axes.flat:ax.grid(alpha=.2);ax.set_xlabel('Cell sweep / MF evaluation')
-    for ax in axes[0]:ax.ticklabel_format(axis='y',style='plain',useOffset=False)
-    fig.suptitle('Trellis one-ladder stripe seed: paired endpoint after 60 raw sweeps',fontsize=15)
-    fig.supxlabel('t0=1, V=0, tau0=tau1=0.1, L64, chi200. Stored status: maximum_iterations; accepted=false.',fontsize=10)
+
+
+def comparisons(data):
+    result = []
+    for cell in ('one_ladder','two_ladder'):
+        a,b = [next(d for d in data if d['summary']['cell']==cell and d['summary']['family']==fam)
+               for fam in ('stripe','pairing')]
+        assert a['summary']['fingerprints'] == b['summary']['fingerprints']
+        assert a['summary']['controls'] == b['summary']['controls']
+        # Only one global spin reversal and pairing gauge per entire spatial cell.
+        spin_sign = np.sign(sum(np.dot(x['spin'][-1],y['spin'][-1]) for x,y in zip(a['ladders'],b['ladders']))) or 1
+        pair_sign = np.sign(sum(np.dot(x['leg'][-1],y['leg'][-1]) for x,y in zip(a['ladders'],b['ladders']))) or 1
+        result.append(dict(cell=cell,endpoint_pairing_minus_stripe=b['energy'][-1]-a['energy'][-1],
+            sum_last10_energy_ranges=a['summary']['energy_span_last10']+b['summary']['energy_span_last10'],
+            spin_alignment_sign=spin_sign,pair_alignment_sign=pair_sign,
+            profile_max_seed_difference={key:max(np.max(np.abs(x[key][-1]-sign*y[key][-1]))
+                for x,y in zip(a['ladders'],b['ladders']))
+                for key,sign in [('charge',1),('spin',spin_sign),('leg',pair_sign),('rung',pair_sign)]},
+            energy_ranking_eligible=bool(a['summary']['accepted'] and b['summary']['accepted'])))
+    return result
+
+
+def all_figures(data):
+    fig,axes = plt.subplots(3,2,figsize=(12,9),layout='constrained')
+    for col,cell in enumerate(('one_ladder','two_ladder')):
+        for d in data:
+            s=d['summary']
+            if s['cell']!=cell:continue
+            x=np.arange(1,s['cell_sweeps']+1)
+            axes[0,col].plot(x,d['energy'],**report.style(s['family']))
+            for l in d['ladders']:
+                opts=report.style(s['family']);opts['label']+=f", {l['summary']['ladder']}"
+                if l['summary']['ladder']=='B':opts.update(ls=':',lw=2.2)
+                axes[1,col].plot(x,l['spin_rms'],**opts)
+                axes[2,col].plot(x,l['pair_rms'],**opts)
+        axes[0,col].set_title('Skew one-ladder cell' if col==0 else 'Rectangular two-ladder cell (A/B)')
+        axes[0,col].ticklabel_format(axis='y',style='plain',useOffset=False)
+        axes[0,col].legend(fontsize=8)
+        for row in (1,2):axes[row,col].set_yscale('log');axes[row,col].legend(fontsize=8)
+        axes[2,col].set_xlabel('Cell sweep')
+    for ax in axes.flat:ax.grid(alpha=.2)
+    for ax,label in zip(axes[:,0],('Corrected energy per site [t]','Physical spin RMS','Physical leg-pair RMS')):ax.set_ylabel(label)
+    fig.suptitle('Trellis (t0,V)=(1,0): all four completed raw-update histories',fontsize=14)
+    fig.supxlabel('L=64 per ladder, chi=200, tau0=tau1=0.1. A/B are spatial ladders; energy is normalized by 128 or 256 sites.',fontsize=9)
     report.save(fig,OUT,'histories')
-    fig,axes = plt.subplots(3,1,figsize=(9,10),layout='constrained')
-    for i in (0,9,59):
-        alpha=1 if i==59 else .45
-        axes[0].plot(np.arange(1,65),l['charge'][i],label=f'Evaluation {i+1}',alpha=alpha)
-        axes[1].plot(np.arange(1,65),l['spin'][i]*(-1.)**np.arange(64),alpha=alpha,label=f'Evaluation {i+1}')
-    axes[2].plot(np.arange(1,64)+.5,l['leg'][-1],color='#B65F16',label='Final leg bonds')
-    axes[2].plot(np.arange(1,65),l['rung'][-1],color='#245A9C',label='Final rung bonds')
-    axes[0].set_ylabel('Electrons per site');axes[1].set_ylabel('Staggered leg-odd spin');axes[2].set_ylabel('Physical pairing')
-    axes[0].legend(ncol=3);axes[2].legend();axes[2].set_xlabel('Rung / bond midpoint')
-    for ax in axes:ax.grid(alpha=.2)
-    fig.suptitle('Trellis: spin texture disappears, opposite leg/rung pairing survives',fontsize=14)
-    fig.supxlabel('Physical correlations read directly from HDF5. Residual end-dependent charge oscillations do not establish bulk CDW order.\nFinal spin RMS is 1.21e-5, compared with 6.27e-2 at evaluation 1. No accepted endpoint.',fontsize=9)
+    ordered=sorted(data,key=lambda d:(d['summary']['cell'],d['summary']['family']!='stripe'))
+    fig,axes=plt.subplots(3,4,figsize=(16,8),layout='constrained')
+    for col,d in enumerate(ordered):
+        s=d['summary']; n=s['cell_sweeps']
+        for l in d['ladders']:
+            name=l['summary']['ladder'];offset=0 if name=='A' else -.5
+            x=np.arange(1,65)+offset;color='#245A9C' if name=='A' else '#B65F16'
+            for row,key in enumerate(('charge','spin','leg')):
+                xx=x[:-1]+.5 if key=='leg' else x
+                multiplier=(-1.)**np.arange(64) if key=='spin' else 1
+                axes[row,col].plot(xx,l[key][-1]*multiplier,color=color,label=f'{name}, sweep {n}')
+                axes[row,col].plot(xx,l[key][-10]*multiplier,color=color,alpha=.3,lw=1)
+            axes[2,col].plot(x,l['rung'][-1],color=color,ls=':',label=f'{name}, rung')
+        axes[0,col].set_title(('One ladder' if s['cell']=='one_ladder' else 'Two ladders')+' / '+s['family']+' seed')
+        axes[0,col].legend(fontsize=8);axes[2,col].legend(fontsize=8,ncol=2)
+        axes[2,col].set_xlabel('Physical rung / bond position')
+    for ax in axes.flat:ax.grid(alpha=.2)
+    for ax,label in zip(axes[:,0],('Electrons per site','Staggered leg-odd spin','Anomalous pairing')):ax.set_ylabel(label)
+    fig.suptitle('Trellis endpoint profiles from stored physical correlations',fontsize=14)
+    fig.supxlabel('Solid: final; faint: nine sweeps earlier; dotted: final rung pairing. B is shifted by -1/2 rung. Raw signs retained.',fontsize=10)
     report.save(fig,OUT,'profiles')
 
 
@@ -182,25 +228,27 @@ def main():
         job = next(j for j in jobs if j['label']==row['label'])
         if list((RUN/'results'/row['label']).rglob('state.h5')):data.append(load(row,job,accounting))
         else:missing.append(partial(row,job))
-    assert len(data)==1 and data[0]['summary']['cell']=='one_ladder' and data[0]['summary']['family']=='stripe'
-    payload = dict(date='2026-09-18',runs=[d['summary'] for d in data],missing=missing,
+    assert len(data)==4 and not missing
+    accounted=[d['summary']['allocation'] for d in data if d['summary']['allocation']]
+    payload = dict(date='2026-09-19',runs=[d['summary'] for d in data],missing=missing,within_cell_comparisons=comparisons(data),
         total_complete_cell_sweeps=sum(d['summary']['cell_sweeps'] for d in data),
         total_complete_ladder_solves=sum(d['summary']['ladder_solves'] for d in data),
-        total_solver_node_hours=sum(d['summary']['solver_node_hours'] for d in data),accepted_count=0,
-        interpretation='One completed pairing-dominated trajectory. No accepted within-cell or between-cell energetic comparison.')
+        total_solver_node_hours=sum(d['summary']['solver_node_hours'] for d in data),accepted_count=sum(d['summary']['accepted'] for d in data),
+        allocation_jobs_available=len(accounted),known_allocation_node_hours=sum(a['node_hours'] for a in accounted),
+        interpretation='Completed endpoint observations; within-cell seed differences remain diagnostic unless both endpoints pass. Different spatial cells have different finite-OBC embeddings.')
     (OUT/'analysis.json').write_text(json.dumps(base.common.clean(payload),indent=2,allow_nan=False)+'\n',encoding='utf-8')
     report.write_csv(OUT/'sources.csv',[{k:d['summary'][k] for k in ('label','job_id','source','compact_sha256','full_sha256','config_sha256','seed_sha256')} for d in data])
-    report.write_csv(OUT/'iteration_history.csv',[dict(ladder=l['summary']['ladder'],cell_sweep=i+1,energy_per_site=d['energy'][i],
+    report.write_csv(OUT/'iteration_history.csv',[dict(label=d['summary']['label'],cell=d['summary']['cell'],family=d['summary']['family'],ladder=l['summary']['ladder'],cell_sweep=i+1,energy_per_site=d['energy'][i],
         spin_rms=l['spin_rms'][i],pair_rms=l['pair_rms'][i],charge_std=np.std(l['charge'][i,5:59]),density=l['density'][i],
         global_relative=l['global_relative'][i],dmrg_last_sweep_delta=l['dmrg_gap'][i])
         for d in data for l in d['ladders'] for i in range(d['summary']['cell_sweeps'])])
-    report.write_csv(OUT/'terminal_profiles.csv',[dict(ladder=l['summary']['ladder'],rung=i+1,charge=l['charge'][-1,i],spin_odd=l['spin'][-1,i],
+    report.write_csv(OUT/'terminal_profiles.csv',[dict(label=d['summary']['label'],cell=d['summary']['cell'],family=d['summary']['family'],ladder=l['summary']['ladder'],rung=i+1,physical_position=i+1-(.5 if l['summary']['ladder']=='B' else 0),charge=l['charge'][-1,i],spin_odd=l['spin'][-1,i],
         rung_pair=l['rung'][-1,i],leg_pair_right=l['leg'][-1,i] if i<63 else None) for d in data for l in d['ladders'] for i in range(64)])
-    report.write_csv(OUT/'partial_log_histories.csv',[dict(label=m['label'],job_id=m['job_id'],**r) for m in missing for r in m['records']])
+    # Preserve the old log-only CSV as a dated historical artifact; JSON missing=[] is authoritative.
+    all_figures(data)
     for d in data:
-        figures(d)
         assert base.common.sha(PROJECT/d['summary']['source'])==d['summary']['compact_sha256']
-    print(json.dumps(base.common.clean(payload['runs'][0]),indent=2,allow_nan=False))
+    print(json.dumps(base.common.clean({k:v for k,v in payload.items() if k not in ('runs','missing')}),indent=2,allow_nan=False))
 
 
 if __name__=='__main__':

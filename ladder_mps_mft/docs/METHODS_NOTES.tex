@@ -36,7 +36,7 @@
 
 \title{Ladder MPS+Mean-Field Project: Living Methods Notes}
 \author{Kevin Wang and contributors}
-\date{Living notes --- updated 18 September 2026}
+\date{Living notes --- updated 19 September 2026}
 
 \begin{document}
 
@@ -1145,7 +1145,7 @@ boundary/bulk-window checks, consistent order diagnostics, sector gaps, and
 seed/basin robustness.  The implementation currently excludes complex fields
 and flux order.
 
-\subsection{September 18 raw-update campaign and energy-shape diagnostics}
+\subsection{September 19 completed raw-update campaign and energy-shape diagnostics}
 
 The current two-family protocol mixes 95\% of one reference correlation
 profile with 5\% of the competing reference, then rebuilds the fields with
@@ -1156,14 +1156,33 @@ and a 60-evaluation cap. Earlier square anchors, remainder runs and
 continuations retain their original controls. These are representative
 campaign settings, not a replacement for the generic algorithms above.
 
-The September~18 local review contains 34 complete 60-step histories:
-18 cubic, 12 finer-square, three positive-$V$ square and one trellis.
-None is formally accepted. Cubic reaches stripes at all nine coordinates;
-the finer square cuts retain two seed-dependent texture pairs. The three
-completed $(1.2,+0.2)$ square starts lose pairing, whereas the one-ladder
-trellis stripe start at $(1,0)$ develops opposite-sign leg/rung pairing.
-Detailed profiles, failed gates and partial-run boundaries belong to
+The September~19 local review contains 38 complete 60-step run histories:
+18 cubic, 12 finer-square, four positive-$V$ square and four trellis.
+These contain 2280 cell updates and 2400 individual ladder solves because
+two trellis runs contain spatial ladders $A/B$. None is formally accepted.
+Cubic reaches stripes at all nine coordinates; the finer square cuts retain
+two seed-dependent texture pairs. All four $(1.2,+0.2)$ square starts lose
+pairing. The period-eight start retains six unevenly spaced spin-envelope
+nodes and an endpoint excess $9.3242\times10^{-4}\,t$/site over the stripe
+start; this is a defect/coarsening diagnostic, not an accepted energy ranking.
+Both trellis one-ladder starts at $(1,0)$ reach the same paired texture,
+but both rectangular two-ladder starts retain strong, essentially unpaired
+stripes. Detailed profiles, failed gates and source checks belong to
 \path{docs/reports/campaign_review_20260918/README.md}.
+
+The two-ladder trellis nonacceptance is an outer-iteration issue:
+final global relative residuals are $0.1845$--$0.2085$, despite passing
+final inner-DMRG windows. Successive full-cell measured-field increments
+have cosine near $-0.99995$ and norm ratio about $0.975$; two-sweep
+maximum differences are only 3.2--3.5\% of one-sweep differences, but
+remain resolved. This supports slowly damped alternating relaxation,
+not an accepted temporal orbit. Spatial $A/B$ labels must not be confused
+with sweep parity. A future damping test would change the numerical
+iteration, not identify a physical dynamical frequency. No damping or
+acceptance change accompanies this analysis. Different cell fingerprints,
+repetition constraints and open-end embeddings also qualify their diagnostic
+energy comparison. Trellis profiles use stored physical correlations,
+since its Hartree fields include normal-bond contributions.
 
 For a transition cut, plot the full stored target-corrected canonical
 energy per physical site against the varied Hamiltonian parameter, including
@@ -1191,6 +1210,17 @@ Also, the interpolated $E_p$ changes $g=t_\perp^2/|E_p|$ along each cut:
 the energy slope includes the changing transverse functional as well as
 the explicit bare-ladder parameter. All plotted energies retain the
 implemented convention of Sec.~\ref{sec:variational}.
+
+The companion spin/pairing cuts use the same twenty source endpoints as
+the energy curves. Spin is the RMS of physical leg-odd $S^z$ over rungs
+6--59; leg pairing is symmetrized and averaged over legs before its RMS
+on bonds with left rungs 6--58. A central 17--48 spin window distinguishes
+end-weighted remnants. These anomalous amplitudes are not pair--pair
+correlations. Full raw and connected terminal correlations are now enabled
+for both accepted and maximum-iteration states; a retrospective measurement
+pass over 56 latest branches / 58 spatial MPSs is prepared. Such measurements
+retain status, residuals and source hashes and do not imply convergence.
+No new four-fermion data from that pass are used in the present review.
 
 \section{Artifacts, provenance, and branch selection}
 

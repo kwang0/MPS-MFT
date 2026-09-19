@@ -19,6 +19,12 @@ def main():
         "reports/campaign_review_20260918/square_cubic_pairing_grids.pdf",
         "reports/square_fine_cuts_20260918/variational_energy_cuts.pdf",
         "reports/square_fine_cuts_20260918/variational_energy_shape.pdf",
+        "reports/square_fine_cuts_20260918/order_parameter_cuts.pdf",
+        "reports/square_positive_v_20260918/histories.pdf",
+        "reports/square_positive_v_20260918/terminal_profiles.pdf",
+        "reports/trellis_progress_20260918/histories.pdf",
+        "reports/trellis_progress_20260918/profiles.pdf",
+        "reports/trellis_progress_20260918/two_ladder_relaxation.pdf",
         "manuscript/README.md",
     )
     # Read everything first, so a missing source cannot truncate a valid ZIP.

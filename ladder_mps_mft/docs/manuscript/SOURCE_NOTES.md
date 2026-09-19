@@ -1,6 +1,6 @@
 # Draft reference and evidence notes
 
-Initial draft: **15 September 2026**. Updated numerical evidence cutoff: **18 September 2026**.
+Initial draft: **15 September 2026**. Updated numerical evidence cutoff: **19 September 2026**.
 
 ## Existing sources
 
@@ -89,51 +89,48 @@ oscillations. Numerical result sections and acceptance flags remain unchanged.
 - Local pairing in the eventual stripe state is an open question; the
   disappearing anomalous expectation value does not answer it alone.
 
-## Results incorporated in LaTeX/PDF — 18 September 2026
+## Final results incorporated in LaTeX/PDF — 19 September 2026
 
 The [combined campaign review](../reports/campaign_review_20260918/README.md)
-supersedes the draft's incomplete numerical coverage. At the user's request,
-the actual LaTeX/PDF now includes these results and explicitly advances its
-evidence cutoff from September 13 to September 18.
+now includes all 38 completed 60-step runs (2280 cell updates / 2400 ladder
+solves), plus the earlier coarse square reference. Every new endpoint
+remains formally unaccepted. No literature search or bibliography change
+accompanies this update; the material discussion above is preserved.
 
-- The coarse square grid, including both V=0 continuations, has seven
-  stripe and two paired coordinates. Both seeds reach the same family at
-  every coarse coordinate, although all endpoints remain unaccepted.
-- Both seeds reach stripes throughout the complete cubic-unfrustrated grid,
-  including the two square paired coordinates at t0=1.4, V=-0.4/-0.2.
-- Finer square points (1.25,-0.4) and (1.4,-0.05) retain distinct seed-dependent
-  textures with diagnostic endpoint gaps well above recent energy drift.
-  This motivates a metastability/transition-order test, not a claim of a
-  measured first-order transition. Weak spin in the paired V=-0.05 endpoint
-  is strongly concentrated near the ends; central spin still decays.
-- Three completed square (1.2,+0.2) seeds lose pairing, including the
-  intertwined period-16 start. The period-eight seed has only a partial
-  scalar log. The legacy positive-V coexistence result is therefore not a
-  general sign-of-V conclusion across the tested geometries.
-- The first completed trellis one-ladder stripe seed instead develops
-  opposite-sign leg/rung pairing at (1,0). Other trellis seeds/cell outcomes
-  remain incomplete; no cross-geometry energetic ranking is appropriate.
+- Square/cubic comparison remains seven-stripe/two-paired versus all-stripe.
+- Finer square points (1.25,−0.4) and (1.4,−0.05) retain distinct textures.
+  Full variational energy curves and their common-chord/secant diagnostics
+  remain. The 0.38% final V-interval slope downturn does not resolve a kink.
+- New physical spin/pairing cut plots use the same twenty endpoint sources.
+  Coarse and fine RMS definitions now match: spin rungs 6–59, symmetrized
+  two-leg-averaged pairing on bonds with left rungs 6–58. Central spin
+  rungs 17–48 distinguish end-weighted remnants. See the order-parameter
+  JSON/CSV and source hashes in the fine-cut report. Lines join independent
+  starts and do not measure hysteresis.
+- All four square (1.2,+0.2) seeds lose pairing. The period-eight start
+  leaves six uneven spin nodes and a diagnostic energy excess 9.3242e−4
+  t/site over the stripe start. Its dominant charge m=4 does not retain
+  the initial period eight. Mixed spin bins are not a clean new wavelength.
+- Both one-ladder trellis seeds reach the same paired basin. Both rectangular
+  two-ladder seeds develop unpaired stripes with large alternating relaxation.
+  Increment cosines about −0.99995 and norm ratio 0.975 indicate a damped
+  negative iteration mode, not an accepted orbit or physical dynamics.
+  A/B are spatial. Cell constraints and open ends qualify endpoint energies.
+- Full terminal pair–pair measurements are enabled and the retrospective
+  56-branch/58-MPS workflow is prepared, including maximum-iteration states.
+  No new campaign four-fermion data enter these reports.
 
-These are finite-L64, chi200 trajectory observations. All 34 completed
-histories reviewed in September 18 remain formally unaccepted. Cite their
-dated detailed reports for profiles, gates, source hashes and cost coverage.
+Sections 3.11 and 3.12 now separately develop positive-V square and trellis,
+with histories, profiles, gates, energy qualifications and physical implications.
+Section 3.10 adds matched spin/pairing cuts. The manuscript contains thirteen
+figures and retains 48 cited references; every figure has a text reference.
 
-The finer-cut section now plots full target-corrected canonical energies
-against V and t0, using 12 fine endpoints plus eight coarse anchors, including
-the latest V=0 continuations. A common chord per cut exposes small curvature
-without changing seed gaps or slope changes. Adjacent secants show a 0.38%
-final-interval slope decrease on the pairing-seed V curve and nearly regular
-curvature on the t0 curve. This does not distinguish a first-order kink from
-smooth curvature. The source table retains canonical and density-corrected
-energies, last-ten drift diagnostics, state/config hashes and seed identities.
-No new calculation or literature search underlies this update.
+The side-by-side square/cubic histories still include 902 square and 1080
+cubic evaluations with continuation markers. Their verified physical-RMS
+reader is reused for the new cut endpoints. Trellis profiles instead come
+directly from raw correlations because its Hartree map includes normal bonds.
 
-The square/cubic comparison is now explicit in Figures 2–5: matching phase
-diagrams, full energy histories, physical spin RMS and physical leg-pair RMS,
-with references in the narrative. Both geometries use rungs 6–59 for spin and
-bonds 6–58 for leg pairing. The old square CSV stores MF-field amplitudes and
-averages leg bonds onto rungs before taking the pairing RMS, so its physical histories were
-reconstructed with the existing correlation reader from the 20 hashed source
-artifacts. Cubic reuses the audited physical-RMS CSV. The side-by-side panels
-contain all 902 square and 1080 cubic evaluations, including square parents
-and continuations; no late-only crop or new acceptance decision is used.
+All 38 reviewed jobs now have synced completed-job accounting, totaling
+40.782361 actual node-hours. The source ledger hash and job-level calculations
+are recorded in completion_accounting.json. Coarse square cost remains
+separate. This supersedes September 18 partial coverage, not historical ledgers.

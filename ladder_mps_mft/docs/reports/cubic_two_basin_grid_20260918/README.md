@@ -102,3 +102,9 @@ C:/Python313/python.exe -B -X utf8 ladder_mps_mft/scripts/analyze_two_basin_camp
 
 This also regenerates the accompanying square-cut and positive-V reports'
 data and figures. Narrative README files are maintained separately.
+
+September 19 accounting update: all eighteen completed jobs now have synced
+reconciliations, totaling **14.196667 actual node-hours**. This supersedes
+the incomplete accounting coverage above; solver-only time remains
+13.886995. [Job-level audit and ledger hash](../campaign_review_20260918/completion_accounting.json).
+Scientific histories and endpoint conclusions are unchanged.

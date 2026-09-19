@@ -119,7 +119,7 @@ def log_only(run, row, jobs):
                 limitation='stdout only; no synced spatial profiles, acceptance or terminal allocation evidence')
 
 
-def export(out, data, missing):
+def export(out, data, missing, date='2026-09-18'):
     summaries = [d['summary'] for d in data]
     points = []
     for t0, v in sorted({(s['t0'], s['V']) for s in summaries}):
@@ -136,7 +136,7 @@ def export(out, data, missing):
                 max_spin_difference=np.max(np.abs(a['spin'][-1]-b['spin'][-1])))
         points.append(record)
     accounted=[s for s in summaries if s['allocation'] is not None]
-    payload=dict(date='2026-09-18', geometry=summaries[0]['geometry'], L=64, chi=200,
+    payload=dict(date=date, geometry=summaries[0]['geometry'], L=64, chi=200,
         runs=summaries, points=points, missing=missing, total_iterations=sum(s['iterations'] for s in summaries),
         accepted_count=sum(s['accepted'] for s in summaries),
         total_solver_node_hours=sum(s['solver_node_hours'] for s in summaries),
@@ -215,7 +215,12 @@ def cubic_phase(out, data):
 
 def cut_summary(out, data, payload):
     old=json.loads((PROJECT/'docs/reports/two_basin_grid_20260915/analysis.json').read_text())
-    anchors=[dict(t0=s['t0'],V=s['V'],family=s['family'],spin=s['physical_spin_odd_bulk_rms'],pair=s['physical_leg_pair_bulk_rms']) for s in old['runs']]
+    anchors=[]
+    for s in old['runs']:
+        if (s['t0'],s['V']) not in ((1.4,-.2),(1.4,0.),(1.2,-.4),(1.4,-.4)):continue
+        path=PROJECT/s['source'];assert base.common.sha(path)==s['source_sha256']
+        d=base.read_arrays(path)
+        anchors.append(dict(t0=s['t0'],V=s['V'],family=s['family'],spin=d['spin_rms'][-1],pair=d['pair_rms'][-1]))
     fig,axes=plt.subplots(2,3,figsize=(13.5,8),layout='constrained')
     for iy,(fixed,key,lo,hi,label) in enumerate(((1.4,'V',-.2,0.,'V/t at t0=1.4'),(-.4,'t0',1.2,1.4,'t0/t at V=-0.4'))):
         match=lambda s: s['t0']==fixed if key=='V' else s['V']==fixed
@@ -284,7 +289,7 @@ def positive_figures(out,data,missing):
         if m['records']:
             axes[0,0].plot([r['iteration'] for r in m['records']],[r['energy_per_site'] for r in m['records']],**style(m['family']))
     for ax in axes.flat:ax.grid(alpha=.2);ax.set_xlabel('MF evaluation')
-    axes[0,0].set_title('Energy: full histories; period 8 is log-only')
+    axes[0,0].set_title('Energy: full histories')
     axes[0,0].set_ylabel('Corrected energy per site [t]')
     axes[1,1].set_title('Energy: last 15 records of completed starts')
     axes[1,1].set_ylabel('Corrected energy per site [t]')
@@ -292,8 +297,8 @@ def positive_figures(out,data,missing):
     axes[0,1].set(title='Spin: completed starts',ylabel='Bulk physical spin RMS')
     axes[1,0].set(title='Pairing: completed starts',ylabel='Bulk physical leg-pair RMS',yscale='log')
     axes[0,0].legend(fontsize=9)
-    fig.suptitle('Square (1.2,+0.2): three completed seeds lose pairing',fontsize=15)
-    fig.supxlabel('Three 60-step states remain unaccepted. Period-8 seed: 46 complete MF records in synced stdout; no spatial state available.',fontsize=10)
+    fig.suptitle('Square (1.2,+0.2): four completed seed histories',fontsize=15)
+    fig.supxlabel('60 raw evaluations per seed, chi=200. Stored acceptance flags retained; distinct endpoints are diagnostic.',fontsize=10)
     save(fig,out,'histories')
     profiles(out,data,[(1.2,.2)],'terminal_profiles','Positive V: stripe profiles after 60 evaluations')
 
@@ -519,10 +524,11 @@ def geometry_comparison_figures():
     print('Rebuilt four square/cubic comparisons: 36 histories, 1982 evaluations, common physical RMS conventions.',flush=True)
 
 
-def main():
+def main(positive_only=False):
     plt.rcParams.update({'font.size':10,'axes.spines.top':False,'axes.spines.right':False})
     accounting=base.common.rows(PROJECT/'output/project_budget/additional_node_hours_reconciliations.tsv')
     for name,campaign in CAMPAIGNS.items():
+        if positive_only and 'positive_v' not in name:continue
         run=base.ROOT/campaign;out=PROJECT/'docs/reports'/name;out.mkdir(parents=True,exist_ok=True)
         manifest,jobs=base.common.rows(run/'manifest.tsv'),base.common.rows(run/'jobs.tsv')
         data=[];missing=[]
@@ -531,9 +537,9 @@ def main():
                 d=enrich(base.load(run,row,jobs,accounting),row);data.append(d)
                 s=d['summary'];print(name,s['t0'],s['V'],s['family'],s['phase_observation'],flush=True)
             else:missing.append(log_only(run,row,jobs))
-        expected={'cubic_two_basin_grid_20260918':18,'square_fine_cuts_20260918':12,'square_positive_v_20260918':3}
+        expected={'cubic_two_basin_grid_20260918':18,'square_fine_cuts_20260918':12,'square_positive_v_20260918':4}
         assert len(data)==expected[name]
-        payload=export(out,data,missing)
+        payload=export(out,data,missing,date='2026-09-19' if 'positive_v' in name else '2026-09-18')
         if name.startswith('cubic'):
             coords=[(t,v) for v in (0.,-.2,-.4) for t in (1.,1.2,1.4)]
             history_grids(out,data,coords,'Cubic unfrustrated');cubic_phase(out,data)
@@ -549,7 +555,7 @@ def main():
                 if m['records']:write_csv(out/(m['family']+'_log_history.csv'),m['records'])
         print(json.dumps({k:v for k,v in payload.items() if k not in ('runs','missing','points')},indent=2),flush=True)
         for d in data:assert base.common.sha(PROJECT/d['summary']['source'])==d['summary']['compact_sha256']
-    geometry_comparison_figures()
+    if not positive_only:geometry_comparison_figures()
 
 
 if __name__=='__main__':
@@ -557,5 +563,7 @@ if __name__=='__main__':
         variational_energy_cuts()
     elif sys.argv[1:] == ['--geometry-comparison-only']:
         geometry_comparison_figures()
+    elif sys.argv[1:] == ['--positive-only']:
+        main(positive_only=True)
     else:
         main()
