@@ -1,6 +1,6 @@
 # Active plan
 
-Last reviewed: **2026-09-19**
+Last reviewed: **2026-09-20**
 
 ## Completed analysis
 
@@ -37,9 +37,17 @@ the Overleaf bundle includes the new figures.
 2. The [prepared CPU handoff](../DIAGNOSTICS.md) is unchanged. GPU speed
    remains unbenchmarked; CPU is the existing implementation, not a proven
    performance winner. No new submission or GPU port was requested here.
-3. Consider selective convergence/stability work on the two square boundary
-   points and the alternating two-ladder trellis trajectories. Linear damping
-   is a possible targeted trellis test, not a prepared control change.
+3. The [transverse-order audit](../reports/trellis_progress_20260918/TRANSVERSE_INTERPRETATION_20260920.md)
+   motivates a targeted square A/B test at (1.4,-0.2) and (1.4,-0.4), with
+   paired/translated-stripe starts and explicit A/B perturbations. Leg-odd
+   charge is an independent allowed control. First verify the spatial map's
+   A=B reduction and per-site energy against the actual square bonds; do not
+   substitute the rectangular trellis tau1=0 switch. Completed square raw
+   runs already allowed two-cycles, so their paired outcomes remain evidence.
+   Cubic cell tests are lower priority for the paired/stripe boundary.
+   These are recommendations, not prepared controls or submissions.
+   Selective trellis convergence work, potentially modest linear damping,
+   remains a separate future decision; its geometric frustration persists.
 4. Rank only accepted, fingerprint-compatible canonical solutions. Retain
    open-end/cell qualifications on trellis endpoint energy comparisons and
    end-localized spin qualifications near the square boundary.

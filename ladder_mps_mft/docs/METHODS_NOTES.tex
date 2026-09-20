@@ -36,7 +36,7 @@
 
 \title{Ladder MPS+Mean-Field Project: Living Methods Notes}
 \author{Kevin Wang and contributors}
-\date{Living notes --- updated 19 September 2026}
+\date{Living notes --- updated 20 September 2026}
 
 \begin{document}
 
@@ -539,11 +539,52 @@ A negative \(\lambda\) flips the mode's sign on every raw update.  If
 point.  If \(|\lambda|>1\), the normal state is unstable along a
 sign-alternating trajectory; nonlinear saturation can then produce two fields
 that are exchanged by the raw map.  In the one-ladder formulation these two
-iterations represent transverse sublattices \(A\) and \(B\).  In an explicit
-two-sublattice formulation the same state is a fixed point of the doubled map,
-whose linear factor is \(\lambda^2>0\).  This interpretation is physical only
-when the transverse lattice supports the required bipartition; numerical
-period two alone is not sufficient.
+iterations can represent transverse sublattices \(A\) and \(B\), provided
+their actual neighbor maps implement \(X_A=R(X_B)\) and \(X_B=R(X_A)\).
+Here \(R\) is the raw one-subsystem response including field construction.
+The two-step composition \(R\circ R\) has linear factor \(\lambda^2\)
+at the identical-subsystem fixed point. This is distinct from the
+\emph{one-sweep} simultaneous two-sublattice Jacobian,
+\begin{equation}
+ J_{\mathrm{cell}}=\begin{pmatrix}0&J\\J&0\end{pmatrix},
+ \qquad \lambda_{\mathrm{even}}=\lambda,
+ \quad \lambda_{\mathrm{odd}}=-\lambda.
+ \label{eq:spatial-cell-jacobian}
+\end{equation}
+Consequently, for this same-map bipartite extension, complete raw-map linear
+stability \(\rho(J)<1\) also implies stability to both spatial parities.
+Observed relaxation from a few seeds is weaker evidence: it does not measure
+every eigenmode or exclude a finite-amplitude competing basin. This spatial
+interpretation requires the actual connectivity to support the assignment;
+numerical period two alone is not sufficient. A converged two-cycle is a
+stationary state of the spatial cell map, not physical time dependence.
+
+\paragraph{Leg parity is not ladder-sublattice parity.}
+For two spatial ladders with legs \(0,1\), the charge deviations
+\((\rho,-\rho;\rho,-\rho)\) and
+\((\rho,\rho;-\rho,-\rho)\) are different modes. The first is leg-odd
+within each ladder; the second preserves each rung's internal charge symmetry
+while alternating between ladders. The solver retains independent site
+densities, so the first mode is allowed even when rung-averaged plots hide it.
+In the rung bonding/antibonding basis, \(n_0-n_1\) mixes the two sectors,
+whereas \(n_0+n_1\) is their total occupation. Strong rung hopping can therefore
+give the two charge channels very different responses. This qualitative
+argument does not substitute for a measured relative-charge gap or a dedicated
+leg-odd perturbation. Leg-odd spin is a separate response channel.
+
+\paragraph{Trellis repetition requires an additional check.}
+For equal zigzag hoppings, the skew one-ladder map uses a backward hopping
+kernel on one target leg and a forward kernel on the other. The rectangular
+two-ladder map uses forward kernels on both legs of \(A\), backward kernels
+on both legs of \(B\), and a physical \(-1/2\)-rung origin for \(B\).
+A skew two-cycle and a rectangular spatial cell therefore impose different
+registration conditions on a longitudinal stripe. In the bulk coordinates
+\(x=i-m/2\), the repeated skew cell ties longitudinal modulation to transverse
+translation; two skew repetitions translate by \((-1,2)\), whereas the
+rectangular cell repeats by \((0,2)\). Open ends also differ. Both cells retain
+both zigzag bonds and the frustrated triangles. Enlarging the cell does not
+remove frustration, and the equivalence in Eq.~\eqref{eq:spatial-cell-jacobian}
+cannot be assumed between these two different trellis maps.
 
 \subsubsection{Why the geometries promote \(d\)-wave pairing differently}
 

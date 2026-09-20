@@ -1,6 +1,6 @@
 # Current project state
 
-Last locally reviewed: **2026-09-19 — final positive-V square and trellis results**
+Last locally reviewed: **2026-09-20 — transverse order and spatial-cell interpretation**
 
 This is a local, mutable snapshot. Stable rules live in AGENTS.md and the
 method documents; durable history is append-only in RUN_LOG.md. Local
@@ -8,7 +8,7 @@ artifacts establish solver outcomes, not live scheduler state.
 
 ## Repository and workflow
 
-- Branch: `codex/mps-mft-phase0-refactor`; baseline for this update: `9b7d4d5`.
+- Branch: `codex/mps-mft-phase0-refactor`; baseline for this update: `13b289d`.
 - Root `.claude/` is unrelated and remains untouched.
 - Output/state files are excluded from Git and immutable. Reports, scripts,
   LaTeX/PDF notes and the Overleaf bundle are maintained together.
@@ -61,6 +61,17 @@ unaccepted. The earlier coarse square grid is a separate reference.
   two-ladder energies are lower, but differing cell constraints/open ends and
   large residuals prevent a certified ranking. [Trellis report](reports/trellis_progress_20260918/README.md).
 
+The [September 20 transverse-sector audit](reports/trellis_progress_20260918/TRANSVERSE_INTERPRETATION_20260920.md)
+finds 79-83% A/B-odd weight in the dominant endpoint charge harmonic after
+correcting the half-rung registration. Central charge modulation is about
+0.047, versus only 5-7e-6 leg-odd charge RMS: the stripe charges both legs
+together. This is distinct from the old leg-parity k_y=pi label. Both trellis
+cells remain geometrically frustrated; skew and rectangular repetition impose
+different stripe registrations. A same-map bipartite two-cycle can encode
+static A/B order, but that equivalence does not identify these two trellis
+ansatzes. Square runs already used raw updates and allowed periods 1 and 2;
+their paired outcomes are evidence, not a complete transverse stability test.
+
 The 95%/5% reference mixtures use the legacy stripe at (1,0) and paired
 state at (1.4,−0.4), rebuilt with target couplings. Raw updates and no
 Anderson are retained. Flat energy or RMS cannot certify a stationary
@@ -84,6 +95,12 @@ introduction and 48 cited references from September 18 are preserved;
 the literature-search cutoff is unchanged. Living methods notes and the
 literature review's project-evidence section incorporate the final results.
 The Overleaf bundle includes every manuscript figure.
+
+The September 20 living-methods update distinguishes R composed with itself
+(lambda squared) from the simultaneous spatial-cell Jacobian (even/odd
+eigenvalues plus/minus lambda), and explains leg parity and trellis shear.
+The manuscript and its Overleaf bundle retain the completed September 19
+results; the new detailed interpretation is linked in the trellis report.
 
 ## Correlation measurements: prepared, not new evidence
 
@@ -130,6 +147,14 @@ completed SCF campaigns. The split square points and alternating two-ladder
 trellis are candidates for a future selective convergence/stability decision.
 Modest linear damping could test the negative trellis iteration mode, but
 no controls or follow-up jobs have been prepared in this analysis.
+
+Prioritize a targeted square A/B comparison at (1.4,-0.2) and (1.4,-0.4),
+using paired and translated-stripe starts with explicit transverse
+perturbations. The square spatial map must reproduce the existing map and
+per-site energy when A=B. The current rectangular trellis tau1=0 switch is
+not a substitute for that bond-level check. Cubic transverse-registration
+tests are useful but lower priority for the paired/stripe boundary. These
+are recommendations, not new run preparations or submissions.
 
 All analysis is local and read-only with respect to simulations. Validation
 checks hashes, physical profiles, full histories, canonical normalization,

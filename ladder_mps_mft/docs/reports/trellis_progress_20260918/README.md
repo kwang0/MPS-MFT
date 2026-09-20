@@ -6,6 +6,15 @@ the same paired texture in the skew one-ladder cell. Both lose pairing and
 retain strong stripes in the rectangular two-ladder cell, where large
 alternating relaxation still prevents convergence.
 
+The [September 20 transverse-order interpretation](TRANSVERSE_INTERPRETATION_20260920.md)
+checks the distinction between leg-odd charge, A/B stripe registration and MF
+iteration cycles. Central two-ladder charge modulation is about 0.047 while
+leg-odd charge RMS is only 5-7e-6. After correcting B's half-rung origin,
+79-83% of the dominant endpoint charge harmonic is A/B-odd, with a nonzero
+even component. Frustration remains in both cells. The note explains the
+qualified relation to Bollmark's two-cycle construction and recommends
+targeted A/B tests at the two square paired points.
+
 All runs use (t0,V)=(1,0), U=8, tau0=tau1=0.1, density 15/16, L=64 per
 ladder, chi=200 and 60 raw cell sweeps. All four retain
 `status=maximum_iterations`, `accepted=false`. A/B denote two spatial

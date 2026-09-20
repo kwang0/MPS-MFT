@@ -3925,3 +3925,78 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   No GPU port, extra compute, submission, authentication, synchronization or
   scheduler operation was performed. Selective stability/convergence work and
   any modest linear-damping trellis test remain future user decisions.
+
+## 2026-09-20: leg parity, transverse stripe registration and iteration cycles
+
+- User asked whether trellis frustration persists with two spatial ladders,
+  how Bollmark's temporal two-period construction relates to these results,
+  whether paired square points need an A/B test, and why charge could not
+  alternate between the two legs of one ladder. Baseline: 13b289d on
+  codex/mps-mft-phase0-refactor. No simulation controls or outputs changed.
+- Read the actual Geometry, MeanField and Trellis kernels and archived square
+  controls. Both trellis cells keep tau0/tau1 zigzag bonds and triangles.
+  Skew one-ladder and rectangular A/B repetition impose different longitudinal
+  registrations and finite OBC cuts. Two skew repetitions translate by
+  (-1,2), versus rectangular (0,2). The former's temporal two-cycle therefore
+  need not reproduce the latter's static spatial pattern.
+- Direct raw-correlation audit of jobs 58468871/58468873/58468875/58468876:
+  in central rungs 17-48 the two-ladder charge-even modulation is
+  0.046667-0.046984, while RMS[(n0-n1)/2] is only 5.006e-6 to 6.506e-6.
+  One-ladder leg-odd charge is about 1.072e-5. The solver allows independent
+  leg densities; small observed leg-odd charge is not an explicit stability
+  test. Alternating rung charge between ladders is a different mode from
+  polarizing the two legs within a rung. No relative-charge gap was measured.
+- At qx=pi/8, with physical x_A=i and x_B=i-1/2, the two-ladder endpoint
+  A/B-odd charge weights are 0.814554/0.788119 (full) and
+  0.829795/0.794464 (central), for stripe/pairing starts respectively.
+  Central relative phases are 131.2699/126.0837 degrees, so both even and odd
+  components remain. Central odd weights across the final ten sweeps range
+  0.76332-0.88698 and 0.71579-0.85498. These are nonstationary OBC profiles,
+  not pure transverse-momentum eigenstates or accepted phases. Leg parity
+  from old two-leg Fourier plots is distinct from A/B ladder parity.
+- The browser-accessible arXiv:2301.08116 preprint, Sec. III A/Fig. 2, was
+  checked for Bollmark's density-avoidance two-cycle mechanism. Published
+  DOI: 10.1103/PhysRevB.111.125141 (2025). Direct published-PDF retrieval
+  failed; the note explicitly links the accessible preprint as the text read.
+  For a correct same-map bipartite extension, X_A=R(X_B), X_B=R(X_A) is
+  both a stationary cell and a raw two-cycle. Clarified in METHODS_NOTES.tex
+  that R composed with itself has lambda squared, while a simultaneous
+  one-sweep cell has Jacobian [0 J; J 0] and eigenvalues plus/minus lambda.
+  Complete raw linear stability therefore tests both parities in that
+  specific extension; the observed few seed trajectories are weaker evidence.
+- Square archived anchors and remainder both have damping=1 and
+  accepted_periods=[1,2]. Their paired outcomes remain useful evidence.
+  Recommended targeted A/B tests at (1.4,-0.2) and (1.4,-0.4), with paired
+  plus explicit transverse perturbations and translated-stripe starts; a
+  leg-odd charge perturbation is a distinct useful control. Verify A=B fields
+  and per-site energy against actual square bonds first. Rectangular trellis
+  at tau1=0 retains a shifted interface and is not a drop-in square A/B map.
+  Cubic cell tests remain useful for registration/energy, with lower priority
+  for the paired/stripe boundary and explicit neighbor assignments required.
+- Added scripts/analyze_trellis_transverse_sectors_20260920.py and linked
+  TRANSVERSE_INTERPRETATION_20260920.md plus transverse_sectors_20260920.json
+  in the trellis report. Updated PROJECT_STATE and ACTIVE. Numerical JSON
+  records all four compact paths/hashes and all 60 Fourier evaluations.
+  Verified compact hashes before and after reading:
+  58468871 b3d204a10eeeced5446f22a7b65ffef8314cf5243e49d8bceae11046a1db7b00;
+  58468873 acbfff6dc8df900310d77499ef380656b82dc92be864e05bae82fe52dc5e71a5;
+  58468875 1b360712c6731f3efda0a68b80faefcc39ebbf0b36001a79819ee877c752e13b;
+  58468876 d9a803de57b3acbb6006ab9328173bd93bf7ccf6d30a1053f07e335057420e8d.
+- Local reproduction: C:/Python313/python.exe -B -X utf8
+  ladder_mps_mft/scripts/analyze_trellis_transverse_sectors_20260920.py.
+  Focused checks cover density normalization, endpoint/history equality,
+  origin phase, even/odd Parseval identity, pure parity examples and bounded
+  finite weights. No new DMRG calculation, susceptibility estimate or full
+  solver suite was needed. All original acceptance flags remain false.
+- Rebuilt only the living methods PDF with cached Tectonic: 22 pages;
+  new equation/paragraphs and neighboring pages 8-10 visually checked.
+  No missing references, overfull boxes or clipped material. Existing
+  underfull table/paragraph warnings remain. Scratch QA/build files are
+  under output/notes_update_20260920. An initial multi-file patch rejected
+  a stale context without partial edits, then applied successfully. PDF text
+  checks needed tolerance for extraction kerning in the word Trellis;
+  semantic checks and rendered pages pass. Manuscript/Overleaf retain their
+  September 19 completed results and were not rebuilt for this methods note.
+- No new jobs, GPU port, budget changes, authentication, synchronization,
+  scheduler actions or terminal correlation measurements were performed.
+  The proposed cell/stability calculations remain future user decisions.
