@@ -1,6 +1,6 @@
 # Stripe–pairing competition across square, cubic and trellis geometries
 
-**Updated 19 September 2026 — analysis of all user-synchronized final results.**
+**Updated 20 September 2026 — completed results and common-cell trellis energy check.**
 
 The completed data distinguish geometry from the imposed spatial cell.
 Cubic unfrustrated reaches stripes throughout its 3×3 grid; square retains
@@ -20,7 +20,7 @@ acceptance flag or immutable state was changed.
 | Cubic unfrustrated 3×3 | 18/18 | Both seeds stripe at every point | Spatial fixed-point gates fail |
 | Six finer square points | 12/12 | Four paired from both seeds; two retain distinct textures | Transition order and accepted crossing unresolved |
 | Square (1.2,+0.2) | 4/4 | All lose pairing; period-eight seed leaves magnetic defects | Spatial drift; no accepted energy ranking |
-| Trellis (1.0,0.0) | 4/4 | One-ladder paired; two-ladder striped from both seeds | Large alternating two-ladder relaxation; cell/boundary dependence |
+| Trellis (1.0,0.0) | 4/4 | One-ladder paired; two-ladder striped from both seeds; lower striped trial energy in the same cell | Large alternating relaxation; transverse period and stationary minimum unresolved |
 
 ## 1. Cubic removes the paired corner seen on square
 
@@ -264,15 +264,22 @@ could be a future targeted numerical test; no such change is made here.
 
 The two-ladder stripe/pairing endpoint energies are −0.521125816792 and
 −0.521055560230 t/site. Their gap, 7.026e−5, is less than the summed final-ten
-energy ranges 3.445e−4. They lie about 0.00224–0.00231 t/site below the
-one-ladder endpoints as diagnostic functional values. Large residuals,
-different cell fingerprints and different finite open-end embeddings prevent
-a certified energetic ranking.
+energy ranges 3.445e−4. A **September 20 audit** evaluates two copies of
+each saved paired ladder in the same rectangular functional. The embedding
+raises the paired energies by only 2.46378e−6 t/site; both striped trials
+remain **0.002238–0.002308 t/site lower**. Density corrections below 8.33e−6
+do not change that ordering. This establishes lower striped trial energies
+without requiring stationarity or nested ansatz families. Large residuals
+still prevent calling the endpoints optimized stationary phase minima.
+[Energy components, source hashes and reproduction](../trellis_progress_20260918/README.md).
 
 Thus the earlier contrast “trellis pairs, square/cubic stripe” applies to
 the **skew one-ladder ansatz**. Allowing independent A/B profiles also accesses
-stripes; relative transverse texture arrangements and boundary cuts both
-need to be distinguished before assigning a trellis phase.
+stripes with a verified trial-energy advantage. The preferred transverse
+arrangement remains open: A/B repetition alternates the observed 126–131-degree
+charge phase advance and cannot freely continue a diagonal tilt. Larger
+cells must accommodate both charge and spin under the proposed translation.
+[Physical interpretation and commensurability](../trellis_progress_20260918/TRANSVERSE_INTERPRETATION_20260920.md).
 
 [Complete trellis analysis, gate failures, profiles and relaxation data](../trellis_progress_20260918/README.md).
 

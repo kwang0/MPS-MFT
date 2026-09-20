@@ -1220,10 +1220,33 @@ remain resolved. This supports slowly damped alternating relaxation,
 not an accepted temporal orbit. Spatial $A/B$ labels must not be confused
 with sweep parity. A future damping test would change the numerical
 iteration, not identify a physical dynamical frequency. No damping or
-acceptance change accompanies this analysis. Different cell fingerprints,
-repetition constraints and open-end embeddings also qualify their diagnostic
-energy comparison. Trellis profiles use stored physical correlations,
+acceptance change accompanies this analysis. Trellis profiles use stored physical correlations,
 since its Hartree fields include normal-bond contributions.
+
+A September~20 check evaluates two copies of each saved paired ladder in
+the same rectangular cell as the striped trials, retaining the measured
+bare-ladder expectation and recomputing every interaction field. This raises
+the paired energy by only $2.46378\times10^{-6}\,t$/site. The striped trials
+remain $0.002238$--$0.002308\,t$/site lower in that common functional.
+Residual-density corrections are below $8.33\times10^{-6}\,t$/site, and the
+uncorrected canonical gaps have the same sign and scale. Nonstationarity
+does not invalidate a trial expectation value; nesting is needed for an
+automatic inequality between optimized variational families, not for this
+explicit comparison. This establishes a lower-energy striped trial without
+certifying a stationary or global minimum. Source and kernel hashes are in
+\path{docs/reports/trellis_progress_20260918/same_cell_energy_audit_20260920.toml}.
+
+The two-ladder cell also restricts transverse stripe registration. For a
+charge harmonic $\delta n_m(x)=\rho\cos(q_xx+m\theta)$, a rectangular
+$n$-ladder repetition requires $n\theta=2\pi p$. A rigid shift of $d$ rungs
+per ladder therefore requires $nd$ to be an integer multiple of the charge
+period; the full spin texture must close as well. More generally every
+ordering wavevector must obey $\vec Q\cdot\vec T=2\pi p$ with integer $p$
+for the actual cell translation, including trellis shear. The observed
+nonstationary $A/B$ charge phase offset near $126$--$131$ degrees alternates
+in sign on repeating $A/B$; it does not establish a continuing diagonal
+stripe. Larger cells or carefully defined translated repetitions could
+test that possibility, but no such runs accompany this analysis.
 
 For a transition cut, plot the full stored target-corrected canonical
 energy per physical site against the varied Hamiltonian parameter, including

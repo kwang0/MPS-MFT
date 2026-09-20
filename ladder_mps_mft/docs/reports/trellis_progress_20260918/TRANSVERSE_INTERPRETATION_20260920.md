@@ -121,7 +121,8 @@ not a new microscopic lattice, removal of frustration, or an improvement of
 interladder quantum entanglement. The two existing finite-cell ansatzes are
 not strictly nested for arbitrary profiles, and both still constrain longer
 transverse patterns. Their current nonconverged endpoints do not certify
-which phase minimizes a common functional.
+which phase minimizes the functional, but their actual trial energies can
+be compared after evaluating both in the same cell, as done below.
 
 The focused discriminating test is to initialize the rectangular cell from
 the actual paired trellis endpoint, let its boundary fields adjust, and test
@@ -133,6 +134,41 @@ whose converged energies decide preference. A strict one-to-two-cell
 variational inequality instead requires an extension with matching repetition
 and boundaries, rather than assuming the current rectangular cell contains
 every finite skew one-ladder state.
+
+## Direct energy comparison in the rectangular cell
+
+Different restrictions do not prohibit comparing specified trial states.
+The September 20 audit evaluates the product of two identical copies of
+each saved paired endpoint in the actual rectangular A/B functional. Stored
+bare-ladder expectation values and correlation matrices suffice: all
+interaction fields are recomputed for that cell. This is an energy
+evaluation, not a new stationary paired solution or MPS optimization.
+
+The two paired-copy energies are -0.518817872689 and -0.518817859078 t/site,
+versus -0.521125816792 and -0.521055560230 for the two saved striped
+endpoints. Reembedding raises each paired energy by only 2.46378e-6 t/site.
+The same-cell stripe advantage is 0.002238-0.002308 t/site, about 900 times
+larger. Target-density corrections are below 8.33e-6 t/site and do not
+change the ordering; the uncorrected canonical gaps are 0.002229-0.002301.
+Residual density differences are small but this tangent correction is not
+an exact particle-number projection or rigorous fixed-density error bound.
+
+Thus a lower-energy striped trial state has been found in a common finite
+functional. Large residuals qualify stationarity and optimality, not the
+existence of this lower trial energy. Nonnesting prevents an automatic
+inequality between separately optimized ansatz families; it does not erase
+the measured comparison. The preferred converged stripe arrangement, a
+possibly distinct optimized paired branch, and larger-cell minima remain
+open. The original accepted=false flags are preserved.
+
+The [numeric audit](same_cell_energy_audit_20260920.toml) records source and
+kernel hashes, original and embedded energy components, density corrections
+and all four pairwise gaps. Recomputed original fields agree exactly and
+energies agree within 1e-12 t/site. Reproduce from the repository root:
+
+```powershell
+julia --startup-file=no --compiled-modules=existing --project=ladder_mps_mft ladder_mps_mft/scripts/audit_trellis_same_cell_energy_20260920.jl
+```
 
 ## Measured A/B charge Fourier sectors
 
@@ -159,6 +195,55 @@ shift. Over the last ten sweeps, the central odd weights span 76.3-88.7%
 and 71.6-85.5%, respectively. Large alternating relaxation persists. These
 are finite, unaccepted textures, not a locked ordering wavevector; OBC
 Fourier components need not be exact translation eigenstates.
+
+## Diagonal stripes and larger transverse cells
+
+The user's bottom-right slide sketch suggests diagonal or oblique
+hole-rich walls separating antiphase magnetic domains. This is a plausible
+competitor, not an orientation established by the two-ladder data. At the
+measured charge harmonic, repeating A/B gives phase changes +theta, -theta,
++theta, -theta. With theta about 126-131 degrees, it does not continue a
+uniform phase advance across successive ladders. Such repetition may
+describe staggered or zigzag wall registration. The special phases 0 and
+pi can close a constant advance in one or two ladders, respectively.
+
+For an ideal bulk texture, write the charge modulation at physical x as
+
+```text
+delta n_m(x) = rho cos(q_x x + m theta),  lambda_c = 2 pi / q_x.
+```
+
+An ordinary rectangular n-ladder cell requires n theta = 2 pi p. If the
+wall shifts by d rungs per ladder, theta = -q_x d, so n d must be an integer
+multiple of lambda_c. Thus n depends on the tilt, not just the longitudinal
+period, and one ladder contains two microscopic rows. The spin texture
+must also close. For a rigidly translated pattern with nominal charge/spin
+periods 16/32 and d=2 rungs per ladder, charge closes after eight ladders
+but the full spin texture requires sixteen, absent an additional spin
+transformation. These are illustrative closure conditions, not inferred
+optimal cell sizes; the present OBC walls are not exactly periodic.
+
+More generally every ordering harmonic must obey Q dot T = 2 pi times an
+integer for the actual cell translation T. This includes the trellis
+half-rung registration and the internal leg/spin basis. A translated or
+"screw" cell can represent some tilted patterns with fewer independent
+ladders by combining a transverse step with a longitudinal shift. The
+existing skew cell already imposes one particular registration; it does
+not explore arbitrary tilts. OBC makes a new translated boundary a kernel
+and endpoint problem, not simply a circular roll of saved arrays.
+
+The next useful distinction is between a preferred A/B registration and
+a stripe that would lower its energy by continuing a phase advance through
+a larger cell. A controlled search over registrations and modest cell
+sizes can identify candidate tilts before committing to a large commensurate
+cell. No larger-cell implementation or campaign is prepared here.
+
+The slide cites Miyazaki, Yanagisawa and Yamaji, JPSJ 73, 1643 (2004).
+Their [primary paper](https://staff.aist.go.jp/t-yanagisawa/activity/JPSJ-Miyazaki04.pdf)
+finds bond-centered diagonal stripes favored over vertical stripes around
+hole doping 1/16 in a square-lattice VMC calculation with U=8 and t'=-0.2.
+The matching doping motivates the hypothesis, but its hopping geometry and
+variational treatment differ from this weakly coupled trellis model.
 
 ## Relation to Bollmark's two-period construction
 

@@ -91,3 +91,15 @@ because the geometries define different Hamiltonians.
 Mixer-dependent recurrences and intermediate iterations remain diagnostic. A periodic branch may enter phase competition only when every phase, recurrence link, density, phase-energy recurrence, and Hamiltonian-consistency gate passes in the unmixed probe. Periods beyond those explicitly mapped to the transverse physics remain candidates rather than automatically accepted solutions.
 
 The implementation restores field-dependent mean-field constants. A field-independent offset from the underlying perturbative derivation, if present, cancels among branches of the same model but would be needed for an absolute comparison between different transverse geometries. This is another reason cross-geometry phase ranking is disabled.
+
+These gates govern reporting of accepted solutions. They do not make a
+nonstationary trial's expectation value undefined. Specified trials may be
+compared under the same functional, normalization and boundary convention
+without assuming that their variational families are nested. Recompute
+interaction contractions for the actual trial and cell; a stale applied
+field generally does not define that trial's energy. The trellis code
+already uses current simultaneous correlations for this purpose. The
+[September 20 audit](reports/trellis_progress_20260918/same_cell_energy_audit_20260920.toml)
+compares saved striped A/B trials to paired copies evaluated in that same
+rectangular cell. It establishes lower trial energies while leaving formal
+acceptance, convergence and global-minimum questions separate.

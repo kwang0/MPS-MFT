@@ -134,3 +134,26 @@ All 38 reviewed jobs now have synced completed-job accounting, totaling
 40.782361 actual node-hours. The source ledger hash and job-level calculations
 are recorded in completion_accounting.json. Coarse square cost remains
 separate. This supersedes September 18 partial coverage, not historical ledgers.
+
+## Same-cell trellis energy and diagonal-stripe interpretation — 20 September 2026
+
+The [energy audit](../reports/trellis_progress_20260918/same_cell_energy_audit_20260920.toml)
+records all four compact-state SHA-256 values and the actual Trellis/Variational
+kernel hashes. It reproduces original measured fields exactly and original
+endpoint energies within 1e-12 t/site, then evaluates paired copies in the
+rectangular cell without MPS optimization. Embedding shifts are 2.46378e-6
+t/site; same-cell striped trials are lower by 0.002238–0.002308. Both
+uncorrected canonical and density-corrected comparisons give this ordering.
+All accepted=false flags and raw histories remain unchanged. This supersedes
+the earlier implication that nonconvergence or nonnested finite cells
+preclude a direct trial-energy comparison; they still qualify a minimum claim.
+
+Section 3.12 and the living methods notes now include this result and the
+conditional charge/spin closure rule for diagonal stripes. The existing
+transverse audit supplies central A/B charge phases 126.08/131.27 degrees.
+Their ABAB repetition does not establish a continuing phase advance.
+Nominal 16/32 periods and d=2 are a commensurability example, not a selected
+physical tilt. No larger-cell runs, new correlation measurements, or
+bibliography changes accompany this interpretation. The linked transverse
+note separately records the primary Miyazaki 2004 paper consulted in response
+to the user's slide; its square-lattice model is not equated to the trellis.

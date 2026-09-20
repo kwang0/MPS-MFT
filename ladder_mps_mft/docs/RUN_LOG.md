@@ -4033,3 +4033,66 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   stripe branch. This separates paired-branch instability from competing
   basins. No code, run controls, original artifacts, acceptance flags,
   accounting, PDFs or submission plans changed; no Perlmutter actions.
+
+## 2026-09-20: direct trellis trial-energy comparison and diagonal-stripe cells
+
+- User challenged whether nonnested finite cells actually preclude comparing
+  striped and paired trial energies, then proposed the diagonal stripe in an
+  attached slide as a candidate requiring more ladders. Baseline: fcd175a.
+  Corrected the earlier overly broad energy qualification: a common-functional
+  expectation value can be compared before stationarity. Acceptance still
+  governs stationary-branch claims; original flags remain false.
+- Added scripts/audit_trellis_same_cell_energy_20260920.jl. It loads the
+  actual array kernels without the DMRG solver, reads saved bare energies
+  and correlations, and duplicates each paired state in the rectangular
+  cell. It recomputes all interaction fields, never copies applied fields
+  into an energy comparison. Common L=64, U=8, V=0, t=t0=1, tau0=tau1=0.1,
+  density=15/16, r_range=4 and |E_p|=0.13251724 were checked across all four.
+- Recomputed original fields agree exactly; canonical/target energies agree
+  within 1e-12 t/site. Paired sources 58468871/58468873 give rectangular
+  target energies -0.518817872689/-0.518817859078. The embedding shift is
+  +2.46378e-6 t/site. Saved striped sources 58468875/58468876 give
+  -0.521125816792/-0.521055560230 in that same cell. The four same-cell
+  target gaps favor the striped trials by 0.002238-0.002308 t/site.
+  Uncorrected canonical gaps favor stripes by 0.002229-0.002301; maximum
+  target-density correction is 8.32448e-6. This correction is not exact
+  number projection, but does not determine the observed ordering.
+- Numeric output is docs/reports/trellis_progress_20260918/
+  same_cell_energy_audit_20260920.toml. Source hashes checked before/after:
+  58468871 b3d204a10eeeced5446f22a7b65ffef8314cf5243e49d8bceae11046a1db7b00;
+  58468873 acbfff6dc8df900310d77499ef380656b82dc92be864e05bae82fe52dc5e71a5;
+  58468875 1b360712c6731f3efda0a68b80faefcc39ebbf0b36001a79819ee877c752e13b;
+  58468876 d9a803de57b3acbb6006ab9328173bd93bf7ccf6d30a1053f07e335057420e8d.
+  The output also records Trellis.jl and Variational.jl SHA-256 values.
+- Local command: Julia 1.12.7 --startup-file=no --compiled-modules=existing
+  --project=ladder_mps_mft ladder_mps_mft/scripts/audit_trellis_same_cell_energy_20260920.jl.
+  Used the installed runtime directly because the WindowsApps alias was
+  inaccessible. Initial Julia script header was changed from a docstring to
+  a block comment after Julia rejected documenting a using statement; the
+  corrected audit completed successfully. No DMRG or unchanged solver tests.
+- Current ABAB phase offsets near 126-131 degrees alternate in sign; they
+  do not establish a continuing tilted stripe. For a rectangular n-ladder
+  cell, a constant charge phase advance obeys n theta=2 pi p. Rigid shifts
+  require n d to close both charge and full spin textures, not only charge.
+  Nominal periods 16/32 with d=2 imply n=16 without a further spin operation;
+  this is a conditional example, not a run recommendation or measured tilt.
+  Actual translations include shear and the leg basis. A properly defined
+  translated cell may test some tilts with fewer independent profiles; OBC
+  prevents treating this as a simple circular array roll.
+- Consulted the primary Miyazaki/Yanagisawa/Yamaji JPSJ 73, 1643 (2004) PDF
+  at https://staff.aist.go.jp/t-yanagisawa/activity/JPSJ-Miyazaki04.pdf.
+  Its U=8, t'=-0.2 square-lattice VMC favors bond-centered diagonal stripes
+  near hole doping 1/16. Recorded as motivation in the transverse note,
+  not a prediction for the different weakly coupled trellis Hamiltonian.
+- Updated the trellis and combined reports, transverse interpretation,
+  method contracts, PROJECT_STATE, ACTIVE, manuscript source/evidence notes
+  and living methods LaTeX. Rebuilt both PDFs using cached Tectonic: methods
+  22 pages; manuscript 37 pages, thirteen figures and 48 cited references.
+  The first methods build required an uncached bold-math font; used ordinary
+  vector accents for the new Q dot T expression, then rebuilt successfully.
+  No undefined references or overfull boxes; existing underfull warnings
+  remain. Visually checked methods pages 20-21 and manuscript pages 28-30.
+  Scratch builds/renders are under output/energy_comparison_20260920.
+- No SCF settings, geometries, original data, acceptance flags, accounting,
+  submissions or measurement controls changed. No Perlmutter connection or
+  scheduler action. Further relaxation and larger-cell tests remain proposals.

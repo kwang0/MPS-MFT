@@ -48,8 +48,12 @@ the Overleaf bundle includes the new figures.
    These are recommendations, not prepared controls or submissions.
    Selective trellis convergence work, potentially modest linear damping,
    remains a separate future decision; its geometric frustration persists.
-4. Rank only accepted, fingerprint-compatible canonical solutions. Retain
-   open-end/cell qualifications on trellis endpoint energy comparisons and
+4. Rank stationary branches only after acceptance and fingerprint checks.
+   The September 20 common-cell evaluation already establishes lower
+   striped trial energies; residuals qualify optimality rather than invalidate
+   that comparison. Larger transverse periods and continuing diagonal-stripe
+   shifts remain possible. Choose cells that close both charge and spin
+   textures for a specified tilt. No such campaign is prepared. Retain
    end-localized spin qualifications near the square boundary.
 5. All 38 reviewed jobs are now accounted: 40.782361 actual node-hours,
    versus 40.068427 solver-only. Reconcile future compute through the existing

@@ -98,12 +98,36 @@ permit relative texture arrangements absent from a single repeated profile;
 different open-end cuts are an additional finite-size distinction. The
 ansatz and relative stripe arrangement matter alongside lattice connectivity.
 
-The two-ladder endpoints lie 0.00224–0.00231 t/site below the one-ladder
-endpoints, as **diagnostic functional values**. Within the two-ladder cell,
-the pairing-seeded endpoint is 7.026e−5 t/site above the stripe-seeded endpoint,
-less than their summed final-ten ranges of 3.445e−4. Large self-consistency
-residuals, different cell fingerprints and finite-OBC embeddings prevent a
-certified cell/phase ranking. These are not converged stripe ground states.
+The **September 20 comparison in the same rectangular cell** removes the
+finite-embedding ambiguity for these trial states. Put two copies of each
+saved paired ladder state into that cell, retain its measured bare-ladder
+energy, and recompute every interaction field with the rectangular kernel.
+No further MPS optimization is needed for this expectation-value comparison.
+
+| Trial state in the rectangular cell | Target-corrected energy (t/site) |
+|---|---:|
+| Two copies of paired endpoint, originally stripe seeded | −0.518817872689 |
+| Two copies of paired endpoint, originally pairing seeded | −0.518817859078 |
+| Saved A/B stripe, originally stripe seeded | −0.521125816792 |
+| Saved A/B stripe, originally pairing seeded | −0.521055560230 |
+
+Embedding changes the paired energy by only **+2.46378e−6 t/site**.
+Both striped trial states remain **0.002238–0.002308 t/site lower** under
+the same finite-cell functional and per-site convention. Residual-density
+corrections are below 8.33e−6 t/site; the uncorrected canonical gaps retain
+the same sign and scale. Thus the observed stripe advantage is not explained
+by the change of finite-cell embedding. Nonstationarity does not invalidate
+an expectation value, and nesting is needed for an automatic inequality
+between optimized variational families, not for comparing specified trials.
+This strengthens the energetic evidence for stripes without certifying an
+optimized phase minimum, stability, or the preferred transverse period.
+All original acceptance flags remain false.
+
+Within the two-ladder cell, the pairing-seeded endpoint is 7.026e−5 t/site
+above the stripe-seeded endpoint, less than their summed final-ten ranges
+of 3.445e−4. That smaller difference does not establish two distinct
+stationary stripe branches. [Reproducible energy audit](same_cell_energy_audit_20260920.toml)
+and [script](../../../scripts/audit_trellis_same_cell_energy_20260920.jl).
 
 The paired one-ladder branch remains a useful reference for future pair–pair
 measurements. Vanishing anomalous order in the two-ladder trajectories does

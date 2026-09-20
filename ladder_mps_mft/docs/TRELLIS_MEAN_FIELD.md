@@ -107,6 +107,16 @@ checkpoint and its SHA-256. The existing branch comparator can rank accepted
 seeds within the same cell fingerprint; comparison across cell ansatzes
 requires explicit per-site normalization and profile/embedding assessment.
 
+Self-consistency is required to call a trial a stationary solution, not to
+evaluate its functional. The September 20
+[same-cell audit](reports/trellis_progress_20260918/same_cell_energy_audit_20260920.toml)
+duplicates each saved paired MPS in the rectangular cell and recomputes its
+interaction fields there. The paired embedding shift is +2.46378e-6 t/site,
+while both saved striped trials remain 0.002238-0.002308 t/site lower.
+This is a common-functional trial comparison, not an accepted-branch ranking
+or proof that the striped endpoints minimize the functional. Nonnested
+ansatz families alone do not prohibit that comparison.
+
 ## Plotting saved MF histories
 
 The Phase 1 plotting adapter reads each trellis ladder's nested fields and

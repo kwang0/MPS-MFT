@@ -1,6 +1,6 @@
 # Current project state
 
-Last locally reviewed: **2026-09-20 — transverse order and spatial-cell interpretation**
+Last locally reviewed: **2026-09-20 — same-cell trellis energy and stripe commensurability**
 
 This is a local, mutable snapshot. Stable rules live in AGENTS.md and the
 method documents; durable history is append-only in RUN_LOG.md. Local
@@ -8,7 +8,7 @@ artifacts establish solver outcomes, not live scheduler state.
 
 ## Repository and workflow
 
-- Branch: `codex/mps-mft-phase0-refactor`; baseline for this update: `13b289d`.
+- Branch: `codex/mps-mft-phase0-refactor`; baseline for this update: `fcd175a`.
 - Root `.claude/` is unrelated and remains untouched.
 - Output/state files are excluded from Git and immutable. Reports, scripts,
   LaTeX/PDF notes and the Overleaf bundle are maintained together.
@@ -57,9 +57,11 @@ unaccepted. The earlier coarse square grid is a separate reference.
   global residuals 0.1845–0.2085 remain large despite passing final inner-DMRG
   windows. Successive field increments nearly reverse (cosines about −0.99995)
   with norm ratio about 0.975: slowly damped alternating relaxation, not an
-  accepted orbit or physical dynamics. A/B are spatial ladders. Diagnostic
-  two-ladder energies are lower, but differing cell constraints/open ends and
-  large residuals prevent a certified ranking. [Trellis report](reports/trellis_progress_20260918/README.md).
+  accepted orbit or physical dynamics. A/B are spatial ladders. A September
+  20 evaluation of paired copies in the same rectangular cell confirms
+  that striped trials are lower by 0.002238–0.002308 t/site; the paired
+  embedding shift is only 2.464e−6. This is a direct trial-energy comparison,
+  not a certified stationary/global phase minimum. [Trellis report](reports/trellis_progress_20260918/README.md).
 
 The [September 20 transverse-sector audit](reports/trellis_progress_20260918/TRANSVERSE_INTERPRETATION_20260920.md)
 finds 79-83% A/B-odd weight in the dominant endpoint charge harmonic after
@@ -83,6 +85,15 @@ perturbations with a stationary stripe branch in the same cell. No such
 test has been prepared or performed, and existing cells are not strictly
 nested for arbitrary finite OBC profiles.
 
+The same-cell energy evaluation above requires no new optimization. It
+removes the embedding ambiguity for these specified trials, while the
+proposed relaxation/stability test remains future work. A diagonal stripe
+with a continuing phase advance is another plausible competitor: A/B
+repetition at the observed 126–131-degree charge offset instead alternates
+the phase advance. A larger rectangular cell must close both charge and
+spin periods under its chosen tilt; its ladder count need not equal the
+longitudinal charge wavelength. No larger-cell runs have been prepared.
+
 The 95%/5% reference mixtures use the legacy stripe at (1,0) and paired
 state at (1.4,−0.4), rebuilt with target couplings. Raw updates and no
 Anderson are retained. Flat energy or RMS cannot certify a stationary
@@ -101,7 +112,7 @@ Square/cubic phase diagrams, full energy grids and physical spin/pairing
 RMS grids remain side by side, preserving all 1982 plotted evaluations
 and square continuation markers. Energy panels keep individual y scales.
 
-Numerical evidence now extends through September 19. The material/trellis
+Numerical evidence now includes the September 20 same-cell energy audit. The material/trellis
 introduction and 48 cited references from September 18 are preserved;
 the literature-search cutoff is unchanged. Living methods notes and the
 literature review's project-evidence section incorporate the final results.
@@ -110,8 +121,8 @@ The Overleaf bundle includes every manuscript figure.
 The September 20 living-methods update distinguishes R composed with itself
 (lambda squared) from the simultaneous spatial-cell Jacobian (even/odd
 eigenvalues plus/minus lambda), and explains leg parity and trellis shear.
-The manuscript and its Overleaf bundle retain the completed September 19
-results; the new detailed interpretation is linked in the trellis report.
+The manuscript and its Overleaf bundle also include the September 20 trial
+energy comparison and the diagonal-stripe commensurability distinction.
 
 ## Correlation measurements: prepared, not new evidence
 

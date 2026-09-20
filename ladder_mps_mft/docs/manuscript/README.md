@@ -2,7 +2,8 @@
 
 Created 15 September 2026. This is an editable manuscript starting point using
 the existing annotated literature review and locally synchronized analyses
-through September 19 (updated from the initial September 13 cutoff).
+through September 19, with a September 20 common-cell trellis energy audit
+(updated from the initial September 13 cutoff).
 
 Final-results update, September 19: the [combined campaign review](../reports/campaign_review_20260918/README.md)
 is now incorporated into the actual LaTeX and rebuilt PDF: complete square
@@ -11,6 +12,12 @@ and matched physical spin/pairing cuts, all four positive-V square starts,
 and all four one-/two-ladder trellis runs. Sections 3.11 and 3.12 now develop
 the square and trellis analyses separately, including magnetic defects,
 spatial-cell dependence, convergence and alternating relaxation.
+
+September 20 clarification: evaluating paired copies in the same rectangular
+cell changes their energy by only 2.464e-6 t/site; the saved striped trials
+remain 0.002238–0.002308 t/site lower. Section 3.12 distinguishes this direct
+trial-energy comparison from a stationary phase ranking and explains how
+diagonal stripes would require charge/spin commensurability across ladders.
 
 The rebuilt draft has 37 pages and 48 cited references. The introduction and
 Section 2.4 now motivate the trellis runs through the chain--ladder materials,
