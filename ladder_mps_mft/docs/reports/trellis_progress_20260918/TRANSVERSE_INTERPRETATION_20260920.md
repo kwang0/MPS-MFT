@@ -85,6 +85,55 @@ rectangular A/B cell repeats after (0,2). At nonzero q these restrictions
 differ. A temporal two-cycle of the skew map therefore need not reproduce
 the rectangular A/B solution.
 
+## Physical meaning of the different outcomes
+
+The relevant freedom is the relative registration of order on adjacent
+ladders. Moving every stripe by the same distance changes its absolute
+position (and can matter at open ends). Moving A relative to B changes which
+charge maxima and spin domains face each other and therefore changes the
+interladder energy even in the bulk. A two-ladder cell tests this physical
+degree of freedom, beyond the original concern about numerical translation
+drift. Cell dependence should have been part of the initial phase-selection
+qualification, before treating one-ladder pairing as a geometry-level result.
+
+For a stationary skew one-ladder harmonic, the physical stripe phase advances
+by q/2 per neighboring ladder; at q=pi/8 this is 11.25 degrees. Independent
+rectangular A/B profiles can choose a different relative phase. The measured
+endpoint charge phases reported below are about 125-131 degrees depending on
+seed/window, and remain nonstationary. They illustrate a different stripe
+arrangement, not a demonstrated optimal phase angle. A skew temporal
+two-cycle still imposes its own repetition and does not remove this distinction.
+
+This restriction affects the competing orders differently. For homogeneous
+bulk pairing, correlations depend on rung separation and commute with
+longitudinal translations. Forward/backward trellis kernels then agree in
+the infinite bulk. A stripe with a nonzero longitudinal wavevector is
+sensitive to their directional shifts. Restricting its transverse alignment
+can therefore disadvantage it relative to uniform pairing. The detailed
+instability also involves the ladder's spin/charge response and normal-bond
+feedback; no susceptibility calculation here proves which channel initiates
+the change. The strong central stripes show the observed difference extends
+into the bulk, although open ends could still select or nucleate that branch.
+
+For phase competition, independent A/B profiles should be part of the minimum
+comparison. This is a better test of possible broken transverse translation,
+not a new microscopic lattice, removal of frustration, or an improvement of
+interladder quantum entanglement. The two existing finite-cell ansatzes are
+not strictly nested for arbitrary profiles, and both still constrain longer
+transverse patterns. Their current nonconverged endpoints do not certify
+which phase minimizes a common functional.
+
+The focused discriminating test is to initialize the rectangular cell from
+the actual paired trellis endpoint, let its boundary fields adjust, and test
+weak relative stripe perturbations. Compare any surviving paired branch
+with a stationary stripe branch in that same cell and energy convention.
+Growth from small perturbations supports local instability of the paired
+branch; decay with a separate stable stripe branch indicates competing basins
+whose converged energies decide preference. A strict one-to-two-cell
+variational inequality instead requires an extension with matching repetition
+and boundaries, rather than assuming the current rectangular cell contains
+every finite skew one-ladder state.
+
 ## Measured A/B charge Fourier sectors
 
 At the dominant charge harmonic q=2 pi (4/64)=pi/8, use

@@ -72,6 +72,17 @@ static A/B order, but that equivalence does not identify these two trellis
 ansatzes. Square runs already used raw updates and allowed periods 1 and 2;
 their paired outcomes are evidence, not a complete transverse stability test.
 
+The physical distinction is relative stripe registration, which changes
+interladder energy, versus translating all ladders together. Uniform bulk
+pairing is compatible with both repetitions more readily than modulated
+stripe order. Independent A/B profiles are therefore a necessary phase
+competition check; the one-ladder paired result is a restricted-cell outcome.
+The focused trellis test is to start the rectangular cell from the actual
+paired trellis endpoint and compare its response to weak relative-stripe
+perturbations with a stationary stripe branch in the same cell. No such
+test has been prepared or performed, and existing cells are not strictly
+nested for arbitrary finite OBC profiles.
+
 The 95%/5% reference mixtures use the legacy stripe at (1,0) and paired
 state at (1.4,−0.4), rebuilt with target couplings. Raw updates and no
 Anderson are retained. Flat energy or RMS cannot certify a stationary

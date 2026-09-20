@@ -4000,3 +4000,36 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
 - No new jobs, GPU port, budget changes, authentication, synchronization,
   scheduler actions or terminal correlation measurements were performed.
   The proposed cell/stability calculations remain future user decisions.
+
+## 2026-09-20: physical interpretation of one- versus two-ladder trellis
+
+- Follow-up asked whether two ladders are more physical and why this was
+  not an initial phase-selection control. Rechecked the implemented kernels
+  and existing geometry/reciprocity tests; no solver tests or simulations
+  were rerun. Baseline commit: 1f08a8d.
+- Clarified the physical variable: relative stripe registration between
+  neighboring ladders changes transverse interaction energy, while a common
+  translation mainly changes absolute position/boundary pinning. The
+  stationary skew one-ladder repetition fixes the former geometrically.
+  It should have been identified as a limitation of the original phase
+  comparison, beyond the initial motivation of numerical translation drift.
+- For a homogeneous infinite-bulk correlation matrix, longitudinal
+  translations commute with that matrix and forward/backward kernels agree.
+  Nonzero-wavevector stripes instead depend on registration. Thus a spatial
+  restriction can bias the competition against stripes relative to uniform
+  pairing. This is a kernel-level interpretation, not a newly measured
+  susceptibility or proof of the mode initiating the observed instability.
+- Independent A/B profiles are a minimum useful phase-selection control.
+  Both cells preserve the microscopic zigzag frustration and use the same
+  product-of-ladder-MPS approximation. Current finite skew/rectangular cells
+  are not strictly nested, so larger cell size alone does not prove a
+  variational ordering of their endpoints. Strong central stripes make the
+  observed difference more than a displaced copy of the paired texture,
+  but boundary-driven selection remains possible.
+- Added a physical-interpretation section to the existing trellis note and
+  a short PROJECT_STATE clarification. Recommended a future same-cell
+  comparison initialized from the actual paired trellis endpoint, followed
+  by weak relative-stripe perturbations and comparison with a stationary
+  stripe branch. This separates paired-branch instability from competing
+  basins. No code, run controls, original artifacts, acceptance flags,
+  accounting, PDFs or submission plans changed; no Perlmutter actions.
