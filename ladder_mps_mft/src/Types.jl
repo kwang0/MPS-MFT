@@ -10,6 +10,8 @@ Base.@kwdef struct ModelSettings
     tau0::Float64 = 0.1
     tau1::Float64 = 0.1
     trellis_cell::Symbol = :one_ladder
+    # Square A/B cells use the unshifted square bonds, not the trellis cell.
+    spatial_cell::Symbol = :one_ladder
     density::Float64 = 0.9375
     mu_initial::Float64 = 0.0
     r_range::Int = 4

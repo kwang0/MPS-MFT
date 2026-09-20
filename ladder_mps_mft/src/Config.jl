@@ -60,6 +60,7 @@ function load_settings(path::AbstractString)
         tau0=Float64(_value(model_raw, "tau0", tp)),
         tau1=Float64(_value(model_raw, "tau1", tp)),
         trellis_cell=Symbol(_value(model_raw, "trellis_cell", "one_ladder")),
+        spatial_cell=Symbol(_value(model_raw, "spatial_cell", "one_ladder")),
         r_range=Int(_value(model_raw, "r_range", 4)),
         geometry=normalize_geometry(_value(model_raw, "geometry", "cubic_frustrated")),
         ep=selection.denominator,
@@ -206,16 +207,21 @@ function validate_settings(settings::ProjectSettings)
     model.tp >= 0 || throw(ArgumentError("tp must be nonnegative"))
     model.ep > 0 || throw(ArgumentError("the selected |E_p| must be positive"))
     normalize_geometry(model.geometry)
+    model.spatial_cell in (:one_ladder, :two_ladder) || throw(ArgumentError("unknown spatial_cell"))
+    model.spatial_cell == :one_ladder || model.geometry == :square ||
+        throw(ArgumentError("spatial_cell=two_ladder currently supports square geometry only"))
     if model.geometry == :trellis
         all(isfinite, (model.tau0, model.tau1)) || throw(ArgumentError("trellis hoppings must be finite"))
         model.trellis_cell in (:one_ladder, :two_ladder) || throw(ArgumentError("unknown trellis_cell"))
+    end
+    if model.geometry == :trellis || model.spatial_cell == :two_ladder
         settings.mixing.method == :linear && !settings.mixing.adaptive &&
             settings.mixing.damping == settings.mixing.minimum_damping == settings.mixing.maximum_damping == 1 ||
-            throw(ArgumentError("the trellis comparison uses simultaneous raw updates"))
+            throw(ArgumentError("spatial cells use simultaneous raw updates"))
         settings.convergence.accepted_periods == [1] || throw(ArgumentError(
-            "trellis spatial cells accept fixed points only; iteration cycles remain diagnostic"))
+            "spatial cells accept fixed points only; iteration cycles remain diagnostic"))
         settings.run.parent_checkpoint === nothing || throw(ArgumentError(
-            "trellis continuation uses resume_checkpoint for the complete spatial cell"))
+            "spatial-cell continuation uses resume_checkpoint for the complete cell"))
     end
     settings.runtime.backend in (:cpu, :gpu) || throw(ArgumentError("runtime.backend must be cpu or gpu"))
     settings.runtime.tensor_scalar_type in (:float32, :float64) || throw(ArgumentError(

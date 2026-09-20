@@ -1,5 +1,13 @@
 # Reciprocal trellis mean field and spatial cells
 
+The shared driver also supports the
+[September 20 square A/B campaign](reports/square_two_ladder_20260920/README.md).
+Its `geometry="square", spatial_cell="two_ladder"` branch applies the
+original square map to the opposite ladder's correlations, without using
+the rectangular trellis tau1=0 limit. Both square origins are zero; A=B
+reproduces the original fields and energy per site exactly. The trellis
+geometry and `trellis_cell` contract below are unchanged.
+
 The September 16 comparison extends the existing real, spin-diagonal,
 second-order approximation with one denominator Delta=|E_p|. It implements
 the two zigzag hoppings discussed in the trellis conversation. It is not a

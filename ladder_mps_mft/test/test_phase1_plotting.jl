@@ -4,12 +4,13 @@ ENV["MPLBACKEND"] = "Agg"
 using Test
 include(joinpath(@__DIR__, "..", "plot_phase1_mf_observables.jl"))
 
-function plotting_fixture(path; members=nothing, values=[1.0], parent="")
+function plotting_fixture(path; members=nothing, values=[1.0], parent="", geometry=members === nothing ? "square" : "trellis")
     h5open(path, "w") do f
         f["model/L"] = 8
         f["model/r_range"] = 2
-        f["model/transverse_geometry"] = members === nothing ? "square" : "trellis"
+        f["model/transverse_geometry"] = geometry
         f["model/trellis_cell"] = members === nothing ? "" : length(members) == 1 ? "one_ladder" : "two_ladder"
+        f["model/spatial_cell"] = geometry == "square" && members !== nothing ? "two_ladder" : "one_ladder"
         f["provenance/parent_checkpoint"] = parent
         f["status"] = "maximum_iterations"
         f["accepted"] = false
@@ -39,8 +40,10 @@ end
         square = plotting_fixture(joinpath(dir,"square.h5"); values=[2.0])
         one = plotting_fixture(joinpath(dir,"one.h5"); members=["A"])
         two = plotting_fixture(joinpath(dir,"two.h5"); members=["A","B"], values=[1.0,7.0])
+        square_two = plotting_fixture(joinpath(dir,"square_two.h5"); members=["A","B"], values=[3.0,9.0],geometry="square")
         for (path, ladder, value) in ((square,nothing,2.0), (one,nothing,1.0),
-                                     (two,:A,1.0), (two,:B,7.0), (two,"b",7.0))
+                                     (two,:A,1.0), (two,:B,7.0), (two,"b",7.0),
+                                     (square_two,:A,3.0), (square_two,:B,9.0))
             @test all(phase1_seed_fields(path; ladder).alpha .== value)
             @test all(_p1_snapshot_fields(path,:restart; ladder).alpha .== value+3)
             history = _p1_complete_history(path,:measured; ladder)
@@ -62,6 +65,7 @@ end
             @test all(collect(fig.axes[1].lines[1].get_ydata()) .== 2(value+3))
             if path != square
                 @test occursin("ladder=$(uppercase(String(something(ladder,:A))))", String(fig._suptitle.get_text()))
+                @test occursin("cell=two_ladder", String(fig._suptitle.get_text())) || path == one
             end
             PyPlot.close(fig)
             seedfig = plot_phase1_seed_profiles(path; ladder)

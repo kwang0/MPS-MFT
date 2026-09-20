@@ -26,8 +26,8 @@ end
 function _diagnostic_samples(file)
     accepted = Bool(read(file, "accepted"))
     period = Int(read(file, "fundamental_period"))
-    trellis = String(read(file, "artifact_kind")) == "trellis_mps_mft_state"
-    if trellis
+    spatial = String(read(file, "artifact_kind")) in ("trellis_mps_mft_state", "spatial_cell_mps_mft_state")
+    if spatial
         names = sort!(String.(collect(keys(file["ladders"]))))
         length(names) == Int(read(file, "spatial_ladders")) || error("incomplete spatial cell")
         names in (["A"], ["A", "B"]) || error("unknown spatial ladder names")
@@ -86,7 +86,7 @@ function measure_state_diagnostics(state_path::AbstractString;
                 "solution_kind" => String(read(file, "solution_kind")),
                 "period" => Int(read(file, "fundamental_period")),
                 "phase" => sample.phase, "spatial_ladder" => sample.ladder,
-                "spatial_ladders" => model.geometry == :trellis ? length(samples) : 1,
+                "spatial_ladders" => isempty(sample.ladder) ? 1 : length(samples),
                 "iteration" => sample.iteration, "source_mps_path" => sample.psi_path,
                 "sample_kind" => !accepted ? "terminal_snapshot" :
                     isempty(sample.ladder) ? "accepted_solution_phase" : "accepted_spatial_ladder",

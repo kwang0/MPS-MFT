@@ -4096,3 +4096,105 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
 - No SCF settings, geometries, original data, acceptance flags, accounting,
   submissions or measurement controls changed. No Perlmutter connection or
   scheduler action. Further relaxation and larger-cell tests remain proposals.
+
+## 2026-09-20: square two-ladder, two-seed comparison prepared
+
+- User authorized the analogous unfrustrated square A/B test at (t0,V)=
+  (1.4,-0.4) and (1.4,-0.2). Baseline commit: 5a590f3. Prepared exactly four
+  jobs; no scheduler submission, transfer, authentication or allocation
+  action was performed locally. Existing scientific states and accounting
+  ledgers remain unchanged. Unrelated root .claude/ remains untouched.
+- Added model.spatial_cell=two_ladder for square and reused the simultaneous
+  spatial-cell driver. The new kernel applies the existing square map to
+  the opposite ladder: F_A=K(C_B), F_B=K(C_A). Opposite legs meet at equal
+  rungs, with no diagonal hopping, shear, wrapped physical bond or extra
+  coordination factor. A=B reproduces the original finite-OBC fields and
+  canonical energy per site. Each independent two-leg MPS has L=64 and
+  its own density target 15/16; mean charge transfer between ladders and
+  quantum entanglement between the two MPSs are outside this approximation.
+- Seeds retain the established 95%/5% stripe/pairing mixtures. A uses the
+  original stripe reference; B uses an eight-rung displacement of that
+  reference, half the nominal charge wavelength. The pairing template is
+  unshifted and has the same sign in A/B. Initial fields are rebuilt with
+  target couplings from the opposite member's template. Fresh MPSs use
+  random/product-state seed 1404. This explicitly excites A/B asymmetry;
+  identical square templates would remain in an invariant A=B subspace.
+- The initial stripe displacement permutes both correlation-matrix indices
+  and density vectors cyclically. This preserves number and matrix symmetry
+  but relocates the finite-reference end structure too. It is only a seed
+  operation, not a translated boundary condition or physical periodic bond.
+  Eight rungs is one trial registration, not a measured optimum or pinning
+  constraint. All charge, spin, pairing and exchange fields remain free.
+- Reference bundle SHA-256:
+  e01a1ea7d6be813110870d26377db0df529d1584816c946af78584e1e1fbddc1.
+  Stripe source: ae6a3bfe76ca8f06f2396fd731b18bca8539e0b7ee68df016cc9156fdceeb074.
+  Pairing source: 8a1cf2d64d2fbe0eb59521192b829cab43e19a4d7ac026519ea847f6ac0778b8.
+  Both target E_p values are exact registry entries: -0.24962435880865996
+  and -0.2068002629740704 respectively. No interpolation/new bare-ladder run.
+  Registry SHA: 2209bd2ca3c1ad02c0e542d1a9d63ecf90fdfa49120ad9cc3af599a5b4bc1f0e.
+- Controls: chi=200, t=1, U=8, tp=0.1, r_range=4, float64 dense GPU MPSs;
+  60 maximum cell sweeps, minimum 40, ten stable records; simultaneous raw
+  updates, damping=1, no Anderson and fixed-point acceptance only. Retained
+  field tolerances 1e-7/1e-4, channel noise floor 5e-7, energy window
+  1e-7 t/site, inner-DMRG 1e-7 total and density tolerance 1e-5 per ladder.
+  At most 480 density-targeted ladder solves across the four jobs; chemical
+  potential targeting can require multiple inner DMRG solves per ladder.
+- Each sweep saves separate A/B full histories and current simultaneous
+  variational energies, with 4L cell normalization and established double
+  counting. New artifacts use spatial_cell_mps_mft_state. Diagnostics,
+  compact mirrors, full-cell resume and history plots handle both members;
+  historical one-ladder/trellis model fingerprints retain their definitions.
+  The saved-model reader in the prior energy-audit script now defaults
+  missing fields so the added model setting does not break old inputs.
+- Complete intraladder terminal measurements are enabled for accepted and
+  maximum-iteration states on both A/B: raw/connected pair, charge, spin,
+  density-spin, single-particle/anomalous, double occupancy and entanglement.
+  The existing measurement implementation uses CPU and writes sidecars after
+  the immutable full state. Solver time-limit exits remain eligible for
+  explicit offline measurement but do not automatically start this pass.
+- Launcher v1.24.0 adds prepare-square-two-ladder and a four-branch contract.
+  slurm/submit_square_two_ladder.sh imports the original anchor run.env,
+  prepares, reconciles and submits through existing project guards when run
+  by the user. It retains shared account/scratch/ledger settings, a single
+  segment and the 400 additional-node-hour cap. New default run ID:
+  20260920_square_two_ladder_two_basin_60. Each job requests one shared GPU,
+  32 logical CPU cores and 16 hours, with an 11.5-hour SCF deadline leaving
+  4.5 hours for two measurement passes. Total reservation ceiling: 16 GPU
+  node-hours; no automatic continuation. Measurement allowance is not a
+  benchmark. Checked current NERSC policy (shared GPU permits up to 48 h;
+  one GPU is a quarter node): https://docs.nersc.gov/jobs/policy/.
+- Local validation, Julia 1.12.7 with --startup-file=no and
+  --compiled-modules=existing --project=ladder_mps_mft:
+  SQUARE_CELL_DMRG_SMOKE=1 test/test_square_two_ladder.jl passed 1107 checks
+  (999 field/energy/boundary checks, 67 preparation/compatibility checks,
+  41 tiny CPU driver/storage/terminal-measurement/resume checks). The tiny
+  DMRG section took 1m43s. Its first provenance lookup encountered Windows
+  git ownership warnings and used the existing unknown-commit fallback;
+  later checks supplied a process-local safe.directory setting.
+- Existing test_trellis.jl with TRELLIS_DMRG_SMOKE=1 plus
+  test_state_diagnostics.jl passed 305 checks: 150 kernel/preparation,
+  57 tiny spatial-driver, 93 complete equal-time measurement and five
+  automatic max-iteration checks. Existing trellis tiny solves took 1m46s;
+  the complete equal-time checks took 1m27s. No GPU timing or scientific
+  convergence is established by these local tests.
+- With MPLBACKEND=Agg and --project=@v1.12, test_phase1_plotting.jl passed
+  119 checks in 38s, including square A/B seeds, full histories and slider
+  values. Python unittest discovery for test_square_two_ladder_launcher.py
+  passed three tests; test_two_basin_next_launchers.py passed six. The local
+  Git Bash executable was used only for syntax/fake-launcher checks, with
+  no Slurm access. No unchanged expensive full solver suite was rerun.
+- Ran scripts/prepare_phase1_square_two_ladder.jl with the new config,
+  data/two_basin_references.h5 and output/square_two_ladder_validation/
+  preview/full directories. It produced four immutable preview configs and
+  seeds, verified matching fingerprints within each point and wrote the
+  seed contract. A following search for a nonexistent root Project.toml
+  returned nonzero after successful preparation; plotting uses the global
+  Julia environment instead. Logs and preview are retained under that
+  ignored validation directory; the temporary test runner was removed.
+- Added the preparation report and portable four-row prepared_branches.csv
+  under docs/reports/square_two_ladder_20260920; updated current state,
+  active plan, architecture, cell method notes, diagnostics and docs index.
+  Existing result reports and LaTeX/PDF results were not changed because
+  this is a run preparation, not new scientific evidence. User handoff:
+  cd "$CFS/m4863/MPS-MFT/ladder_mps_mft"; git pull --ff-only;
+  module load julia; bash slurm/submit_square_two_ladder.sh.

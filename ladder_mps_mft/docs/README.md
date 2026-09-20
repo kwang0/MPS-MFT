@@ -38,6 +38,12 @@ recorded explicitly as user-reported until synchronized evidence is available.
 
 ## Stable scientific references
 
+The [September 20 square A/B preparation](reports/square_two_ladder_20260920/README.md)
+provides four GPU jobs for user submission at (1.4,-0.4) and (1.4,-0.2),
+with 95%/5% competing seeds, 60 raw cell sweeps and full terminal measurements.
+It uses the actual unfrustrated square bonds and reproduces the original
+model at A=B. This is prepared work, not new Perlmutter evidence.
+
 The [terminal correlation measurements and retrospective CPU workflow](DIAGNOSTICS.md)
 enable full raw/connected pair-pair, charge/spin, single-particle and entanglement
 diagnostics, including maximum-iteration endpoints without changing acceptance.

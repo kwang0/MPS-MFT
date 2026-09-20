@@ -43,7 +43,7 @@ operate Slurm.
 | `src/Geometry.jl`, `src/EpRegistry.jl` | Ladder geometry and exact/interpolated pair-binding provenance |
 | `src/MeanField.jl`, `src/Mixing.jl` | MF fields, seed construction, raw-map updates, and fixed-point acceleration |
 | `src/Solver.jl`, `src/Device.jl` | Density-fixed DMRG/SCF execution and CPU/CUDA representation |
-| `src/Trellis.jl` | Reciprocal zigzag maps, one-/two-ladder spatial-cell SCF and complete-cell checkpoints; see `TRELLIS_MEAN_FIELD.md` |
+| `src/Trellis.jl` | Reciprocal zigzag map and shared spatial-cell SCF/checkpoints, including square A/B with unshifted bonds; see `TRELLIS_MEAN_FIELD.md` and the September 20 square-cell contract |
 | `src/Convergence.jl` | Fixed-point, oscillation, slow-mode, and recurrence classification |
 | `src/Variational.jl`, `src/Selection.jl` | Canonical functional and accepted-only same-fingerprint ranking |
 | `src/Provenance.jl`, `src/Storage.jl` | Fingerprints, immutable HDF5, histories, hashes, and full/compact lineage |

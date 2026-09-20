@@ -21,6 +21,7 @@ sha(path) = open(path, "r") do io; bytes2hex(sha256(io)); end
 function model_from_file(file; cell=nothing)
     values = Dict{Symbol,Any}()
     for key in fieldnames(CoreAudit.ModelSettings)
+        haskey(file["model"], string(key)) || continue
         value = read(file["model"], string(key))
         values[key] = fieldtype(CoreAudit.ModelSettings, key) === Symbol ? Symbol(value) : value
     end

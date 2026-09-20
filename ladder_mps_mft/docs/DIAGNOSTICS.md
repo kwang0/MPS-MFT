@@ -9,8 +9,12 @@ Measurements do not change the saved `accepted`, status, solution kind or
 period. Each diagnostic records the original state SHA-256, MPS location,
 iteration, model fingerprint, measurement implementation hash, completion
 marker and measurement time. Unaccepted results are `terminal_snapshot`s.
-Accepted temporal cycles retain separate phase files; trellis A/B retain
+Accepted temporal cycles retain separate phase files; trellis and square A/B retain
 separate **spatial** ladder files. There is no temporal or spatial averaging.
+
+The September 20 square two-ladder campaign enables the same measurements
+for each of its two spatial MPSs. Its new `spatial_cell_mps_mft_state` format
+is supported by the same complete-state and offline measurement readers.
 
 The default equal-time dataset contains:
 

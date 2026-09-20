@@ -37,15 +37,15 @@ the Overleaf bundle includes the new figures.
 2. The [prepared CPU handoff](../DIAGNOSTICS.md) is unchanged. GPU speed
    remains unbenchmarked; CPU is the existing implementation, not a proven
    performance winner. No new submission or GPU port was requested here.
-3. The [transverse-order audit](../reports/trellis_progress_20260918/TRANSVERSE_INTERPRETATION_20260920.md)
-   motivates a targeted square A/B test at (1.4,-0.2) and (1.4,-0.4), with
-   paired/translated-stripe starts and explicit A/B perturbations. Leg-odd
-   charge is an independent allowed control. First verify the spatial map's
-   A=B reduction and per-site energy against the actual square bonds; do not
-   substitute the rectangular trellis tau1=0 switch. Completed square raw
-   runs already allowed two-cycles, so their paired outcomes remain evidence.
-   Cubic cell tests are lower priority for the paired/stripe boundary.
-   These are recommendations, not prepared controls or submissions.
+3. The user authorized the targeted square A/B test at (1.4,-0.2) and
+   (1.4,-0.4). [Four starts are prepared](../reports/square_two_ladder_20260920/README.md):
+   95%/5% references, B stripe displacement eight rungs, chi=200, 60 raw
+   cell sweeps, full terminal measurements, one segment per job. The actual
+   square bonds and A=B fields/energy reduction are checked. Submit with
+   `bash slurm/submit_square_two_ladder.sh` after the user pulls on Perlmutter.
+   Reservation ceiling: 16 node-hours, preserving the existing project cap.
+   Leg-odd charge and further registrations remain possible future controls.
+   Cubic cell tests remain lower priority and are not prepared.
    Selective trellis convergence work, potentially modest linear damping,
    remains a separate future decision; its geometric frustration persists.
 4. Rank stationary branches only after acceptance and fingerprint checks.

@@ -76,6 +76,9 @@ function model_fingerprint(model::ModelSettings)
     if model.geometry == :trellis
         payload *= "|tau0=$(model.tau0)|tau1=$(model.tau1)|trellis_cell=$(model.trellis_cell)|trellis_kernel=1"
     end
+    if model.spatial_cell != :one_ladder
+        payload *= "|spatial_cell=$(model.spatial_cell)|square_cell_kernel=1"
+    end
     return bytes2hex(SHA.sha256(payload))
 end
 

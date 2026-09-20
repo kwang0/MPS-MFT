@@ -462,8 +462,9 @@ end
 function _p1_figure_title(state_file::AbstractString, detail::AbstractString; ladder=nothing)
     metadata, cell_detail = h5open(state_file, "r") do file
         _p1_field_root(file; ladder) # Validate the selection even for custom titles.
+        cell_key = _p1_string(file, "model/transverse_geometry") == "trellis" ? "trellis_cell" : "spatial_cell"
         cell = haskey(file, "ladders") ?
-            " | cell=$(_p1_string(file, "model/trellis_cell")) | ladder=$(uppercase(String(something(ladder, :A))))" : ""
+            " | cell=$(_p1_string(file, "model/$cell_key")) | ladder=$(uppercase(String(something(ladder, :A))))" : ""
         return _p1_metadata(file), cell
     end
     return join((

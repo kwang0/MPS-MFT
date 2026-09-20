@@ -2444,5 +2444,6 @@ end
 
 include("test_raw_basin.jl")
 include("test_trellis.jl")
+include("test_square_two_ladder.jl")
 include("test_state_diagnostics.jl")
 include("test_measurement_backfill.jl")

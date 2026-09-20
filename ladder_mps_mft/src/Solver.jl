@@ -686,7 +686,8 @@ function _print_iteration(record::IterationRecord, diagnostic::ConvergenceDiagno
 end
 
 function run_scf(settings::ProjectSettings)
-    settings.model.geometry == :trellis && return run_trellis_scf(settings)
+    (settings.model.geometry == :trellis || settings.model.spatial_cell == :two_ladder) &&
+        return run_spatial_cell_scf(settings)
     validate_settings(settings)
     ensure_backend!(settings.runtime)
     threading = configure_threading!(settings.runtime)

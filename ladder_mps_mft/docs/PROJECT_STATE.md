@@ -1,6 +1,6 @@
 # Current project state
 
-Last locally reviewed: **2026-09-20 — same-cell trellis energy and stripe commensurability**
+Last locally reviewed: **2026-09-20 — square A/B campaign prepared for submission**
 
 This is a local, mutable snapshot. Stable rules live in AGENTS.md and the
 method documents; durable history is append-only in RUN_LOG.md. Local
@@ -8,7 +8,7 @@ artifacts establish solver outcomes, not live scheduler state.
 
 ## Repository and workflow
 
-- Branch: `codex/mps-mft-phase0-refactor`; baseline for this update: `fcd175a`.
+- Branch: `codex/mps-mft-phase0-refactor`; baseline for this update: `5a590f3`.
 - Root `.claude/` is unrelated and remains untouched.
 - Output/state files are excluded from Git and immutable. Reports, scripts,
   LaTeX/PDF notes and the Overleaf bundle are maintained together.
@@ -20,6 +20,17 @@ artifacts establish solver outcomes, not live scheduler state.
   trees and each campaign's original controls/fingerprints.
 
 ## Current scientific evidence
+
+**New prepared work, not results:** the user authorized two-seed square A/B
+runs at (1.4,-0.4) and (1.4,-0.2). The
+[four-job preparation](reports/square_two_ladder_20260920/README.md) uses
+unshifted square bonds, 95%/5% reference mixtures with B's stripe component
+displaced eight rungs, chi=200, 60 raw cell sweeps (minimum 40), and full
+terminal measurements. A=B field and per-site energy reduction is verified.
+Each job has one GPU, a 16-hour ceiling and an 11.5-hour SCF deadline;
+the total reservation ceiling is 16 node-hours with no automatic extension.
+Local tiny CPU, plotting and fake-launcher checks pass; no Perlmutter job
+has been submitted here and no production outcome is claimed.
 
 The [combined campaign review](reports/campaign_review_20260918/README.md),
 updated September 19, covers **38 completed runs, 2280 cell updates and
@@ -92,7 +103,7 @@ with a continuing phase advance is another plausible competitor: A/B
 repetition at the observed 126–131-degree charge offset instead alternates
 the phase advance. A larger rectangular cell must close both charge and
 spin periods under its chosen tilt; its ladder count need not equal the
-longitudinal charge wavelength. No larger-cell runs have been prepared.
+longitudinal charge wavelength. No larger trellis cells have been prepared.
 
 The 95%/5% reference mixtures use the legacy stripe at (1,0) and paired
 state at (1.4,−0.4), rebuilt with target couplings. Raw updates and no
@@ -168,17 +179,15 @@ interpretation awaits user-run measurement and sync; do not resubmit the
 completed SCF campaigns. The split square points and alternating two-ladder
 trellis are candidates for a future selective convergence/stability decision.
 Modest linear damping could test the negative trellis iteration mode, but
-no controls or follow-up jobs have been prepared in this analysis.
+no trellis convergence follow-up jobs have been prepared in this analysis.
 
-Prioritize a targeted square A/B comparison at (1.4,-0.2) and (1.4,-0.4),
-using paired and translated-stripe starts with explicit transverse
-perturbations. The square spatial map must reproduce the existing map and
-per-site energy when A=B. The current rectangular trellis tau1=0 switch is
-not a substitute for that bond-level check. Cubic transverse-registration
-tests are useful but lower priority for the paired/stripe boundary. These
-are recommendations, not new run preparations or submissions.
+Next, the user can pull the current branch and run
+`bash slurm/submit_square_two_ladder.sh` from the documented Perlmutter
+checkout. The wrapper reuses shared accounting and prepares exactly the
+four approved square A/B starts. Cubic cell tests and larger transverse
+periods remain recommendations, not prepared campaigns.
 
-All analysis is local and read-only with respect to simulations. Validation
-checks hashes, physical profiles, full histories, canonical normalization,
-gate windows and accounting, plus figure/PDF rendering and Overleaf paths.
-No new DMRG calculation or expensive full test suite is needed for this update.
+Archived scientific states and ledgers remain read-only. The implementation
+was checked locally on tiny CPU ladders, including terminal measurements
+and resume, with separate plotting and launcher checks. No production-size
+DMRG run, GPU timing, transfer or scheduler action was performed locally.
