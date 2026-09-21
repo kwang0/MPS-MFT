@@ -55,6 +55,15 @@ base template before submission. Already queued source checkouts are unchanged.
 
 ### User-run Perlmutter backfill
 
+**September 21 recovery:** the submitted `20260918_latest_correlations`
+campaign's 56 jobs all failed at shell startup before measurements. Use the
+[dedicated retry handoff](reports/correlation_retry_20260921/README.md) after
+synchronizing the corrected launcher. It preserves the failed campaign and
+submits the same 56 branches under `20260921_latest_correlations_retry1`.
+Repeating the original submit command skips the already recorded failed jobs.
+The new square A/B campaign is excluded; the user reports two of its jobs
+still ongoing. The instructions below describe the original/general workflow.
+
 After the final trellis run and its ordinary compact export finish, run on
 **Perlmutter** (Codex does not run these commands):
 

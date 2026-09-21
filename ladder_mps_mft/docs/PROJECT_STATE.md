@@ -1,6 +1,6 @@
 # Current project state
 
-Last locally reviewed: **2026-09-21 — first square A/B endpoint compared**
+Last locally reviewed: **2026-09-21 — correlation backfill retry prepared**
 
 This is a local, mutable snapshot. Stable rules live in AGENTS.md and the
 method documents; durable history is append-only in RUN_LOG.md. Local
@@ -41,6 +41,9 @@ Each job has one GPU, a 16-hour ceiling and an 11.5-hour SCF deadline;
 the total reservation ceiling is 16 node-hours with no automatic extension.
 The preparation passed tiny CPU, plotting and fake-launcher checks.
 Submission and synchronization were user-managed; no scheduler access here.
+The user's latest September 21 update reports **two of the new square A/B
+runs still ongoing**. Their identities/live status are not independently
+verified here. The measurement retry below excludes this entire campaign.
 
 The [combined campaign review](reports/campaign_review_20260918/README.md),
 updated September 19, covers **38 completed runs, 2280 cell updates and
@@ -145,7 +148,7 @@ eigenvalues plus/minus lambda), and explains leg parity and trellis shear.
 The manuscript and its Overleaf bundle also include the September 20 trial
 energy comparison and the diagonal-stripe commensurability distinction.
 
-## Correlation measurements: prepared, not new evidence
+## Correlation measurements: startup failure and prepared retry
 
 Full equal-time raw/connected pair–pair, charge/spin, density-spin,
 single-particle/anomalous, double-occupancy and entanglement measurements
@@ -154,16 +157,36 @@ Archived status and convergence flags remain unchanged. Retrospective
 measurement covers 56 latest branches / 58 spatial MPSs, with the two
 old square V=0 endpoints superseded by their continuations.
 
-All previously missing terminal states are present in this sync. This is
-not a fresh full-MPS/backfill preflight: full scratch availability and hashes
-must be checked by the user-run workflow. No new campaign pair–pair
-measurement was analyzed here. Anomalous pairing disappearing does not
-determine the surviving connected pair correlations.
+The user submitted `20260918_latest_correlations`. Its synchronized manifest
+contains 56 branches / 58 spatial MPSs, and jobs.tsv records all 56 jobs.
+All 56 synchronized logs show the same startup failure at shell line 5:
+`/var/spool/slurmd/job.../phase1_gpu.sh: No such file or directory`.
+The worker resolves its sibling launcher relative to Slurm's spooled script
+instead of the saved source directory and exits before Julia measurements.
+There is no local results directory, diagnostic HDF5 file or measurement
+receipt for this campaign: coverage is 0/56 branches and 0/58 spatial MPSs.
+This is synchronized failure evidence, not a live scheduler/accounting check.
 
-The [existing CPU backfill handoff](DIAGNOSTICS.md#user-run-perlmutter-backfill)
-has an 8.15625-node-hour requested ceiling. The user asked whether GPU would
-be faster: CPU was chosen because it is the existing measurement path,
-not from a CPU/GPU benchmark. No GPU port or new submission is implied.
+Both complete diagnostic sidecars for the new square A/B pairing endpoint
+at (1.4,-0.4) remain available from its separate automatic measurement pass.
+The failed backfill does not alter any SCF state or acceptance flag. Full
+scratch availability still needs user-run verification before recovery.
+Anomalous pairing disappearing does not determine connected pair correlations.
+
+The user authorized correction and preparation for resubmission. The
+[retry handoff](reports/correlation_retry_20260921/README.md) uses
+`slurm/retry_latest_correlations.sh plan|submit` and new run ID
+`20260921_latest_correlations_retry1`. Worker startup now resolves the frozen
+run directory before importing submission helpers. The retry preserves the
+old source/jobs/logs and requires the new manifest to match the old exactly.
+Only the failed measurement campaign is reconciled; every parent job must
+have terminal failure accounting before submission. Shared project caps and
+other campaigns' reservations remain in force. No measurement code changed.
+
+The retry retains the 8.15625 CPU-node-hour requested ceiling and 9-node-hour
+measurement cap. CPU remains the existing implementation, not a benchmarked
+performance winner. Submission, source transfer, full scratch preflight and
+live accounting remain user-run. No retry job has been submitted by Codex.
 
 ## Accounting from synchronized evidence
 
@@ -185,8 +208,14 @@ to these totals. Accounting/solver time are distinct; no ledger was edited.
 ## Next action and boundaries
 
 Review the completed reports and LaTeX/PDF. Retrospective connected-correlation
-comparisons await user-run measurement and sync; the first square A/B
-sidecars are already available. Do not resubmit the completed SCF campaigns.
+comparisons await the user-run measurement retry and sync; the corrected
+launcher and dedicated retry handoff are now prepared and locally checked.
+The first square A/B sidecars are already available. Repeating the original
+`submit` command skips the recorded failed jobs; use the dedicated retry
+wrapper after `git pull --ff-only` on the existing
+`codex/mps-mft-phase0-refactor` Perlmutter checkout. The user requested the
+usual commit/push and git-pull handoff instead of individual file transfers.
+Do not resubmit the completed SCF campaigns.
 The split square points and alternating two-ladder
 trellis are candidates for a future selective convergence/stability decision.
 Modest linear damping could test the negative trellis iteration mode, but
@@ -201,3 +230,6 @@ Archived scientific states and ledgers remain read-only. The implementation
 was checked locally on tiny CPU ladders, including terminal measurements
 and resume, with separate plotting and launcher checks. No production-size
 DMRG run, GPU timing, transfer or scheduler action was performed locally.
+For the retry specifically, nine fake-scheduler tests passed in 177 seconds,
+including the spooled worker; the local compact inventory reports 56/56
+branches and 58 MPSs. No measurement/DMRG suite was rerun for this shell fix.

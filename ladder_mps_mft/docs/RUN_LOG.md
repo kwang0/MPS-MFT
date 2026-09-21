@@ -4262,3 +4262,120 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   index, docs index, PROJECT_STATE and ACTIVE. This is an interim single-point
   readout; no manuscript/methods PDF rebuild or submission changes. Original
   data and flags remain immutable, and unrelated .claude/ remains untouched.
+
+## 2026-09-21: retrospective correlation submission failed before measurement
+
+- User reported submitting the retrospective correlation script and asked
+  whether pair correlations were now available for all data. Inspected the
+  local synchronized output/phase1_diagnostics/20260918_latest_correlations
+  manifest, job records, all logs and output inventory; no remote access.
+- Manifest contains 56 branches / 58 spatial MPSs. jobs.tsv records 56
+  submissions, and all 56 corresponding log files are present. Every log
+  consists of the same startup error (with its own job ID):
+  `/var/spool/slurmd/job.../slurm_script: line 5: /var/spool/slurmd/job.../phase1_gpu.sh: No such file or directory`.
+  Representative jobs: 58586747 (row 1) and 58586805 (row 56).
+- The frozen source/slurm/measure_latest_campaigns.sh sources phase1_gpu.sh
+  relative to BASH_SOURCE[0] before dispatching _run. Slurm executes its
+  spooled copy, so that sibling lookup points into /var/spool/slurmd rather
+  than the saved source directory. Failure precedes Julia/MPS contractions.
+- Local coverage: no results directory, zero diagnostic HDF5 files and zero
+  measurement_receipt.toml files for this campaign: 0/56 branches, 0/58 MPSs.
+  The two complete A/B sidecars from square pairing job 58654275 are separate
+  and remain available. Older diagnostic files do not replace this backfill.
+- Manifest SHA-256:
+  6fab4585b0887a17ac310b0d01349bbde0398992aab32c6f4c05cadfa0fbab0f.
+  jobs.tsv SHA-256:
+  82bd445f16fe441eb7c7465fcbfe4bc911a17d8a9f39d32cfad1e35b8c537972.
+- Validation was a PowerShell inventory and exact error-pattern comparison
+  across all 56 logs, with manifest/job counts and file hashes. No DMRG,
+  correlation contractions, scheduler checks, transfers or accounting edits.
+  This establishes the synced submission's startup failure, not live status
+  or billed cost. Updated PROJECT_STATE and ACTIVE to supersede the earlier
+  prepared/awaiting-sync wording.
+- No launcher code or frozen source was changed in this status-only task.
+  Recovery requires a focused launcher repair and user-managed retry after
+  accounting reconciliation and source checks. The existing submit command
+  skips already recorded jobs; repeating it unchanged cannot retry them.
+
+## 2026-09-21: measurement startup corrected and separate retry handoff prepared
+
+- User authorized correcting the failed jobs and preparing submission; also
+  reported two new square A/B runs still ongoing. That live status is
+  user-reported; identities were not inferred and no scheduler was accessed.
+- Changed slurm/measure_latest_campaigns.sh so its _run worker dispatches
+  from the explicit frozen run-directory argument before importing sibling
+  submission helpers. The Slurm spool copy no longer needs phase1_gpu.sh
+  beside itself. Retained manifest/source hash checks, Julia/BLAS thread
+  controls, srun arguments, source project and measurement worker. No Julia
+  measurement implementation or scientific settings changed.
+- Added slurm/retry_latest_correlations.sh plan|submit. Defaults:
+  parent=20260918_latest_correlations,
+  new=20260921_latest_correlations_retry1. It verifies the parent snapshot,
+  exactly 56 jobs / 58 MPSs, no parent results directory and the known startup
+  failure in every log. Plan reads only. Submit reconciles only the parent
+  measurement campaign and requires terminal failure accounting for all jobs.
+- The existing inventory/preparation machinery builds the new manifest,
+  which must match the parent byte for byte before any sbatch call. The new
+  measurement.env and retry_parent_manifest.sha256 preserve the parent link.
+  New source/log/results/job records are separate; resuming an interrupted
+  retry skips recorded submissions. Old frozen source, manifests and job
+  history remain unchanged. No automatic resubmission of failed retry jobs.
+- CPU resources and ceilings remain: 56 jobs, four Julia threads, eight
+  logical Slurm CPUs, 32 GiB per job, two hours/MPS (four for A/B trellis),
+  8.15625 requested CPU node-hours, nine-node-hour measurement cap and the
+  existing shared 400-additional-node-hour cap. Other campaigns' reservations
+  remain included. The four new square A/B branches are outside this fixed
+  backfill inventory and are not submitted, continued or reconciled here.
+- Local Python 3.13 command:
+  `python -B -m unittest discover -s ladder_mps_mft/test -p test_measurement_launcher.py -v`
+  passed nine tests in 177.046 seconds. Fixtures use the confirmed local
+  Git Bash executable and fake sbatch/sacct/srun/module/Julia commands only.
+  Checks cover spool execution without siblings, worker exit propagation,
+  hash failure before execution, parent immutability, byte-identical retry
+  manifests, duplicate prevention, terminal accounting, changed inventory,
+  recognized failure, existing-output rejection and retained project caps.
+  The fake accounting test queried all 56 parent jobs and never the running
+  square fixture; its reservation remained in the shared ledger.
+- Read-only local inventory command:
+  `julia --startup-file=no --compiled-modules=existing --project=ladder_mps_mft ladder_mps_mft/scripts/measure_latest_campaigns.jl plan ladder_mps_mft/output/phase1_gpu --local`
+  completed with ready_states=56/56 and mps_measurements=58. This checks
+  compact states/configuration provenance, not current full scratch-MPS
+  availability, live accounting or successful scientific measurements.
+- Original manifest/jobs hashes remain respectively
+  6fab4585b0887a17ac310b0d01349bbde0398992aab32c6f4c05cadfa0fbab0f and
+  82bd445f16fe441eb7c7465fcbfe4bc911a17d8a9f39d32cfad1e35b8c537972.
+  Updated measurement launcher SHA-256:
+  6584b07a6fd33939d00629b607a0b7e9cdd90765285ed1e6de1924d731b91ddc.
+  New retry wrapper SHA-256:
+  d357015c221cf9751ffc55f41b2508c668678f8f1194221758683bf0dddf3dd0.
+- Added docs/reports/correlation_retry_20260921/README.md and updated
+  DIAGNOSTICS, PROJECT_STATE and ACTIVE. git diff --check passed. No broad
+  DMRG/measurement suite was rerun for this shell-only repair. No remote
+  access, transfer, real submission, scheduler/accounting operation or
+  modification of original SCF/measurement artifacts was performed.
+- User handoff after synchronizing the two updated/new launchers:
+  `cd "$CFS/m4863/MPS-MFT/ladder_mps_mft"`, `module load julia`,
+  `bash slurm/retry_latest_correlations.sh plan`, then
+  `bash slurm/retry_latest_correlations.sh submit`.
+  Source transfer and every live action remain user-managed. No commit or
+  push was performed in this preparation task; unrelated .claude/ is untouched.
+
+## 2026-09-21: restore the git-pull handoff for the correlation retry
+
+- User explicitly requested committing and pushing the prepared changes so
+  synchronization on Perlmutter is the usual `git pull`. Publication target
+  is the existing origin/codex/mps-mft-phase0-refactor branch at
+  https://github.com/kwang0/MPS-MFT.git. This supersedes the preceding
+  local-only handoff; it does not authorize any Perlmutter connection.
+- Updated the retry README and current-state handoff to start with
+  `cd "$CFS/m4863/MPS-MFT/ladder_mps_mft"` and `git pull --ff-only`, then
+  module load julia and the existing retry plan/submit commands. No manual
+  transfer of individual scripts is needed after the release is pushed.
+- Release scope is the corrected launcher, dedicated retry wrapper, focused
+  launcher tests, recovery README and associated status/log documentation.
+  Unrelated .claude/ remains excluded. Source changes are identical to the
+  nine passing launcher tests; only handoff documentation changed afterward,
+  so no unchanged DMRG or launcher suite is repeated.
+- The user-reported two ongoing square A/B jobs and all frozen campaign
+  artifacts remain outside the retry. Git publication and Perlmutter
+  submission are separate: only the user runs the latter.

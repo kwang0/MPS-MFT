@@ -1,6 +1,26 @@
 #!/bin/bash
 # User-run Perlmutter equal-time measurement backfill. No DMRG or GPU jobs.
 set -euo pipefail
+
+# Slurm runs a spooled copy of this file without its sibling scripts. Dispatch
+# the worker from the explicit frozen run directory before loading helpers.
+if [[ "${1:-}" == _run ]]; then
+  [[ $# == 3 && "$3" =~ ^[1-9][0-9]*$ ]] || {
+    echo "usage: $0 _run RUN_DIRECTORY MANIFEST_INDEX" >&2; exit 1;
+  }
+  directory="$(cd "$2" && pwd)"; index="$3"
+  source "$directory/measurement.env"
+  module load julia
+  export JULIA_NUM_THREADS=4 JULIA_PKG_PRECOMPILE_AUTO=0
+  export OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 OMP_NUM_THREADS=1
+  sha256sum -c "$directory/manifest.sha256" >/dev/null
+  (cd "$directory/source"; sha256sum -c ../source.sha256 >/dev/null)
+  srun --ntasks=1 --cpus-per-task=8 --cpu-bind=cores \
+    "$PHASE1_JULIA" --startup-file=no --project="$directory/source" \
+    "$directory/source/scripts/measure_latest_campaigns.jl" run "$directory/manifest.tsv" "$index"
+  exit 0
+fi
+
 measurement_script="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
 source "$(dirname "$measurement_script")/phase1_gpu.sh"
 DIAGNOSTICS_ROOT="${DIAGNOSTICS_ROOT:-$project_dir/output/phase1_diagnostics}"
@@ -42,6 +62,7 @@ EOF
 
 measurement_submit() {
   local run_id="$1" directory index campaign label config configsha compact compactsha source hash fingerprint status accepted iteration samples
+  local expected_manifest="${DIAGNOSTICS_EXPECTED_MANIFEST:-}"
   validate_new_run_id "$run_id"
   directory="$DIAGNOSTICS_ROOT/$run_id"
   # Mandatory CPU calibration plan is read-only and submits nothing.
@@ -51,6 +72,11 @@ measurement_submit() {
     measurement_plan
     "$PHASE1_JULIA" --startup-file=no --project="$project_dir" \
       "$project_dir/scripts/measure_latest_campaigns.jl" prepare "$DIAGNOSTICS_CAMPAIGN_ROOT" "$directory"
+    if [[ -n "$expected_manifest" ]]; then
+      cmp -s "$expected_manifest" "$directory/manifest.tsv" || die \
+        "retry inventory differs from the original manifest; no jobs submitted; inspect $directory"
+      sha256sum "$expected_manifest" >"$directory/retry_parent_manifest.sha256"
+    fi
     mkdir -p "$directory/logs" "$directory/source"
     cp -a "$project_dir/src" "$project_dir/scripts" "$project_dir/slurm" \
       "$project_dir/Project.toml" "$project_dir/Manifest.toml" "$directory/source/"
@@ -63,10 +89,17 @@ measurement_submit() {
       printf 'PHASE1_BUDGET_ROOT=%q\n' "$budget_root"
       printf 'PHASE1_JULIA=%q\n' "$PHASE1_JULIA"
       printf 'DIAGNOSTICS_TIME_PER_MPS=%q\n' "$DIAGNOSTICS_TIME_PER_MPS"
+      printf 'DIAGNOSTICS_EXPECTED_MANIFEST=%q\n' "$expected_manifest"
     } >"$directory/measurement.env"
   fi
   [[ -f "$directory/measurement.env" ]] || die "incomplete preparation; inspect $directory before retrying"
   source "$directory/measurement.env"
+  [[ -z "$expected_manifest" || "$expected_manifest" == "${DIAGNOSTICS_EXPECTED_MANIFEST:-}" ]] || die \
+    "existing run was not prepared for this retry parent"
+  if [[ -n "${DIAGNOSTICS_EXPECTED_MANIFEST:-}" ]]; then
+    sha256sum -c "$directory/retry_parent_manifest.sha256" >/dev/null
+    cmp -s "$DIAGNOSTICS_EXPECTED_MANIFEST" "$directory/manifest.tsv" || die "retry manifest differs from its parent"
+  fi
   ledger_path="$PHASE1_LEDGER_PATH"
   reconciliation_path="$PHASE1_RECONCILIATION_PATH"
   budget_root="$PHASE1_BUDGET_ROOT"
@@ -120,18 +153,6 @@ case "${1:-plan}" in
     ledger_path="$PHASE1_LEDGER_PATH"; reconciliation_path="$PHASE1_RECONCILIATION_PATH"
     lock_path="${ledger_path}.lock"
     reconcile_ledger "${2:-20260918_latest_correlations}"
-    ;;
-  _run)
-    directory="$2"; index="$3"
-    source "$directory/measurement.env"
-    module load julia
-    export JULIA_NUM_THREADS=4 JULIA_PKG_PRECOMPILE_AUTO=0
-    export OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 OMP_NUM_THREADS=1
-    sha256sum -c "$directory/manifest.sha256" >/dev/null
-    (cd "$directory/source"; sha256sum -c ../source.sha256 >/dev/null)
-    srun --ntasks=1 --cpus-per-task=8 --cpu-bind=cores \
-      "$PHASE1_JULIA" --startup-file=no --project="$directory/source" \
-      "$directory/source/scripts/measure_latest_campaigns.jl" run "$directory/manifest.tsv" "$index"
     ;;
   *) die "usage: bash $0 plan|submit|status|reconcile [RUN_ID]";;
 esac

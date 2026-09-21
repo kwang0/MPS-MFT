@@ -31,14 +31,22 @@ the Overleaf bundle includes the new figures.
 
 1. Full terminal correlations are enabled for future accepted and
    maximum-iteration states. The retrospective workflow covers 56 latest
-   branches / 58 spatial MPSs. All terminal state branches are now synced,
-   but full scratch-MPS preflight remains user-run. Retrospective pair–pair
-   evidence awaits measurement and sync; it is not inferred from anomalous
-   order. Both complete sidecars for the new square A/B pairing state are
+   branches / 58 spatial MPSs. The submitted `20260918_latest_correlations`
+   campaign has 56 recorded jobs; all 56 synced logs fail at shell startup
+   because `phase1_gpu.sh` is sought beside Slurm's temporary script. There
+   are zero local backfill diagnostic files or receipts. Recovery needs a
+   user-run retry after synchronizing the corrected launcher. The authorized
+   [recovery](../reports/correlation_retry_20260921/README.md) uses a separate
+   `20260921_latest_correlations_retry1` run and requires an exact match to
+   the original manifest. It reconciles only the failed measurement jobs,
+   requires all parent jobs to have terminal failure accounting, and retains
+   shared budget limits. No local submission; full scratch-MPS preflight
+   remains user-run. Both complete sidecars for the new square A/B pairing state are
    available and verified, separately from that backfill campaign.
-2. The [prepared CPU handoff](../DIAGNOSTICS.md) is unchanged. GPU speed
+2. The [prepared CPU retry handoff](../reports/correlation_retry_20260921/README.md)
+   retains the 8.15625-node-hour ceiling. GPU speed
    remains unbenchmarked; CPU is the existing implementation, not a proven
-   performance winner. No new submission or GPU port was requested here.
+   performance winner. Retry preparation is authorized; no GPU port is included.
 3. The user authorized the targeted square A/B test at (1.4,-0.2) and
    (1.4,-0.4). [Four starts are prepared](../reports/square_two_ladder_20260920/README.md):
    95%/5% references, B stripe displacement eight rungs, chi=200, 60 raw
@@ -49,6 +57,9 @@ the Overleaf bundle includes the new figures.
    one-ladder paired state. Stripe-seed stdout also reaches fixed_point at
    40; wait for its terminal state and the V=-0.2 results to compare profiles.
    Reservation ceiling: 16 node-hours, preserving the existing project cap.
+   The latest user update reports two new A/B runs still ongoing; identities
+   and live status remain unverified locally. The measurement retry excludes
+   this campaign and preserves its reservations.
    Leg-odd charge and further registrations remain possible future controls.
    Cubic cell tests remain lower priority and are not prepared.
    Selective trellis convergence work, potentially modest linear damping,
