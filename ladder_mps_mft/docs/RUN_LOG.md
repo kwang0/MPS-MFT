@@ -4198,3 +4198,67 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   this is a run preparation, not new scientific evidence. User handoff:
   cd "$CFS/m4863/MPS-MFT/ladder_mps_mft"; git pull --ff-only;
   module load julia; bash slurm/submit_square_two_ladder.sh.
+
+## 2026-09-21: first synced square A/B endpoint reproduces the paired state
+
+- User reported one completed run and requested comparison with the original
+  single-ladder result. The initial sync was on another device; after the
+  user corrected it, the local campaign contained job 58654275's state and
+  two diagnostic sidecars, plus partial stdout for 58654274. Baseline adba8c2.
+  No Perlmutter connection, scheduler action, sync or simulation by Codex.
+- Completed branch: pairing seed, square (1.4,-0.4), chi=200. Saved status
+  fixed_point, accepted=true, period one at 40 cell sweeps / 80 ladder
+  evaluations. Recomputed both members' final ten-record channel, field,
+  slow-mode, density, inner-DMRG, energy and consistency gates: all pass.
+  This is the minimum permitted sweep count, not the 60-sweep cap.
+- Physical leg-pair RMS A/B=0.0352250769/0.0352251722; rung means
+  -0.0532419724/-0.0532421064. Spin RMS falls from 0.00845/0.00804 on the
+  first evaluation to 5.369e-7/2.519e-7, without a resolved late growth.
+  The full-length A-minus-B spin RMS falls from 0.01176 to 3.187e-7;
+  maximum final A/B density and leg-pair differences are 7.31e-6/1.08e-6.
+  Profiles match the existing paired phase, with the same open-end structure.
+- Simultaneous-cell corrected canonical energy is -1.167404800545 t/site,
+  with a final ten-record span of 3.218e-10. Relative to the old pairing
+  and stripe seeds, differences are +7.727e-9/+2.416e-10 t/site. Uncorrected
+  canonical energy is -1.167406636373; the larger +1.118e-6/+2.478e-6 raw
+  differences accompany slightly different numerical densities. Identical
+  physical parameters and E_p, and 256/128-site normalization, were checked.
+  Old 80-step states remain unaccepted under their tighter archived controls;
+  new acceptance does not demonstrate an intrinsically faster larger cell.
+- Stripe-start stdout (58654274) independently reports fixed_point at 40
+  and -1.167404800596 t/site, within 5.1e-11 of the completed seed, then
+  begins measurements. There is no synced stripe terminal artifact or
+  completed-measurement record, so this is log-only energetic corroboration.
+  No V=-0.2 results are synced. No claim of all-seed or all-wavevector
+  stability follows from the first completed paired endpoint.
+- Verified compact/full lineage, config/seed hashes, manifest fingerprints,
+  all raw update links, terminal/history agreement, physical density,
+  direct energy components, target-density correction and cell energy sums.
+  State compact SHA: 5edf0d7de2c959446aeb675c62df87b1b97fd123c6a3cc6dbad9d739c14ee5e8.
+  Full-state SHA: f02014387006d2b0d4f8c21c7b177c7d1415fb908f35012e900ec4ad3c5566de.
+  Config SHA: bdd1c3708acb5412aab488cb1f39618eff11da4b7e6230cf3bd315bd8d2140ec.
+  Seed SHA: 16e34bf339abf7d07707121bd23bfe57908c59242f63e7798a4438502a04dac8.
+- Both full-correlation sidecars are complete at sweep 40, linked to that
+  same full-state hash. Their compact hashes are
+  A: 40a14addf8771cde64ca36cc56a43da4c43aa19ee402db016a8b6e47b167458d;
+  B: 74906a93ad930652688bbbe578e1e2e4f8ec287de827aecba459cee6664a33a0.
+  Checked terminal densities and raw-minus-disconnected identities for
+  charge, spin and the 318-operator singlet-pair matrix. These are intraladder
+  measurements; no matching old full-correlation comparison is claimed.
+- Solver time 16531.96 s; A/B measurement time 5950.30/5964.31 s. Combined
+  recorded work is about 7.90 hours, or 1.9755 shared-GPU node-hours before
+  overhead. No completed-job reconciliation is synced for these job IDs;
+  exact allocation cost remains unavailable and ledgers were not changed.
+- Added scripts/analyze_square_two_ladder_20260921.py, reusing the archived
+  anchor reader. Local Python 3.13 command with -B -X utf8 completes in
+  about three seconds. Initial run exposed the older history key
+  variational_energy rather than canonical_variational_energy; corrected
+  the reader, reran successfully, then added explicit E_p equality checks
+  and reran the affected analysis once. No DMRG or solver suite was needed.
+- Wrote FIRST_RESULT_20260921.md, numerical JSON and one six-panel PNG in
+  docs/reports/square_two_ladder_20260920. Visually checked full histories,
+  legends, labels and overlapping endpoint profiles; residual-spin scale is
+  explicitly 1e-6 and energy uses a labeled symlog axis. Updated the campaign
+  index, docs index, PROJECT_STATE and ACTIVE. This is an interim single-point
+  readout; no manuscript/methods PDF rebuild or submission changes. Original
+  data and flags remain immutable, and unrelated .claude/ remains untouched.

@@ -1,6 +1,6 @@
 # Active plan
 
-Last reviewed: **2026-09-20**
+Last reviewed: **2026-09-21**
 
 ## Completed analysis
 
@@ -32,8 +32,10 @@ the Overleaf bundle includes the new figures.
 1. Full terminal correlations are enabled for future accepted and
    maximum-iteration states. The retrospective workflow covers 56 latest
    branches / 58 spatial MPSs. All terminal state branches are now synced,
-   but full scratch-MPS preflight remains user-run. New pair–pair evidence
-   awaits measurement and sync; it is not inferred from anomalous order.
+   but full scratch-MPS preflight remains user-run. Retrospective pair–pair
+   evidence awaits measurement and sync; it is not inferred from anomalous
+   order. Both complete sidecars for the new square A/B pairing state are
+   available and verified, separately from that backfill campaign.
 2. The [prepared CPU handoff](../DIAGNOSTICS.md) is unchanged. GPU speed
    remains unbenchmarked; CPU is the existing implementation, not a proven
    performance winner. No new submission or GPU port was requested here.
@@ -41,8 +43,11 @@ the Overleaf bundle includes the new figures.
    (1.4,-0.4). [Four starts are prepared](../reports/square_two_ladder_20260920/README.md):
    95%/5% references, B stripe displacement eight rungs, chi=200, 60 raw
    cell sweeps, full terminal measurements, one segment per job. The actual
-   square bonds and A=B fields/energy reduction are checked. Submit with
-   `bash slurm/submit_square_two_ladder.sh` after the user pulls on Perlmutter.
+   square bonds and A=B fields/energy reduction are checked. The campaign
+   is submitted. Its [first result](../reports/square_two_ladder_20260920/FIRST_RESULT_20260921.md),
+   pairing seed at (1.4,-0.4), is accepted at 40 sweeps and reproduces the
+   one-ladder paired state. Stripe-seed stdout also reaches fixed_point at
+   40; wait for its terminal state and the V=-0.2 results to compare profiles.
    Reservation ceiling: 16 node-hours, preserving the existing project cap.
    Leg-odd charge and further registrations remain possible future controls.
    Cubic cell tests remain lower priority and are not prepared.

@@ -1,6 +1,6 @@
 # Current project state
 
-Last locally reviewed: **2026-09-20 — square A/B campaign prepared for submission**
+Last locally reviewed: **2026-09-21 — first square A/B endpoint compared**
 
 This is a local, mutable snapshot. Stable rules live in AGENTS.md and the
 method documents; durable history is append-only in RUN_LOG.md. Local
@@ -8,7 +8,7 @@ artifacts establish solver outcomes, not live scheduler state.
 
 ## Repository and workflow
 
-- Branch: `codex/mps-mft-phase0-refactor`; baseline for this update: `5a590f3`.
+- Branch: `codex/mps-mft-phase0-refactor`; baseline for this update: `adba8c2`.
 - Root `.claude/` is unrelated and remains untouched.
 - Output/state files are excluded from Git and immutable. Reports, scripts,
   LaTeX/PDF notes and the Overleaf bundle are maintained together.
@@ -21,16 +21,26 @@ artifacts establish solver outcomes, not live scheduler state.
 
 ## Current scientific evidence
 
-**New prepared work, not results:** the user authorized two-seed square A/B
-runs at (1.4,-0.4) and (1.4,-0.2). The
+**Square A/B first result:** [job 58654275](reports/square_two_ladder_20260920/FIRST_RESULT_20260921.md),
+pairing seed at (1.4,-0.4), is synced with both complete measurement sidecars.
+It is an accepted fixed point at 40 cell sweeps: physical pair RMS 0.035225
+on both ladders and spin RMS 2.52e-7/5.37e-7, matching the original paired
+state. Corrected energy -1.167404800545 t/site agrees with the two old
+one-ladder endpoints within 7.73e-9. A/B stripe asymmetry decays. The stripe
+seed's synced log (58654274) also reaches fixed_point at 40 with energy
+within 5.1e-11, but its state/measurement files are absent. There is no
+V=-0.2 result yet in this local sync. This supports survival of the paired
+state in this tested cell, without proving general transverse stability.
+
+The user submitted two-seed square A/B runs at (1.4,-0.4) and (1.4,-0.2). The
 [four-job preparation](reports/square_two_ladder_20260920/README.md) uses
 unshifted square bonds, 95%/5% reference mixtures with B's stripe component
 displaced eight rungs, chi=200, 60 raw cell sweeps (minimum 40), and full
 terminal measurements. A=B field and per-site energy reduction is verified.
 Each job has one GPU, a 16-hour ceiling and an 11.5-hour SCF deadline;
 the total reservation ceiling is 16 node-hours with no automatic extension.
-Local tiny CPU, plotting and fake-launcher checks pass; no Perlmutter job
-has been submitted here and no production outcome is claimed.
+The preparation passed tiny CPU, plotting and fake-launcher checks.
+Submission and synchronization were user-managed; no scheduler access here.
 
 The [combined campaign review](reports/campaign_review_20260918/README.md),
 updated September 19, covers **38 completed runs, 2280 cell updates and
@@ -174,18 +184,18 @@ to these totals. Accounting/solver time are distinct; no ledger was edited.
 
 ## Next action and boundaries
 
-Review the completed reports and LaTeX/PDF. New connected-correlation
-interpretation awaits user-run measurement and sync; do not resubmit the
-completed SCF campaigns. The split square points and alternating two-ladder
+Review the completed reports and LaTeX/PDF. Retrospective connected-correlation
+comparisons await user-run measurement and sync; the first square A/B
+sidecars are already available. Do not resubmit the completed SCF campaigns.
+The split square points and alternating two-ladder
 trellis are candidates for a future selective convergence/stability decision.
 Modest linear damping could test the negative trellis iteration mode, but
 no trellis convergence follow-up jobs have been prepared in this analysis.
 
-Next, the user can pull the current branch and run
-`bash slurm/submit_square_two_ladder.sh` from the documented Perlmutter
-checkout. The wrapper reuses shared accounting and prepares exactly the
-four approved square A/B starts. Cubic cell tests and larger transverse
-periods remain recommendations, not prepared campaigns.
+Next, compare the square A/B stripe state and V=-0.2 endpoints when their
+terminal artifacts are synced. The existing four-job campaign is submitted;
+do not submit it again. Cubic cell tests and larger transverse periods remain
+recommendations, not prepared campaigns.
 
 Archived scientific states and ledgers remain read-only. The implementation
 was checked locally on tiny CPU ladders, including terminal measurements

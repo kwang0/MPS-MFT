@@ -4,6 +4,11 @@ Prepared September 20, 2026: four fresh runs, two seed families at each of
 (t0,V)=(1.4,-0.4) and (1.4,-0.2). This is prepared work, not new Perlmutter
 evidence. No job was submitted locally.
 
+September 21: the [first completed result](FIRST_RESULT_20260921.md) is the
+pairing seed at (1.4,-0.4), accepted at 40 sweeps. It reproduces the
+single-ladder paired profiles and corrected energy. The stripe-seed log
+also reaches a fixed point at 40, but its terminal artifacts are not synced.
+
 ## Physical cell and energy
 
 Use `geometry="square", spatial_cell="two_ladder"`. Both ladders have

@@ -1,0 +1,282 @@
+{
+  "completed": {
+    "source": "output/phase1_gpu/20260920_square_two_ladder_two_basin_60/results/square__two_ladder__pairing_eps005_t014_vm04_chi200_raw60/square__two_ladder_pairing_weak_other__square_AB_two_reference_eps005_shift08_raw__none__pairing_eps005_Bshift08/20260921T075209_1767067_242b9c6650c6/state.h5",
+    "compact_sha256": "5edf0d7de2c959446aeb675c62df87b1b97fd123c6a3cc6dbad9d739c14ee5e8",
+    "full_sha256": "f02014387006d2b0d4f8c21c7b177c7d1415fb908f35012e900ec4ad3c5566de",
+    "job_id": "58654275",
+    "status": "fixed_point",
+    "accepted": true,
+    "iterations": 40,
+    "corrected": -1.1674048005450695,
+    "canonical": -1.1674066363726148,
+    "energy_span_last10": 3.217934807508982e-10,
+    "solver_seconds": 16531.963366031647,
+    "model_fingerprint": "242b9c6650c6708e2b949943f22726ffb82a82819ee4648aae78943abf84e54f",
+    "config_sha256": "bdd1c3708acb5412aab488cb1f39618eff11da4b7e6230cf3bd315bd8d2140ec",
+    "seed_sha256": "16e34bf339abf7d07707121bd23bfe57908c59242f63e7798a4438502a04dac8",
+    "ladders": {
+      "A": {
+        "spin_rms": 5.368757207732112e-07,
+        "pair_rms": 0.03522507691053004,
+        "charge_std": 0.0031643857789253093,
+        "leg_mean": 0.035217186835689064,
+        "rung_mean": -0.05324197243901854,
+        "density": 0.9374985929932411,
+        "relative_residual": 8.55569101341091e-06,
+        "absolute_residual": 1.9221471394459669e-07,
+        "spin_rms_first": 0.008449982284714774,
+        "spin_rms_max": 0.008449982284714774,
+        "spin_rms_last10_max": 5.668987553966431e-07,
+        "energy_span_last10": 2.371185470195769e-09,
+        "canonical": -1.1674055498065778,
+        "corrected": -1.1674047798212748,
+        "gates": {
+          "minimum": true,
+          "field": true,
+          "slow": true,
+          "density": true,
+          "inner_dmrg": true,
+          "energy": true,
+          "identity": true,
+          "effective": true
+        },
+        "channels": {
+          "charge_modulation": {
+            "step_max_abs_last10": 1.7578069171249322e-08,
+            "window_abs": 1.8495410493077347e-08,
+            "window_rel": 1.65111727444273e-05,
+            "steps_pass": true,
+            "window_pass": true
+          },
+          "charge_uniform": {
+            "step_max_abs_last10": 3.255327083850207e-09,
+            "window_abs": 4.3493356108488535e-09,
+            "window_rel": 1.736972256427158e-06,
+            "steps_pass": true,
+            "window_pass": true
+          },
+          "exchange_charge": {
+            "step_max_abs_last10": 9.210467208364825e-09,
+            "window_abs": 1.1602323490844668e-08,
+            "window_rel": 7.106004070862401e-07,
+            "steps_pass": true,
+            "window_pass": true
+          },
+          "exchange_spin": {
+            "step_max_abs_last10": 2.544535119427463e-07,
+            "window_abs": 4.0288608366379644e-07,
+            "window_rel": 2.2456940628966584,
+            "steps_pass": true,
+            "window_pass": true
+          },
+          "pairing": {
+            "step_max_abs_last10": 2.3640065864515834e-07,
+            "window_abs": 3.36119069485491e-07,
+            "window_rel": 5.301414496195667e-05,
+            "steps_pass": true,
+            "window_pass": true
+          },
+          "spin": {
+            "step_max_abs_last10": 2.1947304101898636e-07,
+            "window_abs": 3.1951221884408965e-07,
+            "window_rel": 2.179149724696705,
+            "steps_pass": true,
+            "window_pass": true
+          }
+        }
+      },
+      "B": {
+        "spin_rms": 2.519490508622354e-07,
+        "pair_rms": 0.035225172150291514,
+        "charge_std": 0.003164996249393367,
+        "leg_mean": 0.03521727852147079,
+        "rung_mean": -0.053242106381131755,
+        "density": 0.9374946977134012,
+        "relative_residual": 1.8351679097394886e-05,
+        "absolute_residual": 4.6587680414215266e-07,
+        "spin_rms_first": 0.008044013967166499,
+        "spin_rms_max": 0.008044013967166499,
+        "spin_rms_last10_max": 4.2821617273564705e-07,
+        "energy_span_last10": 2.657823072738097e-09,
+        "canonical": -1.1674077229386517,
+        "corrected": -1.1674048212688641,
+        "gates": {
+          "minimum": true,
+          "field": true,
+          "slow": true,
+          "density": true,
+          "inner_dmrg": true,
+          "energy": true,
+          "identity": true,
+          "effective": true
+        },
+        "channels": {
+          "charge_modulation": {
+            "step_max_abs_last10": 3.828309552483464e-08,
+            "window_abs": 3.8283095524400956e-08,
+            "window_rel": 4.6871520387929904e-05,
+            "steps_pass": true,
+            "window_pass": true
+          },
+          "charge_uniform": {
+            "step_max_abs_last10": 1.535874420786204e-08,
+            "window_abs": 1.6351043489667982e-08,
+            "window_rel": 6.530442981098816e-06,
+            "steps_pass": true,
+            "window_pass": true
+          },
+          "exchange_charge": {
+            "step_max_abs_last10": 2.4263842941796288e-08,
+            "window_abs": 2.432262190960044e-08,
+            "window_rel": 2.257030381416978e-06,
+            "steps_pass": true,
+            "window_pass": true
+          },
+          "exchange_spin": {
+            "step_max_abs_last10": 3.9944567893063747e-07,
+            "window_abs": 4.2526817234695246e-07,
+            "window_rel": 1.6064123468186167,
+            "steps_pass": true,
+            "window_pass": true
+          },
+          "pairing": {
+            "step_max_abs_last10": 3.986599960322256e-07,
+            "window_abs": 3.986599960322256e-07,
+            "window_rel": 6.369879988254219e-05,
+            "steps_pass": true,
+            "window_pass": true
+          },
+          "spin": {
+            "step_max_abs_last10": 4.2214976741583934e-07,
+            "window_abs": 4.2214976741583934e-07,
+            "window_rel": 1.8843695500088382,
+            "steps_pass": true,
+            "window_pass": true
+          }
+        }
+      }
+    }
+  },
+  "diagnostics": {
+    "A": {
+      "source": "output/phase1_gpu/20260920_square_two_ladder_two_basin_60/results/square__two_ladder__pairing_eps005_t014_vm04_chi200_raw60/square__two_ladder_pairing_weak_other__square_AB_two_reference_eps005_shift08_raw__none__pairing_eps005_Bshift08/20260921T075209_1767067_242b9c6650c6/diagnostics_ladder_A.h5",
+      "sha256": "40a14addf8771cde64ca36cc56a43da4c43aa19ee402db016a8b6e47b167458d",
+      "complete": true,
+      "seconds": 5950.29531788826,
+      "pair_basis": 318,
+      "pair_channels": [
+        "leg0",
+        "leg1",
+        "onsite0",
+        "onsite1",
+        "rung"
+      ]
+    },
+    "B": {
+      "source": "output/phase1_gpu/20260920_square_two_ladder_two_basin_60/results/square__two_ladder__pairing_eps005_t014_vm04_chi200_raw60/square__two_ladder_pairing_weak_other__square_AB_two_reference_eps005_shift08_raw__none__pairing_eps005_Bshift08/20260921T075209_1767067_242b9c6650c6/diagnostics_ladder_B.h5",
+      "sha256": "74906a93ad930652688bbbe578e1e2e4f8ec287de827aecba459cee6664a33a0",
+      "complete": true,
+      "seconds": 5964.311393976212,
+      "pair_basis": 318,
+      "pair_channels": [
+        "leg0",
+        "leg1",
+        "onsite0",
+        "onsite1",
+        "rung"
+      ]
+    }
+  },
+  "single_ladder": {
+    "pairing": {
+      "source": "output\\phase1_gpu\\20260908_square_two_basin_95_5_80_anchors\\results\\square__pairing_weak_other_t014_vm04_chi200_raw\\square__pairing_weak_other__square_two_reference_correlations_eps005_raw__none__pairing_eps005\\20260910T084630_1156171_e93552440b67\\state.h5",
+      "sha256": "026b622a94291f03684a287c39f8ec7306dda36e160a72da138ef2158d91e90a",
+      "accepted": false,
+      "iterations": 80,
+      "spin_rms": 3.111948076846325e-07,
+      "pair_rms": 0.03522467397739939,
+      "charge_std": 0.003165535921375606,
+      "leg_mean": 0.03521677655097109,
+      "rung_mean": -0.05324131804791833,
+      "canonical": -1.1674077539945797,
+      "corrected": -1.1674048082719386,
+      "new_minus_old_corrected": 7.72686914451981e-09,
+      "new_minus_old_canonical": 1.1176219649744468e-06,
+      "max_profile_difference": {
+        "A": {
+          "charge": 7.010451750000257e-06,
+          "spin": 1.7585835904443403e-06,
+          "leg": 1.693434371848046e-06,
+          "rung": 2.535375940596052e-06
+        },
+        "B": {
+          "charge": 3.3298083915722643e-06,
+          "spin": 9.790373450141443e-07,
+          "leg": 1.4714968162091169e-06,
+          "rung": 2.2356900218276077e-06
+        }
+      }
+    },
+    "stripe": {
+      "source": "output\\phase1_gpu\\20260908_square_two_basin_95_5_80_anchors\\results\\square__stripe_weak_other_t014_vm04_chi200_raw\\square__stripe_weak_other__square_two_reference_correlations_eps005_raw__none__stripe_eps005\\20260909T231851_497480_e93552440b67\\state.h5",
+      "sha256": "641277827094e384dbd6bede51334d20c4e00dd86d83d430a7ec8614af5e5f79",
+      "accepted": false,
+      "iterations": 80,
+      "spin_rms": 4.840511703524233e-07,
+      "pair_rms": 0.035224918659457524,
+      "charge_std": 0.0031659603772972444,
+      "leg_mean": 0.03521702235085526,
+      "rung_mean": -0.05324169402451914,
+      "canonical": -1.1674091140138898,
+      "corrected": -1.1674048007866273,
+      "new_minus_old_corrected": 2.4155788480584306e-10,
+      "new_minus_old_canonical": 2.477641275033804e-06,
+      "max_profile_difference": {
+        "A": {
+          "charge": 1.1303945494312018e-05,
+          "spin": 9.184024445385575e-07,
+          "leg": 1.592305338575517e-06,
+          "rung": 2.3936849608691135e-06
+        },
+        "B": {
+          "charge": 5.090545148078718e-06,
+          "spin": 1.3695254908047128e-06,
+          "leg": 1.1976582463615881e-06,
+          "rung": 1.8068823992925531e-06
+        }
+      }
+    }
+  },
+  "AB_difference": {
+    "charge": {
+      "max_final": 7.310411592409416e-06,
+      "rms_first": 0.00035426402573866334,
+      "rms_final": 4.1248193195378034e-06
+    },
+    "spin": {
+      "max_final": 1.2581684338541788e-06,
+      "rms_first": 0.011762614579170399,
+      "rms_final": 3.186760574308116e-07
+    },
+    "leg": {
+      "max_final": 1.0784944496494697e-06,
+      "rms_first": 5.740432019435094e-05,
+      "rms_final": 4.1358036610055645e-07
+    },
+    "rung": {
+      "max_final": 1.558735140225198e-06,
+      "rms_first": 8.649059923578699e-05,
+      "rms_final": 6.101348205419731e-07
+    }
+  },
+  "stripe_log_only": {
+    "source": "output/phase1_gpu/20260920_square_two_ladder_two_basin_60/logs/square__two_ladder__stripe_eps005_t014_vm04_chi200_raw60.s1-58654274.out",
+    "sha256": "bfe46051c4c0e4fccef216a13e7120d59cd1a2376fc747d05f47236e5b8fc378",
+    "iterations": 40,
+    "corrected": -1.167404800596,
+    "status": "fixed_point",
+    "state_available": false,
+    "limitation": "Synced stdout reaches fixed_point and begins measurements; no synced terminal state or completed measurement evidence."
+  },
+  "methods": "Physical spin: leg-odd Sz, rungs 6-59; pair: symmetrized nearest-neighbor leg anomalous expectation, bonds 6-58. Cell energy /256; single ladder /128. Same model at A=B, distinct acceptance controls; no accepted-branch energy ranking."
+}
