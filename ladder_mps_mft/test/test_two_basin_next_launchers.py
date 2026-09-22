@@ -53,10 +53,53 @@ full_run_directory_from_control() { printf '%s/full\\n' "$1"; }
         for name in ('phase1_gpu.sh', 'two_basin_submission_environment.sh',
                      'submit_cubic_unfrustrated_two_basin.sh', 'submit_square_two_basin_finish.sh',
                      'submit_square_two_basin_fine_cuts.sh', 'submit_square_positive_v.sh', 'submit_trellis_comparison.sh',
-                     'submit_trellis_vm1_comparison.sh'):
+                     'submit_trellis_vm1_comparison.sh', 'submit_square_tp_scan.sh'):
             result = subprocess.run([BASH, '-n', (ROOT / 'slurm' / name).as_posix()],
                                     capture_output=True, text=True)
             self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_scan_guard_and_trellis_version_compatibility(self):
+        source = (ROOT / 'slurm/phase1_gpu.sh').read_text()
+        start = source.index('validate_initialized_run() {')
+        function = source[start:source.index('\n}\n', start) + 3]
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            script = root / 'validate.sh'
+            script.write_text('''#!/bin/bash
+set -euo pipefail
+export PATH="/usr/bin:$PATH"
+PHASE1_SCRIPT_VERSION=1.25.0
+PHASE1_RUN_SCRIPT_VERSION="$2"
+die() { echo "error: $*" >&2; exit 1; }
+full_run_directory_from_control() { printf '%s/full\\n' "$1"; }
+''' + function + '\nvalidate_initialized_run "$1"\n', newline='\n')
+            cases = [('square_tp_scan', '1.25.0', 8)] + [
+                ('trellis_comparison', version, 4) for version in ('1.23.0','1.24.0','1.25.0')]
+            for kind, version, count in cases:
+                with self.subTest(kind=kind, version=version):
+                    run = root / (kind + version)
+                    (run/'configs').mkdir(parents=True)
+                    (run/'full/results').mkdir(parents=True)
+                    for name in ('run.env','jobs.tsv','gpu-Manifest.toml'):
+                        (run/name).write_text('')
+                    (run/'gpu-Manifest.toml.sha256').write_text(
+                        hashlib.sha256(b'').hexdigest()+'  '+(run/'gpu-Manifest.toml').as_posix()+'\n', newline='\n')
+                    (run/'campaign_kind.txt').write_text(kind+'\n', newline='\n')
+                    (run/'branch_count.txt').write_text(str(count)+'\n', newline='\n')
+                    (run/'manifest.tsv').write_text('label\tconfig\n'+''.join(
+                        f'branch{i}\tunused\n' for i in range(count)), newline='\n')
+                    for i in range(count):
+                        (run/f'configs/branch{i}.segment-001.toml').write_text('')
+                    contract = run/'seed_contract.toml'
+                    contract.write_text(f'branches = {count}\nstage = "tp_scan"\ninterpolated_ep = false\n', newline='\n')
+                    command = [BASH,script.as_posix(),run.as_posix(),version]
+                    result = subprocess.run(command,capture_output=True,text=True)
+                    self.assertEqual(result.returncode,0,result.stderr)
+                    if kind == 'square_tp_scan':
+                        contract.write_text('branches = 8\nstage = "tp_scan"\ninterpolated_ep = true\n', newline='\n')
+                        result = subprocess.run(command,capture_output=True,text=True)
+                        self.assertNotEqual(result.returncode,0)
+                        self.assertIn('requires exact E_p',result.stderr)
 
     def test_fine_cuts_isolate_source_and_share_accounting(self):
         self.check_isolated_wrapper('submit_square_two_basin_fine_cuts.sh',
@@ -76,7 +119,15 @@ full_run_directory_from_control() { printf '%s/full\\n' "$1"; }
             '20260916_trellis_two_basin_comparison_60',
             'phase1_gpu_trellis_chi200_raw60.toml')
 
-    def check_isolated_wrapper(self, wrapper, config_var, prepare, run, config):
+    def test_square_tp_scan_isolates_trellis_source_and_latest_pointer(self):
+        self.check_isolated_wrapper('submit_square_tp_scan.sh',
+            'PHASE1_SQUARE_TP_SCAN_CONFIG', 'prepare-square-tp-scan',
+            '20260922_square_t014_tp_scan_95_5_60',
+            'phase1_gpu_square_tp_scan_chi200_raw60.toml',
+            wall='16:00:00', run_subdir='/square_tp_scan')
+
+    def check_isolated_wrapper(self, wrapper, config_var, prepare, run, config,
+                               wall='12:00:00', run_subdir=''):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             original = root / 'original' / 'ladder_mps_mft'
@@ -86,13 +137,16 @@ full_run_directory_from_control() { printf '%s/full\\n' "$1"; }
             environment = '\n'.join(['PHASE1_RUN_SCRIPT_VERSION=1.19.0',
                 'PHASE1_RUN_SCRATCH_DIR=old', 'PHASE1_LEDGER_PATH=shared_ledger',
                 'PHASE1_RECONCILIATION_PATH=shared_reconciliation',
+                'PHASE1_RUN_ROOT=shared_runs', 'PHASE1_SCRATCH_ROOT=shared_scratch',
+                'PHASE1_BUDGET_ROOT=shared_budget', 'PHASE1_ADDITIONAL_NODE_HOUR_CAP=400',
                 'PHASE1_ACCOUNT=existing_account', 'PHASE1_MAX_SEGMENTS=4', ''])
             (anchor/'run.env').write_text(environment)
             receipt=root/'receipt.txt'
             fake='''#!/bin/bash
 set -euo pipefail
 [[ ! -v PHASE1_RUN_SCRIPT_VERSION && ! -v PHASE1_RUN_SCRATCH_DIR ]] || exit 17
-printf '%s|%s|%s|%s|%s|%s|%s|%s\\n' "$*" "$PHASE1_PROJECT_DIR" "$CONFIG_VARIABLE" "$PHASE1_LEDGER_PATH" "$PHASE1_RECONCILIATION_PATH" "$PHASE1_ACCOUNT" "$PHASE1_MAX_SEGMENTS" "$PHASE1_GPU_TIME" >> "$TEST_RECEIPT"
+printf '%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s\\n' "$*" "$PHASE1_PROJECT_DIR" "$CONFIG_VARIABLE" "$PHASE1_LEDGER_PATH" "$PHASE1_RECONCILIATION_PATH" "$PHASE1_ACCOUNT" "$PHASE1_MAX_SEGMENTS" "$PHASE1_GPU_TIME" "$PHASE1_RUN_ROOT" "$PHASE1_SCRATCH_ROOT" "$PHASE1_BUDGET_ROOT" "$PHASE1_ADDITIONAL_NODE_HOUR_CAP" >> "$TEST_RECEIPT"
+if [[ "${TEST_FAIL_PREPARE:-0}" == 1 && "$1" == prepare-* ]]; then exit 9; fi
 '''
             fake=fake.replace('CONFIG_VARIABLE',config_var)
             for project in (original,new):
@@ -116,8 +170,15 @@ printf '%s|%s|%s|%s|%s|%s|%s|%s\\n' "$*" "$PHASE1_PROJECT_DIR" "$CONFIG_VARIABLE
             for call in calls:
                 self.assertTrue(call[1].endswith('/fine cuts/ladder_mps_mft'))
                 self.assertTrue(call[2].endswith('/configs/'+config))
-                self.assertEqual(call[3:],['shared_ledger','shared_reconciliation','existing_account','1','12:00:00'])
+                self.assertEqual(call[3:],['shared_ledger','shared_reconciliation','existing_account','1',wall,
+                    'shared_runs'+run_subdir,'shared_scratch','shared_budget','400'])
             self.assertEqual((anchor/'run.env').read_text(),environment)
+            receipt.write_text('')
+            failed=subprocess.run([BASH,(new/'slurm'/wrapper).as_posix(),'custom_run'],
+                env=dict(env,TEST_FAIL_PREPARE='1'),capture_output=True,text=True)
+            self.assertEqual(failed.returncode,9)
+            self.assertEqual(len(receipt.read_text().splitlines()),1)
+            self.assertIn('custom_run',receipt.read_text())
 
     def test_shared_accounting_current_checkout_and_scope(self):
         cases = (

@@ -1,6 +1,6 @@
 # Current project state
 
-Last locally reviewed: **2026-09-22 — four V=-1 trellis runs prepared**
+Last locally reviewed: **2026-09-22 — eight square t_perp scan starts prepared**
 
 This is a local, mutable snapshot. Stable rules live in AGENTS.md and the
 method documents; durable history is append-only in RUN_LOG.md. Local
@@ -8,7 +8,7 @@ artifacts establish solver outcomes, not live scheduler state.
 
 ## Repository and workflow
 
-- Branch: `codex/mps-mft-phase0-refactor`; baseline for this update: `68af0ed`.
+- Branch: `codex/mps-mft-phase0-refactor`; baseline for this update: `5751e4b`.
 - Root `.claude/` is unrelated and remains untouched.
 - Output/state files are excluded from Git and immutable. Reports, scripts,
   LaTeX/PDF notes and the Overleaf bundle are maintained together.
@@ -184,6 +184,23 @@ continuations. Do not add historical reservations or superseded estimates
 to these totals. Accounting/solver time are distinct; no ledger was edited.
 
 ## Next action and boundaries
+
+The user reports that the trellis runs are ongoing; this supersedes the
+earlier prepared-only snapshot below, without providing live job IDs or
+scheduler/accounting verification. Preserve their source checkout.
+
+The [eight square t_perp starts](reports/square_tp_scan_20260922/README.md)
+are prepared: at t0=1.4, V=0 uses tp=0.06/0.08 and V=-0.2 uses tp=0.12/0.14,
+each with stripe/pairing 95%/5% seeds. The single-ladder square protocol keeps
+L64/chi200/60 raw evaluations, exact E_p and full terminal correlations.
+`slurm/submit_square_tp_scan.sh` requires a separate checkout. Fetch and create
+the detached worktree in the report; do not pull into the trellis checkout.
+The unique campaign and square_tp_scan control subdirectory preserve existing
+outputs and the trellis latest pointer while sharing the original budget
+ledger. Eight 16-hour one-GPU jobs have a 32-node-hour ceiling, one segment
+each. Prepared and validated locally only; no new job IDs or budget entries.
+
+Earlier trellis preparation contract (submission now user-reported above):
 
 User requested the same four trellis starts at V=-1.0. The
 [September 22 preparation](reports/trellis_vm1_20260922/README.md) provides

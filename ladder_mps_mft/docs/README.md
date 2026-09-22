@@ -38,6 +38,12 @@ recorded explicitly as user-reported until synchronized evidence is available.
 
 ## Stable scientific references
 
+The [September 22 square t_perp scan](reports/square_tp_scan_20260922/README.md)
+prepares eight fresh starts at t0=1.4: V=0 with tp=0.06/0.08 and V=-0.2 with
+tp=0.12/0.14, both stripe/pairing seeds at each point. Its separate-worktree
+handoff and isolated control subdirectory preserve the user-reported ongoing
+trellis runs while sharing the existing budget ledger. Prepared locally only.
+
 The [September 22 V=-1 trellis preparation](reports/trellis_vm1_20260922/README.md)
 repeats the original four one-/two-ladder and stripe/pairing starts with
 exact target pair binding and unchanged raw-map controls. Its handoff uses

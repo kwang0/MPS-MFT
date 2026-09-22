@@ -34,10 +34,10 @@ function blend_correlations(primary::CorrelationState, perturbation::Correlation
                       for key in fieldnames(CorrelationState))...)
 end
 
-function validate_raw_basin_contract(settings; geometry=:square, allow_interpolated_ep=false)
+function validate_raw_basin_contract(settings; geometry=:square, allow_interpolated_ep=false, expected_tp=0.1)
     geometry in (:square, :cubic_unfrustrated) || error("unsupported two-basin geometry")
     settings.model.geometry == geometry && settings.model.L == 64 || error("expected $geometry L=64")
-    settings.model.U == 8 && settings.model.tp == 0.1 && settings.model.density == 0.9375 || error("model contract changed")
+    settings.model.U == 8 && settings.model.tp == expected_tp && settings.model.density == 0.9375 || error("model contract changed")
     settings.dmrg.maxdim == 200 || error("expected chi=200")
     settings.mixing.method == :linear && !settings.mixing.adaptive || error("Anderson/adaptive mixing is forbidden")
     settings.mixing.minimum_damping == settings.mixing.damping == settings.mixing.maximum_damping == 1 || error("fallback must be raw F(x)")
@@ -65,8 +65,9 @@ end
 
 function prepare_two_basin_grid(base_path, reference_path, control_run, full_run, run_id;
                                stage="anchors", geometry=:square, coordinates=nothing)
-    stage in ("anchors", "remainder", "grid", "cuts") || error("unknown two-basin stage")
-    (stage == "cuts") == (coordinates !== nothing) || error("custom coordinates require the cuts stage")
+    stage in ("anchors", "remainder", "grid", "cuts", "tp_scan") || error("unknown two-basin stage")
+    custom_points = stage in ("cuts", "tp_scan")
+    custom_points == (coordinates !== nothing) || error("custom coordinates require the cuts or tp_scan stage")
     allow_interpolated_ep = stage == "cuts"
     occursin(r"^[A-Za-z0-9_.-]+$", run_id) || error("unsafe run ID")
     control_run, full_run = abspath(control_run), abspath(full_run)
@@ -85,19 +86,21 @@ function prepare_two_basin_grid(base_path, reference_path, control_run, full_run
     rows = NamedTuple[]
     point_specs = coordinates === nothing ?
         [(;t0,V) for t0 in (1.0,1.2,1.4) for V in (-0.4,-0.2,0.0)] : coordinates
-    length(unique((p.t0,p.V) for p in point_specs)) == length(point_specs) || error("duplicate coordinates")
+    length(unique((p.t0,p.V,stage == "tp_scan" ? p.tp : base.model.tp) for p in point_specs)) == length(point_specs) || error("duplicate coordinates")
     for spec in point_specs
         t0, V = spec.t0, spec.V
         anchor = t0 == 1.4 && V in (-0.4, 0.0)
         stage == "anchors" && !anchor && continue
         stage == "remainder" && anchor && continue
-        point = stage == "cuts" ? spec.point :
+        tp = stage == "tp_scan" ? spec.tp : base.model.tp
+        point = custom_points ? spec.point :
             "t0$(round(Int, t0 * 10))_" * (V == 0 ? "v000" : "vm0$(round(Int, -10V))")
         point_fingerprints = NamedTuple[]
         for family in (:stripe, :pairing)
             label = "$(geometry)__$(family)_weak_other_$(point)_chi200_raw"
             raw = deepcopy(raw_base)
             raw["model"]["t0"] = t0; raw["model"]["V"] = V
+            raw["model"]["tp"] = tp
             raw["model"]["mu_initial"] = V == 0 ? 1.65 : V == -0.2 ? 1.10 : 0.55
             if stage == "cuts"
                 raw["model"]["mu_initial"] = spec.mu_initial
@@ -135,7 +138,7 @@ function prepare_two_basin_grid(base_path, reference_path, control_run, full_run
                     "stripe_source_sha256" => TWO_BASIN_SOURCE_HASHES.stripe,
                     "pairing_source_sha256" => TWO_BASIN_SOURCE_HASHES.pairing,
                     "reference_bundle_sha256" => TWO_BASIN_REFERENCE_SHA,
-                    "target_t0" => t0, "target_V" => V, "target_ep" => model.ep,
+                    "target_t0" => t0, "target_V" => V, "target_tp" => tp, "target_ep" => model.ep,
                     "source_L" => 64, "target_L" => 64, "fresh_mps" => true,
                     "source_geometry" => "square", "target_geometry" => String(geometry),
                     "ep_mode" => String(model.ep_mode),
@@ -150,7 +153,7 @@ function prepare_two_basin_grid(base_path, reference_path, control_run, full_run
             raw["run"]["inherit_from"] = seed_path
             raw["run"]["inherit_sha256"] = seed_sha
             open(config_path, "w") do io; TOML.print(io, raw); end
-            settings = validate_raw_basin_contract(load_settings(config_path); geometry, allow_interpolated_ep)
+            settings = validate_raw_basin_contract(load_settings(config_path); geometry, allow_interpolated_ep, expected_tp=tp)
             readback = read_inherited_fields(seed_path)
             for component in (:alpha, :beta, :mu_cdw)
                 getfield(readback.fields, component) == getfield(fields, component) || error("seed readback mismatch")
@@ -163,8 +166,8 @@ function prepare_two_basin_grid(base_path, reference_path, control_run, full_run
                   ep_source_sha256=LadderMPSMFT.sha256_file(model.ep_source))
             push!(point_fingerprints, fp)
             push!(rows, merge((label=label, config=config_path, config_sha256=LadderMPSMFT.sha256_file(config_path),
-                geometry=String(geometry), t0=t0, V=V, family=String(family), epsilon=TWO_BASIN_EPSILON,
-                cut=stage == "cuts" ? spec.cut : "grid", ep_mode=String(model.ep_mode),
+                geometry=String(geometry), t0=t0, V=V, tp=tp, family=String(family), epsilon=TWO_BASIN_EPSILON,
+                cut=custom_points ? spec.cut : "grid", ep_mode=String(model.ep_mode),
                 ep_signed=model.ep_signed, ep_denominator=model.ep,
                 ep_t0_lower=model.ep_t0_lower, ep_t0_upper=model.ep_t0_upper,
                 ep_V_lower=model.ep_V_lower, ep_V_upper=model.ep_V_upper,

@@ -4628,3 +4628,59 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   `bash slurm/submit_trellis_vm1_comparison.sh` from
   `$CFS/m4863/MPS-MFT/ladder_mps_mft`. The user keeps the source checkout
   fixed while jobs run. The unrelated `.claude/` directory remains untouched.
+
+## 2026-09-22: eight square t_perp starts prepared alongside ongoing trellis
+
+- User requested square t0=1.4 with V=0, tp=0.06/0.08 and V=-0.2,
+  tp=0.12/0.14, each with stripe/pairing seeds: exactly eight fresh runs.
+  The user reports ongoing trellis runs; no current job IDs, accounting or
+  scheduler state have been synchronized for this preparation. Only the user
+  transfers or operates Perlmutter; no authentication, transfer, scheduler
+  action or local budget-ledger update was performed.
+- Added `scripts/prepare_phase1_square_tp_scan.jl`,
+  `configs/phase1_gpu_square_tp_scan_chi200_raw60.toml`, and
+  `slurm/submit_square_tp_scan.sh`. Reused the existing two-reference raw
+  preparation with an explicit tp-scan stage; old campaigns still require
+  tp=0.1 by default. Target tp enters labels, manifests and seed provenance.
+  Exact registry values are E_p=-0.14653773091916378 at V=0 and
+  -0.2068002629740704 at V=-0.2. Registry and reference hashes are pinned;
+  no interpolation or new isolated-ladder calculation is needed.
+- This is the one-ladder square protocol at L64, chi200, U8, n15/16,
+  r_range4, random seed1404, with reciprocal 95%/5% correlation mixtures
+  rebuilt under each target kernel. All eight MPSs start fresh. Retain
+  maximum/minimum/stable MF counts 60/40/10, raw updates, existing tolerances
+  and full terminal correlations. Solver, trellis controls/preparer/wrapper,
+  GPU environment and immutable artifacts are unchanged.
+- Launcher v1.25.0 adds the eight-branch campaign guard and retains prior
+  campaign compatibility. The wrapper refuses the original checkout and
+  reads the original anchor run.env for the shared account, scratch and
+  locked budget/reconciliation ledgers. Run ID is
+  `20260922_square_t014_tp_scan_95_5_60`; controls/logs/stateless results use
+  the inherited run root's `square_tp_scan/` child to preserve the trellis
+  latest_run.txt pointer. The unique run ID separates full scratch results.
+  Each job requests one GPU, 32 logical CPU cores, 16 hours and one segment:
+  32 fractional node-hours maximum reservation, with the existing
+  11.5-hour solver deadline. Shared live budget checks remain in force.
+- Local Julia 1.12.7 with `--startup-file=no --compiled-modules=existing
+  --project=ladder_mps_mft` ran `test/test_square_tp_scan.jl`: 178 assertions
+  passed in 22.3 seconds of test execution (package startup is separate).
+  Checks cover all requested coordinates, exact E_p, fresh lineage, seed
+  hashes/readback, every field's tp-squared scaling, nonzero competing
+  channels, distinct model and matching numerical fingerprints, overwrite
+  refusal and the historical four-anchor preparation at tp=0.1.
+- `C:/Python313/python.exe -B -m unittest discover -s ladder_mps_mft/test
+  -p test_two_basin_next_launchers.py -v` passed eight tests in 5.9 seconds.
+  These use installed Git Bash only for local fake launchers and extracted
+  validation functions, never Slurm. They verify source/latest-pointer
+  isolation, shared budget roots, one segment, 16-hour wall time, custom IDs,
+  failed-preparation stop, exact-E_p guards and trellis launcher versions
+  1.23/1.24/1.25. No DMRG, GPU benchmark or full suite was run.
+- The real local preparer generated eight configs and seeds below
+  `output/seed_previews/20260922_square_tp_scan/`. Durable preview hashes and
+  fingerprints are in `docs/reports/square_tp_scan_20260922/prepared_branches.csv`.
+  Host-specific paths and hashes will be regenerated on Perlmutter.
+  Updated PROJECT_STATE, ACTIVE and the documentation entry point.
+- Handoff follows the standing Git publication workflow, but uses fetch
+  and a detached worktree at `$CFS/m4863/MPS-MFT-square-tp-20260922` instead
+  of pulling into the checkout used by ongoing trellis jobs. The report
+  supplies exact user-run commands. No new submission has been reported.

@@ -5,7 +5,7 @@
 
 set -euo pipefail
 
-readonly PHASE1_SCRIPT_VERSION="1.24.0"
+readonly PHASE1_SCRIPT_VERSION="1.25.0"
 script_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
 project_dir="${PHASE1_PROJECT_DIR:-$(cd "$(dirname "$script_path")/.." && pwd)}"
 repo_root="${PHASE1_REPO_ROOT:-$(cd "$project_dir/.." && pwd)}"
@@ -43,6 +43,7 @@ PHASE1_TWO_BASIN_CONFIG="${PHASE1_TWO_BASIN_CONFIG:-$project_dir/configs/phase1_
 PHASE1_CUBIC_TWO_BASIN_CONFIG="${PHASE1_CUBIC_TWO_BASIN_CONFIG:-$project_dir/configs/phase1_gpu_cubic_unfrustrated_two_basin_chi200_raw60.toml}"
 PHASE1_SQUARE_TWO_BASIN_FINISH_CONFIG="${PHASE1_SQUARE_TWO_BASIN_FINISH_CONFIG:-$project_dir/configs/phase1_gpu_square_two_basin_finish20.toml}"
 PHASE1_TWO_BASIN_FINE_CUTS_CONFIG="${PHASE1_TWO_BASIN_FINE_CUTS_CONFIG:-$project_dir/configs/phase1_gpu_square_two_basin_fine_cuts_chi200_raw60.toml}"
+PHASE1_SQUARE_TP_SCAN_CONFIG="${PHASE1_SQUARE_TP_SCAN_CONFIG:-$project_dir/configs/phase1_gpu_square_tp_scan_chi200_raw60.toml}"
 PHASE1_POSITIVE_V_CONFIG="${PHASE1_POSITIVE_V_CONFIG:-$project_dir/configs/phase1_gpu_square_positive_v_chi200_raw60.toml}"
 PHASE1_TRELLIS_CONFIG="${PHASE1_TRELLIS_CONFIG:-$project_dir/configs/phase1_gpu_trellis_chi200_raw60.toml}"
 PHASE1_SQUARE_TWO_LADDER_CONFIG="${PHASE1_SQUARE_TWO_LADDER_CONFIG:-$project_dir/configs/phase1_gpu_square_two_ladder_chi200_raw60.toml}"
@@ -928,7 +929,7 @@ load_environment() {
   # shellcheck disable=SC1090
   source "$run_dir/run.env"
   case "${PHASE1_RUN_SCRIPT_VERSION:-missing}" in
-    1.0.0|1.0.1|1.1.0|1.2.0|1.3.0|1.4.0|1.5.0|1.6.0|1.7.0|1.8.0|1.9.0|1.10.0|1.11.0|1.12.0|1.13.0|1.13.1|1.13.2|1.14.0|1.15.0|1.16.0|1.17.0|1.18.0|1.19.0|1.20.0|1.21.0|1.22.0|1.23.0|1.24.0) ;;
+    1.0.0|1.0.1|1.1.0|1.2.0|1.3.0|1.4.0|1.5.0|1.6.0|1.7.0|1.8.0|1.9.0|1.10.0|1.11.0|1.12.0|1.13.0|1.13.1|1.13.2|1.14.0|1.15.0|1.16.0|1.17.0|1.18.0|1.19.0|1.20.0|1.21.0|1.22.0|1.23.0|1.24.0|1.25.0) ;;
     *) die "unsupported run script version ${PHASE1_RUN_SCRIPT_VERSION:-missing}; current version is $PHASE1_SCRIPT_VERSION";;
   esac
   project_dir="$PHASE1_PROJECT_DIR"
@@ -971,9 +972,9 @@ require_direct_submission_compatible_run_version() {
     1.12.0|1.13.0|1.13.1|1.13.2)
       echo "warning: directly submitting a launcher-v${PHASE1_RUN_SCRIPT_VERSION} campaign with v${PHASE1_SCRIPT_VERSION}; the standalone smoke gate has been retired" >&2
       ;;
-    1.14.0|1.15.0|1.16.0|1.17.0|1.18.0|1.19.0|1.20.0|1.21.0|1.22.0|1.23.0|1.24.0) ;;
+    1.14.0|1.15.0|1.16.0|1.17.0|1.18.0|1.19.0|1.20.0|1.21.0|1.22.0|1.23.0|1.24.0|1.25.0) ;;
     *) die \
-      "direct submission requires a run prepared by launcher v1.12.0 through v1.24.0; found ${PHASE1_RUN_SCRIPT_VERSION:-missing}";;
+      "direct submission requires a run prepared by launcher v1.12.0 through v1.25.0; found ${PHASE1_RUN_SCRIPT_VERSION:-missing}";;
   esac
 }
 
@@ -981,7 +982,7 @@ require_continuation_compatible_run_version() {
   local run_dir="$1" campaign_kind="standard"
   [[ ! -f "$run_dir/campaign_kind.txt" ]] || campaign_kind="$(<"$run_dir/campaign_kind.txt")"
   case "${PHASE1_RUN_SCRIPT_VERSION:-missing}" in
-    1.18.0|1.19.0|1.20.0|1.21.0|1.22.0|1.23.0|1.24.0) ;;
+    1.18.0|1.19.0|1.20.0|1.21.0|1.22.0|1.23.0|1.24.0|1.25.0) ;;
     1.17.0)
       [[ "$campaign_kind" == "cubic_unfrustrated_smooth_pairing_grid" ]] || die \
         "launcher v1.17.0 continuation compatibility is restricted to the active cubic-unfrustrated smooth-pairing grid"
@@ -1004,7 +1005,7 @@ require_continuation_compatible_run_version() {
 
 require_worker_compatible_run_version() {
   case "${PHASE1_RUN_SCRIPT_VERSION:-missing}" in
-    1.2.0|1.3.0|1.4.0|1.5.0|1.6.0|1.7.0|1.8.0|1.9.0|1.10.0|1.11.0|1.12.0|1.13.0|1.13.1|1.13.2|1.14.0|1.15.0|1.16.0|1.17.0|1.18.0|1.19.0|1.20.0|1.21.0|1.22.0|1.23.0|1.24.0) ;;
+    1.2.0|1.3.0|1.4.0|1.5.0|1.6.0|1.7.0|1.8.0|1.9.0|1.10.0|1.11.0|1.12.0|1.13.0|1.13.1|1.13.2|1.14.0|1.15.0|1.16.0|1.17.0|1.18.0|1.19.0|1.20.0|1.21.0|1.22.0|1.23.0|1.24.0|1.25.0) ;;
     *) die "queued worker cannot execute run script ${PHASE1_RUN_SCRIPT_VERSION:-missing} with launcher $PHASE1_SCRIPT_VERSION";;
   esac
 }
@@ -1147,6 +1148,11 @@ initialize_run() {
       prepare_script="$project_dir/scripts/prepare_phase1_square_two_basin_fine_cuts.jl"
       prepare_args=("$PHASE1_TWO_BASIN_FINE_CUTS_CONFIG" "$source_artifact" "$run_dir" "$scratch_run_dir" "$run_id")
       ;;
+    square_tp_scan)
+      [[ -f "$source_artifact" ]] || die "square tp scan requires the reference bundle"
+      prepare_script="$project_dir/scripts/prepare_phase1_square_tp_scan.jl"
+      prepare_args=("$PHASE1_SQUARE_TP_SCAN_CONFIG" "$source_artifact" "$run_dir" "$scratch_run_dir" "$run_id")
+      ;;
     square_two_ladder)
       [[ -f "$source_artifact" ]] || die "square A/B comparison requires the reference bundle"
       prepare_script="$project_dir/scripts/prepare_phase1_square_two_ladder.jl"
@@ -1194,89 +1200,96 @@ validate_initialized_run() {
     "prepared manifest must contain named label and config columns"
   [[ -f "$run_dir/gpu-Manifest.toml" ]] || die "prepared run is missing its GPU manifest"
   [[ -f "$run_dir/gpu-Manifest.toml.sha256" ]] || die "prepared run is missing its GPU-manifest hash"
-  if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24)\.0$ ||
+  if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25)\.0$ ||
         "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.13\.[12]$ ]]; then
     [[ -d "$(full_run_directory_from_control "$run_dir")/results" ]] || die \
       "prepared run is missing its full-result scratch directory"
   fi
-  if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24)\.0$ ||
+  if [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25)\.0$ ||
         "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.13\.[12]$ ]]; then
     [[ -f "$run_dir/campaign_kind.txt" ]] || die "prepared run is missing campaign_kind.txt"
     campaign_kind="$(<"$run_dir/campaign_kind.txt")"
     case "$campaign_kind" in
       standard|recurrence|recurrence_competitors) ;;
       matched_seed_pilot)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24)\.0$ ||
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25)\.0$ ||
           "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.13\.[12]$ ]] || die \
-          "matched-seed pilot requires launcher v1.6.0 through v1.24.0"
+          "matched-seed pilot requires launcher v1.6.0 through v1.25.0"
         ;;
       square_seed_pilot)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24)\.0$ ||
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25)\.0$ ||
           "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.13\.[12]$ ]] || die \
-          "square seed pilot requires launcher v1.7.0 through v1.24.0"
+          "square seed pilot requires launcher v1.7.0 through v1.25.0"
         ;;
       square_seed_pilot_v0)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(11|12|13|14|15|16|17|18|19|20|21|22|23|24)\.0$ ||
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(11|12|13|14|15|16|17|18|19|20|21|22|23|24|25)\.0$ ||
           "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.13\.[12]$ ]] || die \
-          "square V=0 seed pilots require launcher v1.11.0 through v1.24.0"
+          "square V=0 seed pilots require launcher v1.11.0 through v1.25.0"
         ;;
       square_tight5)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(10|11|12|13|14|15|16|17|18|19|20|21|22|23|24)\.0$ ||
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25)\.0$ ||
           "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.13\.[12]$ ]] || die \
-          "square tight-five runs require launcher v1.10.0 through v1.24.0"
+          "square tight-five runs require launcher v1.10.0 through v1.25.0"
         ;;
       frozen_legacy_energy)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(14|15|16|17|18|19|20|21|22|23|24)\.0$ ]] || die \
-          "frozen legacy-field runs require launcher v1.14.0 through v1.24.0"
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(14|15|16|17|18|19|20|21|22|23|24|25)\.0$ ]] || die \
+          "frozen legacy-field runs require launcher v1.14.0 through v1.25.0"
         ;;
       square_v0_chi400_compare)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(15|16|17|18|19|20|21|22|23|24)\.0$ ]] || die \
-          "square V=0 chi=400 comparisons require launcher v1.15.0 through v1.24.0"
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(15|16|17|18|19|20|21|22|23|24|25)\.0$ ]] || die \
+          "square V=0 chi=400 comparisons require launcher v1.15.0 through v1.25.0"
         ;;
       square_smooth_pairing_grid)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(16|17|18|19|20|21|22|23|24)\.0$ ]] || die \
-          "square smooth-pairing grid runs require launcher v1.16.0 through v1.24.0"
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(16|17|18|19|20|21|22|23|24|25)\.0$ ]] || die \
+          "square smooth-pairing grid runs require launcher v1.16.0 through v1.25.0"
         ;;
       cubic_unfrustrated_smooth_pairing_grid)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(17|18|19|20|21|22|23|24)\.0$ ]] || die \
-          "cubic-unfrustrated smooth-pairing grid runs require launcher v1.17.0 through v1.24.0"
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(17|18|19|20|21|22|23|24|25)\.0$ ]] || die \
+          "cubic-unfrustrated smooth-pairing grid runs require launcher v1.17.0 through v1.25.0"
         ;;
       square_legacy_stripe_compare)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(18|19|20|21|22|23|24)\.0$ ]] || die \
-          "square legacy-stripe comparisons require launcher v1.18.0 through v1.24.0"
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(18|19|20|21|22|23|24|25)\.0$ ]] || die \
+          "square legacy-stripe comparisons require launcher v1.18.0 through v1.25.0"
         ;;
       square_two_basin_raw)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(19|20|21|22|23|24)\.0$ ]] || die \
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(19|20|21|22|23|24|25)\.0$ ]] || die \
           "two-basin raw-map comparisons require launcher v1.19.0 or v1.20.0"
         [[ -f "$run_dir/seed_contract.toml" ]] || die "missing two-basin seed contract"
         ;;
       cubic_unfrustrated_two_basin_raw)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(20|21|22|23|24)\.0$ ]] || die "cubic two-basin runs require launcher v1.20.0"
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(20|21|22|23|24|25)\.0$ ]] || die "cubic two-basin runs require launcher v1.20.0"
         [[ -f "$run_dir/seed_contract.toml" ]] || die "missing cubic two-basin seed contract"
         ;;
       square_two_basin_finish)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(20|21|22|23|24)\.0$ ]] || die "square continuations require launcher v1.20.0"
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(20|21|22|23|24|25)\.0$ ]] || die "square continuations require launcher v1.20.0"
         [[ -f "$run_dir/continuation_contract.toml" ]] || die "missing continuation contract"
         grep -qx 'full_sources_verified = true' "$run_dir/continuation_contract.toml" || die "compact previews cannot be submitted; full MPS sources must be verified"
         ;;
       square_two_basin_fine_cuts)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(21|22|23|24)\.0$ ]] || die "fine cuts require launcher v1.21.0 or newer"
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(21|22|23|24|25)\.0$ ]] || die "fine cuts require launcher v1.21.0 or newer"
         [[ -f "$run_dir/seed_contract.toml" ]] || die "missing fine-cut seed contract"
         grep -qx 'interpolated_ep = true' "$run_dir/seed_contract.toml" || die "fine cuts must record interpolated E_p"
         ;;
+      square_tp_scan)
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" == "1.25.0" ]] || die "square tp scan requires launcher v1.25.0"
+        [[ -f "$run_dir/seed_contract.toml" ]] || die "missing square tp scan seed contract"
+        grep -qx 'branches = 8' "$run_dir/seed_contract.toml" || die "square tp scan requires eight branches"
+        grep -qx 'stage = "tp_scan"' "$run_dir/seed_contract.toml" || die "square tp scan stage missing"
+        grep -qx 'interpolated_ep = false' "$run_dir/seed_contract.toml" || die "square tp scan requires exact E_p"
+        ;;
       square_two_ladder)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" == "1.24.0" ]] || die "square A/B comparison requires launcher v1.24.0"
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(24|25)\.0$ ]] || die "square A/B comparison requires launcher v1.24.0"
         [[ -f "$run_dir/seed_contract.toml" ]] || die "missing square A/B seed contract"
         grep -qx 'branches = 4' "$run_dir/seed_contract.toml" || die "square A/B comparison requires four branches"
         grep -qx 'spatial_cell = "two_ladder"' "$run_dir/seed_contract.toml" || die "square A/B cell contract missing"
         ;;
       trellis_comparison)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(23|24)\.0$ ]] || die "trellis comparison requires launcher v1.23.0 or newer"
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(23|24|25)\.0$ ]] || die "trellis comparison requires launcher v1.23.0 or newer"
         [[ -f "$run_dir/seed_contract.toml" ]] || die "missing trellis seed contract"
         grep -qx 'branches = 4' "$run_dir/seed_contract.toml" || die "trellis comparison requires all four branches"
         ;;
       square_positive_v_four_seeds)
-        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(22|23|24)\.0$ ]] || die "positive-V seeds require launcher v1.22.0"
+        [[ "${PHASE1_RUN_SCRIPT_VERSION:-$PHASE1_SCRIPT_VERSION}" =~ ^1\.(22|23|24|25)\.0$ ]] || die "positive-V seeds require launcher v1.22.0"
         [[ -f "$run_dir/seed_contract.toml" ]] || die "missing positive-V seed contract"
         grep -qx 'branches = 4' "$run_dir/seed_contract.toml" || die "positive-V comparison requires all four branches"
         ;;
@@ -1293,6 +1306,9 @@ validate_initialized_run() {
   manifest_rows="$(awk 'END {print NR-1}' "$run_dir/manifest.tsv")"
   if [[ "${campaign_kind:-}" == "square_two_ladder" ]]; then
     [[ "$manifest_rows" == 4 ]] || die "square A/B comparison must contain exactly four branches"
+  fi
+  if [[ "${campaign_kind:-}" == "square_tp_scan" ]]; then
+    [[ "$manifest_rows" == 8 ]] || die "square tp scan must contain exactly eight branches"
   fi
   [[ "$manifest_rows" == "$expected_count" ]] || die \
     "prepared manifest has $manifest_rows branches instead of $expected_count"
@@ -1764,6 +1780,7 @@ Preparation only (no Slurm submission or budget reservation):
   prepare-cubic-unfrustrated-two-basin-raw REFERENCES_H5 NEW_RUN
   prepare-square-two-basin-finish SOURCE_RUN NEW_RUN
   prepare-square-two-basin-fine-cuts REFERENCES_H5 NEW_RUN
+  prepare-square-tp-scan REFERENCES_H5 NEW_RUN
   prepare-square-positive-v REFERENCES_H5 NEW_RUN
                                        Prepare paired/striped chi=200 raw-map branches (default: four anchors)
   prepare-standard NEW_RUN              Prepare the standard nine-branch campaign
@@ -1943,6 +1960,11 @@ case "$action" in
     [[ $# == 3 ]] || die "prepare-square-two-basin-fine-cuts requires REFERENCES_H5 NEW_RUN"
     [[ -f "$2" && -f "$PHASE1_TWO_BASIN_FINE_CUTS_CONFIG" ]] || die "missing fine-cut inputs"
     initialize_run "$3" "" square_two_basin_fine_cuts "$2"
+    ;;
+  prepare-square-tp-scan)
+    [[ $# == 3 ]] || die "prepare-square-tp-scan requires REFERENCES_H5 NEW_RUN"
+    [[ -f "$2" && -f "$PHASE1_SQUARE_TP_SCAN_CONFIG" ]] || die "missing square tp scan inputs"
+    initialize_run "$3" "" square_tp_scan "$2"
     ;;
   prepare-square-two-ladder)
     [[ $# == 3 ]] || die "prepare-square-two-ladder requires REFERENCES_H5 NEW_RUN"

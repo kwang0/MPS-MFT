@@ -29,6 +29,16 @@ the Overleaf bundle includes the new figures.
 
 ## Next evidence and decisions
 
+Prepare the user's [eight square t_perp starts](../reports/square_tp_scan_20260922/README.md):
+t0=1.4, V=0 with tp=0.06/0.08 and V=-0.2 with tp=0.12/0.14, two seed families
+each. Preparation and local checks are complete. Use a detached worktree and
+`submit_square_tp_scan.sh`; retain the original trellis checkout and shared
+budget ledger. The eight one-segment jobs reserve at most 32 node-hours.
+No square scan submission or scheduler evidence is available locally.
+
+The user now reports ongoing trellis jobs. Their current job IDs/status have
+not been verified locally; the prepared-only account below is historical.
+
 The user-requested [V=-1 trellis repetition](../reports/trellis_vm1_20260922/README.md)
 is prepared for user-run submission: the same four one-/two-ladder and
 stripe/pairing starts, exact target E_p, L64/chi200/60 raw sweeps, full terminal
