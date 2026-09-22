@@ -1,5 +1,12 @@
 # Repository operating rules
 
+## Git publication authorization
+
+For requested work in this project, commit and push completed changes to
+`https://github.com/kwang0/MPS-MFT.git` on `codex/*` branches without asking
+again. This excludes force-pushing, deleting branches, changing remotes, and
+all Perlmutter operations.
+
 ## Local and Perlmutter host boundary
 
 1. This Codex workspace is local Windows. Use PowerShell-compatible commands
