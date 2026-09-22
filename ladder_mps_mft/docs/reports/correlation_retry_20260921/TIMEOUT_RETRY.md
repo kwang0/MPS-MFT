@@ -1,5 +1,10 @@
 # Seven missing correlation measurements — September 21, 2026
 
+**Completed September 22:** all seven retries have verified receipts. Together
+with retry1, coverage is 56/56 branches and 58/58 MPSs. The [correlation report](../pair_correlations_20260922/README.md)
+analyzes the complete set. The commands below are the historical handoff,
+not a request to submit another retry.
+
 The user-provided status reports 49/56 branches measured in
 `20260921_latest_correlations_retry1` (51/58 spatial MPSs). Accounting shows
 the remaining seven jobs hit their two-hour wall limit. Their source states

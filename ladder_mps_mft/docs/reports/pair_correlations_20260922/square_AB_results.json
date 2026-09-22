@@ -1,0 +1,246 @@
+[
+  {
+    "label": "square__two_ladder__stripe_eps005_t014_vm04_chi200_raw60",
+    "family": "stripe",
+    "V": -0.4,
+    "t0": 1.4,
+    "iterations": 40,
+    "accepted": true,
+    "status": "fixed_point",
+    "job_id": "58654274",
+    "canonical": -1.1674063798643806,
+    "corrected": -1.1674048005960893,
+    "solver_seconds": 27105.133163928986,
+    "energy_span_last10": 3.604516685129511e-11,
+    "ladders": {
+      "A": {
+        "spin_rms": 2.156953445744663e-07,
+        "pair_rms": 0.035225080726327185,
+        "charge_std": 0.003164376312427012,
+        "density": 0.9374986964295567,
+        "residual": 1.7705029812777946e-07,
+        "gates": {
+          "minimum": true,
+          "channels": true,
+          "field": true,
+          "slow": true,
+          "density": true,
+          "dmrg": true,
+          "energy": true,
+          "identity": true,
+          "effective": true
+        }
+      },
+      "B": {
+        "spin_rms": 1.8626912132279354e-07,
+        "pair_rms": 0.03522515798743862,
+        "charge_std": 0.003164792493721732,
+        "density": 0.9374955319132305,
+        "residual": 3.953225064814124e-07,
+        "gates": {
+          "minimum": true,
+          "channels": true,
+          "field": true,
+          "slow": true,
+          "density": true,
+          "dmrg": true,
+          "energy": true,
+          "identity": true,
+          "effective": true
+        }
+      }
+    },
+    "ab_difference": {
+      "charge": 5.899113651786081e-06,
+      "spin": 8.499910861825555e-07,
+      "leg": 8.681697250684239e-07,
+      "rung": 1.2526280531721667e-06
+    },
+    "source": "output/phase1_gpu/20260920_square_two_ladder_two_basin_60/results/square__two_ladder__stripe_eps005_t014_vm04_chi200_raw60/square__two_ladder_stripe_weak_other__square_AB_two_reference_eps005_shift08_raw__none__stripe_eps005_Bshift08/20260921T075141_1573323_242b9c6650c6/state.h5",
+    "compact_sha256": "3bd4b0c19c0afa08149f4d121392865f29d94251bce582e8453efeae6558e2bc",
+    "full_sha256": "f1ffe424157117e244bb58533d07e344cbd6e03aca8c083c147bd72a158aebd1"
+  },
+  {
+    "label": "square__two_ladder__pairing_eps005_t014_vm04_chi200_raw60",
+    "family": "pairing",
+    "V": -0.4,
+    "t0": 1.4,
+    "iterations": 40,
+    "accepted": true,
+    "status": "fixed_point",
+    "job_id": "58654275",
+    "canonical": -1.1674066363726148,
+    "corrected": -1.1674048005450695,
+    "solver_seconds": 16531.963366031647,
+    "energy_span_last10": 3.217934807508982e-10,
+    "ladders": {
+      "A": {
+        "spin_rms": 5.368757207732112e-07,
+        "pair_rms": 0.03522507691053004,
+        "charge_std": 0.0031643857789253093,
+        "density": 0.9374985929932411,
+        "residual": 1.9221471394459669e-07,
+        "gates": {
+          "minimum": true,
+          "channels": true,
+          "field": true,
+          "slow": true,
+          "density": true,
+          "dmrg": true,
+          "energy": true,
+          "identity": true,
+          "effective": true
+        }
+      },
+      "B": {
+        "spin_rms": 2.519490508622354e-07,
+        "pair_rms": 0.035225172150291514,
+        "charge_std": 0.003164996249393367,
+        "density": 0.9374946977134012,
+        "residual": 4.6587680414215266e-07,
+        "gates": {
+          "minimum": true,
+          "channels": true,
+          "field": true,
+          "slow": true,
+          "density": true,
+          "dmrg": true,
+          "energy": true,
+          "identity": true,
+          "effective": true
+        }
+      }
+    },
+    "ab_difference": {
+      "charge": 7.310411592409416e-06,
+      "spin": 1.2581684338541788e-06,
+      "leg": 1.0784944496494697e-06,
+      "rung": 1.558735140225198e-06
+    },
+    "source": "output/phase1_gpu/20260920_square_two_ladder_two_basin_60/results/square__two_ladder__pairing_eps005_t014_vm04_chi200_raw60/square__two_ladder_pairing_weak_other__square_AB_two_reference_eps005_shift08_raw__none__pairing_eps005_Bshift08/20260921T075209_1767067_242b9c6650c6/state.h5",
+    "compact_sha256": "5edf0d7de2c959446aeb675c62df87b1b97fd123c6a3cc6dbad9d739c14ee5e8",
+    "full_sha256": "f02014387006d2b0d4f8c21c7b177c7d1415fb908f35012e900ec4ad3c5566de"
+  },
+  {
+    "label": "square__two_ladder__stripe_eps005_t014_vm02_chi200_raw60",
+    "family": "stripe",
+    "V": -0.2,
+    "t0": 1.4,
+    "iterations": 55,
+    "accepted": true,
+    "status": "fixed_point",
+    "job_id": "58654276",
+    "canonical": -0.9141236526344088,
+    "corrected": -0.9141178429507772,
+    "solver_seconds": 34951.74737024307,
+    "energy_span_last10": 3.676392523743743e-12,
+    "ladders": {
+      "A": {
+        "spin_rms": 1.0906275648880933e-06,
+        "pair_rms": 0.033567926878669295,
+        "charge_std": 0.0036881114316431075,
+        "density": 0.9374971418027472,
+        "residual": 2.8645926066113436e-08,
+        "gates": {
+          "minimum": true,
+          "channels": true,
+          "field": true,
+          "slow": true,
+          "density": true,
+          "dmrg": true,
+          "energy": true,
+          "identity": true,
+          "effective": true
+        }
+      },
+      "B": {
+        "spin_rms": 1.1411483366825497e-06,
+        "pair_rms": 0.03356771661584739,
+        "charge_std": 0.003689412114304843,
+        "density": 0.9374923076199857,
+        "residual": 4.021732122523082e-08,
+        "gates": {
+          "minimum": true,
+          "channels": true,
+          "field": true,
+          "slow": true,
+          "density": true,
+          "dmrg": true,
+          "energy": true,
+          "identity": true,
+          "effective": true
+        }
+      }
+    },
+    "ab_difference": {
+      "charge": 1.124912725214422e-05,
+      "spin": 8.931013791846354e-07,
+      "leg": 1.0423221743494082e-06,
+      "rung": 1.6225482322163032e-06
+    },
+    "source": "output/phase1_gpu/20260920_square_two_ladder_two_basin_60/results/square__two_ladder__stripe_eps005_t014_vm02_chi200_raw60/square__two_ladder_stripe_weak_other__square_AB_two_reference_eps005_shift08_raw__none__stripe_eps005_Bshift08/20260921T175904_2265745_ba35d00e04fa/state.h5",
+    "compact_sha256": "39d70c8db75fcb6f60d9e1826082d4ef98652e887e4ee13c933cb0cbf22d3ec5",
+    "full_sha256": "629a52111b4893306944ad18ffde74e759f41491709b51ee0d8e29cf231c4ac0"
+  },
+  {
+    "label": "square__two_ladder__pairing_eps005_t014_vm02_chi200_raw60",
+    "family": "pairing",
+    "V": -0.2,
+    "t0": 1.4,
+    "iterations": 44,
+    "accepted": true,
+    "status": "fixed_point",
+    "job_id": "58654277",
+    "canonical": -0.9141229887163431,
+    "corrected": -0.9141178430036564,
+    "solver_seconds": 18831.994740247726,
+    "energy_span_last10": 2.8765878568037806e-12,
+    "ladders": {
+      "A": {
+        "spin_rms": 1.1220850388215586e-06,
+        "pair_rms": 0.03356773960917067,
+        "charge_std": 0.003689159180100478,
+        "density": 0.9374937272945165,
+        "residual": 5.047246623879516e-08,
+        "gates": {
+          "minimum": true,
+          "channels": true,
+          "field": true,
+          "slow": true,
+          "density": true,
+          "dmrg": true,
+          "energy": true,
+          "identity": true,
+          "effective": true
+        }
+      },
+      "B": {
+        "spin_rms": 1.0755673595464396e-06,
+        "pair_rms": 0.033567922720272064,
+        "charge_std": 0.00368821176685593,
+        "density": 0.9374969279273454,
+        "residual": 5.030114009259984e-08,
+        "gates": {
+          "minimum": true,
+          "channels": true,
+          "field": true,
+          "slow": true,
+          "density": true,
+          "dmrg": true,
+          "energy": true,
+          "identity": true,
+          "effective": true
+        }
+      }
+    },
+    "ab_difference": {
+      "charge": 7.870675328924825e-06,
+      "spin": 9.129524109474652e-07,
+      "leg": 9.104399918760664e-07,
+      "rung": 1.414399397527133e-06
+    },
+    "source": "output/phase1_gpu/20260920_square_two_ladder_two_basin_60/results/square__two_ladder__pairing_eps005_t014_vm02_chi200_raw60/square__two_ladder_pairing_weak_other__square_AB_two_reference_eps005_shift08_raw__none__pairing_eps005_Bshift08/20260921T181156_2318927_ba35d00e04fa/state.h5",
+    "compact_sha256": "9c1bd7dd832fd3ea06bd7225ecf3234e75919d51b79727b62a70f06e3426074c",
+    "full_sha256": "6301bd437328f76bebc7b259d4a599ffa372ef8ffcf6a91a32aa402aa9486b4f"
+  }
+]

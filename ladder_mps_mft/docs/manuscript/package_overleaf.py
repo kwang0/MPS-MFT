@@ -25,6 +25,11 @@ def main():
         "reports/trellis_progress_20260918/histories.pdf",
         "reports/trellis_progress_20260918/profiles.pdf",
         "reports/trellis_progress_20260918/two_ladder_relaxation.pdf",
+        "reports/pair_correlations_20260922/pair_decay_comparison.pdf",
+        "reports/pair_correlations_20260922/matched_pair_comparisons.pdf",
+        "reports/pair_correlations_20260922/stripe_pairing_profiles.pdf",
+        "reports/pair_correlations_20260922/square_AB_complete.pdf",
+        "reports/pair_correlations_20260922/square_AB_pair_correlations.pdf",
         "manuscript/README.md",
     )
     # Read everything first, so a missing source cannot truncate a valid ZIP.

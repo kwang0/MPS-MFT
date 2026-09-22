@@ -38,6 +38,13 @@ recorded explicitly as user-reported until synchronized evidence is available.
 
 ## Stable scientific references
 
+The [September 22 correlation and completed square A/B report](reports/pair_correlations_20260922/README.md)
+verifies all 58 retrospective MPS diagnostics and eight square A/B sidecars.
+Stripes retain local pairing near hole-rich magnetic walls while long-distance
+correlations weaken. All four square A/B runs are accepted paired fixed points.
+The main manuscript includes these results and five new figures, with raw versus
+connected conventions, channel signs and boundary/reference sensitivity explicit.
+
 The [September 20 square A/B preparation](reports/square_two_ladder_20260920/README.md)
 provides four GPU jobs for user submission at (1.4,-0.4) and (1.4,-0.2),
 with 95%/5% competing seeds, 60 raw cell sweeps and full terminal measurements.
@@ -49,10 +56,10 @@ The [terminal correlation measurements and retrospective CPU workflow](DIAGNOSTI
 enable full raw/connected pair-pair, charge/spin, single-particle and entanglement
 diagnostics, including maximum-iteration endpoints without changing acceptance.
 The September 18 backfill covers the 56 latest square/cubic/fine-cut/positive-V/
-trellis branch states (58 spatial MPSs); it is prepared for user submission,
-not yet new measured evidence.
+trellis branch states (58 spatial MPSs); its completed measurement evidence
+is analyzed in the September 22 report.
 
-The latest synchronized results are in the
+The earlier complete history analysis is in the
 [September 18 combined campaign review](reports/campaign_review_20260918/README.md).
 Updated September 19, it brings together all 18 cubic, 12 finer square,
 four positive-V square and four trellis starts, with full histories, spatial
@@ -88,10 +95,12 @@ energy normalization and the one-/two-ladder spatial ansatz distinction.
 
 For manuscript background, see the
 [introduction and results draft](manuscript/README.md), created September 15
-and now updated in LaTeX and PDF with numerical evidence through September 19.
+and now updated in LaTeX and PDF with numerical evidence through September 22.
 It includes the complete grids, full transition-cut energies, positive-V and
-trellis outcomes, with separate Sections 3.11/3.12, thirteen figures and
-48 cited references. The material introduction and provisional status remain.
+trellis outcomes, pair correlations and the completed square A/B campaign,
+with 43 pages, eighteen figures and 48 cited references. Sections 3.13/3.14
+develop the latest results. The material introduction and the earlier
+branches' provisional status remain.
 The [coupled-ladder literature review](literature/README.md) provides annotated
 sources, LaTeX/PDF and 49 references. Its actual project-evidence section now
 qualifies the legacy positive-V interpretation with the new square data,

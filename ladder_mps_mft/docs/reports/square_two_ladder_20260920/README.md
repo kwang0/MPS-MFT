@@ -1,5 +1,10 @@
 # Square A/B test at the paired grid points
 
+**September 22 completion:** all four runs are now synchronized and accepted
+paired fixed points. Stripe/pairing starts require 40/40 sweeps at V=-0.4
+and 55/44 at V=-0.2. See the [complete analysis and correlation report](../pair_correlations_20260922/README.md).
+The first-result status below is historical; the preparation contract remains.
+
 Prepared September 20, 2026: four fresh runs, two seed families at each of
 (t0,V)=(1.4,-0.4) and (1.4,-0.2). This is prepared work, not new Perlmutter
 evidence. No job was submitted locally.

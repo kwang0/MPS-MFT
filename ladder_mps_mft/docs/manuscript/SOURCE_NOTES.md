@@ -157,3 +157,27 @@ physical tilt. No larger-cell runs, new correlation measurements, or
 bibliography changes accompany this interpretation. The linked transverse
 note separately records the primary Miyazaki 2004 paper consulted in response
 to the user's slide; its square-lattice model is not equated to the trellis.
+
+## Complete correlations and square A/B — 22 September 2026
+
+The [new report](../reports/pair_correlations_20260922/README.md) supplies
+all 58 retrospective MPS measurements, eight square A/B diagnostics and the
+isolated chi=1200 reference. Sections 3.13/3.14 now include full/connected
+pair correlations, bond signs, stripe-wall relationships, reference/window
+sensitivity and all four accepted square A/B results. Five vector figures
+are added. The earlier "prepared but unmeasured" statements are superseded.
+
+All new correlation numbers use the stored D=sqrt(2)*Delta convention, so
+normalized bond-pair values in Eq. (1) are half as large. The older isolated
+within-class Hermitian covariance equals real pair removal only for disjoint
+bonds after its stored field-metric factor; contacts and missing cross-channel
+entries are excluded. Matrix/receipt/provenance and square convergence gates
+are checked in scripts/analyze_pair_correlations_20260922.py and its outputs.
+Retrospective unaccepted flags, finite-chi comparisons, nonuniversal fit slopes
+and the absence of phase-stiffness/dynamical evidence remain explicit.
+
+The primary arXiv record https://arxiv.org/abs/2303.16487 was reread for Shen,
+Zhang and Qin's reference-bond sensitivity; the existing Shen2023 BibTeX key
+is reused. No broad literature refresh or new external numerical benchmark
+is claimed. The complete source inventory, fits, bulk-cut sensitivity and
+square audit accompany the report rather than being hidden in plotted curves.

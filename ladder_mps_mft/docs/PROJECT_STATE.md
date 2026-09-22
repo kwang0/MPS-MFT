@@ -1,6 +1,6 @@
 # Current project state
 
-Last locally reviewed: **2026-09-21 — selective seven-job correlation timeout retry prepared**
+Last locally reviewed: **2026-09-22 — all correlations and square A/B results analyzed**
 
 This is a local, mutable snapshot. Stable rules live in AGENTS.md and the
 method documents; durable history is append-only in RUN_LOG.md. Local
@@ -8,7 +8,7 @@ artifacts establish solver outcomes, not live scheduler state.
 
 ## Repository and workflow
 
-- Branch: `codex/mps-mft-phase0-refactor`; baseline for this update: `adba8c2`.
+- Branch: `codex/mps-mft-phase0-refactor`; baseline for this update: `e7314af`.
 - Root `.claude/` is unrelated and remains untouched.
 - Output/state files are excluded from Git and immutable. Reports, scripts,
   LaTeX/PDF notes and the Overleaf bundle are maintained together.
@@ -21,29 +21,28 @@ artifacts establish solver outcomes, not live scheduler state.
 
 ## Current scientific evidence
 
-**Square A/B first result:** [job 58654275](reports/square_two_ladder_20260920/FIRST_RESULT_20260921.md),
-pairing seed at (1.4,-0.4), is synced with both complete measurement sidecars.
-It is an accepted fixed point at 40 cell sweeps: physical pair RMS 0.035225
-on both ladders and spin RMS 2.52e-7/5.37e-7, matching the original paired
-state. Corrected energy -1.167404800545 t/site agrees with the two old
-one-ladder endpoints within 7.73e-9. A/B stripe asymmetry decays. The stripe
-seed's synced log (58654274) also reaches fixed_point at 40 with energy
-within 5.1e-11, but its state/measurement files are absent. There is no
-V=-0.2 result yet in this local sync. This supports survival of the paired
-state in this tested cell, without proving general transverse stability.
+**Complete pair correlations and square A/B results:** the
+[September 22 report](reports/pair_correlations_20260922/README.md) verifies
+all 56 retrospective branches / 58 MPSs and all eight new square A/B sidecars.
+Retrospective states remain unaccepted snapshots; the four square A/B runs
+are accepted fixed points. Both seeds reach paired states at (1.4,-0.4)
+in 40 sweeps and at (1.4,-0.2) in 55/44 sweeps (stripe/pairing). Their
+seed energies agree within 5.3e-11 t/site. A/B pairing profiles and connected
+pair correlations reproduce the earlier one-ladder paired endpoints.
 
-The user submitted two-seed square A/B runs at (1.4,-0.4) and (1.4,-0.2). The
-[four-job preparation](reports/square_two_ladder_20260920/README.md) uses
-unshifted square bonds, 95%/5% reference mixtures with B's stripe component
-displaced eight rungs, chi=200, 60 raw cell sweeps (minimum 40), and full
-terminal measurements. A=B field and per-site energy reduction is verified.
-Each job has one GPU, a 16-hour ceiling and an 11.5-hour SCF deadline;
-the total reservation ceiling is 16 node-hours with no automatic extension.
-The preparation passed tiny CPU, plotting and fake-launcher checks.
-Submission and synchronization were user-managed; no scheduler access here.
-The user's latest September 21 update reports **two of the new square A/B
-runs still ongoing**. Their identities/live status are not independently
-verified here. The measurement retry below excludes this entire campaign.
+Stripes retain short-distance pair correlations, strongest near hole-rich
+magnetic walls, while long-distance correlations are strongly suppressed.
+At matched intraladder parameters, cubic stripes have roughly 2200–2300
+times weaker connected rung correlations at separations 16–24 than square
+paired endpoints; striped two-ladder trellis is about 70 times weaker than
+paired one-ladder trellis. Rung–leg signs predominantly survive. Finite-L,
+finite-chi, acceptance and reference/window qualifications remain explicit.
+The isolated comparison uses chi=1200 versus 200 in coupled states and lacks
+cross-channel data. No phase-stiffness or fluctuating-superconductivity claim.
+
+The manuscript now includes these results and five new figures. The report
+has seven figures plus complete source/coverage, correlation, fit-window,
+bulk-cut and square fixed-point audits. No new simulations were run.
 
 The [combined campaign review](reports/campaign_review_20260918/README.md),
 updated September 19, covers **38 completed runs, 2280 cell updates and
@@ -136,7 +135,9 @@ Square/cubic phase diagrams, full energy grids and physical spin/pairing
 RMS grids remain side by side, preserving all 1982 plotted evaluations
 and square continuation markers. Energy panels keep individual y scales.
 
-Numerical evidence now includes the September 20 same-cell energy audit. The material/trellis
+Numerical evidence includes the September 20 same-cell energy audit and
+September 22 complete correlations and square A/B results in Sections
+3.13/3.14. The manuscript has 43 pages and 18 figures. The material/trellis
 introduction and 48 cited references from September 18 are preserved;
 the literature-search cutoff is unchanged. Living methods notes and the
 literature review's project-evidence section incorporate the final results.
@@ -148,68 +149,22 @@ eigenvalues plus/minus lambda), and explains leg parity and trellis shear.
 The manuscript and its Overleaf bundle also include the September 20 trial
 energy comparison and the diagonal-stripe commensurability distinction.
 
-## Correlation measurements: seven-job timeout retry
+## Correlation measurements: complete synchronized coverage
 
-The user has now supplied Perlmutter `status` output for
-`20260921_latest_correlations_retry1`: **49/56 branches MEASURED**, covering
-51/58 spatial MPSs because both two-ladder trellis branches are measured.
-Rows **6, 11, 31, 34, 46, 51, 53** are MISSING. The user's subsequent
-`sacct` output identifies seven TIMEOUT jobs, matching these rows in submission
-order: **58712480, 58712491, 58712512, 58712515, 58712527, 58712532,
-58712534**. Their elapsed times are 02:00:00–02:00:31; the other 49 jobs are
-COMPLETED. Both two-ladder trellis jobs completed within their four-hour limits.
-Thus the seven missing receipts correspond to time limits, not the original
-launcher startup error. ExitCode 0:0 does not override the TIMEOUT state.
-The retry directory and worker logs have not been synchronized locally.
-The [selective retry](reports/correlation_retry_20260921/TIMEOUT_RETRY.md)
-is prepared as `slurm/complete_missing_correlations.sh plan|submit|status|reconcile`.
-It selects exactly these seven rows, copies retry1's frozen scientific source,
-and uses a fresh `20260921_latest_correlations_retry2` output directory.
-Each CPU job gets four hours, for a 1.96875-node-hour requested ceiling under
-the shared project cap. Submission requires the other 49 receipts to verify
-and the seven parent jobs to have reconciled TIMEOUT accounting. Combined
-status reports coverage across both directories. No local submission or
-remote operation has been performed; the user synchronizes via `git pull
---ff-only` and runs the handoff. The first full-startup recovery below is
-historical and must not be used on the partial retry1 campaign.
+Retry1 has 49 receipts / 51 spatial MPS diagnostics; retry2 supplies the
+remaining seven receipts / MPSs. The September 22 analysis checks all
+manifest/receipt hashes, exact retry subset, full-source identifiers,
+compact-state/config hashes, Hermiticity, Gram positivity, connected
+subtraction and density/spin agreement. Frozen artifacts remain unchanged.
+New square A/B adds eight verified intraladder diagnostic files. The
+[report and reproducible evidence](reports/pair_correlations_20260922/README.md)
+supersede all earlier incomplete-measurement status. Startup/timeout retry
+history remains in RUN_LOG and the original recovery handoffs.
 
-Full equal-time raw/connected pair–pair, charge/spin, density-spin,
-single-particle/anomalous, double-occupancy and entanglement measurements
-are enabled for future accepted **and maximum-iteration** states.
-Archived status and convergence flags remain unchanged. Retrospective
-measurement covers 56 latest branches / 58 spatial MPSs, with the two
-old square V=0 endpoints superseded by their continuations.
-
-The user submitted `20260918_latest_correlations`. Its synchronized manifest
-contains 56 branches / 58 spatial MPSs, and jobs.tsv records all 56 jobs.
-All 56 synchronized logs show the same startup failure at shell line 5:
-`/var/spool/slurmd/job.../phase1_gpu.sh: No such file or directory`.
-The worker resolves its sibling launcher relative to Slurm's spooled script
-instead of the saved source directory and exits before Julia measurements.
-There is no local results directory, diagnostic HDF5 file or measurement
-receipt for this campaign: coverage is 0/56 branches and 0/58 spatial MPSs.
-This is synchronized failure evidence, not a live scheduler/accounting check.
-
-Both complete diagnostic sidecars for the new square A/B pairing endpoint
-at (1.4,-0.4) remain available from its separate automatic measurement pass.
-The failed backfill does not alter any SCF state or acceptance flag. Full
-scratch availability still needs user-run verification before recovery.
-Anomalous pairing disappearing does not determine connected pair correlations.
-
-The user authorized correction and preparation for resubmission. The
-[retry handoff](reports/correlation_retry_20260921/README.md) uses
-`slurm/retry_latest_correlations.sh plan|submit` and new run ID
-`20260921_latest_correlations_retry1`. Worker startup now resolves the frozen
-run directory before importing submission helpers. The retry preserves the
-old source/jobs/logs and requires the new manifest to match the old exactly.
-Only the failed measurement campaign is reconciled; every parent job must
-have terminal failure accounting before submission. Shared project caps and
-other campaigns' reservations remain in force. No measurement code changed.
-
-The retry retains the 8.15625 CPU-node-hour requested ceiling and 9-node-hour
-measurement cap. CPU remains the existing implementation, not a benchmarked
-performance winner. Submission, source transfer, full scratch preflight and
-live accounting remain user-run. No retry job has been submitted by Codex.
+Terminal measurements still run on CPU inside GPU allocations. The first
+square A/B result required 99.2/99.4 minutes for its sequential passes;
+no optimized GPU measurement benchmark or performance implementation is
+part of this analysis. No new submission is needed for this completed set.
 
 ## Accounting from synchronized evidence
 
@@ -230,32 +185,21 @@ to these totals. Accounting/solver time are distinct; no ledger was edited.
 
 ## Next action and boundaries
 
-Review the completed reports and LaTeX/PDF. Retrospective connected-correlation
-comparisons await result synchronization. The user reports 49/56 retry
-branches measured; seven remaining jobs hit their two-hour limits. Prepare
-any further recovery as a selective measurement retry with additional wall
-time, preserving successful outputs and the original state hashes.
-The corrected launcher and dedicated retry handoff are locally checked.
-The first square A/B sidecars are already available. Repeating the original
-`submit` command skips the recorded failed jobs; use the dedicated retry
-wrapper after `git pull --ff-only` on the existing
-`codex/mps-mft-phase0-refactor` Perlmutter checkout. The user requested the
-usual commit/push and git-pull handoff instead of individual file transfers.
-Do not resubmit the completed SCF campaigns.
-The split square points and alternating two-ladder
-trellis are candidates for a future selective convergence/stability decision.
+Review the completed correlation report and manuscript Sections 3.13/3.14.
+All requested measurements and all four square A/B endpoints are analyzed;
+no further backfill or square A/B submission is needed. Updated reports and
+sources use the standing commit/push and `git pull --ff-only` workflow on
+`codex/mps-mft-phase0-refactor`, with no individual file-transfer handoff.
+
+The next scientific controls are stationary stripe branches, matched L/chi
+comparisons, and selective cell/stability tests. The split square points
+and alternating two-ladder trellis need a separate convergence decision.
 Modest linear damping could test the negative trellis iteration mode, but
-no trellis convergence follow-up jobs have been prepared in this analysis.
+no follow-up jobs are prepared. Cubic cells and larger transverse periods
+remain recommendations. Measurement performance profiling is also separate.
 
-Next, compare the square A/B stripe state and V=-0.2 endpoints when their
-terminal artifacts are synced. The existing four-job campaign is submitted;
-do not submit it again. Cubic cell tests and larger transverse periods remain
-recommendations, not prepared campaigns.
-
-Archived scientific states and ledgers remain read-only. The implementation
-was checked locally on tiny CPU ladders, including terminal measurements
-and resume, with separate plotting and launcher checks. No production-size
-DMRG run, GPU timing, transfer or scheduler action was performed locally.
-For the retry specifically, nine fake-scheduler tests passed in 177 seconds,
-including the spooled worker; the local compact inventory reports 56/56
-branches and 58 MPSs. No measurement/DMRG suite was rerun for this shell fix.
+Archived scientific states and ledgers remain read-only. This update uses
+focused real-data analysis assertions, LaTeX compilation, rendered-page QA
+and an extracted Overleaf-root build. No DMRG or measurement contractions,
+GPU timing, transfer or scheduler action were performed locally. Earlier
+implementation/launcher tests remain recorded in the append-only run log.

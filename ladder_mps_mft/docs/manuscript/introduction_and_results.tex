@@ -40,7 +40,7 @@
 \title{Pairing, Stripes, and Competing Order\\in Coupled Hubbard Ladders\\
   \large Introduction, Background, and Current Results}
 \author{Ladder MPS+MF project\\Working manuscript draft}
-\date{Updated 20 September 2026}
+\date{Updated 22 September 2026}
 
 \begin{document}
 \maketitle
@@ -63,8 +63,15 @@ the boundary, with a small change in energy slope along the interaction cut
 but no resolved first-order singularity. All four repulsive-$V$ square
 starts lose pairing, including both intertwined seeds. Both trellis seeds
 become paired in a skew one-ladder cell but develop stripes in a rectangular
-two-ladder cell, where large alternating relaxation persists. These
-observations motivate a distinction between local pairing
+two-ladder cell, where large alternating relaxation persists. Complete
+retrospective measurements show that these striped endpoints retain
+short-distance singlet-pair correlations concentrated near hole-rich magnetic
+walls, while longer-distance correlations are strongly suppressed.
+Rung--leg signs predominantly survive, but reference and fit-window
+sensitivity preclude a single asymptotic decay exponent. All four newer
+square two-ladder runs at the attractive paired coordinates pass fixed-point
+gates and reproduce the paired state from both tested seeds. These
+observations sharpen the distinction between local pairing
 tendencies and the order selected in an array. The numerical results remain
 finite-length, finite-bond-dimension evidence, with explicit limits on
 self-consistency, response completeness, and thermodynamic interpretation.
@@ -75,9 +82,10 @@ Sections~\ref{sec:intro}--\ref{sec:background} are draft manuscript prose.
 Section~\ref{sec:results} is a dated collection of results and interpretation,
 including unresolved points that must remain visible during manuscript
 development. The evidence cutoff is the synchronized analyses through
-19 September 2026; the literature discussion incorporates the stripe and
+22 September 2026; the literature discussion incorporates the stripe and
 ladder-material discussions through 18 September. Appendix~\ref{sec:evidence} identifies the local
-sources. No new many-body calculation is reported here.
+sources. The new analysis reads completed measurements and simulations;
+no additional many-body solve was performed for manuscript preparation.
 
 \tableofcontents
 \clearpage
@@ -1090,9 +1098,9 @@ The completed wavelength test strengthens the qualification on the earlier
 physical interpretation: repulsive $V$ alone does not guarantee intertwining
 across these geometries. Other square parameters or basins remain possible.
 Loss of anomalous order also does not determine whether connected
-pair--pair correlations survive in the stripes. The prepared retrospective
-measurement pass addresses that separate question; its results are not
-part of this endpoint analysis.
+pair--pair correlations survive in the stripes. The completed retrospective
+measurements address that separate question in
+Section~\ref{sec:pair-correlations}, without changing these acceptance flags.
 
 \clearpage
 \subsection{Trellis: spatial-cell dependence and alternating stripe relaxation}
@@ -1223,6 +1231,199 @@ cells or suitable translated repetitions could test oblique stripes;
 the current two-cell comparison does not determine their optimum.
 
 \clearpage
+\subsection{Complete pair correlations: local survival and spatial suppression}
+\label{sec:pair-correlations}
+
+The September~22 synchronized measurements cover all 56 retrospective
+branches (58 spatial MPSs), plus eight diagnostics from the four newer
+square A/B runs. Receipts, full-source identifiers, compact-state hashes,
+model/configuration provenance, connected subtraction, Hermiticity and
+Gram positivity have been checked (\ev{pair-correlations}). All retrospective
+branches remain unaccepted maximum-iteration snapshots. The accepted square
+A/B states are discussed separately below.
+
+For this section, use the stored unnormalized singlet
+$D_{ab}=\sqrt2\Delta_{ab}$, with $\Delta$ defined in
+Eq.~\eqref{eq:pair-op}, and define
+\begin{equation}
+ \widetilde P_{ab,cd}=\avg{D^\dagger_{ab}D_{cd}},\qquad
+ \widetilde P^{\rm c}_{ab,cd}=\widetilde P_{ab,cd}
+       -\avg{D_{ab}}^*\avg{D_{cd}}.
+ \label{eq:connected-pair-measured}
+\end{equation}
+All new pair-correlation numbers and figures use this stored convention;
+divide by two for Eq.~\eqref{eq:pair-op}'s normalized bond correlations.
+The complete basis has 318 onsite, rung and nearest-neighbor leg operators,
+including cross-channel entries. The older isolated reference stores only
+within-class Hermitian-field covariances. For disjoint bonds in that real,
+number-conserving state, its non-onsite field-metric factor of $1/2$
+converts the sum of addition/removal correlations to
+$\operatorname{Re}\widetilde P=\operatorname{Re}\widetilde P^{\rm c}$.
+Contact and overlapping-bond entries are excluded; no missing isolated
+rung--leg cross-correlations are inferred.
+
+Figure~\ref{fig:pair-decay} averages correlation magnitudes over both
+directions with rung bonds in 9--56 and leg-bond starts in 9--55, keeping
+both endpoints inside that bulk window. The isolated reference uses
+$\chi=1200$, whereas coupled states use $\chi=200$; this comparison is not a
+matched truncation-error study. The square stripe at $(t_0,V)=(1.4,0)$
+retains a mean connected rung magnitude $1.51\times10^{-2}$ at separations
+2--4, compared with $2.03\times10^{-2}$ in the isolated reference. At
+16--24 rungs the corresponding values are $9.81\times10^{-5}$ and
+$5.22\times10^{-3}$. Local pairing survives, but its spatial persistence
+is strongly reduced in these saved states. Both stripe seeds support the
+same qualitative comparison.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=\textwidth]{\projectdocroot/reports/pair_correlations_20260922/pair_decay_comparison.pdf}
+\caption{Full and connected rung-pair magnitudes and normalized connected
+decay. Figure labels $P$ denote $\widetilde P$ in
+Eq.~\eqref{eq:connected-pair-measured}. All coupled curves here are
+unaccepted snapshots; the isolated curve has a larger bond dimension.
+Square/cubic use $t_0=1.4$; trellis uses $t_0=1,V=0$.
+Very small far-distance tails have no independent truncation-error estimate.}
+\label{fig:pair-decay}
+\end{figure}
+
+At matched intraladder parameters $(1.4,-0.4)$ and $\chi=200$, square
+paired and cubic striped endpoints have comparable short-distance
+connected magnitudes ($1.18\times10^{-2}$ versus approximately
+$1.01$--$1.03\times10^{-2}$). At 16--24 rungs, the square value is
+$3.04\times10^{-4}$ and cubic gives $1.29$--$1.39\times10^{-7}$, a
+factor of roughly $2.2$--$2.3\times10^3$. The trellis comparison at
+$(1,0)$ is similarly selective: short-distance connected amplitudes in
+the paired one-ladder and striped two-ladder endpoints differ by only
+a few percent, while the long-distance value falls from
+$4.64\times10^{-5}$ to approximately $6.6\times10^{-7}$.
+Figure~\ref{fig:pair-matched} includes both seeds and spatial ladders.
+These are endpoint and embedding comparisons, not a causal intervention
+or a stationary phase ranking.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=\textwidth]{\projectdocroot/reports/pair_correlations_20260922/matched_pair_comparisons.pdf}
+\caption{Matched intraladder-parameter comparisons of full and connected
+pair correlations at $\chi=200$. Both initial families and each spatial
+ladder are shown. The states retain their original unaccepted status.}
+\label{fig:pair-matched}
+\end{figure}
+
+The square paired state's full long-distance rung correlation is
+$1.17\times10^{-2}$: approximately 97.4\% of its signed mean is the
+disconnected anomalous product. Full and connected correlations instead
+coincide to the displayed precision in the representative stripe states.
+A full-correlation plateau therefore cannot be identified with slowly
+decaying connected fluctuations.
+
+Relative signs also survive. In the representative square paired, square
+striped and cubic striped states, rung--rung and leg--leg averages are
+positive, while rung--leg averages are negative. Across all retrospective
+MPSs, the fraction of negative connected rung--leg0 entries at bulk
+separations 2--8 is 96.3--100\% on square, 87.2--100\% on cubic and
+100\% on trellis. This supports a surviving local rung/leg sign structure,
+commonly termed $d$-wave-like, without establishing a condensate or PDW.
+Trellis leg--leg correlations also change sign with separation, so a
+single uniform form factor would overstate the evidence. Signed channel
+curves and maps are retained in the report (\ev{pair-correlations}).
+
+The surviving short-distance pairing is spatially organized. Define
+$A(i)=\sum_{r=2}^4(|\widetilde P^{\rm c}(i,i+r)|+
+|\widetilde P^{\rm c}(i,i-r)|)/6$ for rung-pair centers 13--52, whose six
+neighbors all lie inside the common bulk window. The mean $A$ in the
+highest hole-density quartile exceeds the lowest quartile by factors
+5.85--6.68 for square $V=0$, 19.39--19.59 for cubic $(1.4,-0.4)$, and
+5.29--5.36 across both seeds/ladders of striped trellis. Interior hole
+maxima lie within half a rung of the discrete staggered-spin sign crossings
+(Fig.~\ref{fig:pair-walls}). These within-texture associations are
+descriptive; they do not establish that stripes generate an attractive
+interaction or a dynamical pairing mechanism.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=\textwidth]{\projectdocroot/reports/pair_correlations_20260922/stripe_pairing_profiles.pdf}
+\caption{Short-distance pair correlations concentrate near hole-rich
+antiphase magnetic walls in representative snapshots. The bottom panels
+show $A(i)$; the middle panels show staggered leg-odd spin. Outer shading
+excludes eight rungs and the pair-strength centers use rungs 13--52.
+Dotted lines mark interior hole maxima; no independent-sample statistics
+or causal mechanism is inferred.}
+\label{fig:pair-walls}
+\end{figure}
+
+Reference sensitivity prevents a universal decay-exponent claim. Fits of
+$\log|\widetilde P^{\rm c}(i,i\pm r)|$ at reference rungs 16, 24 and 32,
+with windows 4--12, 8--20 and 12--28 clipped to the bulk, give effective
+power slopes 0.39--1.36 for the isolated reference, 1.55--4.12 for square
+paired, $-0.50$--6.74 for square striped, 0.37--15.55 for cubic striped
+and 1.92--13.64 for the displayed trellis stripe. Fits require six points
+above $10^{-12}$; this analysis threshold is not an error bound. The
+negative slope is a local modulation effect, not asymptotic growth.
+Alternate edge cuts and same-window exponential fits are also supplied.
+This sensitivity reinforces the need for reference, boundary, length and
+truncation controls emphasized by \citet{Shen2023}. Neither the old isolated
+fit near 0.76 nor a selected new window should be treated as a universal
+exponent without those controls.
+
+\subsection{Square A/B: all four attractive runs reach paired fixed points}
+\label{sec:square-ab-complete}
+
+The square spatial extension at $t_0=1.4$ now has complete states and
+measurements for both seeds at $V=-0.4$ and $-0.2$
+(\ev{square-ab-complete}). The cell contains two 64-rung MPSs with
+unshifted reciprocal square bonds and separate mean densities $15/16$.
+The stripe component of ladder B's initial condition is displaced by
+eight rungs. Unlike the rectangular trellis result, all four square
+trajectories pass the fixed-point gates and lose their seeded magnetic
+texture (Fig.~\ref{fig:square-ab-complete}).
+
+\begin{table}[htbp]\centering
+\caption{Accepted square A/B endpoints, $t_0=1.4$, $\chi=200$.
+The pair RMS uses the historical physical symmetrized nearest-neighbor
+leg anomalous expectation on bonds 6--58, not $\widetilde P$.}
+\label{tab:square-ab-complete}
+\begin{tabular}{r l r r r}\toprule
+$V$ & Seed & Sweeps & Corrected $E/(Nt)$ & Leg-pair RMS\\\midrule
+$-0.4$ & Stripe & 40 & $-1.167404800596$ & $0.0352251$\\
+$-0.4$ & Pairing & 40 & $-1.167404800545$ & $0.0352251$\\
+$-0.2$ & Stripe & 55 & $-0.914117842951$ & $0.0335678$\\
+$-0.2$ & Pairing & 44 & $-0.914117843004$ & $0.0335678$\\\bottomrule
+\end{tabular}
+\end{table}
+
+The two seed energies at each $V$ agree within $5.3\times10^{-11}\,t$/site.
+Bulk spin RMS is below $5.4\times10^{-7}$ at $V=-0.4$ and
+$1.15\times10^{-6}$ at $V=-0.2$. Maximum A/B leg-pair profile differences
+are below $1.1\times10^{-6}$; charge differences reach $1.13\times10^{-5}$.
+The independent audit checks raw-update identities, source and seed hashes,
+channel/density/energy windows, inner-DMRG and slow-mode criteria, and
+reconstructs canonical energies with 256 sites per cell.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=\textwidth]{\projectdocroot/reports/pair_correlations_20260922/square_AB_complete.pdf}
+\caption{All four square A/B trajectories reach accepted paired fixed
+points. Both seed families and both spatial ladders are shown. The seed
+magnetization decays; the endpoint leg-pair profiles nearly coincide.}
+\label{fig:square-ab-complete}
+\end{figure}
+
+The new pair correlations also agree between seeds and ladders and reproduce
+the earlier paired one-ladder snapshots (Fig.~\ref{fig:square-ab-pairs}).
+Connected rung magnitudes over 16--24 rungs are about $3.036\times10^{-4}$
+and $2.475\times10^{-4}$ at $V=-0.4$ and $-0.2$; the corresponding full
+values are $1.166\times10^{-2}$ and $1.030\times10^{-2}$. These results
+support survival of the paired state in this tested two-ladder square cell.
+They do not prove linear stability against every transverse mode, global
+minimality or thermodynamic superconductivity. The diagnostics remain
+intraladder: A/B mean-field coupling does not supply interladder quantum
+entanglement or a phase-stiffness measurement.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=\textwidth]{\projectdocroot/reports/pair_correlations_20260922/square_AB_pair_correlations.pdf}
+\caption{Connected rung-pair correlations in accepted square A/B states
+and earlier one-ladder snapshots. Agreement holds for both seeds and both
+attractions. The old one-ladder acceptance flags remain unchanged.}
+\label{fig:square-ab-pairs}
+\end{figure}
+
+\clearpage
 \subsection{Scope of the emerging physical interpretation}
 
 The isolated-ladder and coupled-array observations separate pair formation
@@ -1242,18 +1443,15 @@ are necessary for pairing nor excludes their possible beneficial role.
 The approximation treats quantum fluctuations within the ladder, but does
 not resolve the full collective stripe and phase fluctuations of a plane.
 
-The most discriminating open physical question is whether the eventual
-stripe state retains strong pair--pair correlations after its anomalous
-expectation value has vanished. Strong residual pair correlations would
-support a distinction between local pairing and interladder coherence.
-Suppression of those correlations would instead indicate more direct
-competition with pairing. Resolving this requires four-fermion measurements
-on the stripe MPS; anomalous-amplitude histories alone do not answer it.
-These measurements are now enabled for future accepted and maximum-iteration
-endpoints, and a retrospective pass over the latest 56 branches (58 spatial
-MPSs) is prepared. Measuring an unaccepted endpoint is useful if its residuals
-and status accompany the correlations. No new pair--pair data from that
-pass enter the present analysis.
+The completed four-fermion measurements now resolve part of the earlier
+open question: the measured stripe endpoints retain local singlet-pair
+correlations near their hole-rich walls, while longer-distance correlations
+are strongly suppressed. This supports a distinction between local pairing
+and spatially extended order, with direct competition evident at longer
+distances. It does not isolate phase fluctuations as the cause, establish
+fluctuating superconductivity or certify the unaccepted stripe endpoints as
+stationary phases. The newly accepted square A/B paired states strengthen
+the paired side of the comparison within that specific spatial extension.
 
 Attraction changes more than one ingredient of the coupled problem.
 The prefactor $g=\tp^2/|\Ep|$ decreases when $|\Ep|$ increases at fixed
@@ -1302,7 +1500,9 @@ The remaining high-value controls are:
  \item Separate connected fluctuations from disconnected order contributions.
  Subtracting $\avg{O_i}\avg{O_j}$ removes the elastic mean-field order
  contribution; both parts are needed to interpret structure factors.
- Compare pair correlations across bond classes and bulk reference positions.
+ Extend the completed bond-class and reference-position comparisons to
+ matched larger lengths and bond dimensions; the current effective slopes
+ have substantial window dependence.
 \end{enumerate}
 
 The completed square and unfrustrated-cubic grids now supply contrasting
@@ -1428,6 +1628,21 @@ $V=0$ basin.
  \textbf{All four trellis endpoints and alternating relaxation, September~19.}
  \href{run:../reports/trellis_progress_20260918/README.md}{Trellis report} and
  \href{run:../TRELLIS_MEAN_FIELD.md}{spatial-cell method contract}.
+
+ \item\label{ev:pair-correlations}
+ \textbf{Complete retrospective pair correlations, September~22.}
+ \href{run:../reports/pair_correlations_20260922/correlation_report.pdf}{Correlation report},
+ with full/connected and signed channel figures, source hashes, complete
+ coverage, reference-window fits, bulk-cut sensitivity and stripe-wall metrics.
+ \path{reports/pair_correlations_20260922/}.
+
+ \item\label{ev:square-ab-complete}
+ \textbf{All four accepted square A/B results, September~22.}
+ The same report's completed square section and
+ \href{run:../reports/pair_correlations_20260922/square_AB_results.json}{gate/energy audit}
+ supersede the September~21 first-result-only status.
+ The original \href{run:../reports/square_two_ladder_20260920/README.md}{preparation contract}
+ retains the model, seeds and spatial-cell definition.
 
  \item\label{ev:length}
  \textbf{Prepared finite-size seeds, September~6.}

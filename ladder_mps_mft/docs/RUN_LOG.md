@@ -4467,3 +4467,103 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   The unrelated .claude/ directory remains excluded. Live full-state validity,
   scheduler status and final completion remain user-run checks; retry1 results
   and logs have not been synchronized into this local workspace.
+
+## 2026-09-21: retry2 submission reported; CPU terminal measurement cost clarified
+
+- User reports the seven-entry retry submitted. Treat this as user-reported
+  submission, with no new job IDs, scheduler records or results synced locally.
+- User asks whether newer GPU jobs really spend nearly two hours measuring
+  chi=200 states. Read the current diagnostic implementation, GPU launcher,
+  synchronized square A/B configuration, analysis receipt and stdout for
+  job 58654275. The stdout records measurement_wall_seconds of
+  5950.29531788826 (A) and 5964.311393976212 (B), matching the report:
+  99.17/99.41 minutes, 3.31 hours total after 4.59 hours of solver time.
+  These timers cover MPS loading plus diagnostics, excluding the initial
+  source hash and final diagnostic write; they are not Slurm allocation times.
+- compute_ladder_diagnostics explicitly calls move_to_cpu. The GPU launcher
+  sets JULIA_NUM_THREADS=1 and BLAS/OpenMP/MKL threads=1; the synchronized
+  square config has blas_threads=strided_threads=1 and no block-sparse
+  threading. Terminal passes run sequentially inside the same GPU allocation.
+- Full measurements include addition/removal matrices over 318 onsite/rung/
+  leg pair operators, seven additional site-correlation matrices, onsite
+  compatibility matrices and bond entropies. The pair sweep already caches
+  transfer environments and fills Hermitian counterparts; connected
+  subtraction is algebra on measured arrays, not a second contraction pass.
+  Existing timings do not identify which component dominates. Repeated
+  canonicalization for bond entropy and redundant onsite correlations are
+  inspection-based optimization candidates, not measured bottlenecks.
+- Recommended next performance work is component timing and a backend-aware
+  measurement benchmark; separating CPU diagnostics from GPU solves could
+  avoid holding a GPU during the CPU tail. No GPU speedup claim, implementation
+  change, local expensive benchmark, or modification to running jobs is made.
+
+## 2026-09-22: complete correlation analysis and accepted square A/B results
+
+- User synchronized the completed measurements and newest square A/B output,
+  requested the stripe/pairing comparison, a report, and manuscript results
+  with figures. Work uses the local mirror only. No Perlmutter connection,
+  transfer, scheduler operation, budget change or new simulation was performed.
+- Added `scripts/analyze_pair_correlations_20260922.py`, reusing existing
+  source/energy/profile readers. All 56 retrospective branches are present:
+  retry1 has 49 receipts/51 MPS diagnostics; retry2 has seven receipts/diagnostics.
+  Exact parent/subset manifests and receipts agree, with no double counting.
+  All original unaccepted maximum-iteration flags remain unchanged.
+- Four complete square A/B jobs 58654274--58654277 contribute eight additional
+  diagnostics. Independent checks of source/config/seed provenance, raw-update
+  identities, channel/field/slow/density/energy/inner-DMRG gates, density
+  correction and canonical energy confirm all four accepted fixed points.
+  Stripe/pairing seeds take 40/40 sweeps at V=-0.4 and 55/44 at V=-0.2;
+  corrected seed energies agree within 5.3e-11 t/site. Both spatial ladders
+  reproduce the earlier paired profiles and intraladder correlations.
+- The analysis validates all 66 new diagnostic files against receipts,
+  configuration and compact-state provenance, checks complete/full flags,
+  Julia/HDF5 axis conventions, Hermiticity, addition/removal Gram positivity,
+  connected subtraction, stored within-class blocks and physical profiles.
+  Source paths and SHA-256 values are in the report's `coverage.csv`,
+  `source_validation.json` and `square_AB_results.json`. Full-MPS hashes are
+  pinned to the submitted manifests/receipts; no new remote full-state audit
+  is claimed. Connected-subtraction residuals and measured imaginary parts
+  are zero in the stored arrays; PSD checks use a 1e-9 numerical tolerance.
+- The old isolated chi=1200 reference contains Hermitian-field covariances
+  with a non-onsite field-metric factor. For disjoint bonds in its real,
+  number-conserving state, those equal the real unnormalized pair-removal
+  correlations. Contact/overlapping bonds and unavailable rung--leg entries
+  are excluded. New numbers use D=sqrt(2)*Delta; normalized manuscript
+  singlet correlations are half as large. All coupled MPSs use chi=200.
+- Main result: substantial short-distance pairing remains near hole-rich
+  magnetic walls. Matched intraladder comparisons show long-distance
+  connected rung correlations smaller by about 2200--2300 in cubic stripes
+  than paired square, and about 70 in two-ladder striped versus one-ladder
+  paired trellis. Short-distance magnitudes remain comparable. Full/connected
+  comparisons remove the paired anomalous plateau; rung--leg signs mostly
+  survive, whereas trellis leg--leg signs can oscillate. Spatial statements
+  are descriptive and do not establish a causal mechanism or phase stiffness.
+- Reference rungs 16/24/32, both directions, three fit windows and bulk
+  exclusions of 4/8/12 rungs demonstrate strong fit sensitivity. No universal
+  exponent, fluctuating superconductivity, stable striped phase ranking or
+  unrestricted transverse stability is inferred. Rechecked the primary
+  Shen/Zhang/Qin arXiv record 2303.16487 for the existing boundary-sensitivity
+  citation; no broad literature refresh or added bibliography entries.
+- Produced `docs/reports/pair_correlations_20260922/`: a ten-page LaTeX/PDF
+  report, seven vector/raster figures, full CSV/JSON summaries, provenance,
+  fits, bulk cuts and wall comparisons. Added manuscript Sections 3.13/3.14,
+  five figures and two evidence groups; updated abstract, interpretation
+  limits and formerly pending-measurement language. The draft now has 43
+  pages, 18 figures and the existing 48 references. Updated state/plan,
+  diagnostic and report entry points; historical source artifacts are intact.
+- Validation: `C:/Python313/python.exe -B
+  ladder_mps_mft/scripts/analyze_pair_correlations_20260922.py` completed all
+  real-data assertions and figure generation. Repository-local Tectonic
+  compiled both PDFs; extracted-text/reference checks and rendered pages
+  show no unresolved references, missing figures or overfull boxes. The
+  existing underfull paragraph warning remains. A first report build needed
+  three standard Latin Modern fonts; an approved download into the existing
+  workspace Tectonic cache resolved that build dependency.
+- Rebuilt `docs/manuscript/overleaf_upload.zip` with 24 files, checked each
+  against its maintained source and verified all 18 figure paths. A separate
+  build from the extracted Overleaf project root also passes. Build logs,
+  rendered-page QA and extracted text are in the ignored
+  `output/pair_report_review_20260922/`. No unrelated DMRG tests were run.
+- Publishing the report, analysis script and maintained manuscript on the
+  existing branch follows the user's standing git-pull synchronization
+  preference. The unrelated `.claude/` directory remains excluded.

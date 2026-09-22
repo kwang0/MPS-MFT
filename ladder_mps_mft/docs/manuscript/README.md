@@ -2,7 +2,7 @@
 
 Created 15 September 2026. This is an editable manuscript starting point using
 the existing annotated literature review and locally synchronized analyses
-through September 19, with a September 20 common-cell trellis energy audit
+through September 22, including a September 20 common-cell trellis energy audit
 (updated from the initial September 13 cutoff).
 
 Final-results update, September 19: the [combined campaign review](../reports/campaign_review_20260918/README.md)
@@ -19,7 +19,15 @@ remain 0.002238–0.002308 t/site lower. Section 3.12 distinguishes this direct
 trial-energy comparison from a stationary phase ranking and explains how
 diagonal stripes would require charge/spin commensurability across ladders.
 
-The rebuilt draft has 37 pages and 48 cited references. The introduction and
+September 22 update: Sections 3.13 and 3.14 incorporate the complete pair
+correlation measurements and all four accepted square A/B fixed points.
+Five new figures compare full and connected correlations, matched model/cell
+controls, hole-rich magnetic walls, and the completed A/B histories and pair
+correlations. The [standalone correlation report](../reports/pair_correlations_20260922/README.md)
+also supplies channel-sign plots, reference/window sensitivity and the
+machine-readable validation and numerical summaries.
+
+The rebuilt draft has 43 pages and 48 cited references. The introduction and
 Section 2.4 now motivate the trellis runs through the chain--ladder materials,
 pressure-induced superconductivity, charge and magnetic order, optical/model
 parameter estimates (including the limits on V), and reciprocal one-/two-ladder
@@ -42,13 +50,14 @@ stripe/coherence references; three existing material records are also cited.
    the revision of the early paired-basin interpretation; the two raw anchor
    comparisons; stripe wavevectors and slow texture relaxation; canonical
    energies and the bond-dimension comparison; complete grid results, fine-cut
-   energy shapes, positive-V and trellis outcomes; remaining physical controls.
-4. An appendix linking claims to sixteen groups of local evidence.
+   energy shapes, positive-V and trellis outcomes; full and connected pair
+   correlations; the completed square A/B campaign; remaining physical controls.
+4. An appendix linking claims to eighteen groups of local evidence.
 
 The document preserves provisional status and historical acceptance flags.
 The prepared longer-ladder seeds are not new evidence. All four positive-V
 and all four trellis final states are now analyzed; old partial logs remain
-historical. There are thirteen figures, including the earlier September 12
+historical. There are eighteen figures, including the earlier September 12
 spatial evolution, the square/cubic comparisons, full transition-cut energies,
 physical spin/pairing cuts and completed square/trellis history/profile plots. Figures 2–5 compare square and cubic side by side: phase diagrams,
 full energy histories, physical spin RMS and physical pairing RMS. The three
@@ -103,6 +112,12 @@ reports/
     histories.pdf
     profiles.pdf
     two_ladder_relaxation.pdf
+  pair_correlations_20260922/
+    pair_decay_comparison.pdf
+    matched_pair_comparisons.pdf
+    stripe_pairing_profiles.pdf
+    square_AB_complete.pdf
+    square_AB_pair_correlations.pdf
 METHODS_NOTES.tex
 ```
 
@@ -113,7 +128,7 @@ Use the normal pdfLaTeX compiler with BibTeX (the documents use natbib).
 The path handling follows the project-root behavior documented in
 [Overleaf's multi-file guidance](https://www.overleaf.com/learn/latex/Multi-file_LaTeX_projects).
 
-All thirteen figure PDFs are required, even though they are outside the two source
+All eighteen figure PDFs are required, even though they are outside the two source
 folders. The Git-tracked [Overleaf upload ZIP](overleaf_upload.zip) contains
 the LaTeX sources, bibliographies, living methods notes, required figures and
 these instructions, so it can be downloaded from another device.
@@ -133,3 +148,8 @@ The historical material-discussion build is under
 under `output/notes_update_20260919/`. The September 19 build retains all
 48 references and convergence qualifications and is checked for unresolved
 references, missing figures, layout and Overleaf path coverage.
+
+The September 22 build and rendered-page checks are under
+`output/pair_report_review_20260922/`. Both the standalone report and the
+manuscript are checked for unresolved references, missing figures and layout;
+the refreshed Overleaf archive retains all 18 manuscript figures.

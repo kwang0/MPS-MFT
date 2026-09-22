@@ -55,6 +55,10 @@ base template before submission. Already queued source checkouts are unchanged.
 
 ### User-run Perlmutter backfill
 
+**Completed September 22:** all 56 branches / 58 MPSs have verified measurements
+across retry1/retry2. See the [analysis and manuscript figures](reports/pair_correlations_20260922/README.md).
+The recovery commands below describe the history; no entries remain missing.
+
 **Latest September 21 follow-up:** retry1 has 49/56 measured branches and
 seven TIMEOUT jobs. Use the [selective timeout retry](reports/correlation_retry_20260921/TIMEOUT_RETRY.md)
 via `slurm/complete_missing_correlations.sh` to measure only those seven
