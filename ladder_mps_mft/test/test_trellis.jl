@@ -88,26 +88,56 @@ end
 end
 
 @testset "four immutable branches, matched reference seeds and fingerprints" begin
-    mktempdir() do dir
-        args = (joinpath(TRELLIS_ROOT,"configs/phase1_gpu_trellis_chi200_raw60.toml"),
-            joinpath(TRELLIS_ROOT,"data/two_basin_references.h5"),joinpath(dir,"control"),joinpath(dir,"full"),"test_trellis")
-        rows = prepare_trellis_comparison(args...)
-        @test length(rows)==4 && sum(row.spatial_ladders for row in rows)==6
-        @test rows[1].model_fingerprint==rows[2].model_fingerprint != rows[3].model_fingerprint==rows[4].model_fingerprint
-        @test length(unique(row.numerical_fingerprint for row in rows))==1
-        @test_throws ErrorException prepare_trellis_comparison(args...)
-        for (one,two) in ((rows[1],rows[3]),(rows[2],rows[4]))
-            h5open(one.seed,"r") do a
-                h5open(two.seed,"r") do b
-                    for key in fieldnames(CorrelationState)
-                        @test read(a,"template_correlations/$key")==read(b,"template_correlations/$key")
+    rows_by_v = Dict()
+    for (config, V, ep) in (("phase1_gpu_trellis_chi200_raw60.toml", 0., -0.13251724),
+                            ("phase1_gpu_trellis_vm1_chi200_raw60.toml", -1., -0.2713195876256691))
+        mktempdir() do dir
+            args = (joinpath(TRELLIS_ROOT,"configs",config),
+                joinpath(TRELLIS_ROOT,"data/two_basin_references.h5"),joinpath(dir,"control"),joinpath(dir,"full"),"test_trellis")
+            rows = prepare_trellis_comparison(args...)
+            @test length(rows)==4 && sum(row.spatial_ladders for row in rows)==6
+            @test all(row.V == V && row.ep_mode == "exact" && isapprox(row.ep_signed, ep; atol=1e-12) for row in rows)
+            @test all(row.ep_denominator == abs(row.ep_signed) for row in rows)
+            @test TOML.parsefile(joinpath(dir,"control","seed_contract.toml"))["V"] == V
+            rows_by_v[V] = rows
+            for row in rows
+                settings = load_settings(row.config)
+                @test settings.run.inherit_sha256 == LadderMPSMFT.sha256_file(row.seed)
+                @test settings.run.parent_checkpoint === settings.run.resume_checkpoint === nothing
+                @test settings.run.full_pair_correlations && settings.run.quick_diagnostics
+                h5open(row.seed,"r") do file
+                    correlations = LadderMPSMFT._trellis_read_correlations(file["template_correlations"])
+                    expected = trellis_mean_fields(fill(correlations, row.spatial_ladders), settings.model)
+                    for (i, ladder) in enumerate(("A", "B")[1:row.spatial_ladders]), key in fieldnames(FieldState)
+                        @test read(file,"ladders/$ladder/fields/$key") ≈ getfield(expected[i],key)
                     end
                 end
             end
+            @test rows[1].model_fingerprint==rows[2].model_fingerprint != rows[3].model_fingerprint==rows[4].model_fingerprint
+            @test length(unique(row.numerical_fingerprint for row in rows))==1
+            @test_throws ErrorException prepare_trellis_comparison(args...)
+            for (one,two) in ((rows[1],rows[3]),(rows[2],rows[4]))
+                h5open(one.seed,"r") do a
+                    h5open(two.seed,"r") do b
+                        for key in fieldnames(CorrelationState)
+                            @test read(a,"template_correlations/$key")==read(b,"template_correlations/$key")
+                        end
+                    end
+                end
+            end
+            old = load_settings(joinpath(TRELLIS_ROOT,"configs/phase1_gpu_square_two_basin_fine_cuts_chi200_raw60.toml"))
+            @test old.model.geometry==:square && old.convergence.accepted_periods==[1,2]
         end
-        old = load_settings(joinpath(TRELLIS_ROOT,"configs/phase1_gpu_square_two_basin_fine_cuts_chi200_raw60.toml"))
-        @test old.model.geometry==:square && old.convergence.accepted_periods==[1,2]
     end
+    for (old, new) in zip(rows_by_v[0.], rows_by_v[-1.])
+        @test old.model_fingerprint != new.model_fingerprint
+        @test old.numerical_fingerprint == new.numerical_fingerprint
+    end
+    old = TOML.parsefile(joinpath(TRELLIS_ROOT,"configs/phase1_gpu_trellis_chi200_raw60.toml"))
+    new = TOML.parsefile(joinpath(TRELLIS_ROOT,"configs/phase1_gpu_trellis_vm1_chi200_raw60.toml"))
+    new["model"]["V"] = old["model"]["V"]
+    new["run"]["output_directory"] = old["run"]["output_directory"]
+    @test old == new
 end
 
 @testset "spatial A/B stationarity is distinct from temporal period two" begin

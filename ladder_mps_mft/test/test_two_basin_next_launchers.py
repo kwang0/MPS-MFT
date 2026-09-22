@@ -52,7 +52,8 @@ full_run_directory_from_control() { printf '%s/full\\n' "$1"; }
     def test_syntax(self):
         for name in ('phase1_gpu.sh', 'two_basin_submission_environment.sh',
                      'submit_cubic_unfrustrated_two_basin.sh', 'submit_square_two_basin_finish.sh',
-                     'submit_square_two_basin_fine_cuts.sh', 'submit_square_positive_v.sh', 'submit_trellis_comparison.sh'):
+                     'submit_square_two_basin_fine_cuts.sh', 'submit_square_positive_v.sh', 'submit_trellis_comparison.sh',
+                     'submit_trellis_vm1_comparison.sh'):
             result = subprocess.run([BASH, '-n', (ROOT / 'slurm' / name).as_posix()],
                                     capture_output=True, text=True)
             self.assertEqual(result.returncode, 0, result.stderr)
@@ -126,6 +127,9 @@ printf '%s|%s|%s|%s|%s|%s|%s|%s\\n' "$*" "$PHASE1_PROJECT_DIR" "$CONFIG_VARIABLE
             ('submit_square_two_basin_finish.sh', 'prepare-square-two-basin-finish',
              '20260915_square_t014_v000_two_basin_finish20', '08:00:00',
              'phase1_gpu_square_two_basin_finish20.toml'),
+            ('submit_trellis_vm1_comparison.sh', 'prepare-trellis-comparison',
+             '20260922_trellis_vm1_two_basin_comparison_60', '16:00:00',
+             'phase1_gpu_trellis_vm1_chi200_raw60.toml'),
         )
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -147,7 +151,7 @@ printf '%s|%s|%s|%s|%s|%s|%s|%s\\n' "$*" "$PHASE1_PROJECT_DIR" "$CONFIG_VARIABLE
             fake = '''#!/bin/bash
 set -euo pipefail
 [[ ! -v PHASE1_RUN_SCRIPT_VERSION && ! -v PHASE1_RUN_SCRATCH_DIR ]] || exit 17
-printf '%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s\\n' "$*" "$PHASE1_PROJECT_DIR" "$PHASE1_RUN_ROOT" "$PHASE1_SCRATCH_ROOT" "$PHASE1_BUDGET_ROOT" "$PHASE1_LEDGER_PATH" "$PHASE1_RECONCILIATION_PATH" "$PHASE1_ACCOUNT" "$PHASE1_GPU_TIME" "$PHASE1_ADDITIONAL_NODE_HOUR_CAP" "$PHASE1_MAX_SEGMENTS" "${PHASE1_CUBIC_TWO_BASIN_CONFIG:-}" "${PHASE1_SQUARE_TWO_BASIN_FINISH_CONFIG:-}" >> "$TEST_RECEIPT"
+printf '%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s\\n' "$*" "$PHASE1_PROJECT_DIR" "$PHASE1_RUN_ROOT" "$PHASE1_SCRATCH_ROOT" "$PHASE1_BUDGET_ROOT" "$PHASE1_LEDGER_PATH" "$PHASE1_RECONCILIATION_PATH" "$PHASE1_ACCOUNT" "$PHASE1_GPU_TIME" "$PHASE1_ADDITIONAL_NODE_HOUR_CAP" "$PHASE1_MAX_SEGMENTS" "${PHASE1_CUBIC_TWO_BASIN_CONFIG:-}" "${PHASE1_SQUARE_TWO_BASIN_FINISH_CONFIG:-}" "${PHASE1_TRELLIS_CONFIG:-}" >> "$TEST_RECEIPT"
 if [[ "${TEST_FAIL_PREPARE:-0}" == 1 && "$1" == prepare-* ]]; then exit 9; fi
 '''
             (slurm / 'phase1_gpu.sh').write_text(fake, encoding='utf-8', newline='\n')

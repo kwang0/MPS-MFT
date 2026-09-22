@@ -4567,3 +4567,64 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
 - Publishing the report, analysis script and maintained manuscript on the
   existing branch follows the user's standing git-pull synchronization
   preference. The unrelated `.claude/` directory remains excluded.
+
+## 2026-09-22: same four trellis starts prepared at V=-1.0
+
+- User requested the original four trellis runs at V=-1.0 to better match
+  the intended material parameters. Added
+  `configs/phase1_gpu_trellis_vm1_chi200_raw60.toml` and
+  `slurm/submit_trellis_vm1_comparison.sh`, reusing the existing trellis
+  preparation and shared-budget launcher. New default run ID:
+  `20260922_trellis_vm1_two_basin_comparison_60`. Prepared locally only;
+  no Perlmutter connection, transfer, submission, scheduler action or ledger
+  edit was performed. No job IDs are available.
+- The base changes only V and its unprepared output placeholder. The four
+  starts remain one-/two-ladder cells crossed with stripe/pairing 95%/5%
+  reference mixtures, identical templates on A/B, fresh MPSs, random seed
+  1404, t=t0=1, U=8, tau0=tau1=0.1, L64, n=15/16 per ladder, chi200,
+  range4 and at most 60 raw simultaneous cell sweeps. Acceptance gates,
+  minimum 40 sweeps, ten stable records and the 11.5-hour solver deadline
+  are unchanged. No damping or continuation is introduced.
+- Exact registry row: (L,U,V,t0,n,chi)=(64,8,-1,1,0.9375,1000),
+  E_p=-0.2713195876256691 t. Initial fields are regenerated using its
+  absolute denominator; no interpolation or new E_p computation. Reference
+  bundle SHA-256 remains
+  e01a1ea7d6be813110870d26377db0df529d1584816c946af78584e1e1fbddc1.
+  The preparer accepts only the original V=0 and requested V=-1 campaigns
+  and now records V/E_p in the seed contract. Original V=0 config and
+  submission wrapper remain unchanged.
+- Full terminal diagnostics remain enabled, now using the existing current
+  endpoint-measurement workflow. Following the recent square A/B allowance,
+  each job requests one GPU, 32 logical CPU cores and 16 hours in shared QOS,
+  with 4.5 hours beyond the solver deadline for terminal measurements.
+  Four jobs reserve at most 16 node-hours, one segment each, under the
+  existing 400-additional-node-hour control. This is not a new runtime
+  benchmark. Deadline stops retain the existing offline measurement option.
+- Local preview command used the installed Julia 1.12.7 binary with
+  `--startup-file=no --compiled-modules=existing --project=ladder_mps_mft`
+  and `ladder_mps_mft/scripts/prepare_phase1_trellis_comparison.jl`, passing
+  the new config, `ladder_mps_mft/data/two_basin_references.h5`,
+  `ladder_mps_mft/output/seed_previews/20260922_trellis_vm1/control`,
+  its sibling `full` directory and the new run ID. All four previews and
+  six spatial field sets were created. Config/seed/source hashes and
+  fingerprints are recorded in
+  `docs/reports/trellis_vm1_20260922/prepared_branches.csv`.
+  Perlmutter preparation regenerates host-specific paths and hashes.
+- Validation: the installed Julia binary with the same startup/project
+  flags ran `ladder_mps_mft/test/test_trellis.jl`: 240 assertions passed
+  (105 preparation assertions cover both V values). Checks include exact
+  denominator selection, target seed-field reconstruction, fresh lineage,
+  inherited seed hashes, identical numerical controls and distinct model
+  fingerprints. `C:/Python313/python.exe -B -m unittest discover -s
+  ladder_mps_mft/test -p test_two_basin_next_launchers.py -v` passed six
+  tests, including the new current-checkout wrapper's config/run/ceiling,
+  shared accounting, custom ID and failed-preparation stop. Shell checks
+  use installed Git Bash and fake launchers, with no scheduler access.
+  `git diff --check` passed. Solver and measurement code are unchanged;
+  no DMRG smoke, full suite, L64 solve or GPU benchmark was run.
+- Updated current state, active plan and documentation entry point. The
+  handoff follows the standing current-branch commit/push and user-run
+  `git pull --ff-only` workflow, then
+  `bash slurm/submit_trellis_vm1_comparison.sh` from
+  `$CFS/m4863/MPS-MFT/ladder_mps_mft`. The user keeps the source checkout
+  fixed while jobs run. The unrelated `.claude/` directory remains untouched.

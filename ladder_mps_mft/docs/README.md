@@ -38,6 +38,11 @@ recorded explicitly as user-reported until synchronized evidence is available.
 
 ## Stable scientific references
 
+The [September 22 V=-1 trellis preparation](reports/trellis_vm1_20260922/README.md)
+repeats the original four one-/two-ladder and stripe/pairing starts with
+exact target pair binding and unchanged raw-map controls. Its handoff uses
+`slurm/submit_trellis_vm1_comparison.sh`; these runs are prepared, not submitted.
+
 The [September 22 correlation and completed square A/B report](reports/pair_correlations_20260922/README.md)
 verifies all 58 retrospective MPS diagnostics and eight square A/B sidecars.
 Stripes retain local pairing near hole-rich magnetic walls while long-distance

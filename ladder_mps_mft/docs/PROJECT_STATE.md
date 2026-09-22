@@ -1,6 +1,6 @@
 # Current project state
 
-Last locally reviewed: **2026-09-22 — all correlations and square A/B results analyzed**
+Last locally reviewed: **2026-09-22 — four V=-1 trellis runs prepared**
 
 This is a local, mutable snapshot. Stable rules live in AGENTS.md and the
 method documents; durable history is append-only in RUN_LOG.md. Local
@@ -8,13 +8,13 @@ artifacts establish solver outcomes, not live scheduler state.
 
 ## Repository and workflow
 
-- Branch: `codex/mps-mft-phase0-refactor`; baseline for this update: `e7314af`.
+- Branch: `codex/mps-mft-phase0-refactor`; baseline for this update: `68af0ed`.
 - Root `.claude/` is unrelated and remains untouched.
 - Output/state files are excluded from Git and immutable. Reports, scripts,
   LaTeX/PDF notes and the Overleaf bundle are maintained together.
 - Only the user transfers data or operates Perlmutter. Its ladder checkout is
   `$CFS/m4863/MPS-MFT/ladder_mps_mft`. No local authentication, transfers,
-  submissions, scheduler calls or budget-ledger edits accompany this analysis.
+  submissions, scheduler calls or budget-ledger edits accompany this preparation.
 - The 400-additional-node-hour project control remains in force. Historical
   reservations do not authorize new continuations. Preserve submitted source
   trees and each campaign's original controls/fingerprints.
@@ -185,6 +185,17 @@ to these totals. Accounting/solver time are distinct; no ledger was edited.
 
 ## Next action and boundaries
 
+User requested the same four trellis starts at V=-1.0. The
+[September 22 preparation](reports/trellis_vm1_20260922/README.md) provides
+one-/two-ladder cells with stripe/pairing 95%/5% seeds, unchanged chi=200,
+L64 and 60 raw sweeps, exact E_p=-0.2713195876256691, and full terminal
+correlations. Run `bash slurm/submit_trellis_vm1_comparison.sh` on Perlmutter
+after `git pull --ff-only` from the checkout above. Four one-GPU jobs request
+16 hours each (16 node-hours total ceiling), one segment each, retaining the
+11.5-hour solver deadline and shared budget gates. Prepared locally only;
+no submission or job IDs have been reported. Keep the checkout fixed while
+the jobs run. Previous V=0 campaigns and their artifacts are unchanged.
+
 Review the completed correlation report and manuscript Sections 3.13/3.14.
 All requested measurements and all four square A/B endpoints are analyzed;
 no further backfill or square A/B submission is needed. Updated reports and
@@ -195,7 +206,8 @@ The next scientific controls are stationary stripe branches, matched L/chi
 comparisons, and selective cell/stability tests. The split square points
 and alternating two-ladder trellis need a separate convergence decision.
 Modest linear damping could test the negative trellis iteration mode, but
-no follow-up jobs are prepared. Cubic cells and larger transverse periods
+no damping/stability follow-up is prepared. The V=-1 repetition above keeps
+the original raw-map controls. Cubic cells and larger transverse periods
 remain recommendations. Measurement performance profiling is also separate.
 
 Archived scientific states and ledgers remain read-only. This update uses

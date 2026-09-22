@@ -5,7 +5,8 @@ isdefined(@__MODULE__, :two_basin_references) || include("prepare_phase1_two_bas
 function validate_trellis_campaign(settings)
     m, d, c, r = settings.model, settings.dmrg, settings.convergence, settings.run
     m.geometry == :trellis && m.L == 64 && m.r_range == 4 || error("expected L64 range4 trellis")
-    (m.t, m.U, m.t0, m.tau0, m.tau1, m.V, m.density) == (1.,8.,1.,.1,.1,0.,.9375) || error("trellis parameters changed")
+    (m.t, m.U, m.t0, m.tau0, m.tau1, m.density) == (1.,8.,1.,.1,.1,.9375) || error("trellis parameters changed")
+    m.V in (0., -1.) || error("trellis comparison supports V=0 or V=-1 only")
     m.ep_mode == :exact && m.ep_signed < 0 || error("exact bound-pair registry row required")
     d.maxdim == 200 && d.energy_tol == c.dmrg_sweep_energy_tol == 1e-7 || error("chi/inner-DMRG contract changed")
     r.max_iterations == c.probe_iterations == 60 && c.minimum_iterations == 40 && c.stable_iterations == 10 || error("cell-sweep contract changed")
@@ -92,6 +93,7 @@ function prepare_trellis_comparison(base_path, reference_path, control_run, full
     end
     open(joinpath(control_run, "seed_contract.toml"), "w") do io
         TOML.print(io, Dict("run_id" => run_id, "branches" => 4, "epsilon" => TWO_BASIN_EPSILON,
+            "V" => base.model.V, "ep_signed" => base.model.ep_signed, "ep_mode" => String(base.model.ep_mode),
             "reference_sha256" => TWO_BASIN_REFERENCE_SHA, "fresh_mps" => true,
             "maximum_cell_sweeps" => 60, "minimum_cell_sweeps" => 40, "stable_sweeps" => 10,
             "maximum_ladder_solves" => 360, "density_constraint" => "fixed n=0.9375 on each ladder",

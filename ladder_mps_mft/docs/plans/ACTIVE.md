@@ -29,6 +29,14 @@ the Overleaf bundle includes the new figures.
 
 ## Next evidence and decisions
 
+The user-requested [V=-1 trellis repetition](../reports/trellis_vm1_20260922/README.md)
+is prepared for user-run submission: the same four one-/two-ladder and
+stripe/pairing starts, exact target E_p, L64/chi200/60 raw sweeps, full terminal
+measurements. `slurm/submit_trellis_vm1_comparison.sh` requests four 16-hour
+one-GPU jobs under the shared cap (16 node-hours ceiling), with one segment
+and an 11.5-hour solver deadline. No jobs submitted locally. Analyze after
+the user syncs results; no damping, larger-cell or stability campaign is added.
+
 1. The [September 22 correlation report](../reports/pair_correlations_20260922/README.md)
    verifies all 56 retrospective branches / 58 MPSs plus eight new square
    A/B diagnostics. No backfill entries remain missing. Local pairing survives
