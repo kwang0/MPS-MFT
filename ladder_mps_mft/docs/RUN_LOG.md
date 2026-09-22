@@ -4379,3 +4379,91 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
 - The user-reported two ongoing square A/B jobs and all frozen campaign
   artifacts remain outside the retry. Git publication and Perlmutter
   submission are separate: only the user runs the latter.
+
+## 2026-09-21: user-provided retry status reports 49 of 56 branches measured
+
+- User pasted output from `bash slurm/measure_latest_campaigns.sh status
+  20260921_latest_correlations_retry1` and asked why some rows are missing.
+  Attachment: 162e9fd3-53f1-49b1-9f4c-20045d64840c/Pasted text.txt.
+- The table reports complete=49/56. Both two-ladder trellis branches (55/56)
+  are MEASURED, so this corresponds to 51/58 spatial MPS files passing the
+  receipt-based status check as reported by the user's Perlmutter command.
+- MISSING rows: 6 (square pairing t0=1,V=-0.2), 11 (square stripe
+  t0=1.2,V=-0.2), 31 (cubic stripe t0=1.4,V=-0.4), 34 (cubic pairing
+  t0=1.4,V=-0.2), 46 (fine-square pairing t0=1.3,V=-0.4), 51 (positive-V
+  period-eight seed), 53 (one-ladder trellis stripe seed).
+- Read the existing measurement_status implementation: MISSING conflates
+  absent receipts with receipt/source-hash, file-count, output-hash or read
+  failures. It does not query Slurm. A running/pending job can lack a receipt,
+  as can a failed or timed-out job; this table alone cannot identify the cause.
+- The retry campaign directory is absent locally. No queue/accounting
+  output or worker logs accompanied the pasted table. Prepared user-run
+  commands to select these seven job IDs from jobs.tsv and inspect their
+  sacct state/elapsed/exit code and log tails. No further retry, source change,
+  scheduler action, transfer or correlation analysis is performed here.
+- Updated PROJECT_STATE and ACTIVE with the user-provided completion evidence
+  and its boundary. This does not change original acceptance flags or infer
+  the live status of the separately running square A/B jobs.
+
+## 2026-09-21: user accounting identifies all seven missing rows as timeouts
+
+- During the status explanation, the user provided sacct output for all 56
+  retry jobs. It shows 49 COMPLETED and seven TIMEOUT allocations. In the
+  pasted submission/job-ID order, missing rows map to: 6=58712480,
+  11=58712491, 31=58712512, 34=58712515, 46=58712527, 51=58712532,
+  53=58712534. These seven ran for 02:00:00–02:00:31 against the two-hour
+  single-MPS wall limit. The two spatial trellis jobs completed in 03:24:17
+  and 03:19:40 under their four-hour allocations.
+- The successful retry startup is established by 49 measured branches; the
+  remaining failure is insufficient wall time, not the old sibling-script
+  lookup. TIMEOUT remains the controlling allocation state despite ExitCode
+  0:0. No worker logs or measurement output were provided for local inspection.
+- Proposed next step: retry only the seven missing single-MPS measurements
+  with additional wall time, preserving successful outputs and all source
+  hashes. Four hours each would reserve 1.96875 CPU node-hours using the
+  existing 9/128-node billing convention, subject to the shared project cap.
+  This is a requested-ceiling proposal, not a runtime guarantee or new
+  submission. The full-startup retry wrapper is not appropriate for a parent
+  with existing results. No implementation, remote operation or new tests
+  accompany this status-only diagnosis.
+
+## 2026-09-21: selective four-hour retry prepared for seven timed-out measurements
+
+- User requested a new script to complete the missing entries. Added
+  `slurm/complete_missing_correlations.sh` with plan/submit/status/reconcile
+  actions, parent `20260921_latest_correlations_retry1`, and new campaign
+  `20260921_latest_correlations_retry2`. No Perlmutter actions were run here.
+- Exactly parent rows 6, 11, 31, 34, 46, 51 and 53 are selected. Parent job IDs
+  come from its verified jobs.tsv; submission requires reconciled TIMEOUT
+  records for those IDs and receipt/hash verification of the other 49 rows.
+  Each retry requests four hours, 8 logical CPUs, 32 GiB, four Julia threads:
+  total ceiling 1.96875 CPU node-hours, subject to the existing shared cap.
+- The retry manifest is a seven-row subset with indices 1–7. All other
+  manifest fields, including full-MPS hashes, remain pinned to the parent;
+  retry_rows.tsv records original indices/job IDs. Copies the parent's
+  scientific source unchanged, verifies source/manifest/job provenance,
+  checks configuration hashes and full-state presence before submitting,
+  and reuses the existing worker's full-state SHA check before contraction.
+- Uses a fresh results directory so partial timeout files are not reused or
+  overwritten. The parent's successful measurements, partial files, manifest,
+  source and job history remain unchanged. Combined status counts unique
+  measured branches across retry1 and retry2; the original status stays 49/56.
+- Reuses the existing launcher for CPU calibration, budget-locked submission,
+  resource requests and duplicate-job prevention. Only retry1 accounting is
+  reconciled before submission; other campaign reservations, including the
+  two user-reported ongoing square A/B jobs, remain in the shared budget.
+- Local validation: `bash -n ladder_mps_mft/slurm/complete_missing_correlations.sh`
+  passed using the installed Git Bash. `C:/Python313/python.exe -B -m unittest
+  discover -s ladder_mps_mft/test -p test_missing_correlations.py -v` passed
+  all three focused tests in 95.064 seconds. Fake-scheduler fixtures cover
+  exact subset/provenance/resources, fresh output location, parent immutability,
+  duplicates, source tampering, combined status without double counting,
+  changed receipt patterns, running jobs, project cap, unavailable MPSs and
+  changed configurations. Scientific measurement and DMRG code are unchanged;
+  no expensive contraction or DMRG tests were run.
+- Added the TIMEOUT_RETRY handoff and updated current-state/active-plan and
+  diagnostics links. The user's standing git-pull preference authorizes
+  publishing these scoped changes to origin/codex/mps-mft-phase0-refactor.
+  The unrelated .claude/ directory remains excluded. Live full-state validity,
+  scheduler status and final completion remain user-run checks; retry1 results
+  and logs have not been synchronized into this local workspace.

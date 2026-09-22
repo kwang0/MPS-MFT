@@ -55,6 +55,11 @@ base template before submission. Already queued source checkouts are unchanged.
 
 ### User-run Perlmutter backfill
 
+**Latest September 21 follow-up:** retry1 has 49/56 measured branches and
+seven TIMEOUT jobs. Use the [selective timeout retry](reports/correlation_retry_20260921/TIMEOUT_RETRY.md)
+via `slurm/complete_missing_correlations.sh` to measure only those seven
+rows with four-hour limits. Its status combines the two result directories.
+
 **September 21 recovery:** the submitted `20260918_latest_correlations`
 campaign's 56 jobs all failed at shell startup before measurements. Use the
 [dedicated retry handoff](reports/correlation_retry_20260921/README.md) after

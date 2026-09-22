@@ -29,6 +29,18 @@ the Overleaf bundle includes the new figures.
 
 ## Next evidence and decisions
 
+September 21 user-provided retry status supersedes the preparation-only
+status below: `20260921_latest_correlations_retry1` reports **49/56 branches
+measured (51/58 MPSs)**. Rows 6, 11, 31, 34, 46, 51, 53 lack verified receipts.
+The user then supplied accounting showing all seven timed out at their
+two-hour limit; the other 49 jobs completed. No retry results/logs are synced
+locally. The [selective retry](../reports/correlation_retry_20260921/TIMEOUT_RETRY.md)
+is prepared: `slurm/complete_missing_correlations.sh` requests four hours
+for each of the seven missing rows (1.96875 CPU node-hours), preserves the
+49 successful entries, and reports combined completion across retry1/retry2.
+User-run submission follows `git pull --ff-only`; nothing is submitted here.
+The full-startup recovery below is historical and must not be rerun on retry1.
+
 1. Full terminal correlations are enabled for future accepted and
    maximum-iteration states. The retrospective workflow covers 56 latest
    branches / 58 spatial MPSs. The submitted `20260918_latest_correlations`

@@ -1,6 +1,6 @@
 # Current project state
 
-Last locally reviewed: **2026-09-21 — correlation backfill retry prepared**
+Last locally reviewed: **2026-09-21 — selective seven-job correlation timeout retry prepared**
 
 This is a local, mutable snapshot. Stable rules live in AGENTS.md and the
 method documents; durable history is append-only in RUN_LOG.md. Local
@@ -148,7 +148,30 @@ eigenvalues plus/minus lambda), and explains leg parity and trellis shear.
 The manuscript and its Overleaf bundle also include the September 20 trial
 energy comparison and the diagonal-stripe commensurability distinction.
 
-## Correlation measurements: startup failure and prepared retry
+## Correlation measurements: seven-job timeout retry
+
+The user has now supplied Perlmutter `status` output for
+`20260921_latest_correlations_retry1`: **49/56 branches MEASURED**, covering
+51/58 spatial MPSs because both two-ladder trellis branches are measured.
+Rows **6, 11, 31, 34, 46, 51, 53** are MISSING. The user's subsequent
+`sacct` output identifies seven TIMEOUT jobs, matching these rows in submission
+order: **58712480, 58712491, 58712512, 58712515, 58712527, 58712532,
+58712534**. Their elapsed times are 02:00:00–02:00:31; the other 49 jobs are
+COMPLETED. Both two-ladder trellis jobs completed within their four-hour limits.
+Thus the seven missing receipts correspond to time limits, not the original
+launcher startup error. ExitCode 0:0 does not override the TIMEOUT state.
+The retry directory and worker logs have not been synchronized locally.
+The [selective retry](reports/correlation_retry_20260921/TIMEOUT_RETRY.md)
+is prepared as `slurm/complete_missing_correlations.sh plan|submit|status|reconcile`.
+It selects exactly these seven rows, copies retry1's frozen scientific source,
+and uses a fresh `20260921_latest_correlations_retry2` output directory.
+Each CPU job gets four hours, for a 1.96875-node-hour requested ceiling under
+the shared project cap. Submission requires the other 49 receipts to verify
+and the seven parent jobs to have reconciled TIMEOUT accounting. Combined
+status reports coverage across both directories. No local submission or
+remote operation has been performed; the user synchronizes via `git pull
+--ff-only` and runs the handoff. The first full-startup recovery below is
+historical and must not be used on the partial retry1 campaign.
 
 Full equal-time raw/connected pair–pair, charge/spin, density-spin,
 single-particle/anomalous, double-occupancy and entanglement measurements
@@ -208,8 +231,11 @@ to these totals. Accounting/solver time are distinct; no ledger was edited.
 ## Next action and boundaries
 
 Review the completed reports and LaTeX/PDF. Retrospective connected-correlation
-comparisons await the user-run measurement retry and sync; the corrected
-launcher and dedicated retry handoff are now prepared and locally checked.
+comparisons await result synchronization. The user reports 49/56 retry
+branches measured; seven remaining jobs hit their two-hour limits. Prepare
+any further recovery as a selective measurement retry with additional wall
+time, preserving successful outputs and the original state hashes.
+The corrected launcher and dedicated retry handoff are locally checked.
 The first square A/B sidecars are already available. Repeating the original
 `submit` command skips the recorded failed jobs; use the dedicated retry
 wrapper after `git pull --ff-only` on the existing

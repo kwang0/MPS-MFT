@@ -1,5 +1,10 @@
 # Correlation backfill recovery — September 21, 2026
 
+**Latest follow-up:** retry1 measured 49/56 branches; the remaining seven
+jobs timed out. Use the [selective four-hour retry](TIMEOUT_RETRY.md) and
+`slurm/complete_missing_correlations.sh`, rather than the full-startup
+recovery commands below. The rest of this page records the first recovery.
+
 The original `20260918_latest_correlations` campaign submitted 56 CPU jobs
 for 58 spatial MPSs. All 56 synchronized logs fail before Julia starts:
 the spooled batch script tries to source `phase1_gpu.sh` beside itself in
