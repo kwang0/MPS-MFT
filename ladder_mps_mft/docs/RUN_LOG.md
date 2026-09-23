@@ -4893,3 +4893,41 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   Overleaf packager. The regenerated archive has 28 members, all matching
   maintained sources byte for byte, with all 22 figure paths covered.
   No source measurements, figure data, simulations or Perlmutter actions changed.
+
+## 2026-09-23: stripe-first manuscript flow and square-only paired figures
+
+- User requested swapping Sections 3.15/3.16 and their figures, smoothing
+  document-wide flow, and removing trellis from the paired-state plots.
+  Section 3.15 now analyzes the 42 stripe states (Figures 19/20), followed
+  by Section 3.16 on paired square states (Figures 21/22).
+- Moved the shared bulk, pairing-selection and rung-operator definitions
+  before their first use. Revised the introduction, evidence overview,
+  transitions, captions, evidence appendix and final physical interpretation
+  to follow stripe correlations into the reverse paired-state comparison.
+  Corrected the background's stale first-trellis-result wording and link to
+  the complete trellis Section 3.12. All scientific acceptance limits remain.
+- Paired figures now contain one row of 22 square MPSs: 14 unaccepted/eight
+  accepted. Removed the two single-coordinate trellis marks, their panels,
+  t0=1 legend item and figure discussion. All 24 paired records remain in
+  the tables, and the source 42/24 classification is unchanged. Added exact
+  plotted/omitted IDs and rationale to the figure validation manifest.
+- Reused `plot_stripe_pairing_grid_20260923.py`, adding `--paired-only` for
+  focused figure revisions. The local command with that flag completes all
+  66-source checks and the two figure builds in 5.4 seconds. Adjusted title
+  spacing after visual review. Source table records are unchanged; all four
+  stripe PNG/PDF files match their prior Git bytes. A raw CSV byte check
+  encountered Git's CRLF/LF normalization; exact CSV-record comparisons pass.
+- Rebuilt with the existing cached Tectonic compiler in about 2.6 seconds
+  per focused layout revision. The final PDF has 50 pages, 22 figures and
+  the unchanged 48 cited references, with no unresolved references, missing
+  characters or overfull boxes. The existing underfull paragraph and
+  Fontconfig notice remain. New text fits without an orphan continuation page.
+- Visually checked updated front matter, background/evidence pages,
+  stripe/paired analysis, square-only figures and the concluding transition.
+  Final locations: stripe text 36/37, Figures 19/20 on 38/39; paired text 40,
+  Figures 21/22 on 41/42. Logs, text, rendered pages and focused checks are in
+  ignored `output/stripe_first_square_pairs_20260923/`.
+- Refreshed the maintained PDF, report/docs indexes and Overleaf archive.
+  All 28 archive members match their maintained files, and all 22 figure
+  paths are covered. No new DMRG, scientific reclassification, source-state
+  edits or Perlmutter operations were involved.

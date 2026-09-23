@@ -28,6 +28,41 @@
     "charge": 0.39269908169872414,
     "spin": 2.945243112740431
   },
+  "paired_plot": {
+    "mps": 22,
+    "accepted_mps": 8,
+    "unaccepted_mps": 14,
+    "geometry": "square",
+    "ids": [
+      "backfill_1",
+      "backfill_2",
+      "backfill_15",
+      "backfill_16",
+      "backfill_38",
+      "backfill_39",
+      "backfill_40",
+      "backfill_41",
+      "backfill_42",
+      "backfill_44",
+      "backfill_45",
+      "backfill_46",
+      "backfill_47",
+      "backfill_48",
+      "square_AB_stripe_-0.4_A",
+      "square_AB_stripe_-0.4_B",
+      "square_AB_pairing_-0.4_A",
+      "square_AB_pairing_-0.4_B",
+      "square_AB_stripe_-0.2_A",
+      "square_AB_stripe_-0.2_B",
+      "square_AB_pairing_-0.2_A",
+      "square_AB_pairing_-0.2_B"
+    ],
+    "omitted_ids": [
+      "backfill_53A",
+      "backfill_54A"
+    ],
+    "omission_reason": "The two paired trellis MPSs share one parameter coordinate; retained in the source tables but omitted from figures."
+  },
   "excluded": "Isolated chi=1200 reference; prospective runs without diagnostics are not included.",
   "checks": "Diagnostic SHA-256, source-state lineage, status, model labels, pair Hermiticity/subtraction and four recomputed pair measures; charge/spin connected subtraction, rung-channel projection and independent Fourier sum; complete disjoint 42/24 partition.",
   "sources": [

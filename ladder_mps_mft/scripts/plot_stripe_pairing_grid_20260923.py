@@ -5,6 +5,7 @@ seeds and A/B ladders are retained separately. No source state is modified.
 Run from any directory with Python + numpy/h5py/scipy/matplotlib installed.
 """
 from pathlib import Path
+import argparse
 import csv
 import hashlib
 import json
@@ -233,29 +234,28 @@ def marker_handles(points):
 
 
 def paired_grid(points, *, wavevectors):
+    assert len(points) == 22 and all(p["geometry"] == "square" for p in points)
     if wavevectors:
         metrics = ("charge_stripe_q_connected", "spin_stripe_q_connected")
         titles = (r"Charge: $S_{n_+}^{\rm conn}(q_c=\pi/8)$",
                   r"Longitudinal spin: $S_{m_-}^{\rm conn}(q_s=15\pi/16)$")
         name = "paired_stripe_weights"
-        size = (11.4, 8.0)
+        size = (11.4, 5.6)
     else:
         metrics = ("charge_short_connected_abs", "charge_long_connected_abs",
                    "spin_short_connected_abs", "spin_long_connected_abs")
         titles = ("Charge · short\n$r=2$–$4$", "Charge · long\n$r=16$–$24$",
                   "Longitudinal spin · short\n$r=2$–$4$", "Longitudinal spin · long\n$r=16$–$24$")
         name = "paired_stripe_distance_correlations"
-        size = (14.8, 8.0)
+        size = (14.8, 5.6)
     geometries = [g for g in GEOMETRIES if any(p["geometry"] == g for p in points)]
     fig, axes = plt.subplots(len(geometries), len(metrics), figsize=size, squeeze=False)
-    fig.subplots_adjust(left=.12, right=.9, top=.78, bottom=.24, hspace=.58, wspace=.4)
+    fig.subplots_adjust(left=.09, right=.9, top=.73, bottom=.30, wspace=.4)
     norm, cmap = Normalize(vmin=-.4, vmax=.2), plt.get_cmap("viridis")
     xspan = max(p["pair_uniform"] for p in points if p["geometry"] == "square") - min(p["pair_uniform"] for p in points if p["geometry"] == "square")
     for row, geometry in enumerate(geometries):
         data = [p for p in points if p["geometry"] == geometry]
         xlo, xhi = min(p["pair_uniform"] for p in data), max(p["pair_uniform"] for p in data)
-        # The trellis pair consists of almost identical seeds at ONE parameter;
-        # keep a meaningful span rather than magnifying seed-level differences.
         xmin, xmax = (xlo+xhi)/2-xspan*.62, (xlo+xhi)/2+xspan*.62
         for col, (metric, title) in enumerate(zip(metrics, titles)):
             ax = axes[row, col]
@@ -288,36 +288,33 @@ def paired_grid(points, *, wavevectors):
                 ax.set_title(title, fontsize=12, pad=11)
             if col == 0:
                 ax.set_ylabel("Connected weight" if wavevectors else "Mean connected magnitude", fontsize=10)
-            if geometry == "trellis":
-                ax.text(.5, .94, "One coordinate\n(two overlapping seeds)", transform=ax.transAxes,
-                        ha="center", va="top", fontsize=9, color="#555555", wrap=True)
-        fig.text(.02, (axes[row,0].get_position().y0+axes[row,0].get_position().y1)/2,
-                 f"{NAMES[geometry]}\n{len(data)} MPSs", rotation=90, ha="center", va="center", fontsize=12)
-    cax = fig.add_axes([.935, .30, .014, .35])
+    cax = fig.add_axes([.935, .31, .014, .40])
     bar = fig.colorbar(plt.cm.ScalarMappable(norm=norm,cmap=cmap), cax=cax)
     cax.set_title("$V$", pad=8)
     bar.set_ticks(sorted({p["V"] for p in points}))
     fig.legend(handles=marker_handles(points), loc="upper center", bbox_to_anchor=(.5,.895), ncol=6,
                frameon=False, fontsize=10, columnspacing=1.5, handletextpad=.4)
-    fig.suptitle("Uniformly paired states: stripe correlations versus pairing strength", y=.99, fontsize=16)
-    fig.text(.5,.948,"24 paired MPSs: 22 square + 2 trellis. Cubic has no paired endpoints in this data set.",ha="center",fontsize=10)
+    fig.suptitle("Uniformly paired square states: stripe correlations versus pairing strength", y=.99, fontsize=15)
+    fig.text(.5,.925,"22 square MPSs; overlapping seeds and A/B ladders remain separate points.",ha="center",fontsize=10)
     if wavevectors:
         definition = r"$S_O^{\rm conn}(q)=N_b^{-1}\sum_{ij}e^{iq(i-j)}[\langle O_iO_j\rangle-\langle O_i\rangle\langle O_j\rangle]$; fixed stripe wavevectors, contact terms included."
     else:
         definition = r"Mean $|\langle O_iO_j\rangle-\langle O_i\rangle\langle O_j\rangle|$ over the indicated separations; long-distance axes are logarithmic."
-    fig.text(.5,.119,definition,ha="center",fontsize=10)
-    fig.text(.5,.078,r"$n_+=(n_0+n_1)/2$, $m_-=(S^z_0-S^z_1)/2$; bulk rungs 9–56. Axis ranges differ by panel to show within-group variation.",ha="center",fontsize=10)
-    fig.text(.5,.037,"16 unaccepted + 8 accepted MPSs. Equal-time intraladder correlations; parameter associations, not causal response functions.",ha="center",fontsize=10,color="#555555")
+    fig.text(.5,.135,definition,ha="center",fontsize=10)
+    fig.text(.5,.085,r"$n_+=(n_0+n_1)/2$, $m_-=(S^z_0-S^z_1)/2$; bulk rungs 9–56. Axis ranges differ by measure.",ha="center",fontsize=10)
+    fig.text(.5,.035,"14 unaccepted + 8 accepted MPSs. Equal-time intraladder correlations; parameter associations, not causal response functions.",ha="center",fontsize=10,color="#555555")
     for ext in ("png","pdf"):
         fig.savefig(OUT/f"{name}.{ext}",dpi=170,facecolor="white")
     plt.close(fig)
 
 
-def main():
+def main(*, paired_only=False):
     OUT.mkdir(parents=True, exist_ok=True)
     points, receipts = load_points()
     stripe = [p for p in points if p["state_group"] == "stripe"]
     paired = [p for p in points if p["state_group"] == "uniform_pairing"]
+    paired_plot = [p for p in paired if p["geometry"] == "square"]
+    assert len(paired_plot) == 22 and sum(p["accepted"] for p in paired_plot) == 8
     stripe_ids, paired_ids = {p["id"] for p in stripe}, {p["id"] for p in paired}
     assert not stripe_ids & paired_ids and stripe_ids | paired_ids == {p["id"] for p in points}
     assert {g:sum(p["geometry"] == g for p in paired) for g in GEOMETRIES} == dict(square=22,cubic_unfrustrated=0,trellis=2)
@@ -341,18 +338,25 @@ def main():
             minimum_observed_paired_uniform_weight=min(p["pair_uniform_weight_fraction"] for p in paired),
             partition_unchanged_at_pair_rms_thresholds=[.001,.01,.05]),
         stripe_wavevectors={k:float(q) for k,q in STRIPE_Q.items()},
+        paired_plot=dict(mps=len(paired_plot), accepted_mps=8, unaccepted_mps=14,
+            geometry="square", ids=[p["id"] for p in paired_plot],
+            omitted_ids=[p["id"] for p in paired if p["geometry"] != "square"],
+            omission_reason="The two paired trellis MPSs share one parameter coordinate; retained in the source tables but omitted from figures."),
         excluded="Isolated chi=1200 reference; prospective runs without diagnostics are not included.",
         checks="Diagnostic SHA-256, source-state lineage, status, model labels, pair Hermiticity/subtraction and four recomputed pair measures; charge/spin connected subtraction, rung-channel projection and independent Fourier sum; complete disjoint 42/24 partition.",
         sources=receipts)
     (OUT / "validation.json").write_text(json.dumps(validation, indent=2)+"\n", encoding="utf-8")
     plt.rcParams.update({"font.family":"DejaVu Sans", "font.size":11, "pdf.fonttype":42})
-    plot_grid(stripe, "charge_rms", "Charge-modulation RMS", "charge_pairing_grid")
-    plot_grid(stripe, "spin_rms", "Spin-order RMS", "spin_pairing_grid")
-    paired_grid(paired,wavevectors=True)
-    paired_grid(paired,wavevectors=False)
+    if not paired_only:
+        plot_grid(stripe, "charge_rms", "Charge-modulation RMS", "charge_pairing_grid")
+        plot_grid(stripe, "spin_rms", "Spin-order RMS", "spin_pairing_grid")
+    paired_grid(paired_plot,wavevectors=True)
+    paired_grid(paired_plot,wavevectors=False)
     print(json.dumps({k:v for k,v in validation.items() if k != "sources"}, indent=2))
-    print(f"Wrote four PNG/PDF grids and tables for {len(stripe)} stripe / {len(paired)} paired MPSs to {OUT}")
+    print(f"Wrote {'paired' if paired_only else 'all'} PNG/PDF grids; paired figures show {len(paired_plot)} square MPSs. Tables retain {len(stripe)} stripe / {len(paired)} paired MPSs in {OUT}")
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--paired-only", action="store_true", help="Validate all data and rebuild only the paired figures.")
+    main(paired_only=parser.parse_args().paired_only)

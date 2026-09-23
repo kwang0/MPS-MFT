@@ -27,23 +27,23 @@ correlations. The [standalone correlation report](../reports/pair_correlations_2
 also supplies channel-sign plots, reference/window sensitivity and the
 machine-readable validation and numerical summaries.
 
-September 23 update: Section 3.15 retains the paired-state analysis and its
-original figures: stripe-wavevector weights (Figure 19), then short-/long-distance
-correlations (Figure 20). It defines the measured 42/24 stripe/paired
-partition, the uniform rung-pair amplitude, connected charge/spin weights
-at the stripe wavevectors, and short-/long-distance magnitudes. The analysis
-quantifies the opposite spin-correlation trends along the square hopping
-and interaction cuts and distinguishes local weight from spatial range.
-Trellis has only one paired parameter coordinate; the state acceptance
-labels and limits on causal interpretation are retained.
+September 23 update: Section 3.15 analyzes all 42 stripe-state MPSs, with
+pair correlations versus static charge RMS (Figure 19) and spin RMS
+(Figure 20). It introduces the shared state-selection and observable
+definitions, then quantifies local pair survival and long-distance suppression.
+Geometry, parameter cuts, full/connected columns and positive-V seed textures
+are compared without changing acceptance labels.
 
-Section 3.16 adds the complementary analysis of all 42 stripe-state MPSs:
-pair correlations versus static charge RMS (Figure 21) and spin RMS
-(Figure 22). It quantifies local pair survival and long-distance suppression,
-contrasts geometry and parameter cuts, compares full/connected columns,
-and retains the seed-dependent positive-V textures and all unaccepted labels.
+Section 3.16 reverses the comparison within the paired square states:
+stripe-wavevector weights (Figure 21), then short-/long-distance charge/spin
+correlations (Figure 22), versus uniform pairing. The figures show 22 square
+MPSs, with 14 unaccepted/eight accepted labels. The two paired trellis states
+at one parameter coordinate remain in the data tables but are omitted from
+these figures. The discussion follows the opposite spin-correlation trends
+along the square hopping and interaction cuts. The introduction, evidence
+overview, section transitions and final interpretation follow this order.
 
-The rebuilt draft has 51 pages and 48 cited references. The introduction and
+The rebuilt draft has 50 pages and 48 cited references. The introduction and
 Section 2.4 now motivate the trellis runs through the chain--ladder materials,
 pressure-induced superconductivity, charge and magnetic order, optical/model
 parameter estimates (including the limits on V), and reciprocal one-/two-ladder
@@ -67,8 +67,8 @@ stripe/coherence references; three existing material records are also cited.
    comparisons; stripe wavevectors and slow texture relaxation; canonical
    energies and the bond-dimension comparison; complete grid results, fine-cut
    energy shapes, positive-V and trellis outcomes; full and connected pair
-   correlations; the completed square A/B campaign; stripe correlations within
-   uniformly paired states; pair correlations across stripe states;
+   correlations; the completed square A/B campaign; pair correlations across
+   stripe states; stripe correlations within uniformly paired square states;
    remaining physical controls.
 4. An appendix linking claims to nineteen groups of local evidence.
 
@@ -137,10 +137,10 @@ reports/
     square_AB_complete.pdf
     square_AB_pair_correlations.pdf
   stripe_pairing_grid_20260923/
-    paired_stripe_weights.pdf
-    paired_stripe_distance_correlations.pdf
     charge_pairing_grid.pdf
     spin_pairing_grid.pdf
+    paired_stripe_weights.pdf
+    paired_stripe_distance_correlations.pdf
 METHODS_NOTES.tex
 ```
 
@@ -183,8 +183,9 @@ references or overfull boxes; its two new figures use landscape pages.
 The refreshed Overleaf archive contains all 20 figures and is checked
 against the maintained sources and their relative paths.
 
-The complete stripe-state and paired-state manuscript check is under
-`output/stripe_and_pairing_manuscript_20260923/`. Original Figures 19/20
-and their paired-state analysis remain unchanged. The new stripe-state
-analysis occupies pages 40/41, followed by Figures 21/22 on pages 42/43.
+The initial complete stripe/paired manuscript check is under
+`output/stripe_and_pairing_manuscript_20260923/`. The current reordered
+build and figure checks are under `output/stripe_first_square_pairs_20260923/`:
+stripe analysis on pages 36/37 and Figures 19/20 on pages 38/39, followed
+by paired-square analysis on page 40 and Figures 21/22 on pages 41/42.
 The refreshed Overleaf archive contains all 22 figures (28 files total).

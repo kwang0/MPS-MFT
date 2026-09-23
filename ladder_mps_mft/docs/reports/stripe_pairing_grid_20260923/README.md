@@ -13,14 +13,19 @@ uniform pair amplitude. The original mixed-state grids are replaced.
 - [Charge RMS versus pair correlations (PNG)](charge_pairing_grid.png) / [PDF](charge_pairing_grid.pdf).
 - [Spin RMS versus pair correlations (PNG)](spin_pairing_grid.png) / [PDF](spin_pairing_grid.pdf).
 
-**24 uniformly paired MPSs, with pairing strength on the horizontal axis:**
+**22 uniformly paired square MPSs, with pairing strength on the horizontal axis:**
 
 - [Stripe-wavevector connected weights (PNG)](paired_stripe_weights.png) / [PDF](paired_stripe_weights.pdf).
 - [Short-/long-distance connected charge/spin correlations (PNG)](paired_stripe_distance_correlations.png) / [PDF](paired_stripe_distance_correlations.pdf).
 
 Tables: [all 66 points](points.csv), [stripe subset](stripe_points.csv),
-[uniformly paired subset](paired_points.csv), and
+[all 24 uniformly paired states](paired_points.csv), and
 [validation/source hashes](validation.json).
+
+The paired figures omit the two trellis MPSs at their single parameter
+coordinate. Those measurements remain in the tables. The plotted square
+subset contains 14 unaccepted snapshots and eight accepted MPSs; its exact
+included and omitted IDs are recorded in `validation.json` under `paired_plot`.
 
 Color encodes V; marker shape encodes t0. An outer ring marks an accepted
 MPS. Every seed and A/B ladder remains a separate mark; overlaps are retained
@@ -121,9 +126,8 @@ to one wavevector. Signed averages are also retained in the table.
 Only intraladder longitudinal-spin and charge covariances are used; these
 are not dynamical spectra or interladder correlation measurements.
 
-Paired panels have explicitly different axis ranges to show variation
-within each geometry/measure. The tiny trellis seed differences are not
-magnified: its x span matches the square row. Long-distance distance-grid
+Paired figures use a single square row, with different axis ranges to show
+variation within each measure. Long-distance distance-grid
 axes are logarithmic. No points are fitted or connected as a causal curve.
 
 ## Descriptive reading
@@ -148,6 +152,9 @@ From the repository root on local Windows:
 ```powershell
 & C:/Python313/python.exe -B ladder_mps_mft/scripts/plot_stripe_pairing_grid_20260923.py
 ```
+
+Add `--paired-only` to rebuild just the two paired figures while retaining
+all source and classification checks and refreshing the complete data tables.
 
 The script verifies all 66 diagnostic hashes, source-state lineage, status,
 model labels, pair Hermiticity/subtraction and all four old pair-window

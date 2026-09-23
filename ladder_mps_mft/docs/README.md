@@ -49,6 +49,8 @@ separate 42 stripe-state and 24 uniformly paired MPSs. Stripe plots show
 pair correlations versus static order; paired plots show connected charge/spin
 correlations versus uniform pairing. Geometry facets, V colors, t0 markers,
 acceptance labels, PNG/PDF figures and every plotted point are retained.
+The paired figures now show only the 22 square MPSs; both trellis entries
+remain in the full paired table and are identified as omitted in the audit.
 
 The [September 22 square t_perp scan](reports/square_tp_scan_20260922/README.md)
 prepares eight fresh starts at t0=1.4: V=0 with tp=0.06/0.08 and V=-0.2 with
@@ -122,11 +124,12 @@ For manuscript background, see the
 and now updated in LaTeX and PDF with numerical evidence through September 23.
 It includes the complete grids, full transition-cut energies, positive-V and
 trellis outcomes, pair correlations and the completed square A/B campaign,
-with 51 pages, twenty-two figures and 48 cited references. Sections 3.13/3.14
+with 50 pages, twenty-two figures and 48 cited references. Sections 3.13/3.14
 develop the complete pair-correlation and square A/B results; Section 3.15
-analyzes the 24 paired states (original Figures 19/20). Section 3.16 adds
-the 42 stripe-state charge/spin grids (Figures 21/22) and their analysis,
-including local pair survival versus long-distance suppression. The material introduction and the earlier
+analyzes the 42 stripe states (Figures 19/20), including local pair survival
+versus long-distance suppression. Section 3.16 then analyzes the 22 paired
+square MPSs (Figures 21/22), with trellis omitted from those figures.
+The material introduction and the earlier
 branches' provisional status remain.
 The [coupled-ladder literature review](literature/README.md) provides annotated
 sources, LaTeX/PDF and 49 references. Its actual project-evidence section now
