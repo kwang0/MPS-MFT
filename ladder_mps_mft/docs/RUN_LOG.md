@@ -4684,3 +4684,35 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   and a detached worktree at `$CFS/m4863/MPS-MFT-square-tp-20260922` instead
   of pulling into the checkout used by ongoing trellis jobs. The report
   supplies exact user-run commands. No new submission has been reported.
+
+## 2026-09-23: cross-parameter stripe/pair-correlation scatter grids
+
+- User requested grids of stripe strength versus pair correlations across
+  varying parameters, accepting that these are not fixed-parameter controls.
+- Added `scripts/plot_stripe_pairing_grid_20260923.py`, reusing the September
+  22 correlation definitions and diagnostic provenance. Outputs live in
+  `docs/reports/stripe_pairing_grid_20260923/`: two 3x4 PNG/PDF grids, a
+  66-row point table, validation/source hashes and a definitions/readout note.
+- Geometry rows contain 42 square, 18 cubic and 6 trellis MPSs. Four columns
+  show short/long full/connected rung-singlet magnitudes. X axes separately
+  use charge-modulation and leg-odd spin RMS over rungs 9–56. V is color,
+  t0 is shape, and accepted MPSs have outer rings. Seeds and spatial A/B
+  ladders are neither pooled nor treated as independent statistical samples.
+- All 58 retrospective endpoints remain unaccepted; eight MPSs from the
+  four accepted square A/B runs retain their labels. The isolated chi1200
+  reference and prospective campaigns without these diagnostics are excluded.
+- Local command: `C:/Python313/python.exe -B
+  ladder_mps_mft/scripts/plot_stripe_pairing_grid_20260923.py`. The final data
+  validation/render run completed in 7.3 seconds. Checks passed for all 66
+  diagnostic SHA-256s, source-state lineage, statuses/model labels,
+  Hermiticity, connected subtraction, and four independently recomputed
+  pair-window values against the stored summary. Both grids were visually
+  inspected; a subsequent label-only adjustment was rendered from the
+  validated point table. No DMRG or full test suite was needed.
+- The grids show broad negative associations, with nonmonotonic square
+  short-distance connected correlations and nearly unchanged short-distance
+  connected trellis values across the two spatial cells. These observations
+  are descriptive and do not determine the causal origin of pairing.
+- Updated PROJECT_STATE and the documentation map. Source MPS/diagnostic
+  files, acceptance flags, launch controls and campaign plans are unchanged.
+  No Perlmutter authentication, transfer, submission or scheduler action.

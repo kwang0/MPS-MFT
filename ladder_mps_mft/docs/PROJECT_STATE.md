@@ -1,6 +1,6 @@
 # Current project state
 
-Last locally reviewed: **2026-09-22 — eight square t_perp scan starts prepared**
+Last locally reviewed: **2026-09-23 — stripe/pair-correlation scatter grids added**
 
 This is a local, mutable snapshot. Stable rules live in AGENTS.md and the
 method documents; durable history is append-only in RUN_LOG.md. Local
@@ -20,6 +20,14 @@ artifacts establish solver outcomes, not live scheduler state.
   trees and each campaign's original controls/fingerprints.
 
 ## Current scientific evidence
+
+The [September 23 stripe/pairing grids](reports/stripe_pairing_grid_20260923/README.md)
+plot all 66 coupled spatial-MPS diagnostics against common-bulk charge and
+spin RMS, split by geometry and short/long full/connected rung correlations.
+V and t0 remain visible; seeds, A/B ladders and acceptance labels are retained.
+These are descriptive cross-parameter associations. The square connected
+short-distance relationship is not globally monotonic. All original statuses
+remain unchanged; no new simulations or Perlmutter operations were performed.
 
 **Complete pair correlations and square A/B results:** the
 [September 22 report](reports/pair_correlations_20260922/README.md) verifies
