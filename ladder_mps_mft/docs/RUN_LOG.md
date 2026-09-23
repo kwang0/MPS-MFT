@@ -4716,3 +4716,37 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
 - Updated PROJECT_STATE and the documentation map. Source MPS/diagnostic
   files, acceptance flags, launch controls and campaign plans are unchanged.
   No Perlmutter authentication, transfer, submission or scheduler action.
+
+## 2026-09-23: separate paired states and reverse correlation-plot axes
+
+- User requested removing uniformly paired endpoints from the stripe grids
+  and showing stripe correlations versus pairing strength in separate plots.
+- Updated the existing plotting script and report in place. The original
+  charge/spin grids now contain 42 stripe-state MPSs (20 square, 18 cubic,
+  four trellis), all unaccepted. Two new paired PNG/PDF grids contain 24 MPSs
+  (22 square, two trellis), retaining 16 unaccepted/eight accepted labels.
+- Classification uses measured rung-pair RMS >0.01 and >=0.99 uniform
+  weight fraction. The largest stripe RMS is 0.00011033 and smallest paired
+  RMS is 0.06578888; thresholds 0.001/0.01/0.05 give identical IDs. Minimum
+  paired uniform weight is 0.9984596. Seed names do not select the group.
+- Paired x axis is the magnitude of the bulk mean anomalous rung singlet.
+  Connected y quantities use n_+=(n0+n1)/2 and m_-=(Sz0-Sz1)/2 over rungs
+  9–56: Fourier weights at q_c=pi/8 and q_s=15pi/16, plus mean magnitudes
+  for r=2–4 and 16–24. Fourier weights include contact terms; contact and
+  signed offsite pieces are exported. These fixed-q weights do not assert
+  a stripe peak or a dynamical mechanism. No cross-ladder covariance added.
+- New `stripe_points.csv` and `paired_points.csv` partition the full table
+  without omissions or duplicated IDs. All 66 source hashes/status/model
+  and old pair-window checks still pass. Added checks of charge/spin
+  subtraction, rung projection, Fourier normalization using an explicit
+  independent sum, and threshold-stable disjoint classification.
+- Local validation/render command: `C:/Python313/python.exe -B
+  ladder_mps_mft/scripts/plot_stripe_pairing_grid_20260923.py`, 8.7 seconds.
+  Four PNG grids visually reviewed, with overlap and log tick labels fixed.
+  No new DMRG, full suite, backfill, transfer, authentication or scheduler work.
+- Paired square spin-weight trends depend on the parameter path: at V=-0.4,
+  increasing t0 increases pairing while decreasing the fixed-q spin weight;
+  at t0=1.4, more attractive V increases both. Trellis supplies only one
+  paired coordinate with two seeds. These are descriptive observations.
+- Updated the report, documentation map and PROJECT_STATE. Original source
+  measurements, convergence classifications and campaign controls are unchanged.

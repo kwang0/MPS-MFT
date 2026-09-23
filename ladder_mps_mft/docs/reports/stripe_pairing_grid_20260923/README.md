@@ -1,89 +1,145 @@
-# Stripe amplitude versus pair correlations
+# Stripe and uniform-pairing correlation grids
 
-These grids show the requested descriptive associations across different
-model parameters, using the saved September 22 pair-correlation measurements.
-No fixed-parameter restriction is imposed.
+The requested cross-parameter scatter plots now separate the stripe and
+uniformly paired endpoints. In the stripe group, pair correlations are
+plotted against static stripe amplitude. In the paired group, the axes
+reverse roles: connected charge/spin correlations are plotted against the
+uniform pair amplitude. The original mixed-state grids are replaced.
 
-- [Charge-modulation grid (PNG)](charge_pairing_grid.png) / [PDF](charge_pairing_grid.pdf).
-- [Spin-order grid (PNG)](spin_pairing_grid.png) / [PDF](spin_pairing_grid.pdf).
-- [Every plotted point and its source](points.csv).
-- [Validation and diagnostic hashes](validation.json).
+## Plots and data
 
-## How to read the grids
+**42 stripe-state MPSs, with all uniformly paired states removed:**
 
-Rows are square, cubic unfrustrated and trellis geometries. Columns show
-short-distance full, short-distance connected, long-distance full and
-long-distance connected **rung-singlet** correlations. Color encodes V;
-marker shape encodes t0. A larger unfilled ring marks an accepted result.
-Trellis 1L and 2L labels distinguish the one- and two-ladder spatial cells.
+- [Charge RMS versus pair correlations (PNG)](charge_pairing_grid.png) / [PDF](charge_pairing_grid.pdf).
+- [Spin RMS versus pair correlations (PNG)](spin_pairing_grid.png) / [PDF](spin_pairing_grid.pdf).
 
-Each mark is one spatial MPS: 42 square, 18 cubic and 6 trellis, from 60 source
-branches. The 58 retrospective MPSs remain unaccepted terminal snapshots;
-the eight square A/B MPSs belong to four accepted fixed-point runs. Seeds
-and spatial A/B ladders remain separate, even when marks overlap. They are
-not independent statistical replicates. No points are jittered, averaged
-across seeds or filtered according to whether they are paired.
+**24 uniformly paired MPSs, with pairing strength on the horizontal axis:**
 
-All plotted states have L=64 rungs, chi=200, U=8 and target density 15/16.
-The older isolated chi=1200 reference is excluded. Prospective t_perp/V=-1
-campaigns without measurements in this source set are not represented.
+- [Stripe-wavevector connected weights (PNG)](paired_stripe_weights.png) / [PDF](paired_stripe_weights.pdf).
+- [Short-/long-distance connected charge/spin correlations (PNG)](paired_stripe_distance_correlations.png) / [PDF](paired_stripe_distance_correlations.pdf).
 
-## Definitions
+Tables: [all 66 points](points.csv), [stripe subset](stripe_points.csv),
+[uniformly paired subset](paired_points.csv), and
+[validation/source hashes](validation.json).
 
-Both stripe-amplitude proxies use rungs 9–56, matching the pair-correlation
-bulk window:
+Color encodes V; marker shape encodes t0. An outer ring marks an accepted
+MPS. Every seed and A/B ladder remains a separate mark; overlaps are retained
+without jitter or averaging. They are not independent statistical replicates.
+All states have L=64 rungs, chi=200, U=8 and target density 15/16.
+The older isolated chi1200 reference and prospective campaigns lacking
+measurements in this source set are excluded.
+
+## State separation
+
+For the stored unnormalized rung singlet D and bulk rungs 9–56, let
 
 ```text
-n_rung(i) = [<n(i,0)> + <n(i,1)>] / 2
-charge RMS = sqrt(mean_i [n_rung(i) - mean_bulk(n_rung)]^2)
-
-m_rung(i) = [<Sz(i,0)> - <Sz(i,1)>] / 2
-spin RMS = sqrt(mean_i m_rung(i)^2)
+F_i = <D_i>
+F_rms = sqrt(mean_i |F_i|^2)
+F_uniform = |mean_i F_i|
+uniform weight fraction = F_uniform^2 / F_rms^2
 ```
 
-Charge RMS includes residual open-boundary density modulation. Spin RMS is
-the static leg-odd magnetic amplitude; by itself it does not distinguish
-stripe antiphase structure from ordinary antiferromagnetic order. Neither
-is a fluctuation spectrum or an infinite-system order parameter.
-The older correlation summary's spin RMS used rungs 6–59; this grid
-recomputes it over 9–56 for a common bulk definition.
+The paired group has F_rms > 0.01 and uniform weight fraction >= 0.99.
+This separates a clear measured gap: the largest stripe-group F_rms is
+0.00011033, versus 0.06578888 for the smallest paired value. Thresholds
+0.001, 0.01 and 0.05 give exactly the same partition. Every selected paired
+profile has uniform weight fraction >= 0.9984596. "Uniform" allows the
+small amplitude variations caused by open boundaries; it does not require
+an exactly constant finite-ladder profile. Classification uses measured
+pairing, not the seed name or the charge/spin correlations being plotted.
 
-For the stored unnormalized rung singlet D:
+The stripe group contains 20 square, 18 cubic and 4 trellis MPSs, all
+unaccepted endpoints. The paired group contains 22 square and 2 trellis
+MPSs; 16 are unaccepted and eight are the A/B MPSs from four accepted square
+runs. There are no paired cubic endpoints in this data set. Trellis has only
+one paired parameter coordinate, with two nearly identical seed outcomes;
+its panels do not constitute a parameter trend. No scientific acceptance
+status is changed by this plotting classification.
+
+## Stripe-group axes
+
+The static amplitude proxies use the common bulk rungs 9–56:
+
+```text
+n_+(i) = [<n(i,0)> + <n(i,1)>] / 2
+charge RMS = sqrt(mean_i [n_+(i) - mean_bulk(n_+)]^2)
+
+m_-(i) = [<Sz(i,0)> - <Sz(i,1)>] / 2
+spin RMS = sqrt(mean_i m_-(i)^2)
+```
+
+Charge RMS includes residual boundary density modulation. Spin RMS alone
+does not distinguish antiphase stripes from ordinary antiferromagnetism.
+The earlier summary's spin RMS used rungs 6–59; these grids recompute it on
+9–56 to use the same bulk as the pair correlations.
 
 ```text
 P(i,j) = <D_i^dagger D_j>
-P_connected(i,j) = P(i,j) - <D_i>* <D_j>
+P_connected(i,j) = P(i,j) - conjugate(F_i) F_j
 short = mean |P(i,j)| for 2 <= |i-j| <= 4
 long  = mean |P(i,j)| for 16 <= |i-j| <= 24
 ```
 
-In the subtraction, `<D_i>*` means complex conjugation. Both endpoints must
-be in rungs 9–56. Every eligible ordered bond pair receives equal weight;
-short and long definitions are reused from the existing analysis. The
-manuscript's normalized singlet gives correlations half as large.
+Both endpoints must lie in the bulk; every eligible ordered bond pair is
+weighted equally. Definitions are reused from the September 22 analysis.
+The manuscript's normalized singlet gives correlations half as large.
 Short-distance axes are linear; long-distance axes are logarithmic. Scales
-are common across geometries and across full/connected columns at the same
-distance range. Tiny tails have no independent truncation-error bound.
+are common across geometries and full/connected columns at a given distance.
 
-## What the plots show
+## Paired-group axes
 
-The square and cubic clouds broadly associate larger static amplitudes with
-weaker pairing correlations. Square short-distance connected correlations
-are not globally monotonic: the weak-stripe paired cluster has a smaller
-connected short-distance value than some intermediate-stripe snapshots,
-even though its full pair correlation is larger. Subtracting the anomalous
-component therefore changes the apparent association.
+The horizontal coordinate is F_uniform, not the mean-field source alpha.
+The charge and longitudinal-spin operators are the rung average n_+ and
+leg difference m_- defined above. From the saved site covariance matrices,
 
-Trellis one- and two-ladder snapshots have very similar short-distance
-connected correlations, while the two-ladder stripe endpoints have much
-smaller long-distance correlations. With only two spatial ansatzes at one
-parameter coordinate, this is a comparison of endpoints rather than a
-continuous trend.
+```text
+C_O(i,j) = <O_i O_j> - <O_i><O_j>
+S_O_connected(q) = (1/N_bulk) sum_ij exp[i q(i-j)] C_O(i,j)
+N_bulk = 48
+```
 
-These are cross-parameter and cross-state associations, not an estimate of
-the causal effect of stripes. Changing V or t0 also changes pairing physics
-directly. Acceptance labels, finite-L/chi limits, and the distinction between
-full and connected correlations are retained; no phase ranking is inferred.
+Each rung covariance carries the factor 1/4 from the two factors of 1/2 in
+the operator definition. This is a rung-average normalization, not the
+stored 1/(2L) site-normalized structure factor. All comparisons within the
+new plots use this same normalization.
+
+The fixed stripe-channel wavevectors are q_c=pi/8 (charge period 16, leg
+even) and q_s=15pi/16 (antiferromagnetic spin modulation with period-32
+envelope, leg odd). They reference the period-16/32 stripe pattern already
+identified in this data set, including the trellis longitudinal harmonic.
+For real covariances, the other magnetic satellite 17pi/16 is equivalent.
+These are evaluated weights, not fitted peaks or claims that a stripe peak
+is present in every paired state. Onsite/contact terms are included; the
+table also records their contribution and the remaining signed offsite
+weight. A finite value can include broad short-range backgrounds.
+
+The companion distance grid averages |C_O(i,j)| for the same 2–4 and 16–24
+windows, with both endpoints in the bulk. It excludes contact terms and
+shows the spatial range of charge/spin correlations, but is not specific
+to one wavevector. Signed averages are also retained in the table.
+Only intraladder longitudinal-spin and charge covariances are used; these
+are not dynamical spectra or interladder correlation measurements.
+
+Paired panels have explicitly different axis ranges to show variation
+within each geometry/measure. The tiny trellis seed differences are not
+magnified: its x span matches the square row. Long-distance distance-grid
+axes are logarithmic. No points are fitted or connected as a causal curve.
+
+## Descriptive reading
+
+In the stripe-only grids, larger static amplitudes broadly accompany weaker
+pair correlations. In the paired square subset, the spin-weight association
+depends on which parameter changes: along V=-0.4, increasing t0 increases
+pairing and decreases the weight at q_s; along t0=1.4, increasing pairing
+as V becomes more attractive instead increases that weight. The distance
+grid also distinguishes these parameter paths. There is no single universal
+"stronger pairing means weaker stripe correlations" trend across the cloud.
+
+Parameter variation directly changes both channels. Classification and
+selection do not establish phase coexistence or causal competition. Tiny
+tails lack independent truncation-error bounds; finite L/chi and the original
+acceptance labels remain relevant. No phase ranking is inferred.
 
 ## Reproduction and focused validation
 
@@ -93,13 +149,11 @@ From the repository root on local Windows:
 & C:/Python313/python.exe -B ladder_mps_mft/scripts/plot_stripe_pairing_grid_20260923.py
 ```
 
-The script reads the existing summary/source manifest, verifies all 66
-diagnostic SHA-256 hashes and source-state lineage hashes, checks stored
-status and model labels, verifies Hermiticity and connected subtraction,
-and recomputes all four pair measures against the existing summary. The
-source manifest supplies the chi=200 provenance. Charge/spin RMS values
-are calculated directly from the saved density/spin profiles. The exported
-CSV retains source IDs, parameters, spatial cells, status and hashes.
-Both PNG grids were visually inspected after rendering. No new DMRG,
-measurement backfill, source-state edits, scheduler actions or transfers
-were performed.
+The script verifies all 66 diagnostic hashes, source-state lineage, status,
+model labels, pair Hermiticity/subtraction and all four old pair-window
+values. New checks verify charge/spin connected subtraction, rung-channel
+projection, Fourier normalization against an independent explicit sum,
+and the complete disjoint 42/24 partition. The source manifest supplies
+chi200 provenance. Both subset CSVs retain every source ID and status.
+All four PNG grids were visually inspected after rendering. No new DMRG,
+backfill, source-state modification, transfer or scheduler action was needed.

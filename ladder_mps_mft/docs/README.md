@@ -39,9 +39,10 @@ recorded explicitly as user-reported until synchronized evidence is available.
 ## Stable scientific references
 
 The [September 23 stripe/pairing grids](reports/stripe_pairing_grid_20260923/README.md)
-show charge/spin RMS versus four rung-pair measures for all 66 coupled MPSs,
-with geometry facets, V colors, t0 markers and explicit acceptance labels.
-They include PNG/PDF figures, every plotted point and reproducible source checks.
+separate 42 stripe-state and 24 uniformly paired MPSs. Stripe plots show
+pair correlations versus static order; paired plots show connected charge/spin
+correlations versus uniform pairing. Geometry facets, V colors, t0 markers,
+acceptance labels, PNG/PDF figures and every plotted point are retained.
 
 The [September 22 square t_perp scan](reports/square_tp_scan_20260922/README.md)
 prepares eight fresh starts at t0=1.4: V=0 with tp=0.06/0.08 and V=-0.2 with

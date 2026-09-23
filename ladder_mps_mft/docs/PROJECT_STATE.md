@@ -1,6 +1,6 @@
 # Current project state
 
-Last locally reviewed: **2026-09-23 — stripe/pair-correlation scatter grids added**
+Last locally reviewed: **2026-09-23 — stripe and uniform-pairing grids separated**
 
 This is a local, mutable snapshot. Stable rules live in AGENTS.md and the
 method documents; durable history is append-only in RUN_LOG.md. Local
@@ -22,12 +22,15 @@ artifacts establish solver outcomes, not live scheduler state.
 ## Current scientific evidence
 
 The [September 23 stripe/pairing grids](reports/stripe_pairing_grid_20260923/README.md)
-plot all 66 coupled spatial-MPS diagnostics against common-bulk charge and
-spin RMS, split by geometry and short/long full/connected rung correlations.
-V and t0 remain visible; seeds, A/B ladders and acceptance labels are retained.
-These are descriptive cross-parameter associations. The square connected
-short-distance relationship is not globally monotonic. All original statuses
-remain unchanged; no new simulations or Perlmutter operations were performed.
+now separate 42 stripe-state MPSs from 24 uniformly paired MPSs. Stripe-only
+grids retain charge/spin RMS versus pair correlations; paired grids reverse
+the roles, showing connected charge/spin stripe-wavevector weights and
+short/long correlations versus the uniform pair amplitude. The split lies
+in a large measured amplitude gap and survives thresholds 0.001–0.05;
+paired profiles have at least 99.8% uniform rung-pair weight. V/t0 labels,
+seeds, A/B ladders and all acceptance statuses remain intact. Square paired
+spin-correlation trends differ between the V and t0 cuts. These are
+descriptive parameter associations, with no new simulations or Perlmutter actions.
 
 **Complete pair correlations and square A/B results:** the
 [September 22 report](reports/pair_correlations_20260922/README.md) verifies

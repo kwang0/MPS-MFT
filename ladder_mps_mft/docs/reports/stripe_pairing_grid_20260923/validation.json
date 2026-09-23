@@ -10,8 +10,26 @@
     "cubic_unfrustrated": 18,
     "trellis": 6
   },
+  "classification": {
+    "pairing_rms_threshold": 0.01,
+    "minimum_uniform_weight": 0.99,
+    "paired_mps": 24,
+    "stripe_mps": 42,
+    "maximum_stripe_pair_rms": 0.00011032582791860977,
+    "minimum_paired_pair_rms": 0.06578888229783533,
+    "minimum_observed_paired_uniform_weight": 0.9984596455403512,
+    "partition_unchanged_at_pair_rms_thresholds": [
+      0.001,
+      0.01,
+      0.05
+    ]
+  },
+  "stripe_wavevectors": {
+    "charge": 0.39269908169872414,
+    "spin": 2.945243112740431
+  },
   "excluded": "Isolated chi=1200 reference; prospective runs without diagnostics are not included.",
-  "checks": "Diagnostic SHA-256, source-state lineage, status, model labels, pair Hermiticity, connected subtraction and four recomputed pair measures against the existing summary.",
+  "checks": "Diagnostic SHA-256, source-state lineage, status, model labels, pair Hermiticity/subtraction and four recomputed pair measures; charge/spin connected subtraction, rung-channel projection and independent Fourier sum; complete disjoint 42/24 partition.",
   "sources": [
     {
       "id": "backfill_1",
