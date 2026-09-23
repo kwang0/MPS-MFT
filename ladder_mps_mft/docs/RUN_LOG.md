@@ -4861,3 +4861,35 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   regenerated `overleaf_upload.zip`: all 26 members match their maintained
   sources byte for byte, ZIP integrity passes and all 20 figure paths are
   covered. No unrelated DMRG tests or Perlmutter operations were performed.
+
+## 2026-09-23: add the 42-state stripe analysis alongside the paired-state analysis
+
+- User clarified that the requested comparison covers both groups: the
+  original 42 stripe-state grids and the newer 24 paired-state grids.
+  They asked to keep original Figures 19/20 as they were. Preserved the
+  original paired Section 3.15 verbatim, including figure order and captions.
+- Added Section 3.16, `Pair correlations across the 42 stripe-state endpoints`,
+  with the existing charge-RMS and spin-RMS grids as Figures 21/22. The
+  section defines both static RMS measures and the pair-correlation windows,
+  analyzes square and cubic trends, same-parameter positive-V seed textures,
+  full/connected agreement and the single-coordinate trellis subset.
+  It contrasts survival of local pair correlations with suppression of their
+  longer-distance tails, without changing acceptance labels or inferring
+  causal necessity of stripes for pairing.
+- Original paired analysis/figures remain on pages 36-39. New stripe analysis
+  is on pages 40/41 and new landscape figures on pages 42/43. The document
+  now has 51 pages, 22 figures and the unchanged 48 cited references.
+- Focused cached Tectonic build passed in 3.3 seconds using the existing
+  workspace font cache. Rendered and inspected the four new pages. No
+  undefined references, overfull boxes or missing characters; the existing
+  underfull paragraph and Fontconfig notice remain. Compared the paired
+  LaTeX section and extracted PDF pages 36-39 against commit 822dfec: unchanged.
+- CSV checks confirm 20 square/18 cubic/four trellis stripe MPSs, all unaccepted;
+  the approximately sixtyfold and 11-13-fold pair-tail comparisons; the
+  period-eight seed identity; and the stated full/connected difference bounds.
+  Logs, text, page PNGs and validation JSON are in ignored
+  `output/stripe_and_pairing_manuscript_20260923/`.
+- Updated the PDF, manuscript README, documentation map, PROJECT_STATE and
+  Overleaf packager. The regenerated archive has 28 members, all matching
+  maintained sources byte for byte, with all 22 figure paths covered.
+  No source measurements, figure data, simulations or Perlmutter actions changed.

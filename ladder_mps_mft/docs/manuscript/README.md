@@ -27,8 +27,9 @@ correlations. The [standalone correlation report](../reports/pair_correlations_2
 also supplies channel-sign plots, reference/window sensitivity and the
 machine-readable validation and numerical summaries.
 
-September 23 update: Section 3.15 adds both paired-state stripe-correlation
-figures as Figures 19 and 20. It defines the measured 42/24 stripe/paired
+September 23 update: Section 3.15 retains the paired-state analysis and its
+original figures: stripe-wavevector weights (Figure 19), then short-/long-distance
+correlations (Figure 20). It defines the measured 42/24 stripe/paired
 partition, the uniform rung-pair amplitude, connected charge/spin weights
 at the stripe wavevectors, and short-/long-distance magnitudes. The analysis
 quantifies the opposite spin-correlation trends along the square hopping
@@ -36,7 +37,13 @@ and interaction cuts and distinguishes local weight from spatial range.
 Trellis has only one paired parameter coordinate; the state acceptance
 labels and limits on causal interpretation are retained.
 
-The rebuilt draft has 47 pages and 48 cited references. The introduction and
+Section 3.16 adds the complementary analysis of all 42 stripe-state MPSs:
+pair correlations versus static charge RMS (Figure 21) and spin RMS
+(Figure 22). It quantifies local pair survival and long-distance suppression,
+contrasts geometry and parameter cuts, compares full/connected columns,
+and retains the seed-dependent positive-V textures and all unaccepted labels.
+
+The rebuilt draft has 51 pages and 48 cited references. The introduction and
 Section 2.4 now motivate the trellis runs through the chain--ladder materials,
 pressure-induced superconductivity, charge and magnetic order, optical/model
 parameter estimates (including the limits on V), and reciprocal one-/two-ladder
@@ -61,13 +68,14 @@ stripe/coherence references; three existing material records are also cited.
    energies and the bond-dimension comparison; complete grid results, fine-cut
    energy shapes, positive-V and trellis outcomes; full and connected pair
    correlations; the completed square A/B campaign; stripe correlations within
-   uniformly paired states; remaining physical controls.
+   uniformly paired states; pair correlations across stripe states;
+   remaining physical controls.
 4. An appendix linking claims to nineteen groups of local evidence.
 
 The document preserves provisional status and historical acceptance flags.
 The prepared longer-ladder seeds are not new evidence. All four positive-V
 and all four trellis final states are now analyzed; old partial logs remain
-historical. There are twenty figures, including the earlier September 12
+historical. There are twenty-two figures, including the earlier September 12
 spatial evolution, the square/cubic comparisons, full transition-cut energies,
 physical spin/pairing cuts and completed square/trellis history/profile plots. Figures 2–5 compare square and cubic side by side: phase diagrams,
 full energy histories, physical spin RMS and physical pairing RMS. The three
@@ -131,6 +139,8 @@ reports/
   stripe_pairing_grid_20260923/
     paired_stripe_weights.pdf
     paired_stripe_distance_correlations.pdf
+    charge_pairing_grid.pdf
+    spin_pairing_grid.pdf
 METHODS_NOTES.tex
 ```
 
@@ -141,7 +151,7 @@ Use the normal pdfLaTeX compiler with BibTeX (the documents use natbib).
 The path handling follows the project-root behavior documented in
 [Overleaf's multi-file guidance](https://www.overleaf.com/learn/latex/Multi-file_LaTeX_projects).
 
-All twenty figure PDFs are required, even though they are outside the two source
+All twenty-two figure PDFs are required, even though they are outside the two source
 folders. The Git-tracked [Overleaf upload ZIP](overleaf_upload.zip) contains
 the LaTeX sources, bibliographies, living methods notes, required figures and
 these instructions, so it can be downloaded from another device.
@@ -172,3 +182,9 @@ The September 23 build, extracted text and rendered-page checks are under
 references or overfull boxes; its two new figures use landscape pages.
 The refreshed Overleaf archive contains all 20 figures and is checked
 against the maintained sources and their relative paths.
+
+The complete stripe-state and paired-state manuscript check is under
+`output/stripe_and_pairing_manuscript_20260923/`. Original Figures 19/20
+and their paired-state analysis remain unchanged. The new stripe-state
+analysis occupies pages 40/41, followed by Figures 21/22 on pages 42/43.
+The refreshed Overleaf archive contains all 22 figures (28 files total).

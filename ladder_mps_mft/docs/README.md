@@ -122,10 +122,11 @@ For manuscript background, see the
 and now updated in LaTeX and PDF with numerical evidence through September 23.
 It includes the complete grids, full transition-cut energies, positive-V and
 trellis outcomes, pair correlations and the completed square A/B campaign,
-with 47 pages, twenty figures and 48 cited references. Sections 3.13/3.14
+with 51 pages, twenty-two figures and 48 cited references. Sections 3.13/3.14
 develop the complete pair-correlation and square A/B results; Section 3.15
-adds both paired-state stripe-correlation grids with analysis of the
-opposite trends along the hopping and interaction cuts. The material introduction and the earlier
+analyzes the 24 paired states (original Figures 19/20). Section 3.16 adds
+the 42 stripe-state charge/spin grids (Figures 21/22) and their analysis,
+including local pair survival versus long-distance suppression. The material introduction and the earlier
 branches' provisional status remain.
 The [coupled-ladder literature review](literature/README.md) provides annotated
 sources, LaTeX/PDF and 49 references. Its actual project-evidence section now
