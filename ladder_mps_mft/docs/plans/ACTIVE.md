@@ -79,6 +79,10 @@ the user syncs results; no damping, larger-cell or stability campaign is added.
    The original reservation ceiling was 16 node-hours. No further submission
    or continuation is requested by this analysis.
    Leg-odd charge and further registrations remain possible future controls.
+   Manuscript Section 3.18 now explicitly qualifies the equal-average-density
+   sector: a common external chemical potential and independent ladder
+   densities would test an additional charge-transfer mode. Longer transverse
+   charge/spin periods could be necessary; no such campaign is prepared.
    Cubic cell tests remain lower priority and are not prepared.
    Selective trellis convergence work, potentially modest linear damping,
    remains a separate future decision; its geometric frustration persists.

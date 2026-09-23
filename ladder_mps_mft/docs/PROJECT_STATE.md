@@ -1,6 +1,6 @@
 # Current project state
 
-Last locally reviewed: **2026-09-23 — stripe-state and paired-state grids analyzed in manuscript; four trellis intertwined starts prepared**
+Last locally reviewed: **2026-09-23 — equal-density/parallel-stripe limitation documented; stripe/pairing grids analyzed; four trellis intertwined starts prepared**
 
 This is a local, mutable snapshot. Stable rules live in AGENTS.md and the
 method documents; durable history is append-only in RUN_LOG.md. Local
@@ -20,6 +20,16 @@ artifacts establish solver outcomes, not live scheduler state.
   trees and each campaign's original controls/fingerprints.
 
 ## Current scientific evidence
+
+**Current variational limitation:** manuscript Section 3.18 and living methods
+Section 4.3 now document that all spatial ladders are targeted separately to
+the same average density. Parallel stripes involving interladder charge
+redistribution remain excluded even in accepted A/B runs. The focused
+literature discussion separates longitudinal ladder CDWs from 2D orientation
+evidence, gives conditional compressibility reasoning, and identifies common
+external mu and longer transverse periods as future controls. No such
+stability test or solver change has been performed. Both notes PDFs and the
+Overleaf bundle are updated; existing result/acceptance claims remain qualified.
 
 The [September 23 stripe/pairing grids](reports/stripe_pairing_grid_20260923/README.md)
 now separate 42 stripe-state MPSs from 24 uniformly paired MPSs. Stripe-only

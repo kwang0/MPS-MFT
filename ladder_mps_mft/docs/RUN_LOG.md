@@ -4931,3 +4931,50 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   All 28 archive members match their maintained files, and all 22 figure
   paths are covered. No new DMRG, scientific reclassification, source-state
   edits or Perlmutter operations were involved.
+
+## 2026-09-23: document equal ladder densities and excluded parallel stripes
+
+- Added manuscript Section 3.18, `Current limitation: equal ladder densities
+  and parallel stripes`, and living methods Section 4.3. Verified the
+  implementation targets every spatial ladder separately to `model.density`.
+  The text distinguishes independent A/B profiles from release of average
+  ladder densities, longitudinal CDWs from transverse charge transfer, and
+  leg redistribution from a change in the ladder average.
+- Incorporated the focused primary-literature review from the preceding
+  discussion: experimental periods along ladders; finite-width cylinder
+  stripes and boundary qualifications; the Almeida/Roux/Poilblanc DMRG+MF
+  precedent; and anisotropic 2D orientation results. Added five bibliography
+  entries (White/Scalapino 1997 and 2003, Almeida 2010, Kampf 2001, Corboz
+  2014) and explicit reading-depth/source notes. Imposed bulk modulation is
+  not treated as evidence of spontaneous formation of the excluded mode.
+- Qualified both possible concern and possible benign behavior: positive
+  inverse compressibility costs charge transfer in a smooth decoupled-ladder
+  expansion, but no endpoint curvature or stability in that channel has
+  been measured. Proposed common external mu, consistent total-density
+  gates/energies and transverse charge/spin cells only as future controls.
+  At p=1/16 the illustrative half-filled/filled stripe counting requires
+  four/eight ladders on square; small seeds and two-ladder cells alone are
+  not exclusion tests for finite-amplitude or longer-period states.
+- Used the existing repository-local Tectonic executable with
+  `TECTONIC_CACHE_DIR=output/literature_tools/cache`, `--only-cached` and
+  `--keep-logs`, building each maintained source from its own directory into
+  `output/parallel_stripe_notes_20260923/{manuscript,methods}`. The initial
+  manuscript build required an uncached AMS font for the newly introduced
+  greater-than-or-similar symbol; rephrased it as an approximate threshold
+  and rebuilt entirely from the existing cache. Final builds take about
+  three seconds each. Existing Fontconfig/underfull notices remain; no
+  unresolved citations/references, missing characters or overfull boxes.
+- Rendered and visually inspected manuscript front matter, pages 43-47 and
+  the new references, plus methods page 13, its following transition and
+  revision/reference pages. Kept bibliography entries together after finding
+  an orphan DOI continuation. The final manuscript has 53 pages, 22 unchanged
+  figures and 53 cited references; methods has 24 pages and nine references.
+- Focused validator confirms all citation keys, the unchanged prior
+  scientific body before the new section, unchanged figure paths, generated
+  versus maintained PDF bytes and all 28 Overleaf members. It records PDF
+  SHA-256 values in the ignored `validation.json`. Poppler renders were
+  used for visual QA; unavailable `pdftotext` was replaced with pypdf text
+  extraction. Refreshed both maintained PDFs and `overleaf_upload.zip`.
+- Updated manuscript/documentation indexes, PROJECT_STATE and the existing
+  future-controls paragraph in ACTIVE. No solver, seed, measurement, figure
+  data, acceptance flag, simulation, launcher or Perlmutter action changed.

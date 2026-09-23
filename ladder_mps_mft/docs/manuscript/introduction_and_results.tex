@@ -77,6 +77,8 @@ These observations sharpen the distinction between local pairing
 tendencies and the order selected in an array. The numerical results remain
 finite-length, finite-bond-dimension evidence, with explicit limits on
 self-consistency, response completeness, and thermodynamic interpretation.
+Equal average densities on all ladders also exclude charge redistribution
+between ladders and the associated family of parallel stripes.
 \end{abstract}
 
 \noindent\textbf{Draft scope.}
@@ -86,7 +88,9 @@ including unresolved points that must remain visible during manuscript
 development. The evidence cutoff is the synchronized analyses through
 23 September 2026, including reanalysis of the completed September~22
 measurements; the literature discussion incorporates the stripe and
-ladder-material discussions through 18 September. Appendix~\ref{sec:evidence} identifies the local
+ladder-material discussions through 18 September, with a focused
+stripe-orientation and density-constraint update on 23 September.
+Appendix~\ref{sec:evidence} identifies the local
 sources. The correlation analyses use these completed measurements and simulations;
 no additional many-body solve was performed for manuscript preparation.
 
@@ -1733,6 +1737,141 @@ one-dimensional building blocks and the requirements for an ordered
 array~\citep{Kohler2026}. That work is retained as an August~2026 preprint,
 not a result for the present Hamiltonian.
 
+\subsection{Current limitation: equal ladder densities and parallel stripes}
+\label{sec:parallel-stripe-limit}
+
+\paragraph{The excluded charge mode.}
+The present spatial extension gives ladders A and B independent profiles,
+but targets the same average electron density on each ladder separately.
+Writing $x$ for the longitudinal rung coordinate and $m$ for the ladder index,
+the implemented constraint is
+\begin{equation}
+ \bar n_m=\frac{1}{2L}\sum_{x=1}^{L}\sum_{\ell=0}^{1}
+ \avg{n_{m,x,\ell}}=n_\star\qquad\text{for every }m.
+ \label{eq:per-ladder-density-constraint}
+\end{equation}
+This is stronger than fixing only the total density of the spatial cell.
+For example, it excludes $\bar n_A=n_\star+\Delta n$ and
+$\bar n_B=n_\star-\Delta n$ for nonzero $\Delta n$. Hole-rich and hole-poor
+ladders could then form stripes running parallel to the ladder direction,
+with charge modulated across the array. In wavevector language, the excluded
+ladder-average component has $q_\parallel=0$ and nonzero $q_\perp$.
+Density waves varying along each ladder can still develop, including
+different longitudinal phases on A and B. The restriction does not forbid
+every transverse texture: redistribution between the two legs can preserve
+a ladder's average density. It specifically removes interladder charge
+disproportionation, irrespective of how accurately the allowed states converge.
+
+\paragraph{What ladder experiments establish.}
+Resonant X-ray scattering in $\mathrm{Sr}_{14}\mathrm{Cu}_{24}\mathrm{O}_{41}$
+found a hole crystal with a period of about five rungs \emph{along} the ladders,
+coherent across roughly 50 neighboring ladders~\citep{Abbamonte2004}.
+Ca-dependent measurements found longitudinal periods of five and three,
+with a strong commensurability dependence~\citep{Rusydi2006}. These results
+demonstrate electronic charge ordering in a coupled-ladder material. Their
+transverse coherence does not establish different average densities on
+neighboring ladders: a common longitudinal density wave can be coherent
+across an array with equal ladder averages. The cited experiments therefore
+support an ordering channel permitted by Eq.~\eqref{eq:per-ladder-density-constraint},
+and do not directly demonstrate the omitted parallel-stripe state. Conversely,
+they are not an exclusion test for that state. The chain reservoirs,
+multiorbital interactions and structural geometry also prevent a direct
+identification of the material with the present one-band model.
+
+\paragraph{Spontaneous charge order in numerical ladder studies.}
+The four-leg $t$--$J$ work of White and Scalapino establishes stripe states
+without an imposed bulk charge potential~\citep{WhiteScalapino1997}.
+Their six-leg Hubbard calculation finds stripes wrapped around the cylinder,
+so the density varies along its length~\citep{WhiteScalapino2003}.
+Such finite-width results are evidence for spontaneous stripes, but do not
+by themselves compare both orientations in a broad array of weakly coupled
+two-leg ladders. Boundary pinning and the available transverse wavelengths
+must be distinguished from an imposed bulk modulation. Furthermore,
+pronounced density oscillations in an isolated open ladder need not imply
+long-range CDW order; the Friedel-oscillation analysis of
+White, Affleck and Scalapino supplies the relevant
+distinction~\citep{WhiteAffleckScalapino2002}.
+
+A particularly close methodological precedent is the DMRG plus interladder
+mean-field study of Almeida, Roux and Poilblanc~\citep{Almeida2010}.
+Uniform $t$--$J$ ladders coupled by screened Coulomb repulsion develop
+longitudinal charge modulations with periods three, four and five.
+Trellis frustration affects their relative registration; the period-four
+solution involves two inequivalent ladder profiles. However, the calculation
+uses specified candidate CDW patterns around a common mean density and
+does not establish stability against arbitrary interladder charge transfer.
+Its ``pair density waves'' are crystals of hole pairs without superconducting
+coherence, rather than evidence for a sign-changing superconducting pair field.
+This work supports spontaneous longitudinal charge ordering within an
+approximation related to ours, without resolving the omitted channel.
+
+\paragraph{Why parallel stripes remain a credible competitor.}
+Two-dimensional orientation studies provide a stronger motivation to release
+the constraint. In an anisotropic $t$--$J$ model, Kampf, Scalapino and White
+find that exchange anisotropy favors stripes along the stronger-exchange
+direction in the regime studied; their estimate uses a boundary-pinned
+cylinder~\citep{Kampf2001}. The iPEPS calculations of Corboz, Rice and Troyer
+compare stripe orientations in the thermodynamic limit. For
+$t_x=0.85t_y$, $J_x=0.85^2J_y$ and $J_y/t_y=0.4$, low-doping stripes prefer
+the stronger-coupling direction, whereas the preferred orientation reverses
+at higher doping, above approximately $\delta=0.14$ in that
+calculation~\citep{Corboz2014}. The directional anisotropy is spatially
+uniform; a charge modulation is not built into the Hamiltonian.
+Thus, neither orientation follows from a universal kinetic-energy argument.
+The multi-method evidence for stripes in the uniform square-lattice Hubbard
+model also establishes a substantial competing family of inhomogeneous
+states~\citep{Zheng2017}. In the isotropic infinite square lattice,
+bond-aligned orientations are related by rotation. Our physical ladder
+anisotropy and trellis frustration remove that equivalence, so these results
+motivate a test but do not predict its outcome. Models with deliberately
+imposed bulk stripe modulation, including Ref.~\citep{JiangKivelson2022},
+are not used as evidence that the missing density pattern forms spontaneously.
+
+\paragraph{Why the restriction may be benign in part of the phase diagram.}
+An energetic argument separates a possible instability from its necessity.
+For two identical decoupled ladders with a smooth energy per site $e(n)$,
+the redistribution cost per paired set of sites is
+\begin{equation}
+ e(n_\star+\Delta n)+e(n_\star-\Delta n)-2e(n_\star)
+ =e''(n_\star)(\Delta n)^2+O((\Delta n)^4).
+ \label{eq:ladder-redistribution-cost}
+\end{equation}
+Positive inverse compressibility $e''(n_\star)>0$ penalizes this mode.
+Interladder energy gains and any accompanying spin reconstruction must
+overcome that cost. Strong finite-wavevector correlations along a ladder,
+or a spin gap, do not by themselves establish an instability of its average
+density. This is a conditional argument, not a measured curvature or
+stability result for our endpoints; near phase separation, a charge plateau,
+or a first-order redistribution, the smooth small-amplitude expansion is
+insufficient. The available ladder experiments and coupled-ladder CDW
+calculations therefore make the retained channel physically reasonable,
+while leaving the quantitative importance of the excluded channel open.
+
+\paragraph{Interpretation boundary and a prospective test.}
+The current conclusions compare states within the equal-average-density
+ladder sector. In particular, convergence of both square A/B seeds to the
+paired state establishes reproducibility within that sector, not stability
+against parallel stripes. A first extension would use one common external
+chemical potential to impose $(\bar n_A+\bar n_B)/2=n_\star$, allow
+independent ladder densities, and test small imbalance seeds. The common
+chemical potential would coexist with different self-consistent local
+Hartree fields. The density gate, canonical functional and effective-coupling
+assumptions would have to remain consistent with the released constraint.
+Small-seed relaxation tests only local stability; a competing finite-amplitude
+minimum would require additional seeds or constrained energy comparisons.
+
+Two ladders would still allow only a short transverse repeat. For a square
+array, if the excess holes are organized into stripes with linear filling
+$\rho_\ell$ holes per longitudinal lattice spacing, counting gives
+$p=\rho_\ell/\lambda_\perp$, where $\lambda_\perp$ is the spacing in
+physical rows. At our $p=1/16$, illustrative half-filled and filled stripes
+would have spacings of eight and sixteen rows, respectively, corresponding
+to four and eight two-leg ladders. These are conditional examples, not
+selected fillings; antiphase spin order can require a doubled repeat.
+Consequently, absence of imbalance in an A/B cell would not rule out
+longer-period parallel stripes. No charge-transfer stability calculation
+or larger-cell campaign is included in the present evidence.
+
 \subsection{Controls needed before stronger claims}
 
 The pair-breaking expansion needs a careful energy-scale comparison.
@@ -1761,6 +1900,10 @@ The remaining high-value controls are:
  Their planned fixed-$L=64$ binding denominator isolates one finite-size
  question; it is not a new measurement of the larger ladder's binding
  (\ev{length}).
+ \item Release the separate ladder-density constraints and test transverse
+ charge periods compatible with both charge and spin textures, as discussed
+ in Section~\ref{sec:parallel-stripe-limit}. The completed A/B runs do not
+ supply this control.
  \item Check sensitivity to the mean-field range cutoff, currently
  $r_{\mathrm{range}}=4$ in the representative comparisons, and to weaker
  transverse hopping. These are model/approximation controls, separate from
@@ -1944,7 +2087,10 @@ stripe--pseudogap connection. Eleven further sources, checked on
 18 September 2026, support the ladder-material, doping, optical-parameter,
 charge-order, NMR, neutron, and RIXS discussion in
 Section~\ref{sec:ladder-materials}; reading depths and primary links are
-recorded in \path{SOURCE_NOTES.md}. The existing review's reading-depth limits
+recorded in \path{SOURCE_NOTES.md}. Five additional numerical references,
+checked on 23 September, support the focused density-constraint discussion
+in Section~\ref{sec:parallel-stripe-limit}; the source notes distinguish
+full-text checks from abstract-level background. The existing review's reading-depth limits
 continue to apply to inherited references; this draft is not an exhaustive
 literature or novelty assessment.
 
@@ -1959,6 +2105,7 @@ solutions. Those are candidate emphases, not additional results.
 \clearpage
 \begingroup
 \setlength{\bibsep}{0.20em}
+\renewcommand{\bibpreamble}{\interlinepenalty=10000}
 \bibliographystyle{unsrtnat}
 \bibliography{\projectdocroot/literature/references,\manuscriptroot/additional_references}
 \endgroup

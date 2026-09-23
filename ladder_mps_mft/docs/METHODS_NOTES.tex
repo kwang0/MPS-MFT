@@ -36,7 +36,7 @@
 
 \title{Ladder MPS+Mean-Field Project: Living Methods Notes}
 \author{Kevin Wang and contributors}
-\date{Living notes --- updated 20 September 2026}
+\date{Living notes --- updated 23 September 2026}
 
 \begin{document}
 
@@ -812,6 +812,76 @@ and a small warm-start noise schedule.  The best-density state is returned on
 an iteration limit, but it cannot pass final acceptance unless the configured
 density gate is met.
 
+\subsection{Current limitation: equal ladder densities and parallel stripes}
+\label{sec:density-constraint-limit}
+
+The spatial A/B extension still calls \texttt{find\_mu\_for\_density}
+independently for each ladder with the same target \(n_\star\).
+Thus it enforces
+\begin{equation}
+ \bar n_m=\frac{1}{2L}\sum_{i,\ell}\mean{n_{m,i,\ell}}=n_\star
+ \quad\hbox{on every ladder }m,
+\end{equation}
+rather than only the total cell density. Independent spatial profiles do
+not release this constraint. Alternating hole-rich and hole-poor ladders,
+\(\bar n_A=n_\star+\Delta n\) and \(\bar n_B=n_\star-\Delta n\),
+are excluded. Such charge redistribution can produce stripes parallel to
+the ladders, with modulation across the array. Longitudinal density waves
+with different A/B phases remain allowed. The excluded mode is the
+\(q_\parallel=0\), nonzero-\(q_\perp\) component of the ladder-average
+charge; transverse leg redistribution that preserves each average is a
+different channel.
+
+\textbf{Literature and relevance.}
+Resonant scattering in the copper-oxide ladder family found hole crystals
+with periods five and three \emph{along} the ladders~\cite{abbamonte2004,rusydi2006}.
+Coherence across neighboring ladders does not imply unequal average
+ladder densities. These experiments support the retained longitudinal
+ordering channel, but do not test the excluded one. The related
+DMRG plus interladder mean-field study of Almeida et al.\ develops
+longitudinal CDWs from screened Coulomb coupling, including inequivalent
+period-four ladder profiles, within specified patterns about a common
+mean density~\cite{almeida2010}. It is not an unrestricted charge-transfer
+stability calculation.
+
+Parallel stripes nevertheless have a numerical motivation: anisotropic
+two-dimensional \(t\)--\(J\) studies find a preference for the stronger-coupling
+direction in low-doping regimes~\cite{kampf2001,corboz2014}. The iPEPS study
+also finds an orientation reversal at higher doping. These models have
+uniform directional anisotropy rather than imposed bulk charge modulation.
+They establish a plausible competitor, not its preference in our weakly
+coupled two-leg units or frustrated trellis geometry. Detailed distinctions
+between isolated ladders, finite-width cylinders, coupled-ladder calculations
+and two-dimensional orientation studies are in the manuscript's section
+``Current limitation: equal ladder densities and parallel stripes.''
+
+\textbf{Conditional energetic argument.}
+For identical decoupled ladders with smooth energy per site \(e(n)\),
+\begin{equation}
+ e(n_\star+\Delta n)+e(n_\star-\Delta n)-2e(n_\star)
+ =e''(n_\star)(\Delta n)^2+O((\Delta n)^4).
+\end{equation}
+Positive inverse compressibility penalizes redistribution; interladder
+energy gains and spin reconstruction must overcome it. Neither a spin gap
+nor strong longitudinal CDW correlations alone imply this instability.
+No endpoint curvature or charge-transfer stability has been measured here;
+the expansion is insufficient at nonanalyticities or for a competing
+finite-amplitude minimum.
+
+\textbf{Interpretation and prospective control.}
+Current phase comparisons, including accepted square A/B paired states,
+are restricted to equal average ladder densities. A future test would use
+one common external chemical potential for the total cell density, allow
+independent ladder densities and local Hartree fields, and compare
+imbalance seeds with consistent density gates and canonical energies.
+Small seeds test only local stability. Transverse size is an additional
+restriction: at \(p=1/16\), illustrative stripe fillings of one-half and
+one hole per longitudinal lattice spacing imply spacings of four and eight
+two-leg ladders on square, respectively, from \(p=\rho_\ell/\lambda_\perp\).
+Antiphase spin order can require a doubled repeat. Thus a negative A/B
+imbalance test would not exclude longer-period parallel stripes.
+These are proposed controls, not implemented changes or new simulations.
+
 \section{Self-consistency, mixing, and recurrence}
 \label{sec:scf}
 
@@ -1351,6 +1421,9 @@ clearly labeled representative settings.
 \toprule
 Date & Revision & Summary \\
 \midrule
+2026-09-23 & 1.0 & Documented the separate ladder-density constraint,
+excluded parallel stripes, experimental and numerical context, conditional
+compressibility cost and prospective total-density/transverse-cell controls.\\
 2026-09-18 & 0.9 & Added the current raw two-seed campaign, qualified the
 kernel-level geometry expectation with the new data, and specified full
 energy-cut, common-background and secant-slope diagnostics.\\
@@ -1398,6 +1471,34 @@ D. G. Anderson, ``Iterative procedures for nonlinear integral equations,''
 \bibitem{calabrese2004}
 P. Calabrese and J. Cardy, ``Entanglement entropy and quantum field theory,''
 \emph{J. Stat. Mech.} P06002 (2004).
+
+\bibitem{abbamonte2004}
+P. Abbamonte et al., ``Crystallization of charge holes in the spin ladder of
+\(\mathrm{Sr}_{14}\mathrm{Cu}_{24}\mathrm{O}_{41}\),''
+\emph{Nature} \textbf{431}, 1078--1081 (2004),
+\href{https://arxiv.org/abs/cond-mat/0501087}{arXiv:cond-mat/0501087}.
+
+\bibitem{rusydi2006}
+A. Rusydi et al., ``Quantum melting of the hole crystal in the spin ladder of
+\(\mathrm{Sr}_{14-x}\mathrm{Ca}_{x}\mathrm{Cu}_{24}\mathrm{O}_{41}\),''
+\emph{Phys. Rev. Lett.} \textbf{97}, 016403 (2006),
+\href{https://doi.org/10.1103/PhysRevLett.97.016403}{doi:10.1103/PhysRevLett.97.016403}.
+
+\bibitem{almeida2010}
+J. Almeida, G. Roux and D. Poilblanc, ``Pair density waves in coupled doped
+two-leg ladders,'' \emph{Phys. Rev. B} \textbf{82}, 041102(R) (2010),
+\href{https://doi.org/10.1103/PhysRevB.82.041102}{doi:10.1103/PhysRevB.82.041102}.
+
+\bibitem{kampf2001}
+A. P. Kampf, D. J. Scalapino and S. R. White, ``Stripe orientation in an
+anisotropic \(t\)--\(J\) model,'' \emph{Phys. Rev. B} \textbf{64}, 052509 (2001),
+\href{https://doi.org/10.1103/PhysRevB.64.052509}{doi:10.1103/PhysRevB.64.052509}.
+
+\bibitem{corboz2014}
+P. Corboz, T. M. Rice and M. Troyer, ``Competing states in the \(t\)--\(J\)
+model: uniform \(d\)-wave state versus stripe state,''
+\emph{Phys. Rev. Lett.} \textbf{113}, 046402 (2014),
+\href{https://doi.org/10.1103/PhysRevLett.113.046402}{doi:10.1103/PhysRevLett.113.046402}.
 
 \end{thebibliography}
 

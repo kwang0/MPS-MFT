@@ -124,11 +124,16 @@ For manuscript background, see the
 and now updated in LaTeX and PDF with numerical evidence through September 23.
 It includes the complete grids, full transition-cut energies, positive-V and
 trellis outcomes, pair correlations and the completed square A/B campaign,
-with 50 pages, twenty-two figures and 48 cited references. Sections 3.13/3.14
+with 53 pages, twenty-two figures and 53 cited references. Sections 3.13/3.14
 develop the complete pair-correlation and square A/B results; Section 3.15
 analyzes the 42 stripe states (Figures 19/20), including local pair survival
 versus long-distance suppression. Section 3.16 then analyzes the 22 paired
 square MPSs (Figures 21/22), with trellis omitted from those figures.
+Section 3.18 now documents the equal-ladder-density restriction and excluded
+parallel-stripe charge-transfer mode, with experimental/numerical literature,
+conditional compressibility reasoning and possible total-density/larger-cell
+controls. Living methods Section 4.3 records the same implementation limit.
+No stability calculation in the excluded channel has been performed.
 The material introduction and the earlier
 branches' provisional status remain.
 The [coupled-ladder literature review](literature/README.md) provides annotated
@@ -137,7 +142,8 @@ qualifies the legacy positive-V interpretation with the new square data,
 without claiming a fresh literature search. The [living methods notes](METHODS_NOTES.tex)
 ([compiled PDF](METHODS_NOTES.pdf))
 also describe the raw-update protocol, energy-shape interpretation and
-two-ladder alternating relaxation. No new literature search is implied.
+two-ladder alternating relaxation. A focused September 23 literature check
+supports the new density-constraint sections; the older review is unchanged.
 
 The deferred [finite-size seed snapshot](reports/finite_size_seeds_20260906/README.md)
 retains four chi=200 L=96/L=128 pairing/stripe seeds with fixed L=64 coupling.

@@ -43,7 +43,16 @@ these figures. The discussion follows the opposite spin-correlation trends
 along the square hopping and interaction cuts. The introduction, evidence
 overview, section transitions and final interpretation follow this order.
 
-The rebuilt draft has 50 pages and 48 cited references. The introduction and
+September 23 limitation update: Section 3.18 documents the separate density
+target on each ladder and the parallel-stripe charge-transfer mode it excludes.
+It distinguishes longitudinal ladder experiments and cylinder/CDW calculations
+from two-dimensional stripe-orientation evidence, explains the conditional
+compressibility cost, and outlines common-mu and larger-transverse-cell controls.
+Five numerical references are added with reading-depth notes in SOURCE_NOTES.md.
+The living methods notes carry the shorter implementation-oriented Section 4.3.
+No charge-transfer stability calculation or new simulation is implied.
+
+The rebuilt draft has 53 pages and 53 cited references. The introduction and
 Section 2.4 now motivate the trellis runs through the chain--ladder materials,
 pressure-induced superconductivity, charge and magnetic order, optical/model
 parameter estimates (including the limits on V), and reciprocal one-/two-ladder
@@ -69,7 +78,7 @@ stripe/coherence references; three existing material records are also cited.
    energy shapes, positive-V and trellis outcomes; full and connected pair
    correlations; the completed square A/B campaign; pair correlations across
    stripe states; stripe correlations within uniformly paired square states;
-   remaining physical controls.
+   equal-density limitation and parallel stripes; remaining physical controls.
 4. An appendix linking claims to nineteen groups of local evidence.
 
 The document preserves provisional status and historical acceptance flags.
@@ -95,7 +104,7 @@ or:
 
 This draft uses standard LaTeX packages, natbib, and BibTeX. Its bibliography
 combines [the existing bibliography](../literature/references.bib) with the
-sixteen supplemental entries here. Both LaTeX documents now detect whether the
+twenty-one supplemental entries here. Both LaTeX documents now detect whether the
 build starts in their own directory or the parent documentation/project root.
 No path edits are needed when switching between those layouts. The shared
 bibliography is reused without editing its entries.
@@ -189,3 +198,9 @@ build and figure checks are under `output/stripe_first_square_pairs_20260923/`:
 stripe analysis on pages 36/37 and Figures 19/20 on pages 38/39, followed
 by paired-square analysis on page 40 and Figures 21/22 on pages 41/42.
 The refreshed Overleaf archive contains all 22 figures (28 files total).
+
+The density-constraint update is checked under
+`output/parallel_stripe_notes_20260923/`: manuscript Section 3.18 on pages
+43-45, living methods Section 4.3 on page 13, and the new bibliography entries.
+Both PDFs have resolved citations and no overfull boxes or missing characters.
+The archive retains all 22 figures and matches the maintained sources.

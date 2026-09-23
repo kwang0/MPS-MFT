@@ -181,3 +181,35 @@ Zhang and Qin's reference-bond sensitivity; the existing Shen2023 BibTeX key
 is reused. No broad literature refresh or new external numerical benchmark
 is claimed. The complete source inventory, fits, bulk-cut sensitivity and
 square audit accompany the report rather than being hidden in plotted curves.
+
+## Equal ladder densities and parallel stripes - 23 September 2026
+
+The focused manuscript limitation section and living methods subsection
+distinguish longitudinal CDWs from modulation of the ladder-average density
+across an array. The current implementation is verified in `src/Trellis.jl`:
+each spatial member calls `find_mu_for_density` with the same `model.density`,
+and provenance explicitly records a separate target on every ladder.
+
+Primary sources consulted in the preceding literature discussion and checked
+for this update (no claim of an exhaustive literature survey):
+
+| Source | Reading depth and supported use |
+|---|---|
+| [Abbamonte et al. (2004)](https://arxiv.org/abs/cond-mat/0501087), existing `Abbamonte2004` | Full-text scattering geometry and discussion: period-five modulation along ladders and coherence across about 50 ladders; neither establishes unequal average ladder densities. |
+| [Rusydi et al. (2006)](https://arxiv.org/abs/cond-mat/0511524), existing `Rusydi2006` | Full-text wavevector and doping results: longitudinal periods three/five and commensurability; no inference of interladder disproportionation. |
+| [White and Scalapino (1997)](https://doi.org/10.1103/PhysRevB.55.R14701), new `WhiteScalapino1997` | Publisher abstract and bibliographic record: stripe states in the four-leg t-J ladder. Detailed orientation statements use the 2003 full text instead. |
+| [White and Scalapino (2003)](https://arxiv.org/abs/cond-mat/0306545), new `WhiteScalapino2003` | Full-text boundary conditions and Fig. 1 discussion: stripes wrapped around a six-leg cylinder; finite-width orientation qualification. |
+| [White, Affleck and Scalapino (2002)](https://arxiv.org/abs/cond-mat/0111320), existing `WhiteAffleckScalapino2002` | Abstract-level methodological distinction between boundary-induced Friedel oscillations and bulk CDW order; no new numerical claim extracted. |
+| [Almeida, Roux and Poilblanc (2010)](https://arxiv.org/abs/1002.4367), new `Almeida2010` | Full text, especially Eqs. (2)-(3), Fig. 1 and conclusion: DMRG plus interladder Coulomb MF, candidate longitudinal patterns about a common mean density, inequivalent period-four profiles, and hole-pair crystals without superconducting coherence. Not an unrestricted comparison with parallel charge-disproportionated ladders. |
+| [Kampf, Scalapino and White (2001)](https://arxiv.org/abs/cond-mat/0102524), new `Kampf2001` | Full-text orientation energetics and boundary-pinned cylinder; stronger-exchange orientation in the studied regime, with competing kinetic contributions. |
+| [Corboz, Rice and Troyer (2014)](https://arxiv.org/abs/1402.2859), new `Corboz2014` | Full-text nematic subsection and orientation discussion: low-doping alignment along stronger couplings, reversal around delta >= 0.14 for the studied anisotropy; not a result for weakly coupled two-leg units. |
+| [Zheng et al. (2017)](https://arxiv.org/abs/1701.00054), existing `Zheng2017` | Abstract and primary-paper parameter context for spontaneous stripes in the uniform square-lattice Hubbard model; rotational equivalence is a symmetry inference, not a separate result for this project. |
+
+The compressibility expansion, common-external-mu proposal and transverse
+period counting are explicitly our conditional reasoning, not measured
+properties of the present endpoints. At p=1/16, rho_l=1/2 or 1 implies
+eight or sixteen square-lattice rows, hence four or eight two-leg ladders;
+spin closure may double the cell. Small imbalance seeds test local stability
+only. No simulations, prepared launchers or new acceptance claims accompany
+this documentation. Imposed-modulation models are not evidence for spontaneous
+formation of the omitted mode.
