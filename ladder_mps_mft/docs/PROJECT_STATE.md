@@ -1,6 +1,6 @@
 # Current project state
 
-Last locally reviewed: **2026-09-23 — stripe and uniform-pairing grids separated**
+Last locally reviewed: **2026-09-23 — four two-ladder trellis intertwined starts prepared**
 
 This is a local, mutable snapshot. Stable rules live in AGENTS.md and the
 method documents; durable history is append-only in RUN_LOG.md. Local
@@ -8,7 +8,7 @@ artifacts establish solver outcomes, not live scheduler state.
 
 ## Repository and workflow
 
-- Branch: `codex/mps-mft-phase0-refactor`; baseline for this update: `5751e4b`.
+- Branch: `codex/mps-mft-phase0-refactor`; baseline for this update: `373f1c8`.
 - Root `.claude/` is unrelated and remains untouched.
 - Output/state files are excluded from Git and immutable. Reports, scripts,
   LaTeX/PDF notes and the Overleaf bundle are maintained together.
@@ -196,12 +196,25 @@ to these totals. Accounting/solver time are distinct; no ledger was edited.
 
 ## Next action and boundaries
 
-The user reports that the trellis runs are ongoing; this supersedes the
-earlier prepared-only snapshot below, without providing live job IDs or
-scheduler/accounting verification. Preserve their source checkout.
+The user reports that both the square t_perp scan and earlier trellis runs
+are ongoing. This supersedes their prepared-only snapshots below, without
+providing live job IDs or scheduler/accounting verification. Preserve both
+source checkouts.
 
-The [eight square t_perp starts](reports/square_tp_scan_20260922/README.md)
-are prepared: at t0=1.4, V=0 uses tp=0.06/0.08 and V=-0.2 uses tp=0.12/0.14,
+The [four trellis intertwined starts](reports/trellis_intertwined_20260923/README.md)
+use only the rectangular two-ladder cell and one legacy-derived period-16
+charge/pairing seed at each (t0,V) in {1.2,1.4} x {0,+0.2}. Spin-envelope
+period is 32, with the same pairing sign between stripe walls. All targets
+use exact E_p, tau0=tau1=0.1, L64/chi200, fresh A/B MPSs, 60 raw cell sweeps
+and full terminal correlations. The handoff fetches into a third detached
+worktree, then runs `slurm/submit_trellis_intertwined.sh`. Its separate
+trellis_intertwined control root preserves both existing latest pointers;
+the original locked budget ledger is shared. Four 16-hour one-GPU jobs have
+a 16-node-hour ceiling, one segment each. Prepared locally only; no new
+submission, job IDs, accounting entries or Perlmutter operations.
+
+The [eight square t_perp starts](reports/square_tp_scan_20260922/README.md),
+now user-reported ongoing, use t0=1.4, V=0 with tp=0.06/0.08 and V=-0.2 with tp=0.12/0.14,
 each with stripe/pairing 95%/5% seeds. The single-ladder square protocol keeps
 L64/chi200/60 raw evaluations, exact E_p and full terminal correlations.
 `slurm/submit_square_tp_scan.sh` requires a separate checkout. Fetch and create
@@ -209,9 +222,11 @@ the detached worktree in the report; do not pull into the trellis checkout.
 The unique campaign and square_tp_scan control subdirectory preserve existing
 outputs and the trellis latest pointer while sharing the original budget
 ledger. Eight 16-hour one-GPU jobs have a 32-node-hour ceiling, one segment
-each. Prepared and validated locally only; no new job IDs or budget entries.
+each. Preparation was validated locally; current job IDs and accounting have
+not been synchronized. Do not resubmit these ongoing runs.
 
-Earlier trellis preparation contract (submission now user-reported above):
+Earlier trellis preparation contract (ongoing runs now user-reported above;
+do not repeat these submission instructions while those jobs run):
 
 User requested the same four trellis starts at V=-1.0. The
 [September 22 preparation](reports/trellis_vm1_20260922/README.md) provides
@@ -220,8 +235,8 @@ L64 and 60 raw sweeps, exact E_p=-0.2713195876256691, and full terminal
 correlations. Run `bash slurm/submit_trellis_vm1_comparison.sh` on Perlmutter
 after `git pull --ff-only` from the checkout above. Four one-GPU jobs request
 16 hours each (16 node-hours total ceiling), one segment each, retaining the
-11.5-hour solver deadline and shared budget gates. Prepared locally only;
-no submission or job IDs have been reported. Keep the checkout fixed while
+11.5-hour solver deadline and shared budget gates. The runs are now reported
+ongoing, without synchronized job IDs. Keep the checkout fixed while
 the jobs run. Previous V=0 campaigns and their artifacts are unchanged.
 
 Review the completed correlation report and manuscript Sections 3.13/3.14.
@@ -238,8 +253,8 @@ no damping/stability follow-up is prepared. The V=-1 repetition above keeps
 the original raw-map controls. Cubic cells and larger transverse periods
 remain recommendations. Measurement performance profiling is also separate.
 
-Archived scientific states and ledgers remain read-only. This update uses
-focused real-data analysis assertions, LaTeX compilation, rendered-page QA
-and an extracted Overleaf-root build. No DMRG or measurement contractions,
-GPU timing, transfer or scheduler action were performed locally. Earlier
-implementation/launcher tests remain recorded in the append-only run log.
+Archived scientific states and ledgers remain read-only. The current
+preparation uses focused seed/configuration tests, CPU product-state loading
+and fake-launcher checks. No DMRG, measurement contractions, GPU timing,
+transfer or scheduler action was performed locally. Earlier analysis,
+manuscript and implementation validation remains in the append-only run log.

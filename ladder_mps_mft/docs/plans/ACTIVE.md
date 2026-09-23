@@ -1,6 +1,6 @@
 # Active plan
 
-Last reviewed: **2026-09-22**
+Last reviewed: **2026-09-23**
 
 ## Completed analysis
 
@@ -29,12 +29,24 @@ the Overleaf bundle includes the new figures.
 
 ## Next evidence and decisions
 
-Prepare the user's [eight square t_perp starts](../reports/square_tp_scan_20260922/README.md):
+The user reports ongoing square t_perp and trellis runs; no live job IDs or
+scheduler/accounting verification are available locally. Keep both source
+checkouts fixed.
+
+The [four trellis intertwined starts](../reports/trellis_intertwined_20260923/README.md)
+are prepared at t0=1.2/1.4 and V=0/+0.2, only two-ladder cells, one period-16
+intertwined seed each. They retain tau0=tau1=0.1, L64/chi200/60 raw sweeps,
+exact E_p and full terminal correlations. Use a third detached worktree and
+`submit_trellis_intertwined.sh`, with a separate control root and the existing
+shared budget ledger. Four one-segment jobs reserve at most 16 node-hours.
+No new submission, scheduler call or budget entry was made locally.
+
+Earlier preparation of the user's [eight square t_perp starts](../reports/square_tp_scan_20260922/README.md):
 t0=1.4, V=0 with tp=0.06/0.08 and V=-0.2 with tp=0.12/0.14, two seed families
 each. Preparation and local checks are complete. Use a detached worktree and
 `submit_square_tp_scan.sh`; retain the original trellis checkout and shared
 budget ledger. The eight one-segment jobs reserve at most 32 node-hours.
-No square scan submission or scheduler evidence is available locally.
+The runs are now user-reported ongoing; synchronized job IDs remain unavailable.
 
 The user now reports ongoing trellis jobs. Their current job IDs/status have
 not been verified locally; the prepared-only account below is historical.

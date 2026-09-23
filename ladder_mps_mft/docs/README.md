@@ -38,6 +38,12 @@ recorded explicitly as user-reported until synchronized evidence is available.
 
 ## Stable scientific references
 
+The [September 23 trellis intertwined preparation](reports/trellis_intertwined_20260923/README.md)
+provides exactly four two-ladder starts at t0=1.2/1.4 and V=0/+0.2, with one
+period-16 intertwined seed per point, exact E_p and full terminal correlations.
+Its third-checkout handoff and separate control root preserve the user-reported
+ongoing square t_perp and trellis runs while sharing their budget ledger.
+
 The [September 23 stripe/pairing grids](reports/stripe_pairing_grid_20260923/README.md)
 separate 42 stripe-state and 24 uniformly paired MPSs. Stripe plots show
 pair correlations versus static order; paired plots show connected charge/spin
@@ -48,12 +54,13 @@ The [September 22 square t_perp scan](reports/square_tp_scan_20260922/README.md)
 prepares eight fresh starts at t0=1.4: V=0 with tp=0.06/0.08 and V=-0.2 with
 tp=0.12/0.14, both stripe/pairing seeds at each point. Its separate-worktree
 handoff and isolated control subdirectory preserve the user-reported ongoing
-trellis runs while sharing the existing budget ledger. Prepared locally only.
+trellis runs while sharing the existing budget ledger. The user now reports
+that the square scan and trellis jobs are ongoing; job IDs are not synced.
 
 The [September 22 V=-1 trellis preparation](reports/trellis_vm1_20260922/README.md)
 repeats the original four one-/two-ladder and stripe/pairing starts with
 exact target pair binding and unchanged raw-map controls. Its handoff uses
-`slurm/submit_trellis_vm1_comparison.sh`; these runs are prepared, not submitted.
+`slurm/submit_trellis_vm1_comparison.sh`; these runs are now user-reported ongoing.
 
 The [September 22 correlation and completed square A/B report](reports/pair_correlations_20260922/README.md)
 verifies all 58 retrospective MPS diagnostics and eight square A/B sidecars.

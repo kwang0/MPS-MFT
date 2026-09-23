@@ -1,5 +1,11 @@
 # Configuration guide
 
+`phase1_gpu_trellis_intertwined_chi200_raw60.toml` is the September 23 base
+for exactly four rectangular two-ladder trellis starts at t0=1.2/1.4 and
+V=0/+0.2. The dedicated preparer generates one `intertwined_lambda16` seed
+per point with exact E_p and the existing raw chi200 controls. Use the
+[isolated third-checkout handoff](../docs/reports/trellis_intertwined_20260923/README.md).
+
 `phase0_timing.toml` is a timing-only L=64, chi=64 density-search
 payload, with two DMRG sweeps per chemical-potential evaluation.
 `phase0_validation.toml` expands the same model and seed to chi=200 and six

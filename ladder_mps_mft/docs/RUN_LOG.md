@@ -4750,3 +4750,72 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   paired coordinate with two seeds. These are descriptive observations.
 - Updated the report, documentation map and PROJECT_STATE. Original source
   measurements, convergence classifications and campaign controls are unchanged.
+
+## 2026-09-23: four isolated two-ladder trellis intertwined starts prepared
+
+- User requested exactly four runs at t0=1.2/1.4 crossed with V=0/+0.2,
+  two-ladder trellis only, one intertwined seed at each point, preserving
+  the ongoing square t_perp and trellis runs. Their ongoing status is
+  user-reported; no live IDs, scheduler or accounting evidence was queried.
+- Added `scripts/prepare_phase1_trellis_intertwined.jl`,
+  `configs/phase1_gpu_trellis_intertwined_chi200_raw60.toml`, and
+  `slurm/submit_trellis_intertwined.sh`. Reuse the frozen legacy-derived
+  `intertwined_lambda16` recipe: charge/pair-envelope period 16, spin-envelope
+  period 32, pairing at hole-rich spin walls with the same sign between
+  walls. No additional seed family or one-ladder branch is prepared.
+  The source legacy state remains incomplete and is used only for shape.
+- Both spatial ladders start with the same local-rung correlation template
+  and separate fresh MPSs using RNG seed 1404. B keeps its -1/2-rung physical
+  origin; target rectangular A/B kernels independently rebuild every field.
+  No legacy MPS or converged branch is inherited, and no spatial pinning is
+  added. Preserve U8, n15/16 per ladder, L64/chi200, range4, tau0=tau1=0.1,
+  60/40/10 raw cell sweeps, all original tolerances and full terminal
+  diagnostics. There are at most 240 cell sweeps / 480 ladder solves.
+- Exact chi1000 signed E_p values in point order (1.2,0), (1.2,+0.2),
+  (1.4,0), (1.4,+0.2): -0.17989619749147323, -0.15307266912955697,
+  -0.14653773091916378, -0.11678278200975001. No interpolation or extra
+  isolated-ladder computation. Registry SHA-256 remains
+  2209bd2ca3c1ad02c0e542d1a9d63ecf90fdfa49120ad9cc3af599a5b4bc1f0e;
+  recipe SHA-256 remains
+  786fa2e8846820f42aabbabb625c3a645558d25e5388afa4058abf63cf834d35.
+- Launcher v1.26 adds the dedicated four-branch campaign and retains prior
+  campaign compatibility. The new wrapper refuses the original checkout
+  and the standard square-tp checkout (override path supported). The handoff
+  uses fetch and a third detached worktree at
+  `$CFS/m4863/MPS-MFT-trellis-intertwined-20260923`, without pulling into either
+  active checkout. Unique run ID:
+  `20260923_trellis_two_ladder_intertwined_lambda16_60`. The separate
+  `trellis_intertwined/` control subdirectory preserves both latest pointers,
+  and the unique scratch directory is protected against overwrite. Retain
+  the original account and locked shared budget/reconciliation ledgers.
+- Four one-GPU jobs request 32 logical CPU cores and 16 hours each, one
+  segment, a 16-fractional-node-hour reservation ceiling under the shared
+  400-additional-node-hour control. The solver deadline stays 11.5 hours
+  with 4.5 hours for measurements. These are ceilings, not measured costs.
+  No local accounting update or scheduler/transfer/authentication action.
+- Local validation used Julia 1.12.7 with `--startup-file=no
+  --compiled-modules=existing --project=ladder_mps_mft` and
+  `test/test_trellis_intertwined.jl`: all 157 assertions passed in 32.4
+  seconds, excluding package startup. The first pass correctly rejected
+  damping with ArgumentError; the test's expected exception was corrected.
+  Checks include target coordinates/E_p, wave periods, hole/pair alignment,
+  opposite rung/leg signs, both target fields, hashes, overwrite rejection,
+  and production seed loading into distinct CPU product MPSs. No DMRG solve.
+- `C:/Python313/python.exe -B -m unittest discover -s ladder_mps_mft/test
+  -p test_two_basin_next_launchers.py -v` passed nine tests in 9.3 seconds.
+  These use installed Git Bash solely for syntax, local fake launchers and
+  extracted validators; no scheduler calls. They cover both protected source
+  paths, output/accounting separation, one segment, exact branch count,
+  seed/cell/E_p guards, preparation failure and old launcher versions.
+  `git diff --check` passed. Solver src, GPU runtime, old templates and old
+  preparers/wrappers are unchanged; no full suite or GPU benchmark was run.
+- The tested preparer emitted the actual four config/seed previews under
+  `output/seed_previews/20260923_trellis_intertwined/`. Manifest SHA-256:
+  91b378fab840512b96ee44cedec71c10184165b9dad2cf17292451bd1ee987d1.
+  All seed/config hashes and fingerprints are recorded in
+  `docs/reports/trellis_intertwined_20260923/prepared_branches.csv`.
+  Host-specific paths and hashes will be regenerated on Perlmutter.
+- Updated PROJECT_STATE, ACTIVE, documentation/config indexes and the
+  dedicated handoff report. Standing Git commit/push authorization applies
+  on `codex/mps-mft-phase0-refactor`; only the user runs the Perlmutter
+  handoff. The temporary local Julia validation helper was removed.
