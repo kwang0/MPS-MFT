@@ -4819,3 +4819,45 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
   dedicated handoff report. Standing Git commit/push authorization applies
   on `codex/mps-mft-phase0-refactor`; only the user runs the Perlmutter
   handoff. The temporary local Julia validation helper was removed.
+
+## 2026-09-23: paired-state stripe-correlation figures in the manuscript
+
+- User requested both paired-state figures and their analysis in the LaTeX
+  document. Added Section 3.15 to `docs/manuscript/introduction_and_results.tex`
+  and embedded the existing vector figures as Figures 19/20 on landscape
+  pages 38/39. Analysis and definitions occupy pages 36/37.
+- Defined the measured 42/24 stripe/paired partition, bulk rung-pair amplitude
+  and its normalization, connected rung charge/longitudinal-spin covariance,
+  fixed stripe-wavevector weights, and short/long separation windows. Retained
+  all seed/spatial-ladder distinctions, 16 unaccepted/eight accepted paired
+  MPSs, contact/background qualifications and the single-coordinate trellis
+  limitation. No new measurement, solve or acceptance-status change.
+- Quantified the square cuts: at V=-0.4, increasing t0=1.25 to 1.4 strengthens
+  pairing but lowers the spin weight by about 9% and its long-distance
+  magnitude by nearly tenfold; at t0=1.4, changing V=-0.05 to -0.4 increases
+  pairing and spin weight (about 3.5%). Charge and distance trends are also
+  described. These associations do not determine causal necessity of stripes,
+  stripe dynamics or interladder phase stiffness.
+- Updated abstract/date/evidence appendix, manuscript README, documentation
+  map and PROJECT_STATE. The manuscript is now 47 pages with 20 figures and
+  the unchanged 48 references. Literature and methods sources were not edited.
+- Local build from `docs/manuscript/`: set TECTONIC_CACHE_DIR to the resolved
+  `../../output/literature_tools/cache`, then run
+  `../../output/literature_tools/tectonic.exe --only-cached --keep-logs
+  --outdir ../../output/paired_manuscript_20260923 introduction_and_results.tex`.
+  The first build lacked lmsy6.pfb; a restricted network attempt failed, then
+  the approved compiler download populated that workspace cache. The final
+  cached build passed in 3.2 seconds, retaining only the existing underfull
+  paragraph at lines 1200-1219 (and the pre-existing Fontconfig notice).
+- Rendered and visually checked the title/abstract, new analysis and both
+  figure pages, plus the interpretation transition. Kept the distance-analysis
+  heading with its text. Final text/numerical checks confirm 47 pages, all
+  20 figure captions, 48 references, resolved labels, no overfull boxes or
+  missing characters, and the quoted CSV endpoint trends. The UTF-8 checker
+  excludes the existing generic ev:#1 macro placeholder from literal labels.
+  Build logs, text, page PNGs and validation JSON are in ignored
+  `output/paired_manuscript_20260923/`; copied the checked PDF to the manuscript.
+- Reused `package_overleaf.py`, adding the two existing figure paths, and
+  regenerated `overleaf_upload.zip`: all 26 members match their maintained
+  sources byte for byte, ZIP integrity passes and all 20 figure paths are
+  covered. No unrelated DMRG tests or Perlmutter operations were performed.

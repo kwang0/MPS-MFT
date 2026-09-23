@@ -2,7 +2,7 @@
 
 Created 15 September 2026. This is an editable manuscript starting point using
 the existing annotated literature review and locally synchronized analyses
-through September 22, including a September 20 common-cell trellis energy audit
+through September 23, including a September 20 common-cell trellis energy audit
 (updated from the initial September 13 cutoff).
 
 Final-results update, September 19: the [combined campaign review](../reports/campaign_review_20260918/README.md)
@@ -27,7 +27,16 @@ correlations. The [standalone correlation report](../reports/pair_correlations_2
 also supplies channel-sign plots, reference/window sensitivity and the
 machine-readable validation and numerical summaries.
 
-The rebuilt draft has 43 pages and 48 cited references. The introduction and
+September 23 update: Section 3.15 adds both paired-state stripe-correlation
+figures as Figures 19 and 20. It defines the measured 42/24 stripe/paired
+partition, the uniform rung-pair amplitude, connected charge/spin weights
+at the stripe wavevectors, and short-/long-distance magnitudes. The analysis
+quantifies the opposite spin-correlation trends along the square hopping
+and interaction cuts and distinguishes local weight from spatial range.
+Trellis has only one paired parameter coordinate; the state acceptance
+labels and limits on causal interpretation are retained.
+
+The rebuilt draft has 47 pages and 48 cited references. The introduction and
 Section 2.4 now motivate the trellis runs through the chain--ladder materials,
 pressure-induced superconductivity, charge and magnetic order, optical/model
 parameter estimates (including the limits on V), and reciprocal one-/two-ladder
@@ -51,13 +60,14 @@ stripe/coherence references; three existing material records are also cited.
    comparisons; stripe wavevectors and slow texture relaxation; canonical
    energies and the bond-dimension comparison; complete grid results, fine-cut
    energy shapes, positive-V and trellis outcomes; full and connected pair
-   correlations; the completed square A/B campaign; remaining physical controls.
-4. An appendix linking claims to eighteen groups of local evidence.
+   correlations; the completed square A/B campaign; stripe correlations within
+   uniformly paired states; remaining physical controls.
+4. An appendix linking claims to nineteen groups of local evidence.
 
 The document preserves provisional status and historical acceptance flags.
 The prepared longer-ladder seeds are not new evidence. All four positive-V
 and all four trellis final states are now analyzed; old partial logs remain
-historical. There are eighteen figures, including the earlier September 12
+historical. There are twenty figures, including the earlier September 12
 spatial evolution, the square/cubic comparisons, full transition-cut energies,
 physical spin/pairing cuts and completed square/trellis history/profile plots. Figures 2–5 compare square and cubic side by side: phase diagrams,
 full energy histories, physical spin RMS and physical pairing RMS. The three
@@ -118,6 +128,9 @@ reports/
     stripe_pairing_profiles.pdf
     square_AB_complete.pdf
     square_AB_pair_correlations.pdf
+  stripe_pairing_grid_20260923/
+    paired_stripe_weights.pdf
+    paired_stripe_distance_correlations.pdf
 METHODS_NOTES.tex
 ```
 
@@ -128,7 +141,7 @@ Use the normal pdfLaTeX compiler with BibTeX (the documents use natbib).
 The path handling follows the project-root behavior documented in
 [Overleaf's multi-file guidance](https://www.overleaf.com/learn/latex/Multi-file_LaTeX_projects).
 
-All eighteen figure PDFs are required, even though they are outside the two source
+All twenty figure PDFs are required, even though they are outside the two source
 folders. The Git-tracked [Overleaf upload ZIP](overleaf_upload.zip) contains
 the LaTeX sources, bibliographies, living methods notes, required figures and
 these instructions, so it can be downloaded from another device.
@@ -153,3 +166,9 @@ The September 22 build and rendered-page checks are under
 `output/pair_report_review_20260922/`. Both the standalone report and the
 manuscript are checked for unresolved references, missing figures and layout;
 the refreshed Overleaf archive retains all 18 manuscript figures.
+
+The September 23 build, extracted text and rendered-page checks are under
+`output/paired_manuscript_20260923/`. The updated manuscript has no unresolved
+references or overfull boxes; its two new figures use landscape pages.
+The refreshed Overleaf archive contains all 20 figures and is checked
+against the maintained sources and their relative paths.

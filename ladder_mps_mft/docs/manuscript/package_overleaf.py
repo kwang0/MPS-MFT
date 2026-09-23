@@ -30,6 +30,8 @@ def main():
         "reports/pair_correlations_20260922/stripe_pairing_profiles.pdf",
         "reports/pair_correlations_20260922/square_AB_complete.pdf",
         "reports/pair_correlations_20260922/square_AB_pair_correlations.pdf",
+        "reports/stripe_pairing_grid_20260923/paired_stripe_weights.pdf",
+        "reports/stripe_pairing_grid_20260923/paired_stripe_distance_correlations.pdf",
         "manuscript/README.md",
     )
     # Read everything first, so a missing source cannot truncate a valid ZIP.

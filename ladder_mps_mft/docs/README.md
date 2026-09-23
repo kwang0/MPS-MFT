@@ -119,11 +119,13 @@ energy normalization and the one-/two-ladder spatial ansatz distinction.
 
 For manuscript background, see the
 [introduction and results draft](manuscript/README.md), created September 15
-and now updated in LaTeX and PDF with numerical evidence through September 22.
+and now updated in LaTeX and PDF with numerical evidence through September 23.
 It includes the complete grids, full transition-cut energies, positive-V and
 trellis outcomes, pair correlations and the completed square A/B campaign,
-with 43 pages, eighteen figures and 48 cited references. Sections 3.13/3.14
-develop the latest results. The material introduction and the earlier
+with 47 pages, twenty figures and 48 cited references. Sections 3.13/3.14
+develop the complete pair-correlation and square A/B results; Section 3.15
+adds both paired-state stripe-correlation grids with analysis of the
+opposite trends along the hopping and interaction cuts. The material introduction and the earlier
 branches' provisional status remain.
 The [coupled-ladder literature review](literature/README.md) provides annotated
 sources, LaTeX/PDF and 49 references. Its actual project-evidence section now

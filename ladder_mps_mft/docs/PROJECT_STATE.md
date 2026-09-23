@@ -1,6 +1,6 @@
 # Current project state
 
-Last locally reviewed: **2026-09-23 — four two-ladder trellis intertwined starts prepared**
+Last locally reviewed: **2026-09-23 — paired-state correlation figures added to manuscript; four trellis intertwined starts prepared**
 
 This is a local, mutable snapshot. Stable rules live in AGENTS.md and the
 method documents; durable history is append-only in RUN_LOG.md. Local
@@ -8,7 +8,7 @@ artifacts establish solver outcomes, not live scheduler state.
 
 ## Repository and workflow
 
-- Branch: `codex/mps-mft-phase0-refactor`; baseline for this update: `373f1c8`.
+- Branch: `codex/mps-mft-phase0-refactor`; baseline for this update: `953b104`.
 - Root `.claude/` is unrelated and remains untouched.
 - Output/state files are excluded from Git and immutable. Reports, scripts,
   LaTeX/PDF notes and the Overleaf bundle are maintained together.
@@ -31,6 +31,8 @@ paired profiles have at least 99.8% uniform rung-pair weight. V/t0 labels,
 seeds, A/B ladders and all acceptance statuses remain intact. Square paired
 spin-correlation trends differ between the V and t0 cuts. These are
 descriptive parameter associations, with no new simulations or Perlmutter actions.
+Both paired-state grids and their quantitative analysis are now in manuscript
+Section 3.15 (Figures 19/20), including the definitions and interpretation limits.
 
 **Complete pair correlations and square A/B results:** the
 [September 22 report](reports/pair_correlations_20260922/README.md) verifies
@@ -148,7 +150,8 @@ and square continuation markers. Energy panels keep individual y scales.
 
 Numerical evidence includes the September 20 same-cell energy audit and
 September 22 complete correlations and square A/B results in Sections
-3.13/3.14. The manuscript has 43 pages and 18 figures. The material/trellis
+3.13/3.14. Section 3.15 adds the September 23 paired-state stripe-correlation
+analysis and both grids. The manuscript has 47 pages and 20 figures. The material/trellis
 introduction and 48 cited references from September 18 are preserved;
 the literature-search cutoff is unchanged. Living methods notes and the
 literature review's project-evidence section incorporate the final results.

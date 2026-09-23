@@ -40,7 +40,7 @@
 \title{Pairing, Stripes, and Competing Order\\in Coupled Hubbard Ladders\\
   \large Introduction, Background, and Current Results}
 \author{Ladder MPS+MF project\\Working manuscript draft}
-\date{Updated 22 September 2026}
+\date{Updated 23 September 2026}
 
 \begin{document}
 \maketitle
@@ -70,8 +70,10 @@ walls, while longer-distance correlations are strongly suppressed.
 Rung--leg signs predominantly survive, but reference and fit-window
 sensitivity preclude a single asymptotic decay exponent. All four newer
 square two-ladder runs at the attractive paired coordinates pass fixed-point
-gates and reproduce the paired state from both tested seeds. These
-observations sharpen the distinction between local pairing
+gates and reproduce the paired state from both tested seeds. Within the
+paired subset, connected spin correlations at the stripe wavevector decrease
+with pairing along a hopping cut but increase along an interaction cut.
+These observations sharpen the distinction between local pairing
 tendencies and the order selected in an array. The numerical results remain
 finite-length, finite-bond-dimension evidence, with explicit limits on
 self-consistency, response completeness, and thermodynamic interpretation.
@@ -82,7 +84,8 @@ Sections~\ref{sec:intro}--\ref{sec:background} are draft manuscript prose.
 Section~\ref{sec:results} is a dated collection of results and interpretation,
 including unresolved points that must remain visible during manuscript
 development. The evidence cutoff is the synchronized analyses through
-22 September 2026; the literature discussion incorporates the stripe and
+23 September 2026, including reanalysis of the completed September~22
+measurements; the literature discussion incorporates the stripe and
 ladder-material discussions through 18 September. Appendix~\ref{sec:evidence} identifies the local
 sources. The new analysis reads completed measurements and simulations;
 no additional many-body solve was performed for manuscript preparation.
@@ -1424,6 +1427,144 @@ attractions. The old one-ladder acceptance flags remain unchanged.}
 \end{figure}
 
 \clearpage
+\subsection{Stripe correlations within uniformly paired states}
+\label{sec:paired-stripe-correlations}
+
+The reverse comparison asks how charge and spin correlations vary within
+the paired states as their uniform pairing amplitude changes. The
+September~23 analysis separates the same 66 coupled-ladder MPSs into 42
+stripe endpoints and 24 uniformly paired endpoints before plotting either
+group (\ev{paired-stripe-correlations}). For bulk rungs
+$\mathcal B=\{9,\ldots,56\}$, $N_b=48$, use the unnormalized rung singlet
+$D_i$ from Eq.~\eqref{eq:connected-pair-measured} and define
+\begin{equation}
+ F_i=\avg{D_i},\qquad
+ F_{\rm u}=\left|\frac{1}{N_b}\sum_{i\in\mathcal B}F_i\right|,\qquad
+ F_{\rm rms}=\left(\frac{1}{N_b}\sum_{i\in\mathcal B}|F_i|^2\right)^{1/2}.
+ \label{eq:uniform-rung-pair}
+\end{equation}
+The paired selection requires $F_{\rm rms}>0.01$ and
+$F_{\rm u}^2/F_{\rm rms}^2\geq0.99$. The largest excluded amplitude is
+$1.10\times10^{-4}$, the smallest included amplitude is $0.06579$, and
+thresholds $0.001$, $0.01$ and $0.05$ give identical membership. All selected
+profiles have at least $99.84\%$ uniform weight. Thus selection uses
+measured pairing rather than seed names or the stripe correlations on the
+vertical axes. Here $F_{\rm u}$ is a physical anomalous expectation, not
+the MF source $\alpha$ or the leg-pair RMS in
+Table~\ref{tab:square-ab-complete}; divide it by $\sqrt2$ to use the
+normalized rung singlet of Eq.~\eqref{eq:pair-op}.
+
+The paired subset contains 22 square and two one-ladder trellis MPSs,
+with $L=64$, $\chi=200$, $U=8$ and target density $15/16$ throughout.
+Eight MPSs belong to the four accepted square A/B runs; the other sixteen
+retain their unaccepted status. There are no paired cubic endpoints.
+Seeds and spatial ladders remain separate plotted points, including
+overlaps, and are not independent statistical replicates.
+
+To measure the stripe channels after removing the static one-point
+contribution, define the rung operators and their covariance as
+\begin{equation}
+ \begin{aligned}
+ n_+(i)&=\tfrac12[n_{i,0}+n_{i,1}],&
+ m_-(i)&=\tfrac12[S^z_{i,0}-S^z_{i,1}],\\
+ C_O(i,j)&=\avg{O_iO_j}-\avg{O_i}\avg{O_j},&
+ S_O^{\rm c}(q)&=\frac{1}{N_b}\sum_{i,j\in\mathcal B}
+       e^{iq(i-j)}C_O(i,j).
+ \end{aligned}
+ \label{eq:paired-stripe-covariance}
+\end{equation}
+Figure~\ref{fig:paired-stripe-weights} evaluates the leg-even charge
+channel at $q_c=\pi/8$ and the leg-odd longitudinal-spin channel at
+$q_s=15\pi/16$, referencing the previously identified charge period 16
+and spin-envelope period 32. These are fixed-wavevector weights, not
+fitted peak heights. Their normalization uses rung averages and $N_b$;
+it differs from a site-normalized structure factor. Contact terms
+$i=j$ are included, so a finite weight can contain local variance and
+broad short-range correlations without a resolved stripe peak.
+
+\paragraph{The square trend depends on the parameter cut.}
+At fixed $V=-0.4$, increasing $t_0$ from 1.25 to 1.4 increases $F_{\rm u}$
+from $0.09344$ to $0.10637$, while $S_{m_-}^{\rm c}(q_s)$ falls from
+$0.35611$ to $0.32420$, approximately $9\%$. At fixed $t_0=1.4$, making
+$V$ more attractive from $-0.05$ to $-0.4$ also strengthens pairing
+($0.09709$ to $0.10637$), but the spin weight instead rises from
+$0.31331$ to $0.32420$, approximately $3.5\%$. These statements describe
+the paired branch; near the boundary the other seed can remain striped
+and is excluded from this subset. Across the square paired points the
+charge weight occupies the narrow interval $0.04637$--$0.04745$, with
+some nonmonotonicity. The scatter therefore does not support a single
+parameter-independent relation between pairing strength and stripe-channel
+correlation weight.
+
+\Needspace{5\baselineskip}
+\paragraph{The distance grid separates local weight from spatial range.}
+Figure~\ref{fig:paired-stripe-distance} shows the mean of $|C_O(i,j)|$
+over $2\leq|i-j|\leq4$ and $16\leq|i-j|\leq24$, with both endpoints
+in $\mathcal B$ and equal weight for each eligible ordered pair.
+These measures exclude contact terms but do not select a wavevector.
+Along the fixed-$V$ hopping cut above, the long-distance spin magnitude
+drops from $4.44\times10^{-6}$ to $4.56\times10^{-7}$, nearly a factor
+of ten, whereas the short-distance magnitude falls from $0.01502$ to
+$0.01053$. The long-distance charge magnitude also decreases, from
+$2.64\times10^{-5}$ to $1.68\times10^{-5}$. Along the fixed-$t_0$
+interaction cut, the spin magnitudes instead increase: the short-distance
+value rises from $0.00976$ to $0.01053$ and the long-distance value from
+$3.50\times10^{-7}$ to $4.56\times10^{-7}$. Long-distance charge likewise
+rises from $1.26\times10^{-5}$ to $1.68\times10^{-5}$; short-distance
+charge is nonmonotonic. The finite-$q$ and distance measures therefore
+give complementary information. In particular, sizable spin weight at
+$q_s$ does not imply a large long-distance spin tail. The smallest tails
+remain descriptive finite-$\chi$ values without independent error bounds.
+
+The two trellis markers are nearly coincident seed outcomes at the single
+coordinate $(t_0,V)=(1,0)$, with $F_{\rm u}\simeq0.06574$; they provide
+no within-trellis parameter trend. Their greater spin weight and
+long-distance spin magnitude compared with the square paired points
+also involve different geometry and intraladder parameters. They cannot
+be interpreted as the response to reducing pairing alone.
+
+The combined result is coexistence of uniform anomalous pairing with
+finite connected charge and spin correlations in these saved states;
+the connected correlations alone do not establish simultaneous static
+stripe order. Suppression
+of magnetic correlations accompanies stronger pairing along one square
+cut, while enhancement accompanies it along the other. Changing $V$ or
+$t_0$ changes both channels directly; $F_{\rm u}$ is an outcome, not an
+independently controlled field. Consequently these plots characterize
+the relationship but do not choose between the two stripe interpretations:
+finite stripe-channel correlations do not establish that stripes are
+necessary for pairing, and their suppression on one cut does not exclude
+a role for shorter-range correlations. Equal-time intraladder measurements
+also do not determine stripe dynamics, interladder phase stiffness or
+the causal origin of pairing.
+
+\begin{landscape}
+\begin{figure}[p]\centering
+\includegraphics[width=\linewidth,height=5.15in,keepaspectratio]{\projectdocroot/reports/stripe_pairing_grid_20260923/paired_stripe_weights.pdf}
+\caption{Connected charge and longitudinal-spin weights at the fixed stripe
+wavevectors versus uniform rung-pair amplitude in the 24 paired MPSs.
+Operators, bulk window and normalization are defined in
+Eqs.~\eqref{eq:uniform-rung-pair}--\eqref{eq:paired-stripe-covariance}.
+Color indicates $V$, shape indicates $t_0$, and outer rings identify the
+eight accepted MPSs. Axis ranges differ by panel. Contact terms are included;
+these values do not establish peaks. The trellis row contains two overlapping
+seeds at one coordinate.}
+\label{fig:paired-stripe-weights}
+\end{figure}
+\begin{figure}[p]\centering
+\includegraphics[width=\linewidth]{\projectdocroot/reports/stripe_pairing_grid_20260923/paired_stripe_distance_correlations.pdf}
+\caption{Short- and long-distance connected charge and longitudinal-spin
+magnitudes versus uniform pairing in the same 24 MPSs. Both rungs lie in
+9--56; each panel averages $|C_O(i,j)|$ over its indicated separation
+window. Contact terms are excluded, and the long-distance axes are
+logarithmic. These spatial measures are not restricted to a stripe
+wavevector. Marker conventions match Fig.~\ref{fig:paired-stripe-weights};
+the opposite trends along the two square parameter cuts remain visible.}
+\label{fig:paired-stripe-distance}
+\end{figure}
+\end{landscape}
+
+\clearpage
 \subsection{Scope of the emerging physical interpretation}
 
 The isolated-ladder and coupled-array observations separate pair formation
@@ -1643,6 +1784,15 @@ $V=0$ basin.
  supersede the September~21 first-result-only status.
  The original \href{run:../reports/square_two_ladder_20260920/README.md}{preparation contract}
  retains the model, seeds and spatial-cell definition.
+
+ \item\label{ev:paired-stripe-correlations}
+ \textbf{Stripe correlations within paired states, September~23.}
+ \href{run:../reports/stripe_pairing_grid_20260923/README.md}{Definitions and analysis},
+ \href{run:../reports/stripe_pairing_grid_20260923/paired_points.csv}{all 24 paired points},
+ and \href{run:../reports/stripe_pairing_grid_20260923/validation.json}{source/partition audit}.
+ The two paired-state figures reuse the completed measurements; the same
+ report retains the separate 42-state stripe grids. No new solve or
+ acceptance reclassification is implied.
 
  \item\label{ev:length}
  \textbf{Prepared finite-size seeds, September~6.}
