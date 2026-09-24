@@ -1,15 +1,26 @@
 # Literature review
 
 Plain LaTeX annotations for an introduction on competing orders in coupled
-repulsive Hubbard ladders. Updated 7 September 2026: 49 papers, arranged in
-eight groups from the general Hubbard problem to the closest MPS+MF work.
+repulsive Hubbard ladders. Updated 24 September 2026: 73 annotated papers,
+arranged in eight groups from the general Hubbard problem to the closest MPS+MF work.
 Each paper has a medium-length summary, a paragraph on relevance and limits,
 persistent links, and a stable BibTeX key. An introduction outline follows.
 
 The actual LaTeX/PDF now includes a September 19 project-evidence update:
 cubic, finer square energy/order cuts, all positive-V tests and all trellis
 cells/seeds, including the alternating two-ladder relaxation.
-The literature-search cutoff and 49-paper bibliography remain unchanged.
+That project-evidence paragraph is historical. The material review now covers
+the core insulating and doped ladder cuprates, including Notbohm's La4Sr10
+neutron benchmark, SrCu2O3/Sr2Cu3O5, La6Ca8, the Sr/Ca chain--ladder family,
+LaCuO2.5 and buckled CaCu2O3. Exchange/hopping conventions, cyclic exchange,
+carrier partition, charge order, pressure-dependent superconductivity,
+structural modulation and trellis models are compared explicitly.
+
+Eleven existing manuscript material references moved into the shared
+bibliography with their keys preserved; thirteen new entries were added.
+`Scheie2025` now cites its 2026 PRB publication. The three remaining preprints
+include the separately qualified 24 K uniaxial resistive-onset report.
+The manuscript's numerical results and simulation settings are unchanged.
 
 - [Read the compiled PDF](literature_review.pdf).
 - [Edit the LaTeX review](literature_review.tex).
@@ -37,6 +48,9 @@ tectonic literature_review.tex
 
 The supplied PDF was compiled with Tectonic 0.17.0. The source uses standard
 LaTeX packages and BibTeX with `natbib`; no custom class or template is needed.
+The September 24 build has 40 pages with resolved citations and no overfull
+boxes or missing characters. Source checks, build logs and page renders are
+under the ignored `output/ladder_materials_review_20260924/` directory.
 
 ## Incorporate into the paper
 

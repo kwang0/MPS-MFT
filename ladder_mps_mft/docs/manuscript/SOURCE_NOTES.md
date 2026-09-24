@@ -1,5 +1,36 @@
 # Draft reference and evidence notes
 
+## Ladder-material review - 24 September 2026
+
+Section 2.4 now covers the principal relevant copper-oxide ladder families,
+the distinction between magnetic and superconducting benchmarks, carrier
+partition and pressure, and parameter estimates in project notation.
+Notbohm2007 and La4Sr10 were missing from both documents before this update.
+The full-text exchange fit includes cyclic exchange; its approximate hopping
+values give t0/t about 0.81, while a conditional leading-order square-root
+conversion gives 0.82. Neither directly calibrates the Ca-rich superconductor.
+
+The [expanded shared source notes](../literature/SOURCE_NOTES.md) give the
+search scope, reading-depth table, primary links, metadata corrections and
+interpretive boundaries for thirteen new records. Eleven previously maintained
+material records below moved to the shared bibliography with stable keys,
+so they can also receive annotations in the literature review. The remaining
+ten supplemental records concern stripe/background comparisons.
+
+The Scheie2025 key now resolves to PRB 114, 144511 (2026), DOI
+10.1103/1s7m-xkby; quantitative model details refer to the checked author
+manuscript. The Radheep2013 preprint's 24 K resistive onset is explicitly
+distinguished from its lower-temperature magnetic evidence under different
+loading. New material and parameter summaries do not imply new simulations,
+an experimentally calibrated t0/t=1.4, or a calculated transition temperature.
+Sections 3 onward retain the existing result text and acceptance flags, apart
+from the bibliography-provenance paragraph. The 22 figures are unchanged.
+
+Build logs, citation checks and rendered-page inspection are in ignored
+`output/ladder_materials_review_20260924/`; both PDFs and the Overleaf archive
+are rebuilt from maintained sources. Earlier dated sections below describe
+the state at their original update and are preserved as provenance.
+
 Initial draft: **15 September 2026**. Updated numerical evidence cutoff: **19 September 2026**.
 
 ## Existing sources

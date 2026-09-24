@@ -52,12 +52,16 @@ Five numerical references are added with reading-depth notes in SOURCE_NOTES.md.
 The living methods notes carry the shorter implementation-oriented Section 4.3.
 No charge-transfer stability calculation or new simulation is implied.
 
-The rebuilt draft has 53 pages and 53 cited references. The introduction and
-Section 2.4 now motivate the trellis runs through the chain--ladder materials,
-pressure-induced superconductivity, charge and magnetic order, optical/model
-parameter estimates (including the limits on V), and reciprocal one-/two-ladder
-spatial cells. Eleven new material references supplement the initial five
-stripe/coherence references; three existing material records are also cited.
+September 24 material review: the rebuilt draft has 56 pages and 67 cited
+references. The introduction and Section 2.4 cover insulating and doped ladder
+cuprates, including the previously missing Notbohm La4Sr10 neutron benchmark,
+carrier partition, charge/magnetic order, structural modulation and trellis
+theory. A table distinguishes stronger-leg spectroscopic estimates from the
+isotropic optical model and the project's stronger-rung scans. The text
+separates magnetic gaps, hydrostatic superconducting transitions and the
+qualified 24 K uniaxial resistive-onset report. The shared review now has
+73 annotations, with source links and reading depths. Numerical results,
+acceptance labels and all 22 figures are preserved.
 
 - [Edit the LaTeX document](introduction_and_results.tex).
 - [Read the compiled PDF](introduction_and_results.pdf).
@@ -104,10 +108,11 @@ or:
 
 This draft uses standard LaTeX packages, natbib, and BibTeX. Its bibliography
 combines [the existing bibliography](../literature/references.bib) with the
-twenty-one supplemental entries here. Both LaTeX documents now detect whether the
+ten supplemental entries here. Eleven material records now reside in the
+shared bibliography, with their original keys. Both LaTeX documents detect whether the
 build starts in their own directory or the parent documentation/project root.
 No path edits are needed when switching between those layouts. The shared
-bibliography is reused without editing its entries.
+bibliography is maintained jointly with the annotated review.
 
 ## Build on Overleaf
 
@@ -204,3 +209,11 @@ The density-constraint update is checked under
 43-45, living methods Section 4.3 on page 13, and the new bibliography entries.
 Both PDFs have resolved citations and no overfull boxes or missing characters.
 The archive retains all 22 figures and matches the maintained sources.
+
+The September 24 material-review builds, citation/source checks and page
+renders are under `output/ladder_materials_review_20260924/`. The review has
+40 pages and 73 references; the manuscript has 56 pages and 67 references.
+Both have resolved citations, no overfull boxes and no missing characters.
+All pages were rendered for layout review, with detailed inspection of the
+new tables, Notbohm parameters, transition criteria and reference sections.
+The 28-member Overleaf archive matches the maintained source and figure bytes.

@@ -7,6 +7,7 @@
 \usepackage{amsmath,amssymb}
 \usepackage{microtype}
 \usepackage{needspace}
+\usepackage{booktabs,tabularx,array}
 \usepackage[numbers,sort&compress]{natbib}
 \usepackage{xurl}
 \usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
@@ -21,16 +22,16 @@
 \newcommand{\relevance}{\par\textbf{Relevance and limits.} }
 \title{Literature Review for Coupled Hubbard Ladders}
 \author{Ladder MPS and mean field project}
-\date{Literature through 7 September 2026; project update 18 September 2026}
+\date{Ladder-material review updated 24 September 2026}
 
 \begin{document}
 \maketitle
 
-This review collects 49 papers relevant to an introduction on competing superconducting, charge, and magnetic order in weakly coupled repulsive Hubbard ladders. It moves from the general correlated-electron problem to experimental ladder systems, isolated-ladder physics, dimensional crossover, and the closest matrix-product-state plus mean-field (MPS+MF) predecessors. Each annotation explains the result and its use in this project; the bibliography provides complete citations and persistent links.
+This review collects 73 papers relevant to an introduction on competing superconducting, charge, and magnetic order in weakly coupled repulsive Hubbard ladders. The 24 September expansion adds a material-by-material comparison, magnetic and electronic parameter benchmarks, pressure and carrier-partition evidence, and the limits of the ideal ladder description. It moves from the general correlated-electron problem to experimental ladder systems, isolated-ladder physics, dimensional crossover, and the closest matrix-product-state plus mean-field (MPS+MF) predecessors. Each annotation explains the result and its use in this project; the bibliography provides complete citations and persistent links.
 
 The project uses a two-leg extended Hubbard ladder with leg hopping $t$, rung hopping $t_0$, onsite repulsion $U$, and nearest-neighbor density interaction $V$, embedded in a transverse mean-field environment. Its principal current regime is $U/t=8$ and density $n=0.9375$, with square and two cubic coupling geometries. Interladder hopping $t_\perp$ generates effective couplings proportional to $t_\perp^2/|E_p|$. These are project definitions, taken from the repository methods notes, rather than findings attributed to the papers below.
 
-\textbf{Reading scope.} This is an introduction-oriented narrative review, with foundational papers and targeted searches through 7 September 2026, rather than an exhaustive systematic review. Summaries draw on publisher or author abstracts and, for the closest comparisons, selected full-text sections. The source notes record that distinction. Three entries are explicitly retained as preprints. ``Relevance and limits'' states the application to this project and should be read as synthesis, not as an additional claim by the cited authors. A short introduction outline follows the annotations.
+\textbf{Reading scope.} This is an introduction-oriented narrative review, with the general search through 7 September 2026 and a focused ladder-cuprate expansion through 24 September, rather than an exhaustive systematic review. Coverage includes the principal copper-oxide ladder families relevant to this Hamiltonian and counterexamples where buckling or interladder coupling changes the physics; molecular, vanadate, and iron-based ladder magnets are outside this scope. Summaries draw on primary abstracts and selected full-text sections, distinguished in the source notes. Three entries remain preprints; the stable key \texttt{Scheie2025} now points to its 2026 journal publication. ``Relevance and limits'' is our synthesis. The historical project-evidence paragraph below retains its own date; current numerical evidence is in the companion manuscript.
 
 \tableofcontents
 
@@ -106,7 +107,86 @@ These studies explain the wider numerical challenge and why small changes of Ham
 \relevance It supplies terminology for the project's sign-resolved pair fields and Fourier analysis. A rung-versus-leg $d$-wave sign change concerns the internal pair form factor, while a PDW concerns center-of-mass modulation. Neither a seeded node nor a nonzero Fourier component in a finite open system is sufficient to establish a thermodynamic PDW phase.
 
 \section{Ladder materials and experimental motivation for extended interactions}
-This group narrows the motivation to ladder-based realizations and the role of interactions beyond onsite repulsion. The material and cold-atom Hamiltonians should be compared explicitly with the idealized project model.
+\label{sec:materials-review}
+The material comparison must separate four questions: whether the structure
+contains ladders, whether its spins realize an approximately isolated ladder,
+where doped holes reside, and whether those carriers establish superconducting
+coherence. The same chemical family can provide different benchmarks for each.
+Table~\ref{tab:material-map} summarizes this distinction; the annotations below
+provide the primary evidence and its limits.
+
+\begin{table}[htbp]
+\centering\small
+\caption{Core ladder-cuprate families and their role in the project. A magnetic
+gap is an excitation energy, not a superconducting transition temperature.}
+\label{tab:material-map}
+\begin{tabularx}{\linewidth}{@{}p{0.28\linewidth}X@{}}
+\toprule
+Material & Evidence and model relevance \\
+\midrule
+SrCu$_2$O$_3$; Sr$_2$Cu$_3$O$_5$ & Two- versus three-leg insulating benchmarks: gapped versus gapless spin response in the original study~\citep{Azuma1994}. \\
+La$_6$Ca$_8$Cu$_{24}$O$_{41}$ & Nominally hole-free chain--ladder reference; Raman constrains anisotropic exchange and cyclic exchange~\citep{Nucker2000,Schmidt2005}. \\
+La$_4$Sr$_{10}$Cu$_{24}$O$_{41}$ & Approximately undoped ladders despite residual chain holes; resolved one-/two-triplon neutron spectra~\citep{Notbohm2007}. \\
+Sr$_{14-x}$Ca$_x$Cu$_{24}$O$_{41}$ & Intrinsically hole-bearing chains and ladders; charge order, carrier redistribution, and pressure-induced superconductivity~\citep{Uehara1996,Abbamonte2004,Nucker2000}. \\
+La$_{1-x}$Sr$_x$CuO$_{2.5}$ & Doped coupled ladders; metallicity without superconductivity down to 5 K in the cited experiment~\citep{Hiroi1995,NormandRice1996}. \\
+CaCu$_2$O$_3$ & Buckled ladder-like structure; weakened rung path and magnetic order at 25 K, not a standard spin-gap ladder~\citep{Kiryukhin2001}. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection*{Insulating ladders, exchange anisotropy, and structural limits}
+
+\paper{Azuma1994}{Azuma and colleagues 1994 --- Two- and three-leg magnetic benchmarks}
+\doi{10.1103/PhysRevLett.73.3463}
+\summary Susceptibility and copper NMR compare SrCu$_2$O$_3$ with Sr$_2$Cu$_3$O$_5$. The two-leg material has an activated response, with a susceptibility-derived gap of about 420 K; the three-leg material has a gapless response. These observations establish the even/odd ladder distinction in copper oxides.
+\relevance This is evidence for insulating spin physics, not a superconducting transition at 420 K or a measurement of hole binding. The quoted gap is tied to the probe and analysis; it should not be imposed as an exact parameter constraint on every two-leg material.
+
+\paper{Eccleston1998}{Eccleston and colleagues 1998 --- Distinguishing ladder and chain excitations}
+\doi{10.1103/PhysRevLett.81.1702}
+\summary Neutron spectroscopy resolves the higher-energy ladder response and lower-energy dimer-chain excitations of Sr$_{14}$Cu$_{24}$O$_{41}$. The original ladder dispersion analysis gave a gap near 32.5 meV and unequal leg and rung exchange, while the roughly 11.5 meV feature belonged to chain dimers.
+\relevance This establishes why the two subsystems cannot be conflated. Early exchange estimates from this analysis are not interchangeable with later fits that retain cyclic exchange, nor with the distinct La-substituted sample below.
+
+\paper{Nunner2002}{Nunner and colleagues 2002 --- Cyclic exchange in optical spectra}
+\doi{10.1103/PhysRevB.66.180404}; \arxiv{cond-mat/0203472}
+\summary Dynamical DMRG analyzes how four-spin exchange changes one-triplet and singlet two-triplet excitations. For the studied (La,Ca)$_{14}$Cu$_{24}$O$_{41}$ spectra, simultaneous agreement with the spin gap and optical bound-state spectrum requires a substantial cyclic term and unequal leg/rung exchange.
+\relevance A spin gap alone does not determine a unique nearest-neighbor exchange ratio. The paper writes cyclic exchange using a permutation operator, which also generates bilinear terms; coefficients must be converted before comparison with a convention retaining only explicit four-spin products.
+
+\paper{Schmidt2005}{Schmidt and colleagues 2005 --- Raman comparisons across three ladder materials}
+\doi{10.1103/PhysRevB.72.094419}; \arxiv{cond-mat/0503558}
+\summary A common Heisenberg-plus-four-spin analysis compares SrCu$_2$O$_3$, Sr$_{14}$Cu$_{24}$O$_{41}$, and La$_6$Ca$_8$Cu$_{24}$O$_{41}$. The fitted $J_{\rm leg}/J_{\rm rung}$ is 1.5 for the first two and 1.2 for the last, with $J_{\rm cyc}/J_{\rm rung}=0.2$ in that convention. Exchange anisotropy helps explain the differing Raman peak widths.
+\relevance La$_6$Ca$_8$ and La$_4$Sr$_{10}$ are distinct references, not alternate names for one sample. These fits support stronger-leg parameter regimes but do not supply a universal hopping ratio or a pressure-dependent superconducting Hamiltonian.
+
+\paper{Notbohm2007}{Notbohm and colleagues 2007 --- The La4Sr10 neutron benchmark}
+\doi{10.1103/PhysRevLett.98.027403}; \arxiv{cond-mat/0608109}
+\summary Opposite rung-parity modulations separate one- and two-triplon neutron scattering in La$_4$Sr$_{10}$Cu$_{24}$O$_{41}$, whose residual holes predominantly occupy chains. The ladder gap is $26.4\pm0.3$ meV. A fit gives $J_{\rm leg}=186$, $J_{\rm rung}=124$, and $J_{\rm cyc}=31$ meV, using the paper's explicit four-spin convention. The authors also give approximate Hubbard values $t_{\rm leg}=0.42$, $t_{\rm rung}=0.34$, and $U=3.72$ eV.
+\relevance The reported hopping estimate gives $t_0/t\simeq0.81$; a leading-order square-root conversion of the exchanges gives 0.82. Both are model-dependent estimates, not direct hopping measurements. Stronger leg coupling occurs despite a longer Cu--Cu leg distance (3.96 versus 3.84 \AA), illustrating the role of the oxygen environment. This insulating benchmark does not calibrate a superconducting Ca-rich sample.
+
+\paper{Bordas2006}{Bordas and colleagues 2006 --- Ab initio electronic parameters}
+\doi{10.1007/s00214-006-0099-z}
+\summary Embedded-cluster configuration-interaction calculations determine exchange and hopping parameters for SrCu$_2$O$_3$, Sr$_2$Cu$_3$O$_5$, and CaCu$_2$O$_3$, including longer-range and cyclic processes. Direct exchange, charge-transfer hopping, and onsite repulsion are examined alongside effective magnetic couplings.
+\relevance This supplies a microscopic complement to spectroscopy and warns against deriving every coupling from bond length alone. Its neutral--ionic hopping symbol $t_0$ is not our rung-hopping definition. We cite the approach and compound coverage, without transferring unverified numerical table entries.
+
+\paper{Kiryukhin2001}{Kiryukhin and colleagues 2001 --- CaCu2O3 as a structural counterexample}
+\doi{10.1103/PhysRevB.63.144418}; \arxiv{cond-mat/0009158}
+\summary Susceptibility and neutron diffraction find chain-like magnetism and an incommensurate ordered state below $T_N=25$ K in CaCu$_2$O$_3$. The rung Cu--O--Cu angle is about $123^\circ$, strongly departing from the nearly straight path in the standard ladder compounds.
+\relevance The structural label ``ladder'' does not guarantee a dominant-rung singlet state or even a good isolated two-leg description. $T_N$ is magnetic, not superconducting; buckling and competing interladder interactions need explicit treatment for this compound.
+
+\paper{Hiroi1995}{Hiroi and Takano 1995 --- Doping does not guarantee superconductivity}
+\doi{10.1038/377041a0}
+\summary Sr substitution in LaCuO$_{2.5}$ introduces holes and an insulator-to-metal transition, but the reported samples do not become superconducting down to 5 K.
+\relevance This is a useful negative material result. It does not exclude pairing in all ladder Hamiltonians, nor justify describing every hole-doped ladder cuprate as a superconductor.
+
+\paper{NormandRice1996}{Normand and Rice 1996 --- Three-dimensional coupling in LaCuO2.5}
+\doi{10.1103/PhysRevB.54.7180}; \arxiv{cond-mat/9603054}
+\summary Electronic-structure and magnetic modeling find substantial coupling between the ladder units of LaCuO$_{2.5}$. Its three-dimensional environment is central to interpreting the material.
+\relevance The result motivates varying transverse connectivity, while preventing a literal identification of this material with our schematic cubic kernels. A geometrical ladder motif is not sufficient evidence for a weak-coupling reduction.
+
+\subsection*{Carrier partition, superconductivity, and competing order}
+
+\paper{Nucker2000}{N\"ucker and colleagues 2000 --- Where the holes reside}
+\doi{10.1103/PhysRevB.62.14384}; \arxiv{cond-mat/0008320}
+\summary Polarization-dependent x-ray absorption distinguishes chain and ladder oxygen-hole states under Sr/Ca and La/Y substitutions. Isovalent Ca substitution preserves the nominal total hole count while changing orbital occupation; trivalent substitution reduces that count. Partial ladder occupation occurs in Sr$_{14}$Cu$_{24}$O$_{41}$, whereas residual holes in less hole-rich members can reside predominantly on chains.
+\relevance At O$_{41}$ stoichiometry the all-divalent family has six formal holes per formula unit, La$_4$Sr$_{10}$ has two, and La$_6$Ca$_8$ has none, by charge neutrality relative to Cu$^{2+}$. These are total counts, not ladder densities. Oxygen nonstoichiometry and probe-dependent carrier partition prevent an automatic conversion from composition to $n$.
 
 \paper{Uehara1996}{Uehara and colleagues 1996 --- Superconductivity in a ladder material}
 \doi{10.1143/JPSJ.65.2764}
@@ -118,10 +198,62 @@ This group narrows the motivation to ladder-based realizations and the role of i
 \summary Anisotropic resistivity measurements under pressure investigate how superconductivity emerges in a hole-doped two-leg ladder compound. Superconductivity is accompanied by metallic transport between ladders, in contrast to the more insulating transverse response at ambient pressure. The authors interpret this as evidence that pressure promotes a dimensional crossover and connects a low-dimensional insulating state to a superconducting state in an anisotropic higher-dimensional system. The paper is especially relevant because it measures a property associated with coupling between ladders rather than only signatures inside an individual ladder. Its interpretation remains tied to the pressure-dependent material, where several microscopic parameters may change simultaneously.
 \relevance This is a direct experimental motivation for asking how interladder coupling changes the ordering of a paired subsystem. Pressure should not be represented as a change in only one hopping unless supported by a material model. The present geometry comparisons are theoretical changes of Hamiltonian, not a quantitative reconstruction of this pressure trajectory.
 
+\paper{Radheep2013}{Mohan Radheep and colleagues 2013 --- Uniaxial-pressure onset report}
+\arxiv{1303.0921}\quad\textit{Preprint}
+\summary The authors report a resistive onset up to 24 K in Sr$_3$Ca$_{11}$Cu$_{24}$O$_{41}$ under approximately 0.06 GPa compression along $c$. Their magnetization example instead has an onset near 6.8 K under approximately 0.05 GPa along $a$, with an estimated superconducting fraction near 7\% at 5 K.
+\relevance This pressure-direction-dependent report must be distinguished from the 12 K, 3 GPa benchmark of Uehara et al. The cited magnetic measurement is not bulk confirmation at 24 K under the same conditions. No journal reference appears on the checked arXiv record; we retain its preprint status and resistive-onset qualification.
+
+\paper{Fujiwara2003}{Fujiwara and colleagues 2003 --- Superconducting-state NMR}
+\doi{10.1103/PhysRevLett.90.137001}; \arxiv{cond-mat/0303278}
+\summary High-pressure NMR on Sr$_2$Ca$_{12}$Cu$_{24}$O$_{41}$ examines the superconducting quasiparticle response and its relationship to spin-gap formation. The reported gapped behavior is described as $s$-wave-like.
+\relevance The result is not a phase-sensitive measurement of leg-versus-rung pair signs. A ladder state with opposite bond signs need not have nodes on its actual Fermi surfaces; a spin gap, a quasiparticle gap, and a pair-breaking energy are separate observables.
+
+\paper{Fujiwara2009}{Fujiwara and colleagues 2009 --- Pressure-dependent charge transfer and spin response}
+\doi{10.1103/PhysRevB.80.100503}; \arxiv{0908.2845}
+\summary NMR and NQR follow Sr$_2$Ca$_{12}$Cu$_{24}$O$_{41}$ up to the optimal pressure near 3.8 GPa. The quadrupole response supports pressure-induced hole transfer from chains to ladders, while the normal-state magnetic response also evolves.
+\relevance Pressure changes ladder filling as well as coupling. A fixed-density transverse-hopping scan isolates one mechanism but does not reproduce the complete experimental pressure trajectory.
+
+\paper{Frank2014}{Frank and colleagues 2014 --- Optical charge dynamics under pressure}
+\doi{10.1103/PhysRevB.90.224516}
+\summary Polarized infrared reflectivity on Sr$_{2.5}$Ca$_{11.5}$Cu$_{24}$O$_{41}$ investigates pressure-dependent charge dynamics, redistribution between chains and ladders, and anisotropy. Absolute ladder occupations depend on the experimental interpretation and calibration.
+\relevance Optical spectral weight supports pressure-dependent mobility and carrier transfer, but does not uniquely identify the model density $n=15/16$. Chemical and applied pressure should not be treated as interchangeable changes of a single parameter.
+
+\paper{Vuletic2003}{Vuleti\'c and colleagues 2003 --- Suppression of a CDW scale by Ca substitution}
+\doi{10.1103/PhysRevLett.90.257002}; \arxiv{cond-mat/0305159}
+\summary Transport, dielectric, and optical measurements find a CDW transition scale falling from about 210 K at $x=0$ to 10 K at $x=9$ in Sr$_{14-x}$Ca$_x$Cu$_{24}$O$_{41}$. This is a charge-order scale, not a superconducting $T_c$.
+\relevance The trend motivates competing charge and pairing channels, but does not establish the absence of charge order at all larger Ca concentrations; resonant scattering supplies a complementary test.
+
 \paper{Abbamonte2004}{Abbamonte and colleagues 2004 --- Crystallization of charge holes in a spin ladder}
 \doi{10.1038/nature02925}; \arxiv{cond-mat/0501087}
 \summary Resonant x-ray scattering identifies charge organization associated with the ladder subsystem of $\mathrm{Sr}_{14}\mathrm{Cu}_{24}\mathrm{O}_{41}$. The results are interpreted as a hole crystal, providing experimental evidence for an electronically ordered state in a ladder material that had also motivated theories of pairing. The work connects low-dimensional correlation physics to directly observable charge modulation and establishes that the fate of doped carriers is not limited to uniform transport or superconductivity. Its experimental sensitivity to electronic contrast is central to the interpretation, while the detailed ordering pattern belongs to a specific compound and carrier distribution.
 \relevance This paper motivates retaining CDW competitors when studying superconducting ladder arrays. It should be paired with boundary-scaling references when discussing numerical density profiles: an experimentally detected bulk charge pattern and open-boundary Friedel oscillations are different kinds of evidence. The project's density and interaction values should not be inferred from the compound's chemical formula alone.
+
+\paper{Rusydi2006}{Rusydi and colleagues 2006 --- Commensurability and hole crystals}
+\doi{10.1103/PhysRevLett.97.016403}; \arxiv{cond-mat/0511524}
+\summary Resonant scattering detects commensurate ladder hole crystals at selected compositions, including $x=10,11,12$, and relates their appearance to commensurability. Longitudinal periods three and five occur in the studied family.
+\relevance Ca content alone does not determine whether a CDW exists. Longitudinal charge modulation and coherence between ladders do not establish unequal average fillings on different ladders, the channel excluded by the current equal-density ansatz.
+
+\paper{Katano1999}{Katano and colleagues 1999 --- Pressure and static magnetic order}
+\doi{10.1016/S0921-4526(98)00692-9}
+\summary Neutron measurements on Sr$_{2.5}$Ca$_{11.5}$Cu$_{24}$O$_{41}$ find a pressure-suppressed ordered magnetic moment, apparently disappearing near the superconducting threshold.
+\relevance This supports separating static magnetism from the dynamic spin gap. It does not demonstrate universal mutual exclusion of magnetic and superconducting order across the whole family or directly validate a particular mean-field texture.
+
+\subsection*{Electronic models, localization, and transverse geometry}
+
+\paper{Popovic2000}{Popovi\'c and colleagues 2000 --- An isotropic optical-model benchmark}
+\doi{10.1103/PhysRevB.62.4963}; \arxiv{cond-mat/0005096}
+\summary An optical model of Sr$_{14}$Cu$_{24}$O$_{41}$ uses $t=t_0=0.26$ eV, $U=2.1$ eV, and interladder hopping $t_{xy}=0.026$ eV. The latter enters the two displaced paths between neighboring ladders.
+\relevance This motivates the project's isotropic-rung trellis comparison with two path amplitudes of $0.1t$. It is a different effective parameterization from the neutron and RIXS models; it does not independently determine $V$ or calibrate a high-pressure superconducting sample.
+
+\paper{Gelle2006}{Gell\'e and Lepetit 2006 --- Incommensurate structural modulation}
+\doi{10.1103/PhysRevB.74.235115}; \arxiv{cond-mat/0411135}
+\summary Correlated ab initio calculations derive spatially varying electronic parameters for the ladder subsystem of the incommensurate Sr/Ca compounds. Strong onsite-energy modulation along the legs is found in the highly Ca-substituted case, while the two sites of a rung remain approximately equivalent in the reported calculation.
+\relevance A uniform ladder Hamiltonian omits a potential localization mechanism. Weak direct chain--ladder hybridization does not prevent the chains from setting the electrostatic environment or redistributing charge. The arXiv record contains a mismatched related DOI; the bibliography uses the verified PRB publication above.
+
+\paper{Tseng2022}{Tseng and colleagues 2022 --- Doping, disorder, and magnetic localization}
+\doi{10.1038/s41535-022-00502-1}
+\summary RIXS compares the high-energy magnetic response of Sr$_{14-x}$Ca$_x$Cu$_{24}$O$_{41}$ across Ca substitution. The interpretation invokes off-ladder impurity potentials and hole localization to account for changes from collective triplon behavior.
+\relevance This provides a disorder-based comparison for later attractive-interaction models. A material spectrum can reflect localization as well as intrinsic pairing; neither mechanism is resolved by a uniform static anomalous amplitude alone.
 
 \paper{Hirthe2023}{Hirthe and colleagues 2023 --- Magnetically mediated hole pairing with ultracold atoms}
 \doi{10.1038/s41586-022-05437-y}; \arxiv{2203.10027}
@@ -135,13 +267,61 @@ This group narrows the motivation to ladder-based realizations and the role of i
 
 \paper{Padma2025}{Padma and colleagues 2025 --- Beyond-Hubbard pairing in a cuprate ladder}
 \doi{10.1103/PhysRevX.15.021049}; \arxiv{2501.10287}
-\summary Resonant inelastic x-ray scattering and DMRG examine magnetic excitations in $\mathrm{Sr}_{14}\mathrm{Cu}_{24}\mathrm{O}_{41}$. The measured magnetic response of doped carriers is strongly suppressed relative to the onsite Hubbard model. Including a nearest-neighbor attraction of roughly $V/t=-1$ to $-1.25$ improves agreement with the spectra. The authors attribute this suppression to tighter hole pairing, with substantially increased binding energy and retained $d$-wave-like rung-versus-leg sign structure. Their doped-ladder calculation uses $U/t=8$ and hole density $1/16$, matching the project's central baseline. The study provides a direct spectroscopic motivation for an extended ladder Hamiltonian, while its main evidence concerns bound carriers rather than a superconducting transition.
-\relevance This is a high-priority citation for the $V$ scan. Its fitted rung hopping is $0.84t$, and it includes diagonal hopping $t'=-0.3t$, so matching $U$ and density does not make the Hamiltonians identical. The material fit does not validate the project's transverse treatment; stronger binding also need not imply greater pair mobility or a higher ordering temperature.
+\summary Resonant inelastic x-ray scattering and DMRG examine magnetic excitations in $\mathrm{Sr}_{14}\mathrm{Cu}_{24}\mathrm{O}_{41}$. The measured magnetic response of doped carriers is strongly suppressed relative to the onsite Hubbard model. Including a nearest-neighbor attraction of roughly $V/t=-1$ to $-1.25$ improves agreement with the spectra. The authors attribute this suppression to tighter hole pairing, with substantially increased binding energy and retained $d$-wave-like rung-versus-leg sign structure. Their $V=0$ doped-ladder baseline uses $U/t=8$ and hole density $1/16$; the attraction scan instead adjusts $U$ to maintain $U-V=8t$. The study provides a direct spectroscopic motivation for an extended ladder Hamiltonian, while its main evidence concerns bound carriers rather than a superconducting transition.
+\relevance This is a high-priority citation for the $V$ scan. Its fitted rung hopping is $0.84t$, and its main-text model includes diagonal hopping $t'=-0.3t$. The project lacks that diagonal term and holds $U/t=8$ as $V$ varies, so the scans follow different paths in parameter space. The material fit does not validate the project's transverse treatment; stronger binding also need not imply greater pair mobility or a higher ordering temperature.
 
-\paper{Scheie2025}{Scheie and colleagues 2025 --- Cooper-pair localization in ladder magnetic dynamics}
-\arxiv{2501.10296}\quad\textit{Preprint}
+\paper{Scheie2025}{Scheie and colleagues 2026 --- Cooper-pair localization in ladder magnetic dynamics}
+\doi{10.1103/1s7m-xkby}; \arxiv{2501.10296}\quad\textit{Original 2025 key retained}
 \summary High-resolution neutron spectroscopy and DMRG investigate spin dynamics in $\mathrm{Sr}_{2.5}\mathrm{Ca}_{11.5}\mathrm{Cu}_{24}\mathrm{O}_{41}$. The spectra lack the incommensurate magnetic signatures expected from mobile doped holes. The proposed explanation combines an attractive nearest-neighbor interaction of order $-t$ with pair localization at pinning centers. In the finite-cluster calculation, open boundaries emulate such pinning and accumulate pairs near the ends, leaving a lower effective hole density in the bulk. This restores a predominantly commensurate magnetic response. The study complements the related x-ray work, but localization is essential to its interpretation: binding alone does not explain every observed feature or establish coherent transport.
-\relevance This is particularly relevant to boundary-sensitive density profiles and the distinction between pairing and superconductivity. Its localization mechanism is an explicit ingredient, so its result should not be read as a homogeneous bulk phase diagram. The checked arXiv record supplies no journal reference; publication status should be rechecked before manuscript submission.
+\relevance This is particularly relevant to boundary-sensitive density profiles and the distinction between pairing and superconductivity. The author manuscript uses $t=0.4$ eV, $t_0/t=0.84$, and diagonal $t'/t=-0.3$. Its localization mechanism is explicit, so the result is not a homogeneous bulk phase diagram. The publisher record is now Phys. Rev. B \textbf{114}, 144511 (23 September 2026); detailed parameter statements here refer to the checked author manuscript.
+
+\paper{SchmidtUhrig2007}{Schmidt and Uhrig 2007 --- Magnetic signatures of trellis coupling}
+\doi{10.1103/PhysRevB.75.224414}; \arxiv{cond-mat/0701551}
+\summary A spin-model treatment computes the two-dimensional one-triplon dispersion and neutron structure factor for frustrated trellis arrays relevant to SrCu$_2$O$_3$ and the chain--ladder family. It identifies momentum-dependent signatures of interladder exchange.
+\relevance Weak or frustrated transverse coupling does not mean it is absent. This is a magnetic-excitation benchmark, not a determination of electronic pair transfer or validation of the project's static transverse approximation.
+
+\paper{Faye2015}{Faye and colleagues 2015 --- Electronic pairing on the trellis}
+\doi{10.1103/PhysRevB.91.195126}
+\summary Variational cluster approximation and cellular dynamical mean field theory study a repulsive Hubbard model on coupled two-leg ladders. Both find a superconducting doping dome in the examined regime. A complex, time-reversal-breaking solution appears in the variational-cluster treatment but not in the cellular-DMFT solution.
+\relevance This is a direct electronic trellis comparator. Method-dependent phase structure, small clusters, and the different Hamiltonian prevent quantitative transfer of its boundaries. Our real-field ansatz cannot test its complex order parameter; its $t'$ labels interladder hopping, unlike the diagonal $t'$ in the RIXS fits.
+
+\paper{Sushkov2008}{Sushkov and colleagues 2008 --- Orthorhombicity is not a universal hopping prescription}
+\doi{10.1103/PhysRevB.77.035124}; \arxiv{0710.5325}
+\summary For insulating orthorhombic La$_{2-x}$Sr$_x$CuO$_4$, electronic-structure calculations find a difference of about 8 meV between hoppings along the two plaquette diagonals. The orthorhombic crystallographic directions in this example are diagonal to the nearest-neighbor Cu network.
+\relevance This planar comparison prevents equating every orthorhombic distortion with one nearest-neighbor anisotropy. A square-connectivity approximation and isotropic hopping are separate assumptions; ladder rung/leg inequivalence also exists without a small planar orthorhombic perturbation.
+
+\paper{Gao1994}{Gao and colleagues 1994 --- A planar-cuprate transition-temperature comparison}
+\doi{10.1103/PhysRevB.50.4260}
+\summary Resistive measurements on optimally doped Hg-based planar cuprates find transition temperatures up to 164 K under quasihydrostatic pressure. These compounds provide a high-temperature comparison to the roughly 10 K hydrostatic-pressure ladder benchmark.
+\relevance The comparison concerns observed transition temperatures under different pressures, not equal microscopic couplings or a ratio of pair-binding energies. Pressure, sample composition, and onset versus bulk criteria must accompany quoted $T_c$ values.
+
+\subsection*{What the material review implies for the present parameter scan}
+The three useful benchmarks are a neutron-derived stronger-leg estimate near
+$t_0/t=0.8$ in La$_4$Sr$_{10}$, the explicitly chosen ratio 0.84 in the
+Sr/Ca spectroscopic Hubbard models, and the isotropic optical model with
+$t_0/t=1$~\citep{Notbohm2007,Padma2025,Scheie2025,Popovic2000}.
+They must remain separate parameterizations, including their $U$, diagonal
+hopping, filling, cyclic exchange, and disorder assumptions. In the leading
+half-filled one-band expansion with a common denominator,
+\begin{equation}
+ J_\mu\simeq\frac{4t_\mu^2}{U-V_\mu},\qquad
+ \frac{t_0}{t}\simeq\sqrt{\frac{J_{\rm rung}}{J_{\rm leg}}}
+ \quad(V_{\rm rung}=V_{\rm leg}).
+\end{equation}
+This is our conditional conversion, not a direct experimental extraction.
+Finite-$U$ Hubbard calculations already generate higher-order exchange
+processes; adding a spin-model ring term independently can double count them.
+The existing $t_0/t=1.2$--1.4 scans explore stronger-rung physics and are not
+material fits justified by orthorhombicity. At 1.4 the leading exchange ratio
+would be 1.96, opposite to the cited stronger-leg benchmarks.
+
+Neither the magnetic spin gap nor a pairing scale is $T_c$. Uehara's reported
+onsets are 12 K at 3 GPa and 9 K at 4.5 GPa; the 24 K uniaxial onset has the
+separate qualifications above. An isolated short-range ladder has no
+finite-temperature superconducting transition. Transverse coherence,
+localization, and charge order therefore matter even when local pairing is
+strong. No universal pressure-to-$t_0/t$, pressure-to-$t_\perp$, or
+composition-to-density map follows from this review.
 
 \section{Low dimensional constraints and the origin of ladder pairing}
 The two-leg ladder is useful because it can retain strong local correlations while supporting a spin-gapped, conducting charge sector. This group establishes that starting point and its limits.
@@ -366,6 +546,7 @@ Refs.~\citep{Bollmark2023,Bollmark2025}.
 \bibliographystyle{unsrtnat}
 \begingroup
 \raggedright
+\renewcommand{\bibpreamble}{\interlinepenalty=10000}
 % Support both project-root (Overleaf) and literature-directory local builds.
 \IfFileExists{literature/references.bib}{%
   \bibliography{literature/references}%

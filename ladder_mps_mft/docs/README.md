@@ -124,7 +124,8 @@ For manuscript background, see the
 and now updated in LaTeX and PDF with numerical evidence through September 23.
 It includes the complete grids, full transition-cut energies, positive-V and
 trellis outcomes, pair correlations and the completed square A/B campaign,
-with 53 pages, twenty-two figures and 53 cited references. Sections 3.13/3.14
+with 56 pages, twenty-two figures and 67 cited references after the September 24
+material-review update. Sections 3.13/3.14
 develop the complete pair-correlation and square A/B results; Section 3.15
 analyzes the 42 stripe states (Figures 19/20), including local pair survival
 versus long-distance suppression. Section 3.16 then analyzes the 22 paired
@@ -134,16 +135,20 @@ parallel-stripe charge-transfer mode, with experimental/numerical literature,
 conditional compressibility reasoning and possible total-density/larger-cell
 controls. Living methods Section 4.3 records the same implementation limit.
 No stability calculation in the excluded channel has been performed.
-The material introduction and the earlier
-branches' provisional status remain.
+The earlier branches' provisional status remains.
 The [coupled-ladder literature review](literature/README.md) provides annotated
-sources, LaTeX/PDF and 49 references. Its actual project-evidence section now
-qualifies the legacy positive-V interpretation with the new square data,
-without claiming a fresh literature search. The [living methods notes](METHODS_NOTES.tex)
+sources, LaTeX/PDF and 73 references. The September 24 expansion covers the
+relevant ladder-cuprate families, Notbohm's La4Sr10 exchange/hopping benchmark,
+cyclic exchange, carrier partition, pressure, transition scales, structural
+modulation and trellis theory. Material fits are distinguished from the
+project's stronger-rung model scans, and source notes record reading depth.
+The review's September 19 project-evidence section remains historical.
+The [living methods notes](METHODS_NOTES.tex)
 ([compiled PDF](METHODS_NOTES.pdf))
 also describe the raw-update protocol, energy-shape interpretation and
 two-ladder alternating relaxation. A focused September 23 literature check
-supports the new density-constraint sections; the older review is unchanged.
+supports the density-constraint sections; numerical results are unchanged by
+the September 24 material expansion.
 
 The deferred [finite-size seed snapshot](reports/finite_size_seeds_20260906/README.md)
 retains four chi=200 L=96/L=128 pairing/stripe seeds with fixed L=64 coupling.

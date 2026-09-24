@@ -1,6 +1,6 @@
 # Current project state
 
-Last locally reviewed: **2026-09-23 — equal-density/parallel-stripe limitation documented; stripe/pairing grids analyzed; four trellis intertwined starts prepared**
+Last locally reviewed: **2026-09-24 — ladder-cuprate literature expanded; numerical evidence and prepared campaigns unchanged**
 
 This is a local, mutable snapshot. Stable rules live in AGENTS.md and the
 method documents; durable history is append-only in RUN_LOG.md. Local
@@ -8,7 +8,7 @@ artifacts establish solver outcomes, not live scheduler state.
 
 ## Repository and workflow
 
-- Branch: `codex/mps-mft-phase0-refactor`; baseline for this update: `49fd08f`.
+- Branch: `codex/mps-mft-phase0-refactor`; baseline for this update: `371a17d`.
 - Root `.claude/` is unrelated and remains untouched.
 - Output/state files are excluded from Git and immutable. Reports, scripts,
   LaTeX/PDF notes and the Overleaf bundle are maintained together.
@@ -20,6 +20,18 @@ artifacts establish solver outcomes, not live scheduler state.
   trees and each campaign's original controls/fingerprints.
 
 ## Current scientific evidence
+
+**Ladder-material context:** the [annotated review](literature/README.md) now
+has 73 papers, and the [manuscript](manuscript/README.md) has an expanded
+Section 2.4 and 67 cited references. The previously missing Notbohm La4Sr10
+benchmark gives an approximate hopping ratio 0.81 (0.82 from a conditional
+leading-order exchange conversion). The review distinguishes this stronger-leg
+estimate, 0.84 spectroscopic models and the isotropic optical parameterization
+from our 1.2-1.4 stronger-rung scans. It covers carrier partition, structure,
+cyclic exchange, pressure and transition criteria across the relevant copper
+oxide ladder families. Both PDFs and the Overleaf bundle are refreshed;
+no material parameter fit, transition-temperature prediction or new simulation
+is implied. Numerical results, acceptance flags and all 22 figures are unchanged.
 
 **Current variational limitation:** manuscript Section 3.18 and living methods
 Section 4.3 now document that all spatial ladders are targeted separately to

@@ -4978,3 +4978,59 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
 - Updated manuscript/documentation indexes, PROJECT_STATE and the existing
   future-controls paragraph in ACTIVE. No solver, seed, measurement, figure
   data, acceptance flag, simulation, launcher or Perlmutter action changed.
+
+## 2026-09-24: expand the ladder-cuprate material review
+
+- Confirmed that Notbohm et al. (2007) and La4Sr10Cu24O41 were absent from
+  both the annotated review and manuscript. Added the neutron benchmark:
+  Jleg=186, Jrung=124, Jcyc=31 meV, spin gap 26.4 +/- 0.3 meV, and the
+  authors' approximate electronic values tleg=0.42, trung=0.34, U=3.72 eV.
+  Distinguished the resulting t0/t=0.81 from the conditional leading-order
+  square-root estimate 0.82, explicit four-spin versus permutation exchange
+  conventions, and the insulating reference versus superconducting Ca-rich
+  compositions. Orthorhombicity does not select a universal hopping ratio.
+- Expanded the review from 49 to 73 annotations. Eleven existing manuscript
+  material records moved to the shared bibliography with their keys intact;
+  thirteen further records cover neutron/Raman/optical exchange, structural
+  counterexamples, carrier partition, modulation and trellis theory, plus
+  planar-orthorhombicity and transition-temperature comparisons. The remaining
+  manuscript supplement contains ten stripe references. The new family table
+  covers SrCu2O3/Sr2Cu3O5, La6Ca8, La4Sr10, Sr/Ca chain--ladder cuprates,
+  La1-xSrxCuO2.5 and CaCu2O3. Source notes distinguish primary abstracts from
+  selected full-text checks and define the narrative review's scope.
+- Extended manuscript Section 2.4 and the introduction, including a table of
+  the distinct 0.81, 0.84 and isotropic parameterizations. The text preserves
+  their different U, diagonal hopping, filling and localization assumptions;
+  Padma's fixed-(U-V) attraction scan differs from our fixed-U scan. Existing
+  t0/t=1.2-1.4 results remain stronger-rung model studies. The electronic
+  finite-U calculation already contains higher-order virtual exchange.
+- Separated spin gaps and magnetic ordering from superconducting transitions,
+  formal hole counts from ladder density, and hydrostatic-pressure onsets
+  from Radheep's 24 K uniaxial resistive onset. Checked the latter author's
+  displayed 6.8 K magnetization measurement under different loading conditions;
+  it is not bulk confirmation at 24 K. No temperature prediction or
+  composition-to-density/pressure-to-hopping calibration is claimed.
+- Checked new journal metadata against publisher-deposited Crossref records.
+  Updated the stable Scheie2025 key to PRB 114, 144511 (2026), published
+  September 23, while attributing detailed parameters to the checked author
+  version. Corrected Gelle2006's unrelated arXiv-linked DOI using the PRB
+  record. The collection now has 70 journal articles and three preprints.
+- Built both PDFs locally with the existing Tectonic 0.17.0 executable and
+  repository cache. The first manuscript pass needed two public Latin Modern
+  font metrics; an authorized network-enabled build fetched them, and final
+  builds ran with --only-cached, --keep-logs and --keep-intermediates in about
+  2-4 seconds per document. No unresolved citations, duplicate bibliography
+  keys, overfull boxes, missing characters or BibTeX warnings remain; the
+  existing Fontconfig/underfull notices are non-fatal. Kept review bibliography
+  entries together to avoid page-split references.
+- Rendered all 40 review and 56 manuscript pages with Poppler, inspected page
+  contact sheets and readable material/table pages, and re-rendered the final
+  clarified parameter-table caption. The review has 73 references and the
+  manuscript 67. The focused validator verifies unchanged results/evidence
+  text against 371a17d (except bibliography provenance), all 22 unchanged
+  figure paths and bytes, source/PDF agreement and all 28 Overleaf members.
+  Public-source caches, builds, renders, validation script and PDF/figure
+  SHA-256 values are in ignored output/ladder_materials_review_20260924/.
+- Refreshed both maintained PDFs, overleaf_upload.zip, documentation indexes
+  and PROJECT_STATE. No solver, simulation parameter, acceptance label,
+  prepared campaign, stored state, figure data or Perlmutter operation changed.
