@@ -205,4 +205,3 @@ All report folders below are under `ladder_mps_mft/docs/reports/`:
 - `square_tp_scan_20260922`: the complementary prepared scan.
 
 The current project-state and active-plan documents distinguish completed evidence from user-reported ongoing campaigns.
-
