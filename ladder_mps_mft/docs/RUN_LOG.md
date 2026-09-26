@@ -5051,3 +5051,24 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
 - Rendered the Markdown with Pandoc/XeLaTeX, inspected all PDF pages and
   the final revised page, checked six-page count and safe text bounds.
   No DMRG tests were required for this documentation-only addition.
+
+## 2026-09-26: revise Task 1 around measured fine-cut snapshots
+
+- Checked live origin branch tips: collaborator branch remains 7da085b;
+  no newer pushed scan results were found. Reviewed fine-cut, correlation,
+  source-validation and data README records rather than assuming seed labels
+  identify surviving phases or local correlation templates contain MPSs.
+- Replaced the historical V=0 chi400 primary pair by backfill_37/38 at
+  t0=1.4, V=-0.05, chi200. These distinct 60-step snapshots have completed
+  retrospective diagnostics; both remain unaccepted. Recorded exact manifest
+  lookup rules and distinguished compact hashes from full-source identities.
+- Revised the plan to array-only extraction of density bonds and reconstruction
+  of transverse trial energies. No new optimization or MPS contraction is
+  planned. Local execution requires the existing compact states, diagnostic
+  sidecars and metadata, currently absent from this checkout.
+- Preserved campaign-specific E_p interpolation and explicitly treated its
+  polynomial guide as model sensitivity, not a numerical error bar. Added
+  density sensitivity, boundary-spin and future-continuation qualifications.
+- Updated the Markdown and matching six-page PDF in Literature. Rendered and
+  visually checked the PDF, fixed long-path overflow and checked text bounds.
+  No scientific calculations, solver changes, DMRG tests or Perlmutter actions.

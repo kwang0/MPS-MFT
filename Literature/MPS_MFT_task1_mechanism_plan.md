@@ -1,206 +1,208 @@
 ---
-title: "Task 1: what stabilizes the stripe, and what attraction changes"
-subtitle: "A minimal frozen-state mechanism study for MPS+MFT"
-date: "September 26, 2026"
+title: "Task 1 revised: direct attraction versus transverse feedback"
+subtitle: "A postprocessing study of the measured square-array boundary snapshots"
+date: "Revision 2 - September 26, 2026"
 ---
 
-## 1. Decision and intended contribution
+## 1. Decision: change the anchor, preserve the mechanism question
 
-Proceed with a **two-state, measurement-only analysis** at the existing square-array $V=0$ point. Separate (i) direct intraladder density-interaction preference from (ii) the change in transverse energy caused by the prescribed $E_p(V)$ denominator. Use existing registry values at $V/t=-0.2,-0.4$ only to evaluate the physical parameter path. No new self-consistent optimization is required for the primary result.
+This revision supersedes the earlier $V=0$-pair plan. No new mechanism calculation has yet been executed.
 
-The strongest attainable statement is:
+**Use the measured stripe-like and paired-like snapshots at $t_0/t=1.4$, $V_*/t=-0.05$, $\chi=200$. Do not assume two surviving paired/striped solutions at $V=0$, and do not make recovery of historical $\chi=400$ MPSs a prerequisite.**
 
-> For two specified competing $V=0$ trial states, quantify whether attraction directly favors pairing, weakens the transverse stabilization of the stripe, or produces competing frozen effects.
+The revised question is: for two distinct trial textures actually observed at the same near-boundary Hamiltonian, does making $V$ more attractive favor pairing through direct intraladder bond-density energetics, through the reduction of the transverse scale $g=t_\perp^2/|E_p|$, or through both? This is a fixed-trial sensitivity analysis, not a proof of two stable phases or of the relaxed transition mechanism.
 
-This adds a mechanism to the existing order-selection results. It is not a phase-boundary calculation, a claim of global stability, or a proof that either trial remains stationary at negative $V$.
+The September 22 retrospective campaign already measured the required density-correlation matrices for these two snapshots. Compact states contain the pair, exchange and density arrays needed for transverse energy reconstruction. **The intended computation is array postprocessing: zero new optimized states, zero new MPS contractions, and no new production campaign.** The required compact files are not present in this Mac checkout; obtaining those existing files is the explicit first dependency.
 
-**Deliverable:** one two-panel mechanism figure, a compact numerical table, reproducible provenance and a short interpretation. The direct bond-density coefficient is the main missing measurement. The transverse reconstruction should mostly reuse saved two-point correlations and existing energy routines.
+### What changed from revision 1
 
-### Changes to the original Task 1
+- Replace the historical $V=0$, $\chi=400$ pair by `backfill_37` and `backfill_38`, both at $V_*=-0.05$, $\chi=200$ and the same 60-step controls.
+- Extract bond-density coefficients from already completed diagnostics instead of preparing fresh measurements.
+- Preserve the actual interpolated $E_p$ used by the fine-cut campaign. The older exact-entry-only premise cannot describe these source states.
+- Describe the result as a decomposition for two measured finite-state snapshots. Source convergence, density mismatch and end-localized spin qualify the physical interpretation.
+- Keep future collaborator scans as independent contextual evidence. Do not duplicate their seeding, convergence, correlation or geometry work.
 
-| Original proposal | Revised minimal plan |
-|---|---|
-| Treat two negative-$V$ evaluations as the primary framing | First extract independent $V$ and $g$ sensitivities from the two $V=0$ states; then map them onto the existing registry path. |
-| Use stored transverse energy divided by $g$ | Rebuild interaction fields from each trial's own correlations, then evaluate the same square functional. Quantify the difference from stored applied-field energies. |
-| One pass over two full MPSs if needed | First inspect compact correlations/sidecars. If missing, measure only the 190 nearest-neighbor density bonds per state. |
-| Cancellation implies reorganization is important | Cancellation establishes competing frozen effects. Reorganization needs a separate, reliable relaxed-state comparison. |
-| Estimate 0.5-1 day | Budget 4-8 hours of active work once inputs are available; measurement runtime and user-managed transfer/queue time are separate. |
-| Optional broad contextual comparisons | Keep Task 2, new scans and new convergence campaigns outside this work. Existing results may provide labeled context. |
+### Latest pushed evidence checked
 
-The source proposal remains unchanged. This plan refines Task 1 only. Repository evidence was reviewed at commit `7da085b`; this is a local evidence boundary, not a live remote or scheduler check.
+On September 26, a live `git ls-remote --heads origin` check found the collaborator's working branch `codex/mps-mft-phase0-refactor` still at **7da085b**, matching this checkout. Other advertised branch tips also matched cached refs; our separate plan branch is not new collaborator evidence. No newer pushed scan results were found.
 
-\newpage
-
-## 2. Why V=0 can be enough
-
-**The user's intuition is correct for frozen-state mechanism separation.** A state at $V=0$ has a measurable density-density expectation even though its contribution to the energy is multiplied by zero. The old energy table alone omits this coefficient; the state does not.
-
-Let $s$ and $p$ denote the saved stripe and paired trials. Use $\Delta X=X_s-X_p$, energies per physical site, and $g=t_\perp^2/|E_p|$. For a fixed trial $b$, write
-
-\[
-e_b(V,g)=A_b+V B_b+g Q_b.
-\]
-
-Here $A_b$ is its $V=0$ bare-ladder energy per site, $B_b$ its intraladder nearest-neighbor density coefficient, and $Q_b$ its transverse quadratic contraction in the specified square ansatz. Geometry, range, density convention and the state itself are held fixed. Branch-independent offsets cancel in differences.
-
-The two independent frozen sensitivities are already available at $V=0$:
-
-\[
-\left.\frac{\partial\Delta e}{\partial V}\right|_{g,\psi}=\Delta B,
-\qquad
-\left.\frac{\partial\Delta e}{\partial g}\right|_{V,\psi}=\Delta Q.
-\]
-
-These answer which trial gains from direct attraction and which gains from stronger transverse coupling. **No negative-$V$ wavefunction is needed.** Moreover, linearity makes the finite frozen change exact within this functional, not just a first-order approximation in $V$ or $g$:
-
-\[
-\Delta e_{\rm frozen}(V_1,g_1)
-=\Delta e_0+V_1\Delta B+(g_1-g_0)\Delta Q.
-\]
-
-There are three different questions:
-
-1. **What stabilizes the two trials at $V=0$?** The baseline bare/transverse decomposition answers this.
-2. **How would direct attraction and transverse rescaling separately change their relative energies?** $\Delta B$ and $\Delta Q$ measured on those same trials answer this.
-3. **What actually happens when the system relaxes at negative $V$?** Frozen trials alone cannot answer this; the wavefunctions, textures and even existence of distinct branches can change.
-
-To put the second question on the project's physical path, we need $g(V_1)-g_0$. One value $E_p(0)$ cannot supply that change. Existing tabulated $E_p(V_1)$ does supply it, without new optimization. Do not infer a smooth derivative from sparse registry entries. A hypothetical fixed-$g$ attraction change remains a valid diagnostic even though it is not the default fixed-$t_\perp$ campaign path.
-
-The old $V=0$ energy table shows a transverse stripe advantage. It does **not** contain $\Delta B$, because the direct $V B$ energy is zero there. This is the precise sense in which the table is insufficient, while the two $V=0$ states are sufficient for our primary task. My earlier assessment should be read with this distinction.
-
-Even on a smooth stationary branch, where variational stationarity can remove state-response terms from a first derivative at fixed density, finite changes still need evolving coefficients. These endpoints are not formally accepted stationary solutions, so this plan does not invoke that shortcut.
+Recent work includes the September 24 material review, September 23 stripe/pairing correlation grids and density-constraint discussion, September 22 completed correlations and accepted square A/B controls, and preparation of the square $t_\perp$ and trellis campaigns. Project records call the latter ongoing based on user reports; this check does not establish live scheduler state or completion.
 
 \newpage
 
-## 3. Inputs, existing evidence and first gate
+## 2. What has been done and the exact usable pair
 
-Use the two endpoints in `docs/reports/chi400_comparison_20260905/endpoints.csv`, relative to `ladder_mps_mft/`. The physical controls are square geometry, $L=64$, $U/t=8$, $t_0/t=1.4$, $n=15/16$, $V=0$, $t_\perp/t=0.1$, and $\chi=400$. Verify the stored longitudinal interaction range and every relevant fingerprint; do not assume them from this prose.
+The September 16 coarse-grid update shows both $V=0,t_0=1.4$ seed lineages becoming striped. Their final physical leg-pair RMS values are $1.04\times10^{-9}$ and $4.42\times10^{-8}$. A seed name is not an endpoint phase label. The old September 5 report does record distinct $\chi=400$ snapshots, but full-state availability has not been established locally.
 
-- **Paired trial:** lineage `pairing`, source job 57905744; stored status `stagnated`, accepted false.
-- **Stripe trial:** lineage `legacy`, source job 57905745; stored status `time_limit`, accepted false.
-- Resolve exact paths and full-artifact SHA-256 values from the endpoint manifest. Do not select a different state by a filename or texture resemblance. Later $\chi=200$ campaign endpoints are not substitutes for these two trials.
+The newer fine cut supplies the appropriate same-Hamiltonian contrast:
 
-The existing endpoint CSV records matching model, numerical, implementation and registry fingerprints. Verify these against available source metadata before analysis. Both states reach bond dimension 400; neither carries a certified truncation-error bound. The paired trial's residual density differs from target by about $3.58\times10^{-6}$ per site.
+| Quantity | Stripe-like trial $s$ | Paired-like trial $p$ |
+|---|---:|---:|
+| Retrospective diagnostic ID | backfill_37 | backfill_38 |
+| Source job | 58387972 | 58387973 |
+| Raw evaluations | 60 | 60 |
+| Physical leg-pair RMS | $3.67\times10^{-5}$ | $0.032991$ |
+| Physical spin RMS | $0.144695$ | $0.005606$ |
+| Stored status | maximum_iterations | maximum_iterations |
+| Accepted | false | false |
 
-### Quantitative motivation, not a new result
+Both have square geometry, $L=64$, $U/t=8$, $t_0/t=1.4$, $V_*/t=-0.05$, $t_\perp/t=0.1$, target $n=15/16$, $\chi=200$ and raw-map evolution. Validate stored range, implementation and numerical fingerprints from the source files. The paired snapshot has 96.7% of its full-chain spin-squared weight in the outer 14 rungs at each end; it is not an established bulk coexistence state.
 
-The archived applied-field energy table gives stripe-minus-pair differences of $+0.0034783$ in bare energy and $-0.0037276$ in total transverse energy, yielding $-0.0002493\,t$/site. The density channel's spin component supplies the largest transverse stripe advantage. These numbers motivate recomputation; they are not yet the consistent frozen-trial baseline.
+Archived applied-field values give $\Delta e=e_s-e_p=+4.9757\times10^{-5}\,t$/site canonically, or $+5.9520\times10^{-5}$ after the stored target-density correction. The difference, about $9.76\times10^{-6}$, matters at this scale. Neither number is yet our rebuilt frozen-trial baseline or an accepted phase-energy ranking.
 
-At $t_\perp/t=0.1$, existing registry entries give:
+### Source map: no guessed filenames or new measurements
 
-| $V/t$ | Signed $E_p/t$ | $g/t$ |
-|---:|---:|---:|
-| 0 | -0.14653773091916378 | 0.06824181 |
-| -0.2 | -0.2068002629740704 | 0.04835584 |
-| -0.4 | -0.24962435880865996 | 0.04006019 |
+All paths here are relative to `ladder_mps_mft/`.
 
-Thus attraction decreases $g$ on this path. Rescaling the archived transverse difference alone gives positive shifts of roughly $0.00109$ and $0.00154\,t$/site, toward the paired trial. The direct $V\Delta B$ term is unknown. No crossing or mechanism conclusion follows until it and the consistent baseline are available.
+1. Read `coverage.csv` in the September 22 correlation report directory, rows with `parent_index` 37 and 38. These specify campaign, labels, compact/full source hashes and config hashes.
+2. Resolve exact compact-state paths from the $t_0=1.4,V=-0.05$ rows of `variational_energy_cuts.csv` in the September 18 fine-cut report directory. Its `source_sha256` is the **compact** hash, not the full-MPS hash.
+3. Resolve exact diagnostic paths and hashes by IDs `backfill_37/38` in `source_validation.json` in the September 22 correlation report directory.
+4. Both diagnostics are in retry1, campaign `20260915_square_two_basin_fine_cuts_95_5_60`. Retrieve their adjacent measurement receipts, relevant manifest rows and original run configs. Use manifest/config metadata to resolve config paths.
 
-### Gate A: inventory before coding
+The minimal transfer is two compact `state.h5` files, two `diagnostics.h5` files and their small provenance/config records. Full MPS tensors are unnecessary. Git versions the reports, not these output files. The user performs any transfer from Perlmutter; Codex does not connect there.
 
-Allow 30-60 minutes to locate the exact two compact states, full-state identities and any matching diagnostic sidecars. This checkout currently has no `ladder_mps_mft/output/` directory. The historical report's compact mirrors excluded MPS tensors; full scratch availability has not been verified. The September 22 backfill concerns later $\chi=200$ states.
-
-If saved correlations suffice for $Q$, compute it without loading MPSs. If a verified charge-correlation sidecar exists, extract $B$ from it. Otherwise request only the missing two saved-state measurements through the established user-managed workflow. If full states are unavailable, stop with an input manifest and a precise missing-data list. Do not replace them or regenerate them silently.
+`data/two_basin_references.h5` is only a seeding template: its pair reference is $(1.4,-0.4)$ and stripe reference $(1.0,0)$, and it contains no MPS. It is not an analysis substitute. Also, `data/README.md`'s older “never interpolates” statement is superseded for fine cuts by the explicit preparer and campaign records.
 
 \newpage
 
-## 4. Minimal implementation and measurements
+## 3. Mechanism definition and why V=0 is not required
 
-### A. Reconstruct the energy of each specified trial
-
-Reuse `mean_fields_from_correlations(...; threshold=0.0)` and the existing variational/channel contraction routines. Build interaction fields from the saved trial's current pair, exchange and density correlators in the same square ansatz. Preserve the actually applied fields separately for the effective-Hamiltonian identity.
-
-The production single-ladder solver stores energy with `interaction_fields=fields`, the applied input fields. Away from a fixed point this is not generally the energy of identical copies of the outgoing trial. Use the rebuilt fields for the frozen transverse functional, retain the original bare-ladder expectation, and report the old/new difference by channel. This is an analysis-side evaluation, not a change to production energy bookkeeping or solver acceptance.
-
-Record pair, exchange, density and total transverse energies, and, where the existing decomposition supports it, density charge/spin pieces. The latter is a useful low-cost explanation of what decreasing $g$ removes. Define $Q_b=e_{\perp,b}/g_0$ from the recomputed value.
-
-### B. Measure only the missing bond-density information
-
-For each state,
+For each fixed trial, all parameters except $V$ and $g$ held fixed, write
 
 \[
-B_b=\frac{1}{2L}\sum_{\langle a,c\rangle_{\rm lad}}
-\langle n_a n_c\rangle_b
-=B_b^{\rm leg}+B_b^{\rm rung}
-=B_b^{\rm prof}+B_b^{\rm conn}.
+e_b(V,g)=A_b+V B_b+g Q_b,\qquad \Delta X=X_s-X_p.
 \]
 
-There are 126 leg bonds and 64 rung bonds: 190 total, divided by 128 physical sites. Compute the profile part from $\langle n_a\rangle\langle n_c\rangle$ and the connected part by subtraction. Preserve individual bond values so all sums are independently auditable. Use the interacting MPS expectation; no Wick factorization.
-
-Prefer existing saved `charge_correlation` and density arrays. If they are absent, reuse existing contraction primitives in a small density-only measurement wrapper. Do not call the full pair-correlation diagnostic pipeline merely to obtain these bonds. No four-fermion pair matrices, new DMRG solves, or production-map changes are needed.
-
-### C. Produce the three counterfactual evaluations
-
-For each target $V_1/t=-0.2,-0.4$, tabulate:
+Measure $B_b$ from density correlations and $Q_b$ from the unthresholded square transverse map. At the actual source point $(V_*,g_*)$, the exact frozen change is
 
 \[
-D_V=V_1\Delta B,\qquad D_g=(g_1-g_0)\Delta Q,\qquad
-\Delta e_{\rm frozen}=\Delta e_0+D_V+D_g.
+\Delta e_{\rm frozen}(V,g)=\Delta e_*+(V-V_*)\Delta B+(g-g_*)\Delta Q.
 \]
 
-Evaluate direct-only $(V_1,g_0)$, feedback-only $(0,g_1)$ and combined $(V_1,g_1)$. Positive changes in $\Delta e$ favor the paired trial relative to the stripe. In particular, $\Delta B>0$ means negative $V$ directly favors the stripe; $\Delta B<0$ means it favors pairing. “Favors” describes the direction of the change, not necessarily a reversal of the baseline ordering.
+This is exact for these fixed trials within the implemented functional; it is not an expansion assuming small parameter changes. It is not exact for reoptimized states. Branch-independent offsets cancel in the difference.
 
-### Coding ceiling
+### Direct intraladder coefficient
 
-One small Julia analysis/measurement wrapper, one lightweight plotting/export script if needed, and focused tests. Prefer adapting existing loaders, `Variational.jl`, `Diagnostics.jl`, `EpRegistry.jl` and the retrospective measurement workflow. Proposed code belongs under `ladder_mps_mft/scripts/`; analysis outputs under `ladder_mps_mft/docs/reports/task1_frozen_mechanism/`. Names are proposed, not existing commands. If substantial library redesign or a new production campaign becomes necessary, stop and report why.
+\[
+B_b=\frac{1}{128}\sum_{\langle a,c\rangle_{\rm lad}}\langle n_a n_c\rangle_b.
+\]
 
-\newpage
+Use 126 unique leg bonds plus 64 rung bonds. Save leg/rung sums, the profile product contribution $\langle n_a\rangle\langle n_c\rangle$, and the connected remainder. Reuse the full-chain energy normalization. A bulk-only diagnostic may supplement the result, but must never replace the full-chain $B$ in the energy identity. No Wick factorization.
 
-## 5. Validation and acceptance criteria
+### Transverse coefficient and consistent baseline
 
-### Implementation correctness: required before interpretation
+Rebuild interaction fields from each trial's current correlations with `mean_fields_from_correlations(...; threshold=0.0)`. Reuse the existing variational/channel routines to compute $e_{\perp,b}$ and $Q_b=e_{\perp,b}/g_*$. Keep pair, exchange, density and, if already supported, density charge/spin pieces.
 
-1. **Identity and compatibility.** Verify source hashes, lineages, stored statuses, model/geometry/range and numerical fingerprints. Record source and analysis code versions separately. Confirm the exact campaign-compatible registry selections and bound-state sign convention.
-2. **Bond accounting.** Assert 126 unique leg and 64 unique rung bonds with the project's site mapping. Check total = leg + rung = profile + connected. On an occupation product state, reproduce analytic density products and zero connected density correlations.
-3. **Independent energy check.** If introducing a bond diagnostic, compare the summed bond observable against an independently constructed $\sum n_a n_c$ MPO on a small test MPS. If the full source states are measured, also check the same frozen state's direct bare energy difference at one nonzero $V$ against $2L\,V B$; this is a contraction, not optimization.
-4. **Transverse scaling.** Rebuild unthresholded fields at two distinct positive $g$ values from the same correlators. Verify every channel scales with $g$ and $Q$ is unchanged. Suggested algebraic target: $10^{-10}$ relative or $10^{-12}\,t$/site absolute, whichever is looser. Test failures must be explained, not hidden by changing the target after inspection.
-5. **Energy conventions.** Reproduce archived applied-field bookkeeping before replacing only the interaction fields in the analysis. Check reconstructed/direct consistency against the original tolerances and preserve existing failures. The new trial evaluation must not be presented as a new Hamiltonian-identity certification of the old run.
-6. **Units and density.** Use $1/(2L)$ everywhere. Keep exact frozen canonical values at each state's actual particle expectation as primary. Show the original target-density correction as a separate sensitivity diagnostic (about $5.93\times10^{-6}\,t$/site in the archived gap); do not carry an old chemical potential into negative-$V$ evaluations as an exact fixed-density correction.
+The single-ladder solver's stored energy uses applied input fields, which differ from rebuilt fields away from self-consistency. Preserve applied fields for the effective-Hamiltonian identity; replace only interaction fields in this analysis-side evaluation. Set $e_{*,b}=e_{{\rm bare},b}^{\rm stored}+e_{\perp,b}^{\rm rebuilt}$. The stored bare term already contains $V_*B_b$; do not add it twice. If needed, $A_b=e_{{\rm bare},b}^{\rm stored}-V_*B_b$.
 
-### Distinguish calculation acceptance from physical claims
+### Two independent effects and the actual campaign path
 
-**Accept the analysis as completed** when the two trials, $B$, $Q$, all channel sums, registry path, tests and provenance are reproducible. The states need not become accepted fixed points to define these trial expectations. Their original acceptance flags remain unchanged, and the accepted-solution branch ranker is not bypassed.
+$\Delta B$ and $\Delta Q$ are the primary outputs. For $\delta V<0$, $\Delta B>0$ means direct attraction favors the stripe trial, while $\Delta B<0$ favors the paired trial. A decrease in $g$ favors pairing if $\Delta Q<0$. A favorable shift need not reverse the total gap.
 
-**Allow a robust frozen-trial mechanism statement** when signs survive numerical tolerance checks and any available nearby-checkpoint recomputation. Report applied-versus-rebuilt differences, late energy drift, density sensitivity and known $\chi$ limitations separately; they are not independent statistical errors and must not be combined into an invented confidence interval.
+For the minimum figure, evaluate only $V/t=0,-0.05,-0.2$, using the archived source $g_*$ and exact registry endpoint scales. Show direct-only $(V,g_*)$, feedback-only $(V_*,g(V))$, and combined changes. No new fine scan or smooth derivative is needed.
 
-As a screening rule, require a claimed contribution to exceed three times its available empirical sensitivity scale and retain its sign under the tested variants. This factor is a planning heuristic, not a certified error bound. If nearby-checkpoint $B,Q$ are unavailable, limit the claim to the exact saved trials and explicitly leave state-selection sensitivity untested. Small Hamiltonian-identity errors do not bound MPS optimization/truncation error.
-
-**Allow a frozen ordering reversal statement** only when the consistent $\Delta e_0+D_V+D_g$ changes sign robustly under the same checks. An individual positive contribution is insufficient. **Do not claim a relaxed transition or thermodynamic mechanism** from this task alone.
-
-If contributions cancel, report the cancellation and its sensitivity. If all effects are unresolved, retain a concise null-result table and stop; do not automatically launch more states, higher $\chi$, or a $V$ scan.
+The user's $V=0$ intuition remains mathematically correct: two distinct $V=0$ trials would suffice to measure both sensitivities, even though $VB$ vanishes there. The problem was our unverified choice of such a pair. **Any common source point works; the measured split at $V_*=-0.05$ is better supported.** Existing $E_p(V)$ values supply the change in $g$; no target-$V$ wavefunction is required for frozen comparisons.
 
 \newpage
 
-## 6. Output, effort and optional follow-through
+## 4. Implementation sequence and data contract
 
-### One figure with two complementary panels
+### Step A: build an input inventory before numerical code
 
-**Panel A: the $V=0$ balance.** Show stripe-minus-pair bare energy and transverse channels, plus the recomputed total. This answers the user's baseline question directly. Distinguish the new frozen-trial evaluation from archived applied-field values in the accompanying table.
+Resolve the two IDs through the versioned report tables. Produce a manifest containing exact compact/diagnostic/config paths and hashes, full-source identity, source status, iteration, geometry, model/numerical fingerprints and code versions. Report which files exist locally. Missing inputs produce a precise transfer list, not an attempt to rerun the measurement campaign.
 
-**Panel B: the change under attraction.** At $V/t=0,-0.2,-0.4$, show direct $D_V$, feedback $D_g$, their sum and the resulting $\Delta e_{\rm frozen}$ relative to zero. Use discrete markers or grouped bars; connecting lines are guides, not evidence for a smooth $E_p(V)$ interpolation. Add a leg/rung or profile/connected inset only if it changes the interpretation.
+The current local folder lacks `ladder_mps_mft/output/`. Accordingly, this plan is implementable from already measured data, but the numerical execution is **blocked on obtaining that existing compact bundle**. Do not describe it as immediately runnable here or silently substitute legacy HDF5 files.
 
-Provide `sources.json` with hashes, statuses and registry records. Export the measurements to `bond_density.csv`, the energies to `trial_energies.csv`, and the counterfactuals to `frozen_changes.csv`. Include a validation receipt, one PDF/PNG figure and a brief report. Each table must identify its source trials and normalization. Include one verified reproduction command after implementation. Append executed work to `docs/RUN_LOG.md`; update current project state when the analysis changes the evidence. Durable methods need revision only if an actual method changes.
+### Step B: reuse array loaders and the physics implementation
 
-### Effort budget after inputs are available
+Adapt the source/receipt checks in `scripts/analyze_pair_correlations_20260922.py` for only these two rows. Do not invoke its all-56-branch loader. Reuse its array-orientation handling: the Julia-written HDF5 arrays must be interpreted consistently.
 
-| Work | Active effort | Decision |
-|---|---:|---|
-| Resolve exact artifacts and saved observables | 0.5-1 hour | Stop early if inputs are missing. |
-| Rebuild transverse energies and registry path | 1-2 hours | Reuse existing map/energy routines. |
-| Extract $B$, or prepare a density-only wrapper | 1-2 hours | Measure only the missing bonds. |
-| Focused checks, figure and interpretation | 1.5-3 hours | Stop at one figure and evidence table. |
-| **Total** | **4-8 hours** | **Zero new optimized states.** |
+Required diagnostic arrays are `density`, `charge_correlation` and `charge_connected`. Required compact-state arrays are spin-resolved densities, `pair`, `exchange_up` and `exchange_down` under `correlations`, plus applied fields, model/config metadata, bare energy and original energy components. Confirm actual group paths through the existing storage/loader code before implementation. Check consistency between the two files' densities and source hashes.
 
-Saved-array analysis should be inexpensive. Full-MPS contraction time and memory must be estimated from the actual state and environment; no runtime promise is justified yet. User-managed transfer, queue and scheduler time is additional. Do not start a local operation expected to exceed five minutes without reporting its expected cost. All Perlmutter transfers and actions remain user-operated.
+Use Julia library calls for the transverse map and energy rather than independently reimplementing the physics in Python. A small Julia wrapper can export the energy components and bond summaries; a small Python script can make the final table/figure. Existing primitives need no production change. If the archived implementation differs from current code, audit the relevant map/energy diff before reuse; record both hashes.
 
-### Optional evidence, not a prerequisite
+### Step C: retain the actual denominator convention
 
-When existing $t_\perp$ scan results arrive, compare their qualitative behavior with the sign of $\Delta Q$: varying $t_\perp$ at fixed $V$ changes $g$ without the direct $V B$ term. These are complementary relaxed-state observations, not an exact fixed-$g$ or matched-state causal control. No new scan is part of this plan.
+The fine-cut preparer pins registry SHA-256 beginning `2209bd2c` and linearly interpolates signed $E_p$ between $V=-0.2$ and 0. The source uses
 
-A relaxation residual requires both appropriately tracked competing branches at the target point, evaluated under the same functional with comparable controls and adequate convergence. The accepted negative-$V$ paired A/B states do not by themselves supply a matched relaxed stripe-minus-pair gap for the $\chi=400$, one-ladder trials. Omit this residual unless those requirements are already met. Absence of a surviving competing branch is not a numerical value for the missing energy.
+\[
+E_p(V_*)/t=-0.16160336393289043,\qquad g_*/t=0.06187990000104661.
+\]
 
-### Local evidence used
+The target endpoint values are $g(0)/t=0.06824181005993883$ and $g(-0.2)/t=0.04835583792876438$. Verify all values against the source config and archived registry; do not replace the source denominator with a new estimate. Record interpolation weight 0.25 when measured from $V=0$ toward $-0.2$; the implementation may store the complementary weight because its bracket order is reversed.
 
-Relative to `ladder_mps_mft/`: the September 5 chi400 report and endpoint manifest; the Julia mean-field, geometry, energy, solver, storage, diagnostics and registry modules; `data/E_p_values.csv`; the variational-method, project-state and active-plan documents; and the September 22 pair-correlation and square $t_\perp$ reports. These identify the source states, existing routines and complementary evidence.
+The prior fine-cut report already gives a polynomial-guide sensitivity of +0.615% in $g_*$, not an error bar. As a cheap optional check, reevaluate fixed $Q$ at that source scale, label the alternative model, and rebuild its baseline consistently. Endpoint frozen gaps at fixed target $g$ must remain invariant to mere changes of reference parametrization; do not manufacture endpoint uncertainty by changing $g_*$ while holding the baseline fixed. True unmeasured $E_p(V_*)$ uncertainty remains unbounded by that guide.
 
-This is an execution plan, not a report of new contractions, newly validated endpoints or completed mechanism results.
+### Proposed implementation boundary
+
+Add at most `scripts/analyze_frozen_mechanism.jl`, a plotting wrapper and focused tests. Proposed output folder: `docs/reports/task1_frozen_mechanism/`. A future driver should accept an explicit manifest and output directory, with an inventory-only mode. These are proposed interfaces, not already existing commands. Deliver a tested reproduction command once implemented. No solver, seeding, launcher or acceptance changes.
+
+\newpage
+
+## 5. Validation, acceptance and stopping rules
+
+### Required correctness gates
+
+- **Provenance:** every compact and diagnostic hash matches its own recorded hash; diagnostic full-source identity matches the compact metadata; model, iteration and statuses agree. Preserve both false acceptance flags. Source and analysis code hashes remain distinct.
+- **Geometry and sums:** assert 128 sites and exactly 190 unique bonds. Verify total = leg + rung = profile + connected. On a small occupation-product fixture, reproduce analytic products and zero connected correlations. Compare a small correlated fixture against an independently assembled bond-density MPO if any new indexing/measurement code is introduced.
+- **Array consistency:** charge matrix is symmetric within numerical tolerance; its diagonal satisfies $\langle n_i^2\rangle=\langle n_i\rangle+2\langle n_{i\uparrow}n_{i\downarrow}\rangle$ where the stored double occupancy is available. Check connected subtraction and match spin-resolved compact densities to diagnostic densities.
+- **Map scaling:** at fixed arrays, verify every transverse channel scales linearly at two positive $g$ values. Suggested numerical tolerance is $10^{-10}$ relative or $10^{-12}\,t$/site absolute, whichever is looser. Preserve any original identity failures rather than relaxing gates to make this task pass.
+- **Energy bookkeeping:** reproduce archived applied-field channel values first, then report the rebuilt-minus-applied changes. Check $e_{\rm bare}(V_*)-V_*B=A$ algebraically and verify that separate direct/feedback evaluations sum to the combined change. No new full-state energy contraction is required.
+- **Density:** show actual densities, canonical gaps and the archived target-density corrections separately. The paired correction is about $-9.75\times10^{-6}\,t$/site. An old chemical potential is not an exact correction for a new target Hamiltonian. Do not advertise exact common-density phase ranking.
+
+### Levels of interpretation
+
+**Calculation complete:** provenance, array checks, rebuilt energies, $B,Q$ and the figure reproduce. Nonstationary trials still have well-defined trial energies. Completion does not promote them to accepted solutions.
+
+**Mechanism resolved for these snapshots:** a contribution has a definite sign above arithmetic/extraction tolerances. Report its magnitude and sensitivity to applied-versus-rebuilt bookkeeping, density correction and the stated denominator convention. Profile/connected and leg/rung pieces identify what carries the direct preference. The conclusion explicitly names the two saved trials.
+
+**Robust beyond these snapshots:** requires existing, comparably measured later snapshots with matched controls and persisting contrasting textures. If such data arrive from the collaborator, repeat the same wrapper and retain old results. Do not use convergence residuals or last energy steps as certified error bars, and do not infer $B$ stability from energy stability. Absence of later measurements leaves this level untested.
+
+**Phase or relaxed-mechanism claim:** not a deliverable. Unaccepted source states, finite $L,\chi$, restricted transverse ansatz, density mismatch and end-weighted spin prohibit a claim of equilibrium coexistence or a resolved transition. Cancellation alone establishes competing frozen effects, not that relaxation caused the observed phase change.
+
+Stop after one figure if the mechanism is clear for the trials. If the apparent conclusion depends on bookkeeping or density sensitivity, publish only the coefficients and qualify the ambiguity. If the inputs cannot be supplied, finish the manifest and report the blocker. Do not initiate new optimization or measurement campaigns to rescue this plan.
+
+\newpage
+
+## 6. Deliverable, effort and collaboration strategy
+
+### One figure and auditable tables
+
+Panel A shows the rebuilt baseline stripe-minus-pair energy by bare and transverse channel at $V_*=-0.05$. Panel B shows $(V-V_*)\Delta B$, $(g(V)-g_*)\Delta Q$, their sum and the total frozen gap at the three specified coordinates. Use discrete markers/bars; any line is a guide, not a phase boundary. Add a small direct-term decomposition only if physically informative.
+
+Export a source manifest, per-bond values, per-trial energy components, frozen changes and a validation receipt. A short report states the result, source limitations and stop/go decision. Append completed analysis actions to `docs/RUN_LOG.md`; update project state when actual evidence changes. Do not rewrite manuscript conclusions before numerical output exists.
+
+### Effort after the compact bundle is available
+
+| Work | Active effort |
+|---|---:|
+| Resolve and validate two-state input bundle | 0.5-1 hour |
+| Extract density bonds and wrap existing transverse routines | 1-2 hours |
+| Focused tests and bookkeeping checks | 1-2 hours |
+| Figure, provenance and interpretation | 1-2 hours |
+| **Total** | **3.5-7 hours** |
+
+The array calculations should be inexpensive; first-run Julia loading and environment setup may dominate. No GPU allocation or DMRG is required. Transfer/queue time is not included, and no scheduler action is assumed. Report dependency problems instead of broadening scope.
+
+### Complement the collaborator's likely next work
+
+The collaborator's recent pattern is basin tests, selective continuations, transverse-cell controls, terminal correlations and integrated reporting. Assume that pattern continues for planning purposes; do not treat it as evidence that any particular future dataset already exists.
+
+- Their work determines which textures persist and which cells or parameters change the outcome. This task supplies an energetic explanation using the same recorded outputs.
+- The existing square $t_\perp$ scan varies $g$ at fixed $V$; use synchronized results as an independent directional check, not as a duplicate campaign. Classify states by measured texture, not seed name or MF-field magnitude alone.
+- If a later continuation makes both $V_*=-0.05$ starts striped or paired, retain this analysis as a historical trial comparison. Withdraw any language suggesting persistent competing branches. Do not automatically search many points until a desired contrast appears.
+- If the collaborator supplies a genuinely stationary contrasting pair, add it as a clearly versioned validation set after checking equal model/numerical controls. New data never silently replace the fixed primary manifest.
+- Trellis and accepted square A/B results provide context, not a substitute for the one-ladder same-model pair. Full Task 2 correlation analysis is already substantially done and is not repeated here.
+
+### Evidence locations for the implementer
+
+All report folders below are under `ladder_mps_mft/docs/reports/`:
+
+- `square_fine_cuts_20260918`: split textures and energies.
+- `pair_correlations_20260922`: exact measured-state identities.
+- `two_basin_grid_20260915`: the later $V=0$ collapse.
+- `two_basin_fine_cuts_20260915`: interpolation sensitivity.
+- `square_tp_scan_20260922`: the complementary prepared scan.
+
+The current project-state and active-plan documents distinguish completed evidence from user-reported ongoing campaigns.
+
