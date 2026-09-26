@@ -5034,3 +5034,20 @@ Next action: sync the branch to Perlmutter, run `bash slurm/phase0_calibrate_cpu
 - Refreshed both maintained PDFs, overleaf_upload.zip, documentation indexes
   and PROJECT_STATE. No solver, simulation parameter, acceptance label,
   prepared campaign, stored state, figure data or Perlmutter operation changed.
+
+## 2026-09-26: plan the frozen-state Task 1 mechanism analysis
+
+- Added Literature/MPS_MFT_task1_mechanism_plan.md and its six-page PDF.
+  The plan refines the original Task 1 around two V=0 chi400 trial states,
+  direct bond-density sensitivity and reconstructed transverse energies.
+- Clarified that V=0 states suffice for the frozen partial sensitivities;
+  existing finite-V registry entries provide the physical g(V) change.
+  Relaxed finite-V branches are optional evidence, not required inputs.
+- Defined artifact-availability gates, minimal density-only measurements,
+  focused validation, claim limits and 4-8 hours of active implementation
+  effort after input availability. No new optimized states are planned.
+- Reviewed repository evidence at 7da085b. No source MPS, solver, campaign,
+  acceptance flag, numerical result or Perlmutter operation changed.
+- Rendered the Markdown with Pandoc/XeLaTeX, inspected all PDF pages and
+  the final revised page, checked six-page count and safe text bounds.
+  No DMRG tests were required for this documentation-only addition.
